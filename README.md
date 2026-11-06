@@ -37,13 +37,11 @@
 
 ## Downloads & Installation
 
-Pre-compiled releases for macOS, Linux, and Windows are published on GitHub [Releases](https://github.com/BytwLumina/Bytwina/releases).
+Pre-compiled Windows 10 and Windows 11 builds are published on GitHub [Releases](https://github.com/BytwLumina/Bytwina/releases). macOS and Linux builds are paused for now; the instructions below are kept for when they return.
 
 | Platform | Format | Architectures | Details |
 |---|---|---|---|
-| **Windows** | `-Setup.exe`, `.zip` | `x86_64`, `aarch64` | Per-user NSIS installer (recommended) or standalone portable archive |
-| **macOS** | Homebrew Cask, `.zip`, Nix flake | Apple Silicon (`aarch64`) | Signed and notarized `.app` bundle; the Nix build is unsigned |
-| **Linux** | Flatpak (recommended), Repositories (`apt`, `dnf`, `zypper`, `pacman`), Gentoo ebuild, Nix flake, `.AppImage` | `x86_64` | Flatpak with automatic updates; signed package repositories; portable AppImage |
+| **Windows** | `bytwina-<version>-Windows-X64-Setup.exe`, `bytwina-<version>-Windows-X64.zip` | `x86_64` | Per-user NSIS installer (recommended) or standalone portable archive |
 
 ---
 
@@ -207,14 +205,14 @@ Keep the AppImage in a writable directory to receive in-app updates via **Settin
 <summary><h3>🪟 Windows (Installer, PowerShell, Portable)</h3></summary>
 
 #### 1. Setup Installer (Recommended)
-Download the `Windows-X64-Setup.exe` or `Windows-ARM64-Setup.exe` asset for your system from [Releases](https://github.com/BytwLumina/Bytwina/releases) and run it:
+Download the `bytwina-<version>-Windows-X64-Setup.exe` asset from [Releases](https://github.com/BytwLumina/Bytwina/releases) and run it:
 - Installs per-user to `%LOCALAPPDATA%\Programs\Bytwina` without requiring administrator/UAC elevation.
 - Automatically registers Start Menu shortcuts and configures AppUserModelID (`io.github.ninokiru.Bytwina`) for native Windows toast notifications.
 - Registers in Windows Settings (Installed Apps / Add or Remove Programs) with full uninstall support.
 - Fully compatible with in-app self-updates: updates automatically synchronize the registered version.
 
 #### 2. Standalone PowerShell Setup
-Extract the `Windows-X64.zip` or `Windows-ARM64.zip` asset for your system and run:
+Extract the `bytwina-<version>-Windows-X64.zip` asset and run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup.ps1
 ```
@@ -224,7 +222,7 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Uninstall
 ```
 
 #### 3. Portable Archive
-Extract the `Windows-X64.zip` or `Windows-ARM64.zip` asset for your system anywhere and launch `bytwina.exe`. To enable native desktop notifications:
+Extract the `bytwina-<version>-Windows-X64.zip` asset anywhere and launch `bytwina.exe`. To enable native desktop notifications:
 ```powershell
 powershell -File .\install-notifications.ps1
 ```
