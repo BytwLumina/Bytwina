@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import conventionalCommits from 'conventional-changelog-conventionalcommits';
 import { generateNotes as defaultGenerateNotes } from '@semantic-release/release-notes-generator';
 
@@ -30,7 +31,117 @@ function authorLabel(author, context) {
   return name?.replace(/[\r\n]+/g, ' ') || null;
 }
 
-// ponytail: compare Git author identities; use GitHub contribution metadata if aliases or non-code contributions matter.
+// Only these sections are published; routine chores stay out of the release notes.
+const sectionTitles = [
+  { type: 'feat', section: 'Những gì mới' },
+  { type: 'fix', section: 'Những gì đã sửa' },
+  { type: 'perf', section: 'Hiệu năng' },
+  { type: 'revert', section: 'Hoàn tác', hidden: true },
+  { type: 'docs', section: 'Tài liệu', hidden: true },
+  { type: 'style', section: 'Định dạng', hidden: true },
+  { type: 'refactor', section: 'Tái cấu trúc', hidden: true },
+  { type: 'test', section: 'Kiểm thử', hidden: true },
+  { type: 'build', section: 'Build', hidden: true },
+  { type: 'ci', section: 'CI', hidden: true },
+  { type: 'chore', section: 'Việc khác', hidden: true },
+];
+
+function readPinnedVersions() {
+  const read = file => {
+    try {
+      return readFileSync(file, 'utf8');
+    } catch {
+      return '';
+    }
+  };
+  const cargo = read('Cargo.toml');
+  const client = cargo.match(/^version = "([^"]+)"/m)?.[1] ?? 'chưa xác định';
+  const rust = read('rust-toolchain.toml').match(/channel = "([^"]+)"/)?.[1] ?? 'chưa xác định';
+  const lock = read('Cargo.lock');
+  const locked = name => lock.match(new RegExp(`name = "${name}"\\nversion = "([^"]+)"`))?.[1] ?? 'chưa xác định';
+  return {
+    client,
+    rust,
+    fluentBundle: locked('fluent-bundle'),
+    fluentTemplates: locked('fluent-templates'),
+  };
+}
+
+function versionsSection() {
+  const v = readPinnedVersions();
+  return [
+    '### Phiên bản',
+    '',
+    '| Thành phần | Phiên bản |',
+    '| --- | --- |',
+    `| Bytwina | ${v.client} |`,
+    `| Rust | ${v.rust} |`,
+    `| fluent-bundle | ${v.fluentBundle} |`,
+    `| fluent-templates | ${v.fluentTemplates} |`,
+  ].join('\n');
+}
+
+function introNotes(context) {
+  const v = readPinnedVersions();
+  const version = context?.nextRelease?.version ?? v.client;
+  return [
+    '## Bytwina',
+    '',
+    'Bytwina là client Discord chạy native, viết bằng Rust với egui và wgpu. Không Electron,',
+    'không webview cho phần giao diện, nên bộ nhớ và CPU thấp hơn hẳn bản web, trong khi vẫn',
+    'giữ đủ chat, voice và extension.',
+    '',
+    '### Tính năng',
+    '',
+    '- Giao diện native, render bằng GPU; cuộn mượt trên máy yếu.',
+    '- Voice và video call: Opus, DAVE/E2EE (không có đường lui không mã hoá).',
+    '- Server, DM, thread, forum, reaction, poll, attachment, định dạng Markdown đầy đủ.',
+    '- Extension và theme cài thêm được, chạy WASM trong sandbox.',
+    '- 13 ngôn ngữ, giao diện tiếng Việt có sẵn.',
+    '- Token lưu trong credential store của hệ điều hành; không telemetry, không crash uploader.',
+    '- Tự cập nhật có kiểm tra SHA-256 trước khi cài.',
+    '',
+    '### Cài đặt',
+    '',
+    '1. Tải `Bytwina-<version>-setup.exe` trong mục Assets bên dưới.',
+    '2. Chạy file, chọn thư mục cài đặt.',
+    '3. Mở Bytwina và đăng nhập bằng tài khoản Discord đang dùng.',
+    '',
+    'Bản portable: tải file `.zip`, giải nén và chạy `bytwina.exe`.',
+    '',
+    '### Yêu cầu',
+    '',
+    '- Windows 10 hoặc Windows 11, 64-bit.',
+    '- Không cần cài .NET hay WebView2 riêng.',
+    '',
+    '### Lưu ý',
+    '',
+    'Bytwina là client không chính thức, không liên kết với Discord. Tự động hoá tài khoản',
+    'người dùng là hành vi vi phạm Terms of Service của Discord; bạn dùng với rủi ro của mình.',
+    '',
+    `_Bản phát hành ${version}._`,
+    '',
+    versionsSection(),
+  ].join('\n');
+}
+
+// A first release is announced with the introduction, every later one with the diff.
+// gh is present on runners; offline checks override the choice explicitly.
+function firstRelease(context) {
+  const forced = process.env.BYTWINA_NOTES_MODE;
+  if (forced === 'intro') return true;
+  if (forced === 'conventional') return false;
+  try {
+    const listed = execFileSync('gh', ['release', 'list', '--limit', '1'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return listed.trim() === '';
+  } catch {
+    return getLatestReleaseTag(context?.nextRelease?.gitHead || 'HEAD') === null;
+  }
+}
+
 function previousAuthors(ref) {
   if (!ref) return new Set();
   try {
@@ -49,7 +160,8 @@ function previousAuthors(ref) {
 }
 
 async function generateAnnotatedNotes(pluginConfig, context, previousRef) {
-  const preset = await conventionalCommits(pluginConfig.presetConfig);
+  const presetConfig = { ...pluginConfig.presetConfig, types: sectionTitles };
+  const preset = await conventionalCommits(presetConfig);
   const baseTransform = preset.writer.transform;
   const previous = previousAuthors(previousRef);
   const writerOpts = {
@@ -121,7 +233,8 @@ async function generateAnnotatedNotes(pluginConfig, context, previousRef) {
       return { ...templateContext, newContributors };
     },
   };
-  return defaultGenerateNotes({ ...pluginConfig, writerOpts }, context);
+  const notes = await defaultGenerateNotes({ ...pluginConfig, presetConfig, writerOpts }, context);
+  return [notes.trimEnd(), '', versionsSection()].join('\n');
 }
 
 export function getLatestReleaseTag(ref = 'HEAD') {
@@ -138,6 +251,8 @@ export function getLatestReleaseTag(ref = 'HEAD') {
 }
 
 export async function generateReleaseNotes(channel, pluginConfig, context) {
+  if (firstRelease(context)) return introNotes(context);
+
   if (channel === 'production') {
     return generateAnnotatedNotes(pluginConfig, context, context.lastRelease?.gitTag || context.lastRelease?.gitHead);
   }

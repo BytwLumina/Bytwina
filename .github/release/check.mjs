@@ -2,11 +2,17 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { load } from 'js-yaml';
 import { analyzeCommits } from '@semantic-release/commit-analyzer';
 import { generateNotes } from '@semantic-release/release-notes-generator';
 import getLastRelease from './node_modules/semantic-release/lib/get-last-release.js';
 import { generateReleaseNotes } from './notes.mjs';
+
+// The introduction is only for the first published release; these checks cover the diff notes.
+process.env.BYTWINA_NOTES_MODE = 'conventional';
 
 const logger = { log() {} };
 for (const [message, expected] of [
@@ -30,6 +36,40 @@ const notes = await generateNotes({ preset: 'conventionalcommits' }, {
 });
 assert(notes.includes('fix scrolling'));
 
+// Nightly notes diff against a release tag, so the check builds its own tagged repository
+// instead of depending on tags in the checkout (an imported repo has none).
+async function withTaggedFixture(run, { released, pending }) {
+  const dir = mkdtempSync(join(tmpdir(), 'bytwina-notes-'));
+  const git = args => execFileSync('git', args, { cwd: dir, encoding: 'utf8' }).trim();
+  git(['init', '-q']);
+  git(['config', 'user.email', 'fixture@example.invalid']);
+  git(['config', 'user.name', 'Fixture']);
+  git(['commit', '-q', '--allow-empty', '-m', released.message]);
+  const baseline = git(['rev-parse', 'HEAD']);
+  git(['tag', 'v1.0.0', baseline]);
+  git(['commit', '-q', '--allow-empty', '-m', pending.message]);
+  const head = git(['rev-parse', 'HEAD']);
+
+  const context = {
+    logger,
+    options: { repositoryUrl: 'https://github.com/BytwLumina/Bytwina' },
+    commits: [
+      { hash: baseline, author: released.author, message: released.message },
+      { hash: head, author: pending.author, message: pending.message },
+    ],
+    lastRelease: { gitTag: 'v1.0.0', gitHead: baseline, version: '1.0.0' },
+    nextRelease: { version: '1.1.0', gitHead: head },
+  };
+
+  const previousCwd = process.cwd();
+  process.chdir(dir);
+  try {
+    return await run(context);
+  } finally {
+    process.chdir(previousCwd);
+  }
+}
+
 const releaseNotesContext = {
   cwd: process.cwd(), logger, options: { repositoryUrl: 'https://github.com/BytwLumina/Bytwina' },
   commits: [
@@ -48,9 +88,19 @@ assert(prodNotes.includes('## New Contributors'));
 assert(prodNotes.indexOf('## New Contributors') > prodNotes.indexOf('notification sounds'));
 assert(prodNotes.includes('Release Note Author made their first contribution'));
 
-const nightlyNotes = await generateReleaseNotes('nightly', { preset: 'conventionalcommits' }, releaseNotesContext);
+const nightlyNotes = await withTaggedFixture(async context => generateReleaseNotes('nightly', { preset: 'conventionalcommits' }, context), {
+  released: { message: 'feat(audio): bundle notification sounds (#140)', author: { name: 'Audio Note Author', email: 'audio-note-author@example.invalid' } },
+  pending: { message: 'feat(ui): add category and channel permission settings (#149)', author: { name: 'Release Note Author', email: 'release-note-author@example.invalid' } },
+});
 assert(nightlyNotes.includes('category and channel permission settings'));
 assert(!nightlyNotes.includes('notification sounds'));
+
+process.env.BYTWINA_NOTES_MODE = 'intro';
+const introNotes = await generateReleaseNotes('production', { preset: 'conventionalcommits' }, releaseNotesContext);
+assert(introNotes.includes('## Bytwina'));
+assert(introNotes.includes('Windows 10'));
+assert(!introNotes.includes('notification sounds'));
+process.env.BYTWINA_NOTES_MODE = 'conventional';
 
 const workflow = load(readFileSync('.github/workflows/release.yml', 'utf8'));
 assert.deepEqual(Object.keys(workflow.on), ['schedule', 'workflow_dispatch', 'push']);

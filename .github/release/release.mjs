@@ -18,7 +18,9 @@ if (plan) assert.equal(channel, plan.channel, 'Release channel changed');
 const tapRepo = 'Bytwina/homebrew-bytwina';
 const caskPath = 'Casks/bytwina.rb';
 const tapToken = process.env.HOMEBREW_TAP_TOKEN;
-if (plan) assert(tapToken, 'HOMEBREW_TAP_TOKEN is required to publish the Homebrew cask');
+// macOS is not built right now, so the cask is skipped unless a tap token is supplied.
+const tapEnabled = tapToken !== undefined;
+if (plan && tapEnabled) assert(tapToken, 'HOMEBREW_TAP_TOKEN is empty');
 
 function checkTapAccess() {
   const push = execFileSync('gh', ['api', `repos/${tapRepo}`, '--jq', '.permissions.push'], {
@@ -37,7 +39,6 @@ function releaseExists() {
   }
 }
 const resumed = plan !== null && releaseExists();
-const tapEnabled = process.env.HOMEBREW_TAP_TOKEN !== undefined;
 if (plan && !resumed && tapEnabled) checkTapAccess();
 
 // The cask lives in its own tap repository so users do not clone this one. The tap file is the

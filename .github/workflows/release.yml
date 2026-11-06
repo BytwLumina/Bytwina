@@ -147,6 +147,7 @@ jobs:
 
   publish:
     needs: [prepare, build]
+    if: needs.prepare.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -182,8 +183,9 @@ jobs:
         run: bun .github/release/release.mjs publish
 
   repositories:
+    # Linux package repositories are paused while the pipeline builds Windows only.
+    if: false
     needs: [prepare, build, publish]
-    if: needs.prepare.outputs.release == 'true'
     permissions:
       contents: read
       pages: write

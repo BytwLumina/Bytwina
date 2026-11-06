@@ -9,6 +9,7 @@ SetCompressor /SOLID lzma
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
+!include "WinVer.nsh"
 !include "x64.nsh"
 !include "Win\COM.nsh"
 !include "Win\Propkey.nsh"
@@ -156,6 +157,11 @@ FunctionEnd
 
 Function .onInit
   SetShellVarContext current
+  ${IfNot} ${AtLeastWin10}
+    MessageBox MB_ICONSTOP "${PRODUCT_NAME} requires Windows 10 or Windows 11 (64-bit)." /SD IDOK
+    SetErrorLevel 1
+    Abort
+  ${EndIf}
   ${If} ${RunningX64}
     SetRegView 64
   ${EndIf}
