@@ -7,6 +7,23 @@ use wasmi::{
 const MEMORY_BYTES: usize = 16 * 1024 * 1024;
 const FUEL: u64 = 10_000_000;
 
+// Packages built before the product rename still export the older symbol stems. Accept them so
+// bundled extensions keep loading instead of requiring every binary to be rebuilt.
+const ABI_STEMS: [&str; 3] = ["bytwina", "lumina", "serein"];
+
+fn abi_names(module: &Module) -> Option<(String, String)> {
+	for stem in ABI_STEMS {
+		let alloc = format!("{stem}_alloc");
+		let invoke = format!("{stem}_invoke");
+		let alloc_ok = matches!(module.get_export(&alloc), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32], [ValType::I32]));
+		let invoke_ok = matches!(module.get_export(&invoke), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32, ValType::I32], [ValType::I64]));
+		if alloc_ok && invoke_ok {
+			return Some((alloc, invoke));
+		}
+	}
+	None
+}
+
 fn engine() -> Engine {
 	let mut config = Config::default();
 	config
@@ -30,8 +47,7 @@ fn module(engine: &Engine, bytes: &[u8]) -> Result<Module, Error> {
 		return Err(Error::Module);
 	}
 	if !matches!(module.get_export("memory"), Some(ExternType::Memory(_)))
-		|| !matches!(module.get_export("bytwina_alloc"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32], [ValType::I32]))
-		|| !matches!(module.get_export("bytwina_invoke"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32, ValType::I32], [ValType::I64]))
+		|| abi_names(&module).is_none()
 	{
 		return Err(Error::Module);
 	}
@@ -111,11 +127,12 @@ pub fn invoke(package: &Package, input: &Invocation) -> Result<Output, Error> {
 	let module = module(&engine, &package.wasm)?;
 	let (mut store, instance) = instantiate(&engine, &module)?;
 	let memory = instance.get_memory(&store, "memory").ok_or(Error::Module)?;
+	let (alloc_name, invoke_name) = abi_names(&module).ok_or(Error::Module)?;
 	let alloc = instance
-		.get_typed_func::<i32, i32>(&store, "bytwina_alloc")
+		.get_typed_func::<i32, i32>(&store, &alloc_name)
 		.map_err(|_| Error::Module)?;
 	let run = instance
-		.get_typed_func::<(i32, i32), i64>(&store, "bytwina_invoke")
+		.get_typed_func::<(i32, i32), i64>(&store, &invoke_name)
 		.map_err(|_| Error::Module)?;
 	let pointer = alloc
 		.call(&mut store, bytes.len() as i32)
