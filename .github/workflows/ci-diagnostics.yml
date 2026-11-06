@@ -101,6 +101,12 @@ jobs:
           cargo xtask fuzz > fuzz-report.txt 2>&1 || true
           tail -n 120 fuzz-report.txt > diagnostics-fuzz.txt
           rm -f fuzz-report.txt
+      - name: Collect legacy SDK output
+        shell: bash
+        run: |
+          cargo run --locked --release -p extensions --example legacy_sdk_check > legacy.txt 2>&1 || true
+          tail -n 80 legacy.txt > diagnostics-legacy.txt
+          rm -f legacy.txt
       - name: Publish fuzz report
         shell: bash
         run: |
@@ -110,7 +116,8 @@ jobs:
           git checkout -B ci-fuzz origin/ci-fuzz || git checkout -B ci-fuzz
           mkdir -p diagnostics
           mv diagnostics-fuzz.txt diagnostics/fuzz.txt
+          mv diagnostics-legacy.txt diagnostics/legacy.txt
           git add diagnostics
           git diff --cached --quiet && exit 0
-          git commit -m "chore: record fuzz diagnostics for ${GITHUB_SHA:0:7}"
+          git commit -m "chore: record fuzz and legacy diagnostics for ${GITHUB_SHA:0:7}"
           git push --force origin ci-fuzz
