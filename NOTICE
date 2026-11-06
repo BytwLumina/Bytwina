@@ -1,0 +1,31 @@
+Lumina
+Copyright 2026 Lumina contributors
+
+This product includes software developed as part of the Lumina project,
+dual licensed under the MIT License (LICENSE-MIT) and the Apache License,
+Version 2.0 (LICENSE-APACHE), at your option.
+
+Third-party components
+----------------------
+This product bundles or links third-party components that remain under
+their own licences. The full inventory, their licence terms and where each
+licence text is stored is recorded in THIRD_PARTY_NOTICES.md.
+
+Notable obligations carried by those components:
+
+  - Vendored sources under `vendor/` keep their original copyright notices
+    and SPDX identifiers (for example wry: Apache-2.0 OR MIT; hpke-rs
+    modifications: MPL-2.0). Do not remove those headers.
+  - Fonts are licensed under SIL Open Font License 1.1 and each font's
+    licence text ships in `assets/fonts/`.
+  - Twitter Emoji (Twemoji) artwork is licensed CC-BY-4.0; the Unicode
+    Terms of Use apply to the character data.
+  - Phosphor Icons are MIT; Simple Icons are CC0.
+  - crates.io dependencies are covered by `Cargo.lock` checksums and the
+    per-dependency texts under `assets/licenses/`.
+
+Endorsement
+-----------
+Nothing in these licences grants permission to use the Lumina name, logo,
+or any third-party trade name or mark beyond describing the origin of the
+software.

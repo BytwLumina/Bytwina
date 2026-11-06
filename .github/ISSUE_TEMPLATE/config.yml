@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation & Architecture
+    url: https://github.com/BytwLumina/Lumina#readme
+    about: Consult the README, Discord compatibility matrix, and platform support guides.

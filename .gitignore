@@ -1,0 +1,17 @@
+/.envrc
+/.direnv/
+/result
+/result-*
+/target/
+/dist/
+.DS_Store
+node_modules/
+__pycache__/
+/site/
+/release-assets/
+/packages/
+/dist-installer/
+.env
+.env.*
+!.env.example
+*.log

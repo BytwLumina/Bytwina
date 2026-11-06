@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Lumina
+Comment=Experimental unofficial native Discord client
+Exec=lumina
+Icon=lumina
+StartupWMClass=io.github.ninokiru.Lumina
+Terminal=false
+Categories=Network;InstantMessaging;
