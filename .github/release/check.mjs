@@ -53,8 +53,9 @@ assert(nightlyNotes.includes('category and channel permission settings'));
 assert(!nightlyNotes.includes('notification sounds'));
 
 const workflow = load(readFileSync('.github/workflows/release.yml', 'utf8'));
-assert.deepEqual(Object.keys(workflow.on), ['schedule', 'workflow_dispatch']);
-assert(workflow.jobs.build.strategy.matrix.os.includes('windows-11-arm'));
+assert.deepEqual(Object.keys(workflow.on), ['schedule', 'workflow_dispatch', 'push']);
+assert.deepEqual(workflow.jobs.build.strategy.matrix.os, ['windows-latest']);
+assert(!('linux' in workflow.jobs));
 for (const job of Object.values(workflow.jobs)) {
   for (const step of job.steps ?? []) {
     if (step.run && step.shell !== 'pwsh') execFileSync('bash', ['-n'], { input: step.run });
