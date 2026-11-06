@@ -10,6 +10,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bytwina-extension-sdk"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "url",
+]
+
+[[package]]
 name = "custom-rpc"
 version = "1.0.0"
 dependencies = [
@@ -241,15 +250,6 @@ dependencies = [
  "serde",
  "serde_core",
  "zmij",
-]
-
-[[package]]
-name = "bytwina-extension-sdk"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "url",
 ]
 
 [[package]]

@@ -4,7 +4,7 @@
 [`3d94c76228d9f2918fa8d22e78f40233ae4f90dc`](https://github.com/BytwLumina/Bytwina/blob/main28d9f2918fa8d22e78f40233ae4f90dc/examples/extensions/packages/app-toolbox.bytwina-extension),
 not rebuilt with the current SDK. Source and package are synthetic offline fixtures for this private build.
 
-- Package bytes: 574992
+- Package bytes: 574991
 - Wasm bytes: 198370
 - Package SHA-256: `45cc1f3951ba59d365f9e29696659f5f474545756e6441755bb92fad8428546f`
 

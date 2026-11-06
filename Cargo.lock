@@ -759,6 +759,62 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
+name = "bytwina"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "client-core",
+ "cpal",
+ "diagnostics",
+ "discord-api",
+ "discord-gateway",
+ "discord-protocol",
+ "discord-voice",
+ "eframe",
+ "egui-winit",
+ "extensions",
+ "find-msvc-tools",
+ "fontique",
+ "futures-util",
+ "getrandom 0.4.3",
+ "image",
+ "local-store",
+ "log",
+ "md4",
+ "model",
+ "opus2",
+ "platform",
+ "png",
+ "rasterlottie",
+ "reqwest",
+ "resvg",
+ "rtrb",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "symphonia",
+ "test-support",
+ "time",
+ "tokio",
+ "tokio-tungstenite",
+ "ui",
+ "url",
+ "winit",
+ "zeroize",
+ "zip",
+]
+
+[[package]]
+name = "bytwina-extension-sdk"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "url",
+]
+
+[[package]]
 name = "cairo-rs"
 version = "0.22.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6358,62 +6414,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6662b5879511e06e8999a8a235d848113e942c9124f211511b16466ee2995f26"
 dependencies = [
  "serde_core",
-]
-
-[[package]]
-name = "bytwina"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "client-core",
- "cpal",
- "diagnostics",
- "discord-api",
- "discord-gateway",
- "discord-protocol",
- "discord-voice",
- "eframe",
- "egui-winit",
- "extensions",
- "find-msvc-tools",
- "fontique",
- "futures-util",
- "getrandom 0.4.3",
- "image",
- "local-store",
- "log",
- "md4",
- "model",
- "opus2",
- "platform",
- "png",
- "rasterlottie",
- "reqwest",
- "resvg",
- "rtrb",
- "semver",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "symphonia",
- "test-support",
- "time",
- "tokio",
- "tokio-tungstenite",
- "ui",
- "url",
- "winit",
- "zeroize",
- "zip",
-]
-
-[[package]]
-name = "bytwina-extension-sdk"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "url",
 ]
 
 [[package]]
