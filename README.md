@@ -46,7 +46,7 @@ Pre-compiled Windows 10 and Windows 11 builds are published on GitHub [Releases]
 ---
 
 <details open>
-<summary><h3>🐧 Linux (Flatpak, Repositories, Gentoo, Nix, AppImage)</h3></summary>
+<summary><h3>🐧 Linux (paused — not built in this release)</h3></summary>
 
 #### 1. Flatpak (Recommended)
 
@@ -231,7 +231,7 @@ Run the script from the extracted folder beside `bytwina.exe`. If PowerShell's `
 </details>
 
 <details>
-<summary><h3>🍎 macOS (Homebrew Cask, Standalone .app)</h3></summary>
+<summary><h3>🍎 macOS (paused — not built in this release)</h3></summary>
 
 #### Homebrew Cask
 ```sh
