@@ -114,6 +114,8 @@ function introNotes(context) {
     '- Windows 10 hoặc Windows 11, 64-bit.',
     '- Không cần cài .NET hay WebView2 riêng.',
     '',
+    'Bản này chỉ phát hành cho Windows; bản macOS và Linux đang tạm hoãn.',
+    '',
     '### Lưu ý',
     '',
     'Bytwina là client không chính thức, không liên kết với Discord. Tự động hoá tài khoản',
