@@ -70,12 +70,22 @@ jobs:
           rm -f diagnostics/typing.txt
           mv diagnostics/typing-tail.txt diagnostics/typing.txt
 
+      - name: Collect workspace check output
+        shell: bash
+        run: |
+          cargo xtask check > check.txt 2>&1 || true
+          grep -nE "^(error|warning: unused|failures:|---- )|panicked|FAILED|assertion" check.txt | tail -n 60 > diagnostics-check.txt
+          tail -n 60 check.txt >> diagnostics-check.txt
+          rm -f check.txt
+
       - name: Publish diagnostics branch
         shell: bash
         run: |
           git config user.name "ci-diagnostics"
           git config user.email "ci-diagnostics@users.noreply.github.com"
           git checkout -B ci-diagnostics
+          mkdir -p diagnostics
+          mv diagnostics-check.txt diagnostics/check.txt
           git add diagnostics
           git diff --cached --quiet && exit 0
           git commit -m "chore: record CI diagnostics for ${GITHUB_SHA:0:7}"
