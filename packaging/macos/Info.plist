@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleName</key><string>Lumina</string>
-<key>CFBundleDisplayName</key><string>Lumina</string>
-<key>CFBundleIdentifier</key><string>io.github.ninokiru.Lumina</string>
-<key>CFBundleExecutable</key><string>lumina</string>
-<key>CFBundleIconFile</key><string>Lumina.icns</string>
-<key>CFBundleIconName</key><string>Lumina</string>
+<key>CFBundleName</key><string>Bytwina</string>
+<key>CFBundleDisplayName</key><string>Bytwina</string>
+<key>CFBundleIdentifier</key><string>io.github.ninokiru.Bytwina</string>
+<key>CFBundleExecutable</key><string>bytwina</string>
+<key>CFBundleIconFile</key><string>Bytwina.icns</string>
+<key>CFBundleIconName</key><string>Bytwina</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>0.1.0</string>
-<key>NSMicrophoneUsageDescription</key><string>Lumina uses your microphone when you join a Discord server voice channel or start or answer a DM call.</string>
-<key>NSScreenCaptureUsageDescription</key><string>Lumina uses screen recording permission to list and share the screen or window you select in a Discord call.</string>
-<key>NSCameraUsageDescription</key><string>Lumina uses your camera only when you turn it on in a Discord call.</string>
+<key>NSMicrophoneUsageDescription</key><string>Bytwina uses your microphone when you join a Discord server voice channel or start or answer a DM call.</string>
+<key>NSScreenCaptureUsageDescription</key><string>Bytwina uses screen recording permission to list and share the screen or window you select in a Discord call.</string>
+<key>NSCameraUsageDescription</key><string>Bytwina uses your camera only when you turn it on in a Discord call.</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSPrincipalClass</key><string>NSApplication</string>
 </dict></plist>

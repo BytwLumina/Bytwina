@@ -1,4 +1,4 @@
-//! Lumina's opt-in diagnostic log.
+//! Bytwina's opt-in diagnostic log.
 //!
 //! A record carries a compile-time category and label, numbers, and at most four fields whose text
 //! is a compile-time constant. Nothing in this API accepts an account, channel, message, path,
@@ -34,8 +34,8 @@ const MAX_LINE_BYTES: usize = 320;
 /// The file rotates once; a run then stops appending instead of growing without end.
 const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_RUN_BYTES: u64 = 4 * 1024 * 1024;
-const LOG_FILE: &str = "lumina.log";
-const PREVIOUS_LOG_FILE: &str = "lumina.1.log";
+const LOG_FILE: &str = "bytwina.log";
+const PREVIOUS_LOG_FILE: &str = "bytwina.1.log";
 
 /// How much detail the log keeps: a record is written when its level is at or above the
 /// owner's choice, so `Error` keeps failures only and `Debug` keeps everything.
@@ -200,8 +200,8 @@ pub fn level() -> Level {
 	Level::from_code(sink().level.load(Ordering::Relaxed))
 }
 
-/// The fallback folder used when Lumina's own data folder cannot be written.
-const FALLBACK_FOLDER: &str = "lumina-logs";
+/// The fallback folder used when Bytwina's own data folder cannot be written.
+const FALLBACK_FOLDER: &str = "bytwina-logs";
 
 /// The folder a log uses when the app has no writable data folder at all.
 pub fn fallback_directory() -> PathBuf {
@@ -512,7 +512,7 @@ fn sink() -> &'static Sink {
 	SINK.get_or_init(|| {
 		let sink: &'static Sink = Box::leak(Box::new(Sink::new()));
 		let _ = std::thread::Builder::new()
-			.name("lumina-log".into())
+			.name("bytwina-log".into())
 			.spawn(move || writer(sink));
 		sink
 	})

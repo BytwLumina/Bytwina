@@ -1,5 +1,5 @@
 //! Offline UI check, without a window, account, decoder, or audio device.
-//! cargo run --locked -p lumina --features demo --example video_controls
+//! cargo run --locked -p bytwina --features demo --example video_controls
 use eframe::egui;
 use ui::DownloadUi;
 

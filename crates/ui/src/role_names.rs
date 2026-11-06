@@ -118,8 +118,8 @@ mod tests {
 				);
 				for row in &text.rows {
 					for vertex in &row.visuals.mesh.vertices {
-						let a = crate::design::luminance(vertex.color) + 0.05;
-						let b = crate::design::luminance(background) + 0.05;
+						let a = crate::design::bytwinance(vertex.color) + 0.05;
+						let b = crate::design::bytwinance(background) + 0.05;
 						assert!(a.max(b) / a.min(b) >= 4.5);
 					}
 				}

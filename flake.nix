@@ -27,13 +27,13 @@
                 system,
                 ...
             }: {
-                packages.lumina = pkgs.callPackage ./packaging/nix/package.nix {};
-                packages.default = config.packages.lumina;
+                packages.bytwina = pkgs.callPackage ./packaging/nix/package.nix {};
+                packages.default = config.packages.bytwina;
 
                 devShells.default = pkgs.mkShell {
-                    name = "lumina-dev";
+                    name = "bytwina-dev";
 
-                    inputsFrom = [config.packages.lumina];
+                    inputsFrom = [config.packages.bytwina];
                 };
             };
         };

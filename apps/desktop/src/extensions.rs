@@ -120,53 +120,53 @@ pub(crate) fn starters() -> Result<Vec<Starter>, String> {
 		#[cfg(any(test, feature = "demo"))]
 		(
 			include_bytes!(
-				"../../../extensions/plugins/packages/message-delete-protector.lumina-extension"
+				"../../../extensions/plugins/packages/message-delete-protector.bytwina-extension"
 			),
 			"Keep messages already seen in this session visible in red after deletion. Cleared when disabled or signed out.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/ocean.lumina-extension"),
+			include_bytes!("../../../extensions/themes/ocean.bytwina-extension"),
 			"Deep blue surfaces with a bright ocean accent.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/midnight.lumina-extension"),
+			include_bytes!("../../../extensions/themes/midnight.bytwina-extension"),
 			"Inky midnight surfaces with a vivid violet accent.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/rose.lumina-extension"),
+			include_bytes!("../../../extensions/themes/rose.bytwina-extension"),
 			"Soft rose surfaces with a warm pink accent.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/forest.lumina-extension"),
+			include_bytes!("../../../extensions/themes/forest.bytwina-extension"),
 			"Calm forest greens and fresh leafy accents.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/latte.lumina-extension"),
+			include_bytes!("../../../extensions/themes/latte.bytwina-extension"),
 			"Warm coffee tones and a creamy caramel accent.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/golden.lumina-extension"),
+			include_bytes!("../../../extensions/themes/golden.bytwina-extension"),
 			"Warm charcoal and gold, with rounded, roomy controls.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/katana.lumina-extension"),
+			include_bytes!("../../../extensions/themes/katana.bytwina-extension"),
 			"Katana's dark charcoal surfaces and sharp red accents. Light mode uses built-in colors.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/obsidian.lumina-extension"),
+			include_bytes!("../../../extensions/themes/obsidian.bytwina-extension"),
 			"Obsidian violet surfaces and lavender accents in light and dark.",
 		),
 		#[cfg(any(test, feature = "demo"))]
 		(
-			include_bytes!("../../../extensions/themes/teal.lumina-extension"),
+			include_bytes!("../../../extensions/themes/teal.bytwina-extension"),
 			"Cool blue-green surfaces with fresh teal accents.",
 		),
 	];
@@ -256,7 +256,7 @@ pub fn demo_check_examples() -> Result<bool, String> {
 			return Err("Theme starter must only supply a valid palette".into());
 		}
 	}
-	let root = std::env::temp_dir().join(format!("lumina-theme-check-{}", std::process::id()));
+	let root = std::env::temp_dir().join(format!("bytwina-theme-check-{}", std::process::id()));
 	fs::create_dir(&root).map_err(|_| "Cannot create isolated theme check directory")?;
 	let result = (|| {
 		for starter in self::starters()?
@@ -451,7 +451,7 @@ impl ExtensionHost {
 		let context = self.context.clone();
 		self.active = Some((token, receiver));
 		if std::thread::Builder::new()
-			.name("lumina-extension".into())
+			.name("bytwina-extension".into())
 			.spawn(move || {
 				let result = run(&root, job, &gate);
 				let _ = sender.send(result);
@@ -1685,7 +1685,7 @@ mod tests {
 			let mut nonce = [0; 16];
 			getrandom::fill(&mut nonce).unwrap();
 			let path =
-				std::env::temp_dir().join(format!("lumina-extension-test-{}", digest(&nonce)));
+				std::env::temp_dir().join(format!("bytwina-extension-test-{}", digest(&nonce)));
 			fs::create_dir(&path).unwrap();
 			Self(path)
 		}
@@ -1756,7 +1756,7 @@ mod tests {
 		let profile = Profile::new();
 		let root = profile.0.join("extensions");
 		let mut package = extensions::parse_package(include_bytes!(
-			"../../../examples/extensions/packages/message-counter.lumina-extension"
+			"../../../examples/extensions/packages/message-counter.bytwina-extension"
 		))
 		.unwrap();
 		assert!(manifest_scope(&root, &package.manifest, None).is_err());
@@ -1858,7 +1858,7 @@ mod tests {
 		}
 		assert!(!root.exists(), "preview must not install a theme");
 		let original = extensions::parse_package(include_bytes!(
-			"../../../extensions/themes/ocean.lumina-extension"
+			"../../../extensions/themes/ocean.bytwina-extension"
 		))
 		.unwrap();
 		let directory = root.join("themes").join(&original.manifest.id);
@@ -1904,7 +1904,7 @@ mod tests {
 		let profile = Profile::new();
 		let root = profile.0.join("extensions");
 		let package = extensions::parse_package(include_bytes!(
-			"../../../examples/extensions/packages/message-counter.lumina-extension"
+			"../../../examples/extensions/packages/message-counter.bytwina-extension"
 		))
 		.unwrap();
 		enable(

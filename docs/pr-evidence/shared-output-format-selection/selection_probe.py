@@ -81,7 +81,7 @@ fn main() {
 }
 '''.replace('NOTIFICATION_CALL', notification_call).replace('VOICE_CALL', voice_call)
 lib = args.cpal_lib.resolve()
-with tempfile.TemporaryDirectory(prefix='lumina-selection-probe-') as temporary:
+with tempfile.TemporaryDirectory(prefix='bytwina-selection-probe-') as temporary:
     temporary = Path(temporary)
     rust = temporary / 'probe.rs'
     rust.write_text(selection + harness)

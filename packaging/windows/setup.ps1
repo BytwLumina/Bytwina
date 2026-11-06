@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Installs or uninstalls Lumina for the current Windows user without elevation.
+Installs or uninstalls Bytwina for the current Windows user without elevation.
 Preserves write permissions for seamless in-app autoupdates.
 #>
 param(
@@ -9,20 +9,20 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$appName = 'Lumina'
+$appName = 'Bytwina'
 $publisher = 'Lumina contributors'
 $website = 'https://github.com/BytwLumina/Bytwina'
 $installDir = Join-Path $env:LOCALAPPDATA "Programs\$appName"
 $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$appName"
 $shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) "$appName.lnk"
 
-# Check if Lumina is currently running
-$running = Get-Process lumina -ErrorAction SilentlyContinue
+# Check if Bytwina is currently running
+$running = Get-Process bytwina -ErrorAction SilentlyContinue
 if ($running) {
     if ($Quiet) {
         $running | Stop-Process -Force
     } else {
-        throw "Lumina is currently running. Please close Lumina before running setup."
+        throw "Bytwina is currently running. Please close Bytwina before running setup."
     }
 }
 
@@ -41,21 +41,21 @@ if ($Uninstall) {
         Remove-Item -LiteralPath $installDir -Recurse -Force
     }
     if (!$Quiet) {
-        Write-Host "Lumina was successfully uninstalled."
+        Write-Host "Bytwina was successfully uninstalled."
     }
     return
 }
 
 # Install
 $distDir = $PSScriptRoot
-$executable = Join-Path $distDir 'lumina.exe'
+$executable = Join-Path $distDir 'bytwina.exe'
 if (!(Test-Path -LiteralPath $executable)) {
-    $candidate = Join-Path (Join-Path $distDir '..\..\dist') 'lumina.exe'
+    $candidate = Join-Path (Join-Path $distDir '..\..\dist') 'bytwina.exe'
     if (Test-Path -LiteralPath $candidate) {
         $distDir = (Resolve-Path (Join-Path $distDir '..\..\dist')).Path
         $executable = $candidate
     } else {
-        throw "lumina.exe not found in $distDir. Run this script from the release package directory or build the project first."
+        throw "bytwina.exe not found in $distDir. Run this script from the release package directory or build the project first."
     }
 }
 
@@ -76,7 +76,7 @@ if (Test-Path -LiteralPath $notificationScript) {
 # Determine version
 $version = '0.1.0'
 try {
-    $versionInfo = (Get-Item -LiteralPath (Join-Path $installDir 'lumina.exe')).VersionInfo.ProductVersion
+    $versionInfo = (Get-Item -LiteralPath (Join-Path $installDir 'bytwina.exe')).VersionInfo.ProductVersion
     if ($versionInfo) { $version = $versionInfo }
 } catch {}
 
@@ -89,7 +89,7 @@ $uninstallCmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$inst
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'DisplayName' -Value $appName
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'DisplayVersion' -Value $version
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'Publisher' -Value $publisher
-Set-ItemProperty -LiteralPath $uninstallKey -Name 'DisplayIcon' -Value "$installDir\lumina.exe,0"
+Set-ItemProperty -LiteralPath $uninstallKey -Name 'DisplayIcon' -Value "$installDir\bytwina.exe,0"
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'InstallLocation' -Value $installDir
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'UninstallString' -Value $uninstallCmd
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'QuietUninstallString' -Value "$uninstallCmd -Quiet"
@@ -98,5 +98,5 @@ Set-ItemProperty -LiteralPath $uninstallKey -Name 'NoModify' -Value 1 -Type DWor
 Set-ItemProperty -LiteralPath $uninstallKey -Name 'NoRepair' -Value 1 -Type DWord
 
 if (!$Quiet) {
-    Write-Host "Lumina $version installed successfully to $installDir"
+    Write-Host "Bytwina $version installed successfully to $installDir"
 }

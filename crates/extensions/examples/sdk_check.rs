@@ -527,7 +527,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	check(
 		"message-delete-protector/committed",
 		include_bytes!(
-			"../../../extensions/plugins/packages/message-delete-protector.lumina-extension"
+			"../../../extensions/plugins/packages/message-delete-protector.bytwina-extension"
 		),
 		&expected,
 	);
@@ -574,7 +574,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	check_message_counter(
 		"message-counter/committed",
 		&parse_package(include_bytes!(
-			"../../../examples/extensions/packages/message-counter.lumina-extension"
+			"../../../examples/extensions/packages/message-counter.bytwina-extension"
 		))?,
 	);
 	check_message_counter(
@@ -587,7 +587,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	check_app_toolbox(
 		"app-toolbox/committed",
 		&parse_package(include_bytes!(
-			"../../../examples/extensions/packages/app-toolbox.lumina-extension"
+			"../../../examples/extensions/packages/app-toolbox.bytwina-extension"
 		))?,
 	);
 	check_app_toolbox(
@@ -600,7 +600,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	check_guild_inspector(
 		"guild-inspector/committed",
 		&parse_package(include_bytes!(
-			"../../../examples/extensions/packages/guild-inspector.lumina-extension"
+			"../../../examples/extensions/packages/guild-inspector.bytwina-extension"
 		))?,
 	);
 	check_guild_inspector(
@@ -613,7 +613,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	check_conversation_inspector(
 		"conversation-inspector/committed",
 		&parse_package(include_bytes!(
-			"../../../examples/extensions/packages/conversation-inspector.lumina-extension"
+			"../../../examples/extensions/packages/conversation-inspector.bytwina-extension"
 		))?,
 	);
 	check_conversation_inspector(

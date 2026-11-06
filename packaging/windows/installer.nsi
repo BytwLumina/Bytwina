@@ -1,5 +1,5 @@
-; Lumina Windows Installer Script (NSIS Modern UI 2)
-; Installs per-user to $LOCALAPPDATA\Programs\Lumina without elevation
+; Bytwina Windows Installer Script (NSIS Modern UI 2)
+; Installs per-user to $LOCALAPPDATA\Programs\Bytwina without elevation
 ; Preserves write permissions for seamless in-app autoupdates
 
 Unicode True
@@ -13,11 +13,11 @@ SetCompressor /SOLID lzma
 !include "Win\COM.nsh"
 !include "Win\Propkey.nsh"
 
-!define PRODUCT_NAME "Lumina"
+!define PRODUCT_NAME "Bytwina"
 !define PRODUCT_PUBLISHER "Lumina contributors"
 !define PRODUCT_WEB_SITE "https://github.com/BytwLumina/Bytwina"
-!define APP_EXE "lumina.exe"
-!define APP_ID "io.github.ninokiru.Lumina"
+!define APP_EXE "bytwina.exe"
+!define APP_ID "io.github.ninokiru.Bytwina"
 
 !ifndef VERSION
   !define VERSION "0.1.0"
@@ -40,22 +40,22 @@ SetCompressor /SOLID lzma
 !endif
 
 Name "${PRODUCT_NAME} ${VERSION}"
-OutFile "${OUTPUT_DIR}\lumina-${VERSION}-setup.exe"
-InstallDir "$LOCALAPPDATA\Programs\Lumina"
+OutFile "${OUTPUT_DIR}\bytwina-${VERSION}-setup.exe"
+InstallDir "$LOCALAPPDATA\Programs\Bytwina"
 InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "InstallLocation"
 
-!if /FileExists "packaging\windows\Lumina.ico"
-  !define MUI_ICON "packaging\windows\Lumina.ico"
-  !define MUI_UNICON "packaging\windows\Lumina.ico"
-!else if /FileExists "${__FILEDIR__}\Lumina.ico"
-  !define MUI_ICON "${__FILEDIR__}\Lumina.ico"
-  !define MUI_UNICON "${__FILEDIR__}\Lumina.ico"
-!else if /FileExists "Lumina.ico"
-  !define MUI_ICON "Lumina.ico"
-  !define MUI_UNICON "Lumina.ico"
+!if /FileExists "packaging\windows\Bytwina.ico"
+  !define MUI_ICON "packaging\windows\Bytwina.ico"
+  !define MUI_UNICON "packaging\windows\Bytwina.ico"
+!else if /FileExists "${__FILEDIR__}\Bytwina.ico"
+  !define MUI_ICON "${__FILEDIR__}\Bytwina.ico"
+  !define MUI_UNICON "${__FILEDIR__}\Bytwina.ico"
+!else if /FileExists "Bytwina.ico"
+  !define MUI_ICON "Bytwina.ico"
+  !define MUI_UNICON "Bytwina.ico"
 !else
-  !define MUI_ICON "${__FILEDIR__}\Lumina.ico"
-  !define MUI_UNICON "${__FILEDIR__}\Lumina.ico"
+  !define MUI_ICON "${__FILEDIR__}\Bytwina.ico"
+  !define MUI_UNICON "${__FILEDIR__}\Bytwina.ico"
 !endif
 
 !define MUI_ABORTWARNING
@@ -83,8 +83,8 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRO
 !endif
 
 ; Returns 0 when absent, 1 when running, 2 when the snapshot cannot be checked.
-!macro LuminaProcessCheck PREFIX
-Function ${PREFIX}CheckLuminaRunning
+!macro BytwinaProcessCheck PREFIX
+Function ${PREFIX}CheckBytwinaRunning
   System::Store "s"
   StrCpy $R0 2
   System::Call 'kernel32::CreateToolhelp32Snapshot(i 2, i 0) p .r0'
@@ -117,8 +117,8 @@ Function ${PREFIX}CheckLuminaRunning
   System::Store "l"
 FunctionEnd
 !macroend
-!insertmacro LuminaProcessCheck ""
-!insertmacro LuminaProcessCheck "un."
+!insertmacro BytwinaProcessCheck ""
+!insertmacro BytwinaProcessCheck "un."
 
 Function RegisterNotificationShortcut
   System::Store "s"
@@ -161,7 +161,7 @@ Function .onInit
   ${EndIf}
 
   ${Do}
-    Call CheckLuminaRunning
+    Call CheckBytwinaRunning
     Pop $0
     ${If} $0 == 2
       MessageBox MB_OK|MB_ICONSTOP "Cannot check whether ${PRODUCT_NAME} is running. Setup cannot continue safely." /SD IDOK
@@ -169,7 +169,7 @@ Function .onInit
       Abort
     ${EndIf}
     ${If} $0 != 0
-      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PRODUCT_NAME} is currently running. Please close Lumina before continuing." /SD IDCANCEL IDRETRY retry_init IDCANCEL cancel_init
+      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PRODUCT_NAME} is currently running. Please close Bytwina before continuing." /SD IDCANCEL IDRETRY retry_init IDCANCEL cancel_init
       retry_init:
         ${Continue}
       cancel_init:
@@ -233,7 +233,7 @@ Function un.onInit
   ${EndIf}
 
   ${Do}
-    Call un.CheckLuminaRunning
+    Call un.CheckBytwinaRunning
     Pop $0
     ${If} $0 == 2
       MessageBox MB_OK|MB_ICONSTOP "Cannot check whether ${PRODUCT_NAME} is running. Uninstall cannot continue safely." /SD IDOK
@@ -241,7 +241,7 @@ Function un.onInit
       Abort
     ${EndIf}
     ${If} $0 != 0
-      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PRODUCT_NAME} is currently running. Please close Lumina before uninstalling." /SD IDCANCEL IDRETRY retry_uninit IDCANCEL cancel_uninit
+      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PRODUCT_NAME} is currently running. Please close Bytwina before uninstalling." /SD IDCANCEL IDRETRY retry_uninit IDCANCEL cancel_uninit
       retry_uninit:
         ${Continue}
       cancel_uninit:

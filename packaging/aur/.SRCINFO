@@ -1,4 +1,4 @@
-pkgbase = lumina-bin
+pkgbase = bytwina-bin
 	pkgdesc = Unofficial native Discord client (prebuilt nightly)
 	pkgver = 1.0.0pre.nightly.20261001.53
 	pkgrel = 1
@@ -142,13 +142,13 @@ pkgbase = lumina-bin
 	optdepends = gnome-keyring: Secret Service credential provider
 	optdepends = gst-plugins-bad: hardware screen encoding
 	optdepends = gst-libav: inline video
-	provides = lumina=1.0.0pre.nightly.20261001.53
-	conflicts = lumina
-	conflicts = lumina-git
+	provides = bytwina=1.0.0pre.nightly.20261001.53
+	conflicts = bytwina
+	conflicts = bytwina-git
 	options = !strip
 	options = !debug
 	options = !lto
-	source_x86_64 = https://github.com/BytwLumina/Bytwina/releases/download/v1.0.0-nightly.20261001.53/lumina-v1.0.0-nightly.20261001.53-Linux-arch-lumina-1.0.0pre.nightly.20261001.53-1-x86_64.pkg.tar.zst
+	source_x86_64 = https://github.com/BytwLumina/Bytwina/releases/download/v1.0.0-nightly.20261001.53/bytwina-v1.0.0-nightly.20261001.53-Linux-arch-bytwina-1.0.0pre.nightly.20261001.53-1-x86_64.pkg.tar.zst
 	sha256sums_x86_64 = 5efa3f71216cced0da707753b96007add5efc9bad256c390ecc020c5a238dfc5
 
-pkgname = lumina-bin
+pkgname = bytwina-bin

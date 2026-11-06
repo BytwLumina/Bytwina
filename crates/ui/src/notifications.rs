@@ -298,7 +298,7 @@ impl MessagingUi {
 				);
 				crate::icons::paint(
 					ui.painter(),
-					crate::icons::Icon::Lumina,
+					crate::icons::Icon::Bytwina,
 					rect.shrink(9.0),
 					colors.text.lerp_to_gamma(colors.accent_text, lit),
 				);

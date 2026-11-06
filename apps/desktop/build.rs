@@ -10,7 +10,7 @@ fn main() {
 		let plist = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
 			.join("../../packaging/macos/Info.plist");
 		println!(
-			"cargo:rustc-link-arg-bin=lumina=-Wl,-sectcreate,__TEXT,__info_plist,{}",
+			"cargo:rustc-link-arg-bin=bytwina=-Wl,-sectcreate,__TEXT,__info_plist,{}",
 			plist.display()
 		);
 	}
@@ -18,8 +18,8 @@ fn main() {
 
 fn windows_icon() {
 	use std::{path::PathBuf, process::Command};
-	println!("cargo:rerun-if-changed=../../packaging/windows/Lumina.ico");
-	println!("cargo:rerun-if-changed=../../packaging/windows/lumina.rc");
+	println!("cargo:rerun-if-changed=../../packaging/windows/Bytwina.ico");
+	println!("cargo:rerun-if-changed=../../packaging/windows/bytwina.rc");
 	let root = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
 		.join("../../packaging/windows");
 	let out = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
@@ -33,18 +33,18 @@ fn windows_icon() {
 			.map(|path| path.join("rc.exe"))
 			.find(|path| path.is_file())
 			.expect("Windows SDK rc.exe");
-		let resource = out.join("lumina.res");
+		let resource = out.join("bytwina.res");
 		let mut compiler = Command::new(rc);
 		compiler
 			.arg("/nologo")
 			.arg("/fo")
 			.arg(&resource)
-			.arg("lumina.rc");
+			.arg("bytwina.rc");
 		(compiler, resource)
 	} else {
-		let resource = out.join("lumina-icon.o");
+		let resource = out.join("bytwina-icon.o");
 		let mut compiler = Command::new("windres");
-		compiler.args(["-i", "lumina.rc", "-o"]).arg(&resource);
+		compiler.args(["-i", "bytwina.rc", "-o"]).arg(&resource);
 		(compiler, resource)
 	};
 	assert!(
@@ -55,5 +55,5 @@ fn windows_icon() {
 			.success(),
 		"application icon resource compilation failed"
 	);
-	println!("cargo:rustc-link-arg-bin=lumina={}", resource.display());
+	println!("cargo:rustc-link-arg-bin=bytwina={}", resource.display());
 }

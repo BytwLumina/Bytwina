@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "task": "Lumina PR #672: mark server folders as read",
+  "task": "Bytwina PR #672: mark server folders as read",
   "capturedDate": "2026-10-15",
   "source": {
     "baseline": {
@@ -26,8 +26,8 @@
     "rust": "1.98.1"
   },
   "demoScenario": {
-    "build": "cargo build --release --locked -p lumina --no-default-features --features demo",
-    "launch": "target/release/lumina.exe --demo",
+    "build": "cargo build --release --locked -p bytwina --no-default-features --features demo",
+    "launch": "target/release/bytwina.exe --demo",
     "accountOrNetwork": "Offline synthetic workspace; no Discord account or transport",
     "state": "Synthetic folder context menu open at the same getting-started channel; no unread guild in the folder, so the new action is disabled in the after capture"
   },
@@ -57,7 +57,7 @@
     "nsisAvailable": false,
     "measurements": [
       {
-        "metric": "lumina.exe bytes",
+        "metric": "bytwina.exe bytes",
         "baseline": 87399936,
         "after": 87405568,
         "delta": 5632,

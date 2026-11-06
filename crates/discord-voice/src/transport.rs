@@ -350,7 +350,7 @@ pub async fn run_with_identity(
 	identity: Arc<Identity>,
 ) -> Result<(), &'static str> {
 	let url = endpoint(&credentials.endpoint)?;
-	crate::timer::isolated("lumina-voice", move || {
+	crate::timer::isolated("bytwina-voice", move || {
 		run_inner(
 			credentials,
 			capture,
@@ -1234,7 +1234,7 @@ pub async fn run_stream(
 	emit: impl Fn(Status) -> Result<(), ()> + Send + 'static,
 ) -> Result<(), &'static str> {
 	let url = endpoint(&credentials.endpoint)?;
-	crate::timer::isolated("lumina-stream", move || {
+	crate::timer::isolated("bytwina-stream", move || {
 		run_stream_inner(
 			credentials,
 			identity,
@@ -1258,7 +1258,7 @@ pub async fn watch_stream(
 	emit: impl Fn(Status) -> Result<(), ()> + Send + 'static,
 ) -> Result<(), &'static str> {
 	let url = endpoint(&credentials.endpoint)?;
-	crate::timer::isolated("lumina-watch", move || {
+	crate::timer::isolated("bytwina-watch", move || {
 		run_stream_inner(
 			credentials,
 			identity,
@@ -3288,7 +3288,7 @@ mod tests {
 			// Wait until the client has reached Ready.
 			ready_rx.await.unwrap();
 
-			// Bob departs (leaves the DM call). Lumina is now the sole member.
+			// Bob departs (leaves the DM call). Bytwina is now the sole member.
 			ws.send(Message::Text(
 				json!({"op":13,"d":{"user_id":"2"}}).to_string().into(),
 			))

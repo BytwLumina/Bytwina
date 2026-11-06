@@ -247,7 +247,7 @@ mod tests {
 	}
 	#[test]
 	fn custom_markup_is_bounded_and_never_an_arbitrary_url() {
-		for token in ["<:lumina_wave:9001>", "<a:lumina_party:9001>"] {
+		for token in ["<:bytwina_wave:9001>", "<a:bytwina_party:9001>"] {
 			assert_eq!(
 				custom_prefix(&format!("{token} trailing")),
 				Some((model::Id(9001), token.len()))

@@ -25,7 +25,7 @@ def release_order(version):
     """Sort key for release versions; a stable release sorts above its own nightlies."""
     match = re.fullmatch(SEMANTIC_VERSION, version)
     if match is None:
-        raise ValueError(f'Not a Lumina release version: {version}')
+        raise ValueError(f'Not a Bytwina release version: {version}')
     major, minor, patch, date, build = match.groups()
     if date is None:
         return int(major), int(minor), int(patch), 1, 0, 0
@@ -60,8 +60,8 @@ def check_arch_recipe(version):
     literal(r"(?m)^sha256sums_x86_64=\('(?P<value>[0-9a-f]{64})'\)", source, 'Arch checksum')
     # pacman names a package from pkgver and pkgrel, so the asset must carry both verbatim.
     pin = re.search(
-        r'/releases/download/(?P<tag>v[^/]+)/lumina-(?P=tag)-Linux-[A-Za-z0-9.]+-'
-        r'lumina-(?P<pkgver>[A-Za-z0-9._+]+)-(?P<pkgrel>\d+)-[A-Za-z0-9_]+\.pkg\.tar\.zst$',
+        r'/releases/download/(?P<tag>v[^/]+)/bytwina-(?P=tag)-Linux-[A-Za-z0-9.]+-'
+        r'bytwina-(?P<pkgver>[A-Za-z0-9._+]+)-(?P<pkgrel>\d+)-[A-Za-z0-9_]+\.pkg\.tar\.zst$',
         url,
     )
     if pin is None:
@@ -91,7 +91,7 @@ def update(version):
             package = tomllib.loads(pathlib.Path(path).read_text())['package']
             if package.get('version') == {'workspace': True}:
                 names.add(package['name'])
-    assert 'lumina' in names, 'Desktop must inherit the workspace version'
+    assert 'bytwina' in names, 'Desktop must inherit the workspace version'
     updated, count = re.subn(
         r'(\[workspace\.package\]\s*\nversion\s*=\s*")[^"]+("\s*\n)',
         lambda match: match[1] + version + match[2], source, count=1,
@@ -120,7 +120,7 @@ def update(version):
                 stable, 'Mac build version')
     rewrite(pathlib.Path('packaging/windows/installer.nsi'),
             r'(?m)^([ \t]*!define VERSION ")[^"]+("[ \t]*)$', version, 'Windows installer version')
-    rewrite(pathlib.Path('Casks/lumina.rb'),
+    rewrite(pathlib.Path('Casks/bytwina.rb'),
             r'(?m)^([ \t]*version ")[^"]+("[ \t]*)$', version, 'Homebrew cask version')
     check_arch_recipe(version)
 

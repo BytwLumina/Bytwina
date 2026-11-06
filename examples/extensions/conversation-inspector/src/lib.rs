@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{AppInvocation, AppOutput, Element, Output, PollAvailability};
+use bytwina_extension_sdk::{AppInvocation, AppOutput, Element, Output, PollAvailability};
 fn text(text: impl Into<String>) -> Element {
 	Element::Text { text: text.into() }
 }
@@ -159,11 +159,11 @@ fn handle(input: AppInvocation) -> AppOutput {
 		..Default::default()
 	}
 }
-lumina_extension_sdk::export!(handle);
+bytwina_extension_sdk::export!(handle);
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use lumina_extension_sdk::{dispatch_typed, serde_json};
+	use bytwina_extension_sdk::{dispatch_typed, serde_json};
 	fn run(wire: &str) -> AppOutput {
 		serde_json::from_slice(&dispatch_typed(wire.as_bytes(), handle).unwrap()).unwrap()
 	}

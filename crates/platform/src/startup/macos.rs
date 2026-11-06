@@ -7,13 +7,13 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-const LABEL: &str = "io.github.ninokiru.Lumina.startup";
+const LABEL: &str = "io.github.ninokiru.Bytwina.startup";
 const MAX_BYTES: u64 = 16 * 1024;
 const READ_ERROR: &str = "Could not read the macOS login setting.";
 const WRITE_ERROR: &str = "Could not update the macOS login setting.";
 const PATH_ERROR: &str = "This executable path cannot be registered for macOS login.";
 const INVALID_ENTRY: &str =
-	"The Lumina login entry does not match this application. Turn startup on to replace it.";
+	"The Bytwina login entry does not match this application. Turn startup on to replace it.";
 
 fn entry_path() -> Result<PathBuf, &'static str> {
 	let home = dirs::home_dir()

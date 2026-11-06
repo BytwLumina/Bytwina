@@ -26,8 +26,8 @@ Use separate worktrees for the baseline and changed revision. Copy only the chan
 Run the following from each worktree, using distinct build/output paths:
 
 ```powershell
-$env:CARGO_TARGET_DIR = 'E:/codex-builds/lumina-review650-target'
-cargo build --release --locked -p lumina --no-default-features --features demo --example profile_preview
+$env:CARGO_TARGET_DIR = 'E:/codex-builds/bytwina-review650-target'
+cargo build --release --locked -p bytwina --no-default-features --features demo --example profile_preview
 $previewExe = "$env:CARGO_TARGET_DIR/release/examples/profile_preview.exe"
 & $previewExe --demo --page=embeds --width=1120 --height=900 --output=before.png
 & $previewExe --demo --page=embeds --width=1120 --height=900 --light --output=before-light.png
@@ -44,7 +44,7 @@ eframe/wgpu framebuffer exports, inspected alongside the native window. On this 
 Run `cargo xtask package` in both worktrees, retaining their separate `dist` directories.
 In this run, a later cleanup removed baseline binaries, ZIPs and raw sampling files;
 the recorded aggregate measurements and native PNG captures remain the evidence.
-Measure `dist/lumina.exe` and sum the lengths of all files under `dist`. Create each ZIP
+Measure `dist/bytwina.exe` and sum the lengths of all files under `dist`. Create each ZIP
 with the same .NET compression implementation:
 
 ```powershell

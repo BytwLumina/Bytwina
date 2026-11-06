@@ -1,7 +1,7 @@
-//! Lumina theme tokens, presets and typography shared by every native view.
+//! Bytwina theme tokens, presets and typography shared by every native view.
 //!
 //! The palette is resolved from egui's light/dark mode plus a process-wide [`Variant`]
-//! (the cool Lumina neutrals, deep black, blue-grey, or a gradient recolour). Gradient
+//! (the cool Bytwina neutrals, deep black, blue-grey, or a gradient recolour). Gradient
 //! variants paint a backdrop under translucent surfaces; see [`paint_backdrop`].
 use egui::{Color32, FontFamily, FontId, RichText, Stroke, epaint::FontColorTransferFunction};
 use std::sync::atomic::{AtomicU8, AtomicU32, Ordering};
@@ -104,7 +104,7 @@ impl Variant {
 	];
 	pub fn label(self) -> &'static str {
 		match self {
-			Variant::Standard => "Lumina",
+			Variant::Standard => "Bytwina",
 			Variant::Eclipse => "Eclipse",
 			Variant::Slate => "Slate",
 			Variant::Nightfall => "Nightfall",
@@ -267,7 +267,7 @@ const fn rgba(value: u32, alpha: u8) -> Color32 {
 		alpha,
 	)
 }
-/// Lumina azure: the house accent, packed for call sites that speak in integer colours.
+/// Bytwina azure: the house accent, packed for call sites that speak in integer colours.
 pub const DEFAULT_PRIMARY_RGB: u32 = 0x1a72e8;
 pub const DEFAULT_PRIMARY_COLOR: [u8; 3] = [
 	(DEFAULT_PRIMARY_RGB >> 16) as u8,
@@ -990,7 +990,7 @@ pub fn paint_backdrop(ctx: &egui::Context) {
 
 pub const SEMIBOLD: &str = "semibold";
 pub const MEDIUM: &str = "medium";
-const WEIGHTS_KEY: &str = "lumina-font-weights";
+const WEIGHTS_KEY: &str = "bytwina-font-weights";
 // Called by `fonts::install` for one context; until then the weight families resolve to
 // the default face so headless contexts (tests) never reference an unknown family.
 thread_local! {
@@ -1687,7 +1687,7 @@ fn wide_button(
 	}
 	response
 }
-/// Deterministic fallback avatar colours drawn from the Lumina palette, keyed by the display name.
+/// Deterministic fallback avatar colours drawn from the Bytwina palette, keyed by the display name.
 fn fallback_avatar_color(name: &str) -> Color32 {
 	const COLORS: [u32; 5] = [DEFAULT_PRIMARY_RGB, 0x6b7a94, 0x2fb87a, 0xe8a33d, 0xef5561];
 	let hash = name
@@ -1903,7 +1903,7 @@ pub fn role_name_color(rgb: u32, background: Color32, fallback: Color32) -> Colo
 	}
 	fallback
 }
-pub(crate) fn luminance(c: Color32) -> f32 {
+pub(crate) fn bytwinance(c: Color32) -> f32 {
 	let channel = |v: u8| {
 		let v = v as f32 / 255.0;
 		if v <= 0.03928 {
@@ -1915,7 +1915,7 @@ pub(crate) fn luminance(c: Color32) -> f32 {
 	0.2126 * channel(c.r()) + 0.7152 * channel(c.g()) + 0.0722 * channel(c.b())
 }
 fn contrast(a: Color32, b: Color32) -> f32 {
-	let (l1, l2) = (luminance(a) + 0.05, luminance(b) + 0.05);
+	let (l1, l2) = (bytwinance(a) + 0.05, bytwinance(b) + 0.05);
 	l1.max(l2) / l1.min(l2)
 }
 
@@ -2134,7 +2134,7 @@ pub fn build_badge(ui: &mut egui::Ui, build: Build) -> Option<egui::Response> {
 
 /// Discord-style settings row with a pill switch on the right. Clicking anywhere on the row
 /// toggles `enabled`; the accessible label is `label`.
-/// Blur control. Every compositor Lumina targets (macOS, DWM acrylic, KDE and Wayland blur)
+/// Blur control. Every compositor Bytwina targets (macOS, DWM acrylic, KDE and Wayland blur)
 /// only turns its own fixed blur on or off, so a strength slider would promise control that
 /// does not exist. The stored percentage stays for themes: zero is off, anything else on.
 pub fn blur_control(ui: &mut egui::Ui, label: &str, hint: &str, blur: &mut u8) -> egui::Response {

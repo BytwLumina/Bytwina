@@ -6,15 +6,15 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::{Arc, Mutex, Weak};
 
 const READY: &str = "Global voice keybinds are enabled.";
-const DISABLED: &str = "Global keybinds are off. Shortcuts work while Lumina is focused.";
+const DISABLED: &str = "Global keybinds are off. Shortcuts work while Bytwina is focused.";
 #[cfg(target_os = "linux")]
 const WAYLAND_PENDING: &str = "Approve the global voice keybinds in your desktop's dialog.";
 #[cfg(target_os = "linux")]
-const WAYLAND_UNAVAILABLE: &str = "Global voice keybinds were denied or the desktop GlobalShortcuts portal is unavailable; they still work while Lumina is focused.";
+const WAYLAND_UNAVAILABLE: &str = "Global voice keybinds were denied or the desktop GlobalShortcuts portal is unavailable; they still work while Bytwina is focused.";
 const UNAVAILABLE: &str =
-	"Global voice keybinds are unavailable on this system; they work while Lumina is focused.";
-const INVALID: &str = "One or more voice bindings cannot be registered globally; they still work while Lumina is focused.";
-const MODIFIER_REQUIRED: &str = "Add Ctrl, Alt, Shift, or Command to use a voice binding globally; it still works while Lumina is focused.";
+	"Global voice keybinds are unavailable on this system; they work while Bytwina is focused.";
+const INVALID: &str = "One or more voice bindings cannot be registered globally; they still work while Bytwina is focused.";
+const MODIFIER_REQUIRED: &str = "Add Ctrl, Alt, Shift, or Command to use a voice binding globally; it still works while Bytwina is focused.";
 
 #[cfg(target_os = "windows")]
 /// Mouse poller identities, kept out of the range `global-hotkey` assigns to real hotkeys.
@@ -490,7 +490,7 @@ async fn portal(
 	let mut ids = Vec::with_capacity(triggers.len());
 	let mut shortcuts = Vec::with_capacity(triggers.len());
 	for (index, (trigger, action, group_chords)) in triggers.iter().enumerate() {
-		let id = format!("lumina-{index}");
+		let id = format!("bytwina-{index}");
 		ids.push((id.clone(), *action, index as u32, group_chords.clone()));
 		shortcuts.push(
 			NewShortcut::new(id, portal_description(*action)).preferred_trigger(trigger.as_str()),
@@ -609,11 +609,11 @@ async fn portal(
 #[cfg(target_os = "linux")]
 fn portal_description(action: KeybindAction) -> &'static str {
 	match action {
-		KeybindAction::PushToTalk => "Lumina push to talk",
-		KeybindAction::PushToMute => "Lumina push to mute",
-		KeybindAction::ToggleMute => "Toggle Lumina microphone mute",
-		KeybindAction::ToggleDeafen => "Toggle Lumina deafen",
-		_ => "Lumina voice shortcut",
+		KeybindAction::PushToTalk => "Bytwina push to talk",
+		KeybindAction::PushToMute => "Bytwina push to mute",
+		KeybindAction::ToggleMute => "Toggle Bytwina microphone mute",
+		KeybindAction::ToggleDeafen => "Toggle Bytwina deafen",
+		_ => "Bytwina voice shortcut",
 	}
 }
 
@@ -885,7 +885,7 @@ mod mouse {
 			let stop = Arc::new(AtomicBool::new(false));
 			let stopped = stop.clone();
 			let thread = std::thread::Builder::new()
-				.name("lumina-mouse-keybinds".into())
+				.name("bytwina-mouse-keybinds".into())
 				.spawn(move || {
 					let mut held = vec![false; watched.len()];
 					let mut held_toggles = vec![false; toggle_groups.len()];

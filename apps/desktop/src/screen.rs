@@ -19,8 +19,8 @@ const SIGNAL_TIMEOUT: Duration = Duration::from_secs(30);
 /// Names why a share ended, under the same opt-in variable as the voice reports. A share
 /// that stops by itself otherwise leaves only the latest status, which the stop overwrites.
 fn note(event: &str, reason: &str) {
-	if std::env::var_os("LUMINA_VOICE_DIAGNOSTICS").is_some_and(|value| value == "1") {
-		eprintln!("[Lumina voice Screen] {event}={reason}");
+	if std::env::var_os("BYTWINA_VOICE_DIAGNOSTICS").is_some_and(|value| value == "1") {
+		eprintln!("[Bytwina voice Screen] {event}={reason}");
 	}
 }
 

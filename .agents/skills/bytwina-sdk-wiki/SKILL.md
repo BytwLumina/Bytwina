@@ -1,9 +1,9 @@
 ---
-name: lumina-sdk-wiki
-description: Synchronize Lumina’s creator wiki for author-visible extension SDK or theme API changes, or an explicit wiki refresh.
+name: bytwina-sdk-wiki
+description: Synchronize Bytwina’s creator wiki for author-visible extension SDK or theme API changes, or an explicit wiki refresh.
 ---
 
-# Maintain the Lumina SDK wiki
+# Maintain the Bytwina SDK wiki
 
 The creator wiki is `https://github.com/BytwLumina/Bytwina/wiki`; its separate Git
 remote is `https://github.com/BytwLumina/Bytwina.wiki.git`. The authoritative sources
@@ -47,8 +47,8 @@ and edits; use another clone if necessary.
 From the repository root (replace values with the current pushed revision/status):
 
 ```powershell
-python .agents/skills/lumina-sdk-wiki/scripts/sync.py --source-ref <full-pushed-commit> --wiki-dir target/<wiki-clone> --status "Preview SDK — PR #<number>, not yet released"
-python .agents/skills/lumina-sdk-wiki/scripts/sync.py --source-ref <full-pushed-commit> --wiki-dir target/<wiki-clone> --status "Preview SDK — PR #<number>, not yet released" --check
+python .agents/skills/bytwina-sdk-wiki/scripts/sync.py --source-ref <full-pushed-commit> --wiki-dir target/<wiki-clone> --status "Preview SDK — PR #<number>, not yet released"
+python .agents/skills/bytwina-sdk-wiki/scripts/sync.py --source-ref <full-pushed-commit> --wiki-dir target/<wiki-clone> --status "Preview SDK — PR #<number>, not yet released" --check
 git -C target/<wiki-clone> diff --check
 git -C target/<wiki-clone> diff --stat
 git -C target/<wiki-clone> diff
@@ -63,7 +63,7 @@ compares generated output without writing. It never fetches, commits or pushes.
 Review the pages as documentation, including navigation, examples, capability
 restrictions and preview status; generation alone does not establish accuracy.
 After changing the helper, run
-`python .agents/skills/lumina-sdk-wiki/scripts/test_sync.py`.
+`python .agents/skills/bytwina-sdk-wiki/scripts/test_sync.py`.
 
 ## Publish
 

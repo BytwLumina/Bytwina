@@ -30,8 +30,8 @@ fn module(engine: &Engine, bytes: &[u8]) -> Result<Module, Error> {
 		return Err(Error::Module);
 	}
 	if !matches!(module.get_export("memory"), Some(ExternType::Memory(_)))
-		|| !matches!(module.get_export("lumina_alloc"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32], [ValType::I32]))
-		|| !matches!(module.get_export("lumina_invoke"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32, ValType::I32], [ValType::I64]))
+		|| !matches!(module.get_export("bytwina_alloc"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32], [ValType::I32]))
+		|| !matches!(module.get_export("bytwina_invoke"), Some(ExternType::Func(ty)) if ty == FuncType::new([ValType::I32, ValType::I32], [ValType::I64]))
 	{
 		return Err(Error::Module);
 	}
@@ -79,7 +79,7 @@ fn instantiate(engine: &Engine, module: &Module) -> Result<(Store<StoreLimits>, 
 }
 
 /// Execute once, on the host worker. All Wasm state is dropped before returning.
-/// ABI: `lumina_alloc(i32) -> i32`, `lumina_invoke(i32, i32) -> i64`.
+/// ABI: `bytwina_alloc(i32) -> i32`, `bytwina_invoke(i32, i32) -> i64`.
 /// The result packs the output pointer in its high 32 bits and byte length in its low 32 bits.
 pub fn invoke(package: &Package, input: &Invocation) -> Result<Output, Error> {
 	if package.manifest.kind != ExtensionKind::Plugin || package.theme.is_some() {
@@ -112,10 +112,10 @@ pub fn invoke(package: &Package, input: &Invocation) -> Result<Output, Error> {
 	let (mut store, instance) = instantiate(&engine, &module)?;
 	let memory = instance.get_memory(&store, "memory").ok_or(Error::Module)?;
 	let alloc = instance
-		.get_typed_func::<i32, i32>(&store, "lumina_alloc")
+		.get_typed_func::<i32, i32>(&store, "bytwina_alloc")
 		.map_err(|_| Error::Module)?;
 	let run = instance
-		.get_typed_func::<(i32, i32), i64>(&store, "lumina_invoke")
+		.get_typed_func::<(i32, i32), i64>(&store, "bytwina_invoke")
 		.map_err(|_| Error::Module)?;
 	let pointer = alloc
 		.call(&mut store, bytes.len() as i32)

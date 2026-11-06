@@ -366,7 +366,7 @@ impl Desktop {
 							ui.label(
 								ui::design::semibold(
 									ui,
-									ui::i18n::translate("main-restoring-screen-lumina"),
+									ui::i18n::translate("main-restoring-screen-bytwina"),
 									16.0,
 								)
 								.color(p.muted),
@@ -398,7 +398,7 @@ impl Desktop {
 					ui.painter().rect_filled(mark, 14, p.accent);
 					ui::icons::paint(
 						ui.painter(),
-						ui::icons::Icon::Lumina,
+						ui::icons::Icon::Bytwina,
 						mark.shrink(13.0),
 						p.accent_text,
 					);
@@ -495,7 +495,7 @@ impl Desktop {
 							ui.painter().rect_filled(mark, 6, p.accent);
 							ui::icons::paint(
 								ui.painter(),
-								ui::icons::Icon::Lumina,
+								ui::icons::Icon::Bytwina,
 								mark.shrink(5.0),
 								p.accent_text,
 							);
@@ -503,7 +503,7 @@ impl Desktop {
 							ui.label(
 								ui::design::semibold(
 									ui,
-									ui::i18n::translate("main-sign-in-screen-lumina"),
+									ui::i18n::translate("main-sign-in-screen-bytwina"),
 									16.0,
 								)
 								.color(p.text_strong),
@@ -669,7 +669,7 @@ impl Desktop {
 						if returning {
 							ui::design::secondary_icon_button(ui, ui::icons::Icon::Plus, label)
 						} else {
-							ui::design::primary_icon_button(ui, ui::icons::Icon::Lumina, label)
+							ui::design::primary_icon_button(ui, ui::icons::Icon::Bytwina, label)
 						}
 					})
 					.inner;
@@ -716,7 +716,7 @@ impl Desktop {
 			ui.painter().rect_filled(mark, 13, p.accent);
 			ui::icons::paint(
 				ui.painter(),
-				ui::icons::Icon::Lumina,
+				ui::icons::Icon::Bytwina,
 				mark.shrink(11.0),
 				p.accent_text,
 			);
@@ -727,7 +727,7 @@ impl Desktop {
 					ui::i18n::translate_if_key(if returning {
 						"main-sign-in-header-welcome-back"
 					} else {
-						"main-sign-in-header-welcome-to-lumina"
+						"main-sign-in-header-welcome-to-bytwina"
 					}),
 					22.0,
 				)
@@ -1073,7 +1073,7 @@ impl Desktop {
 		let p = ui::design::palette(ui);
 		if ui::design::disclosure(
 			ui,
-			&ui::i18n::translate("main-sign-in-disclosures-about-lumina"),
+			&ui::i18n::translate("main-sign-in-disclosures-about-bytwina"),
 			self.about_open,
 		)
 		.clicked()

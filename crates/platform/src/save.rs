@@ -7,8 +7,8 @@ pub fn extension_source(
 ) -> impl std::future::Future<Output = Option<PathBuf>> + Send + 'static {
 	let dialog = rfd::AsyncFileDialog::new()
 		.set_parent(parent.as_ref())
-		.set_title("Import Lumina extension")
-		.add_filter("Lumina extensions", &["lumina-extension", "json"])
+		.set_title("Import Bytwina extension")
+		.add_filter("Bytwina extensions", &["bytwina-extension", "json"])
 		.pick_file();
 	async move {
 		let file = dialog.await?;
@@ -69,9 +69,9 @@ pub fn theme_destination(
 ) -> impl std::future::Future<Output = Option<PathBuf>> + Send + 'static {
 	let dialog = rfd::AsyncFileDialog::new()
 		.set_parent(parent.as_ref())
-		.set_title("Export Lumina theme")
+		.set_title("Export Bytwina theme")
 		.set_file_name(safe_filename(filename))
-		.add_filter("Lumina theme", &["lumina-extension"])
+		.add_filter("Bytwina theme", &["bytwina-extension"])
 		.save_file();
 	async move {
 		let file = dialog.await?;
@@ -277,7 +277,7 @@ mod tests {
 	fn completed_files_publish_without_clobbering() {
 		let mut random = [0_u8; 16];
 		getrandom::fill(&mut random).unwrap();
-		let root = std::env::temp_dir().join(format!("lumina-save-{random:02x?}"));
+		let root = std::env::temp_dir().join(format!("bytwina-save-{random:02x?}"));
 		std::fs::create_dir(&root).unwrap();
 		let source = root.join("partial");
 		let destination = root.join("attachment");

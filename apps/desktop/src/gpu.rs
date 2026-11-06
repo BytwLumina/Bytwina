@@ -106,16 +106,16 @@ pub fn select(
 		});
 	};
 	let info = adapter.get_info();
-	eprintln!("[Lumina] GPU adapter: {}", describe(&info));
+	eprintln!("[Bytwina] GPU adapter: {}", describe(&info));
 	if software(&info) {
 		// Already on OpenGL, the override has nothing left to try.
 		if info.backend == wgpu::Backend::Gl {
 			eprintln!(
-				"[Lumina] GPU adapter is a software OpenGL rasterizer; install the GPU's graphics driver"
+				"[Bytwina] GPU adapter is a software OpenGL rasterizer; install the GPU's graphics driver"
 			);
 		} else {
 			eprintln!(
-				"[Lumina] GPU adapter is a software rasterizer; set WGPU_BACKEND=gl to try the GPU's OpenGL driver"
+				"[Bytwina] GPU adapter is a software rasterizer; set WGPU_BACKEND=gl to try the GPU's OpenGL driver"
 			);
 		}
 	}

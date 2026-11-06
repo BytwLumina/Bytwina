@@ -1,4 +1,4 @@
-"""Synthetic native package regression check; never launches Lumina or installs it."""
+"""Synthetic native package regression check; never launches Bytwina or installs it."""
 
 from pathlib import Path
 import argparse
@@ -14,11 +14,11 @@ ARTIFACTS = None
 
 class NativePackageTest(unittest.TestCase):
     def test_package_allowlist_and_corrupt_archive_detection(self):
-        with tempfile.TemporaryDirectory(prefix="lumina-debian-test-") as directory:
+        with tempfile.TemporaryDirectory(prefix="bytwina-debian-test-") as directory:
             root = Path(directory)
             staged = root / "staged"
             staged.mkdir()
-            shutil.copyfile("/bin/true", staged / "lumina")
+            shutil.copyfile("/bin/true", staged / "bytwina")
             for name in ["README.md", "THIRD_PARTY_NOTICES.md", "LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]:
                 (staged / name).write_text("synthetic package fixture\n")
             (staged / "docs").mkdir()
@@ -70,24 +70,24 @@ class NativePackageTest(unittest.TestCase):
                         packaging.native_package(staged, "0.1.0-test", FORMAT)
                 with self.assertRaisesRegex(ValueError, "semantic application version"):
                     packaging.native_package(staged, "0.1.0\nmalformed", FORMAT)
-                (staged / "lumina").write_bytes(b"MZ synthetic wrong architecture")
+                (staged / "bytwina").write_bytes(b"MZ synthetic wrong architecture")
                 with self.assertRaisesRegex(ValueError, "ELF executable"):
                     packaging.native_package(staged, "0.1.0", FORMAT)
                 return
             packaging.package(staged, "0.1.0-test")
-            artifact = next(staged.glob("lumina_*.deb"))
-            self.assertEqual(packaging.output("dpkg-deb", "--field", str(artifact), "Package"), "lumina")
+            artifact = next(staged.glob("bytwina_*.deb"))
+            self.assertEqual(packaging.output("dpkg-deb", "--field", str(artifact), "Package"), "bytwina")
             self.assertIn("gstreamer1.0-plugins-good", packaging.output(
                 "dpkg-deb", "--field", str(artifact), "Depends").split(", "))
             listing = packaging.output("dpkg-deb", "--contents", str(artifact))
             for excluded in ["debug.log", "stale.log", "stale.deb", "previous.deb", "stale-nested.log"]:
                 self.assertNotIn(excluded, listing)
-            self.assertNotIn("usr/share/doc/lumina/docs/", listing)
+            self.assertNotIn("usr/share/doc/bytwina/docs/", listing)
             self.assertNotIn("source/hpke-rs/", listing)
             self.assertIn("licenses/dependencies/PROVENANCE.md", listing)
             self.assertIn("licenses/voice/", listing)
             for name in ["LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]:
-                self.assertIn(f"usr/share/doc/lumina/{name}", listing)
+                self.assertIn(f"usr/share/doc/bytwina/{name}", listing)
             # Preserve valid metadata while making the expected payload disagree.
             wrong_stage = root / "wrong-stage"
             wrong_stage.mkdir()
@@ -98,7 +98,7 @@ class NativePackageTest(unittest.TestCase):
                     artifact, wrong_stage, check, "0.1.0~test-1",
                     packaging.output("dpkg", "--print-architecture"),
                     packaging.output("dpkg-deb", "--field", str(artifact), "Depends"))
-            (staged / "lumina").write_bytes(b"MZ synthetic wrong architecture")
+            (staged / "bytwina").write_bytes(b"MZ synthetic wrong architecture")
             with self.assertRaisesRegex(ValueError, "ELF executable"):
                 packaging.package(staged, "0.1.0")
 

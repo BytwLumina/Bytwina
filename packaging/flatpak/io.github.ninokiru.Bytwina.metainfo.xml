@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.ninokiru.Lumina</id>
-  <name>Lumina</name>
+  <id>io.github.ninokiru.Bytwina</id>
+  <name>Bytwina</name>
   <summary>Experimental unofficial native Discord client</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT OR Apache-2.0</project_license>
   <description>
-    <p>Lumina is an experimental native client for existing Discord accounts, built with Rust and egui. It includes messaging and voice without a web-based application shell.</p>
+    <p>Bytwina is an experimental native client for existing Discord accounts, built with Rust and egui. It includes messaging and voice without a web-based application shell.</p>
     <p>This client is unofficial and is not affiliated with Discord.</p>
   </description>
-  <launchable type="desktop-id">io.github.ninokiru.Lumina.desktop</launchable>
+  <launchable type="desktop-id">io.github.ninokiru.Bytwina.desktop</launchable>
   <url type="homepage">https://github.com/BytwLumina/Bytwina</url>
   <url type="bugtracker">https://github.com/BytwLumina/Bytwina/issues</url>
   <developer id="io.github.ninokiru"><name>Lumina contributors</name></developer>

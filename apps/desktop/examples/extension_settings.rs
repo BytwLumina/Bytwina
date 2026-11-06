@@ -1,4 +1,4 @@
-//! Offline debug check: cargo run --locked -p lumina --example extension_settings
+//! Offline debug check: cargo run --locked -p bytwina --example extension_settings
 use eframe::egui;
 
 fn texts(shape: &egui::Shape, labels: &mut Vec<String>) {
@@ -16,9 +16,9 @@ fn main() {
 	let mut messaging = ui::MessagingUi::default();
 	let packages: [&[u8]; 2] = [
 		include_bytes!(
-			"../../../extensions/plugins/packages/message-delete-protector.lumina-extension"
+			"../../../extensions/plugins/packages/message-delete-protector.bytwina-extension"
 		),
-		include_bytes!("../../../extensions/themes/ocean.lumina-extension"),
+		include_bytes!("../../../extensions/themes/ocean.bytwina-extension"),
 	];
 	messaging.extensions.set_entries(
 		packages
@@ -78,7 +78,7 @@ fn main() {
 		assert!(
 			!labels
 				.iter()
-				.any(|text| text.contains("Make Lumina yours") || text.contains("A new look."))
+				.any(|text| text.contains("Make Bytwina yours") || text.contains("A new look."))
 		);
 	}
 	messaging.preview_settings("extensions");

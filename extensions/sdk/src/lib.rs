@@ -2,7 +2,7 @@
 //!
 //! Test handlers locally through the same JSON path as the Wasm exports:
 //! ```
-//! use lumina_extension_sdk::{dispatch, Invocation, Output, serde_json};
+//! use bytwina_extension_sdk::{dispatch, Invocation, Output, serde_json};
 //! fn handle(input: Invocation) -> Output {
 //!     Output { replacement: input.composer.map(|text| text.to_uppercase()), ..Default::default() }
 //! }
@@ -275,13 +275,13 @@ fn encode<T: Serialize + ?Sized>(value: &T) -> Result<Vec<u8>, Error> {
 	Ok(buffer.0)
 }
 
-/// Export a typed handler as Lumina ABI version 1, including `fn(Invocation) -> Output`.
+/// Export a typed handler as Bytwina ABI version 1, including `fn(Invocation) -> Output`.
 /// Each invocation gets a fresh instance, so buffers are reclaimed when it finishes.
 #[macro_export]
 macro_rules! export {
 	($handler:path) => {
 		#[unsafe(no_mangle)]
-		pub extern "C" fn lumina_alloc(length: u32) -> u32 {
+		pub extern "C" fn bytwina_alloc(length: u32) -> u32 {
 			if length == 0 || length as usize > $crate::MAX_IO_BYTES {
 				return 0;
 			}
@@ -290,9 +290,9 @@ macro_rules! export {
 		}
 
 		/// # Safety
-		/// The Lumina host supplies the pointer returned by `lumina_alloc` and its allocated length.
+		/// The Bytwina host supplies the pointer returned by `bytwina_alloc` and its allocated length.
 		#[unsafe(no_mangle)]
-		pub unsafe extern "C" fn lumina_invoke(pointer: u32, length: u32) -> u64 {
+		pub unsafe extern "C" fn bytwina_invoke(pointer: u32, length: u32) -> u64 {
 			if pointer == 0 || length == 0 || length as usize > $crate::MAX_IO_BYTES {
 				return 0;
 			}

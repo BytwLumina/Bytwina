@@ -188,7 +188,7 @@ fn main() {
 	assert!(
 		std::str::from_utf8(&output)
 			.unwrap()
-			.starts_with("[Lumina voice Audio]")
+			.starts_with("[Bytwina voice Audio]")
 	);
 	assert!(
 		!std::str::from_utf8(&output)

@@ -107,7 +107,7 @@ define_class!(
 	// SAFETY: NSObject has no subclassing requirements. All state and callbacks stay on
 	// the main thread, and the target lives until every menu item is disconnected.
 	#[unsafe(super = NSObject)]
-	#[name = "LuminaMenuTarget"]
+	#[name = "BytwinaMenuTarget"]
 	#[thread_kind = MainThreadOnly]
 	#[ivars = State]
 	struct Target;
@@ -116,7 +116,7 @@ define_class!(
 	unsafe impl NSObjectProtocol for Target {}
 
 	impl Target {
-		#[unsafe(method(luminaCommand:))]
+		#[unsafe(method(bytwinaCommand:))]
 		fn command(&self, item: &NSMenuItem) {
 			if let Some(command) = Command::from_tag(item.tag()) {
 				self.run(command, item);
@@ -399,9 +399,9 @@ impl AppMenu {
 		key: &str,
 		modifiers: Option<NSEventModifierFlags>,
 	) {
-		let item = self.native(menu, title, sel!(luminaCommand:), key, modifiers);
+		let item = self.native(menu, title, sel!(bytwinaCommand:), key, modifiers);
 		item.setTag(command.tag());
-		// SAFETY: the target implements `luminaCommand:` and outlives the item's connection.
+		// SAFETY: the target implements `bytwinaCommand:` and outlives the item's connection.
 		unsafe { item.setTarget(Some(&self.target)) };
 	}
 

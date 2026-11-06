@@ -54,7 +54,7 @@ pub enum Status {
 impl Status {
 	pub fn label(self) -> &'static str {
 		match self {
-			Self::Disabled => "System notifications are off in Lumina settings.",
+			Self::Disabled => "System notifications are off in Bytwina settings.",
 			Self::Enabling => "Checking system notification permission…",
 			Self::Ready => "",
 			Self::Denied => "System notifications are disabled in your OS settings.",
@@ -64,7 +64,7 @@ impl Status {
 			Self::Unavailable => {
 				#[cfg(target_os = "macos")]
 				{
-					"System notifications unavailable. Run the packaged Lumina.app and check System Settings > Notifications."
+					"System notifications unavailable. Run the packaged Bytwina.app and check System Settings > Notifications."
 				}
 				#[cfg(target_os = "windows")]
 				{
@@ -146,7 +146,7 @@ impl Notifications {
 			let restore = Arc::clone(&self.restore);
 			let activated = self.activation_send.clone();
 			if std::thread::Builder::new()
-				.name("lumina-notifications".into())
+				.name("bytwina-notifications".into())
 				.spawn(move || worker(receive, current, status, wake, restore, activated))
 				.is_err()
 			{
@@ -193,7 +193,7 @@ impl Notifications {
 	/// Queue a privacy-preserving generic alert. False means disabled, unavailable or overloaded.
 	pub fn notify(&self) -> bool {
 		self.enqueue(Alert {
-			title: "Lumina".into(),
+			title: "Bytwina".into(),
 			body: GENERIC_BODY.into(),
 			image_path: None,
 		})
@@ -406,7 +406,7 @@ fn authorize() -> Status {
 	{
 		use windows::{UI::Notifications::ToastNotificationManager, core::HSTRING};
 		let notifier = ToastNotificationManager::CreateToastNotifierWithId(&HSTRING::from(
-			"io.github.ninokiru.Lumina",
+			"io.github.ninokiru.Bytwina",
 		));
 		match notifier {
 			Ok(notifier) => windows_setting_status(notifier.Setting(), windows_shortcut_exists()),
@@ -441,7 +441,7 @@ fn windows_setting_status(
 fn windows_shortcut_exists() -> bool {
 	std::env::var_os("APPDATA").is_some_and(|root| {
 		std::path::PathBuf::from(root)
-			.join("Microsoft/Windows/Start Menu/Programs/Lumina.lnk")
+			.join("Microsoft/Windows/Start Menu/Programs/Bytwina.lnk")
 			.is_file()
 	})
 }
@@ -493,7 +493,7 @@ fn show(alert: &Alert, activation: Activation) -> Result<NotificationHandle, ()>
 	#[cfg(target_os = "windows")]
 	{
 		use tauri_winrt_notification::{IconCrop, Toast};
-		let mut toast = Toast::new("io.github.ninokiru.Lumina")
+		let mut toast = Toast::new("io.github.ninokiru.Bytwina")
 			.title(&alert.title)
 			.text1(&alert.body)
 			.on_activated(move |_| {
@@ -518,7 +518,7 @@ fn show(alert: &Alert, activation: Activation) -> Result<NotificationHandle, ()>
 fn notification(alert: &Alert) -> notify_rust::Notification {
 	let mut notification = notify_rust::Notification::new();
 	notification
-		.appname("Lumina")
+		.appname("Bytwina")
 		.summary(&alert.title)
 		.body(&alert.body)
 		.timeout(5_000);
@@ -545,7 +545,7 @@ fn close(outstanding: &mut Option<NotificationHandle>) {
 	if outstanding.take().is_some() {
 		use windows::{UI::Notifications::ToastNotificationManager, core::HSTRING};
 		let _ = ToastNotificationManager::History()
-			.and_then(|history| history.ClearWithId(&HSTRING::from("io.github.ninokiru.Lumina")));
+			.and_then(|history| history.ClearWithId(&HSTRING::from("io.github.ninokiru.Bytwina")));
 	}
 }
 
@@ -615,11 +615,11 @@ mod tests {
 	#[test]
 	fn disabled_is_lazy_and_fixed_queue_is_bounded_and_invalidated() {
 		let alert = notification(&Alert {
-			title: "Lumina".into(),
+			title: "Bytwina".into(),
 			body: GENERIC_BODY.into(),
 			image_path: None,
 		});
-		assert_eq!(alert.summary, "Lumina");
+		assert_eq!(alert.summary, "Bytwina");
 		assert_eq!(alert.body, "You have a new message.");
 		let mut notifications = Notifications::new(|| {}, || {});
 		assert_eq!(notifications.status(), Status::Disabled);

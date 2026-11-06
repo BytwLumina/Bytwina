@@ -14,7 +14,7 @@
         "capabilities": [],
         "actions": []
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/forest-piano.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/forest-piano.bytwina-extension",
       "sha256": "3fffa784b2f406b4ad435fa5804baa1bed9ead9682254546ccf332c2bae12505",
       "download_bytes": 6452658,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -27,7 +27,7 @@
     {
       "manifest": {
         "api_version": 1,
-        "id": "lumina-forest",
+        "id": "bytwina-forest",
         "name": "Forest",
         "version": "1.0.0",
         "author": "Lumina contributors",
@@ -35,7 +35,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/forest.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/forest.bytwina-extension",
       "sha256": "487448a92a0c6e2d8d0a1d3f98818846416147ce53d20f2a4c3d3e7250ac0ba1",
       "download_bytes": 1453,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -56,7 +56,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/golden.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/golden.bytwina-extension",
       "sha256": "08396e2d5077873735a275193c1150975a238ac6bb04fe8a6fcca6a38b9f9c04",
       "download_bytes": 1793,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -77,7 +77,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/katana.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/katana.bytwina-extension",
       "sha256": "efa4d53f1b5e75a5e4f62b05cb8fb31d0dcf55156390042d319693b754f3f400",
       "download_bytes": 993,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -90,7 +90,7 @@
     {
       "manifest": {
         "api_version": 1,
-        "id": "lumina-latte",
+        "id": "bytwina-latte",
         "name": "Latte",
         "version": "1.0.0",
         "author": "Lumina contributors",
@@ -98,7 +98,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/latte.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/latte.bytwina-extension",
       "sha256": "e023d99941297cc9c50c5228845c2ef0f1d4317fa48c7e94450bc8135880ff6a",
       "download_bytes": 1451,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -111,7 +111,7 @@
     {
       "manifest": {
         "api_version": 1,
-        "id": "lumina-midnight",
+        "id": "bytwina-midnight",
         "name": "Midnight",
         "version": "1.0.0",
         "author": "Lumina contributors",
@@ -119,7 +119,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/midnight.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/midnight.bytwina-extension",
       "sha256": "dddd5ea35bb6674701d6157124f4b62240401f9f55c8efe35596be7af361bb22",
       "download_bytes": 1457,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -140,7 +140,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/obsidian.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/obsidian.bytwina-extension",
       "sha256": "5dbd15c530de1516a1fb1e2c13a7579496231bccc71f64ae8d509d2b2a408036",
       "download_bytes": 1837,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -153,7 +153,7 @@
     {
       "manifest": {
         "api_version": 1,
-        "id": "lumina-ocean",
+        "id": "bytwina-ocean",
         "name": "Ocean",
         "version": "1.0.0",
         "author": "Lumina contributors",
@@ -161,7 +161,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/ocean.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/ocean.bytwina-extension",
       "sha256": "ef5fc625d9d7b237e20d8bd5740cc5008a1b115d33945a61346b9b7584b730a6",
       "download_bytes": 957,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -174,7 +174,7 @@
     {
       "manifest": {
         "api_version": 1,
-        "id": "lumina-rose",
+        "id": "bytwina-rose",
         "name": "Rose",
         "version": "1.0.0",
         "author": "Lumina contributors",
@@ -182,7 +182,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/rose.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/rose.bytwina-extension",
       "sha256": "d2b28e3e4b01c3ac391882e17de6e33ddd41d46ce5e9a3f65005073814c76dc2",
       "download_bytes": 1449,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -205,7 +205,7 @@
         "capabilities": [],
         "actions": []
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/soft-white.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/soft-white.bytwina-extension",
       "sha256": "00a604efb3927375249b4e5f3de255b478189c7eb8e314c0cfc4fc96366c68ac",
       "download_bytes": 5860516,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -226,7 +226,7 @@
         "source": "https://github.com/BytwLumina/Bytwina",
         "kind": "theme"
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/teal.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/themes/teal.bytwina-extension",
       "sha256": "3d89237bbf4a9e0372215ccadb6b71361645d1bc0a392e4bd24939205459786c",
       "download_bytes": 1826,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -268,7 +268,7 @@
           }
         ]
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/api-proxy.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/api-proxy.bytwina-extension",
       "sha256": "d0b272c7f5019f758cdf30f9e7d3852d18e3779b60188d7f92140e87eea1197e",
       "download_bytes": 920978,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -325,7 +325,7 @@
           }
         ]
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/custom-rpc.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/custom-rpc.bytwina-extension",
       "sha256": "84553677b7a814d6defbeddd85fa38e12836c17057dbc7020fd006e1e5dc2532",
       "download_bytes": 409131,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",
@@ -356,7 +356,7 @@
           }
         ]
       },
-      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/message-delete-protector.lumina-extension",
+      "release_url": "https://raw.githubusercontent.com/BytwLumina/Bytwina/be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c/extensions/plugins/packages/message-delete-protector.bytwina-extension",
       "sha256": "9acc8cd58fd7f3c344a1d4ce9ce83a4261dc98188036beb69d8084d961075c99",
       "download_bytes": 338102,
       "source_commit": "be4034c2b2c503fa8bf6f3d193c2cfac21e4d79c",

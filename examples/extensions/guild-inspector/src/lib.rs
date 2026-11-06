@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{AppInvocation, AppOutput, Element, Output};
+use bytwina_extension_sdk::{AppInvocation, AppOutput, Element, Output};
 
 fn text(text: impl Into<String>) -> Element {
 	Element::Text { text: text.into() }
@@ -149,12 +149,12 @@ fn handle(input: AppInvocation) -> AppOutput {
 	}
 }
 
-lumina_extension_sdk::export!(handle);
+bytwina_extension_sdk::export!(handle);
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use lumina_extension_sdk::{dispatch_typed, serde_json};
+	use bytwina_extension_sdk::{dispatch_typed, serde_json};
 
 	#[test]
 	fn loaded_data_and_unknown_permissions_remain_distinct() {

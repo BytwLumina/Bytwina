@@ -1,15 +1,15 @@
-# Run explicitly after extracting Lumina to its final folder. No administrator rights required.
-# Creates only the current user's Lumina Start Menu shortcut; does not enable OS alerts in Lumina.
+# Run explicitly after extracting Bytwina to its final folder. No administrator rights required.
+# Creates only the current user's Bytwina Start Menu shortcut; does not enable OS alerts in Bytwina.
 param([switch]$Remove, [switch]$Force)
 $ErrorActionPreference = 'Stop'
-$shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) 'Lumina.lnk'
+$shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) 'Bytwina.lnk'
 if ($Remove) {
     if (Test-Path -LiteralPath $shortcut) { Remove-Item -LiteralPath $shortcut }
     return
 }
-$executable = Join-Path $PSScriptRoot 'lumina.exe'
-if (!(Test-Path -LiteralPath $executable)) { throw 'Keep this script next to lumina.exe in its final folder.' }
-if ((Test-Path -LiteralPath $shortcut) -and !$Force) { throw 'Lumina.lnk already exists. Remove it explicitly with -Remove before replacing it.' }
+$executable = Join-Path $PSScriptRoot 'bytwina.exe'
+if (!(Test-Path -LiteralPath $executable)) { throw 'Keep this script next to bytwina.exe in its final folder.' }
+if ((Test-Path -LiteralPath $shortcut) -and !$Force) { throw 'Bytwina.lnk already exists. Remove it explicitly with -Remove before replacing it.' }
 if ($Force -and (Test-Path -LiteralPath $shortcut)) { Remove-Item -LiteralPath $shortcut -Force }
 
 # A desktop toast requires a Start Menu shortcut carrying the same AppUserModelID as the notifier.
@@ -17,7 +17,7 @@ if ($Force -and (Test-Path -LiteralPath $shortcut)) { Remove-Item -LiteralPath $
 Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-public static class LuminaShortcut {
+public static class BytwinaShortcut {
     [StructLayout(LayoutKind.Sequential)] struct PropertyKey {
         public Guid format; public uint id;
     }
@@ -42,7 +42,7 @@ public static class LuminaShortcut {
         IPropertyStore store;
         SHGetPropertyStoreFromParsingName(path, IntPtr.Zero, 2, ref iid, out store);
         PropertyKey key = new PropertyKey { format = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"), id = 5 };
-        PropVariant value = new PropVariant { type = 31, value = Marshal.StringToCoTaskMemUni("io.github.ninokiru.Lumina") };
+        PropVariant value = new PropVariant { type = 31, value = Marshal.StringToCoTaskMemUni("io.github.ninokiru.Bytwina") };
         try { store.SetValue(ref key, ref value); store.Commit(); }
         finally { Marshal.FreeCoTaskMem(value.value); Marshal.FinalReleaseComObject(store); }
     }
@@ -53,9 +53,9 @@ try {
     $link = $shell.CreateShortcut($shortcut)
     $link.TargetPath = $executable
     $link.WorkingDirectory = $PSScriptRoot
-    $link.Description = 'Lumina'
+    $link.Description = 'Bytwina'
     $link.Save()
-    [LuminaShortcut]::SetAppId($shortcut)
+    [BytwinaShortcut]::SetAppId($shortcut)
 } catch {
     if (Test-Path -LiteralPath $shortcut) { Remove-Item -LiteralPath $shortcut }
     throw
@@ -63,4 +63,4 @@ try {
     if ($null -ne $link) { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($link) }
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell)
 }
-Write-Output 'Lumina Start Menu shortcut registered. Enable system notifications separately in Lumina for each session.'
+Write-Output 'Bytwina Start Menu shortcut registered. Enable system notifications separately in Bytwina for each session.'

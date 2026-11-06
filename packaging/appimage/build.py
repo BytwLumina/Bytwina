@@ -1,4 +1,4 @@
-"""Package the native Linux payload as a Type 2 AppImage; never launch Lumina."""
+"""Package the native Linux payload as a Type 2 AppImage; never launch Bytwina."""
 
 import argparse
 import filecmp
@@ -20,10 +20,10 @@ def update_metadata(version, release_tag):
         raise ValueError("Expected a semantic application version")
     if release_tag and release_tag != f"v{version}":
         raise ValueError("AppImage release tag must match the application version")
-    name = f"lumina-{release_tag or version}-Linux-X64.AppImage"
+    name = f"bytwina-{release_tag or version}-Linux-X64.AppImage"
     channel = "latest-pre" if "-" in version.split("+", 1)[0] else "latest"
-    information = f"gh-releases-zsync|Lumina|Lumina|{channel}|lumina-*-Linux-X64.AppImage.zsync"
-    url = f"https://github.com/BytwLumina/Bytwina/releases/download/v{version}/lumina-v{version}-Linux-X64.AppImage"
+    information = f"gh-releases-zsync|Bytwina|Bytwina|{channel}|bytwina-*-Linux-X64.AppImage.zsync"
+    url = f"https://github.com/BytwLumina/Bytwina/releases/download/v{version}/bytwina-v{version}-Linux-X64.AppImage"
     return name, information, url
 
 
@@ -31,7 +31,7 @@ def build(root, version):
     native_elf(root)
     if platform.machine() != "x86_64":
         raise ValueError("AppImage releases currently support Linux x86_64 only")
-    name, information, url = update_metadata(version, os.environ.get("LUMINA_RELEASE_TAG", ""))
+    name, information, url = update_metadata(version, os.environ.get("BYTWINA_RELEASE_TAG", ""))
     tools = Path("target/appimage-tools").resolve()
     appimagetool = tools / "appimagetool"
     runtime = tools / "runtime-x86_64"
@@ -41,22 +41,22 @@ def build(root, version):
         raise ValueError("The 'file' command is required by appimagetool but was not found in PATH")
     if not shutil.which("zsyncmake"):
         raise ValueError("Install zsync to generate AppImage delta-update metadata")
-    libraries = subprocess.check_output(["ldd", str(root / "lumina")], text=True)
+    libraries = subprocess.check_output(["ldd", str(root / "bytwina")], text=True)
     if "not found" in libraries:
         raise ValueError(f"Missing host runtime libraries:\n{libraries}")
-    with tempfile.TemporaryDirectory(prefix="lumina-appimage-") as directory:
+    with tempfile.TemporaryDirectory(prefix="bytwina-appimage-") as directory:
         temporary = Path(directory)
-        appdir = temporary / "Lumina.AppDir"
+        appdir = temporary / "Bytwina.AppDir"
         stage_payload(root, appdir)
         shutil.copyfile("packaging/appimage/AppRun", appdir / "AppRun")
         (appdir / "AppRun").chmod(0o755)
-        shutil.copyfile("packaging/linux/lumina.desktop", appdir / "io.github.ninokiru.Lumina.desktop")
-        shutil.copyfile("packaging/linux/hicolor/256x256/apps/lumina.png", appdir / "lumina.png")
-        doc = appdir / "usr/share/doc/lumina"
+        shutil.copyfile("packaging/linux/bytwina.desktop", appdir / "io.github.ninokiru.Bytwina.desktop")
+        shutil.copyfile("packaging/linux/hicolor/256x256/apps/bytwina.png", appdir / "bytwina.png")
+        doc = appdir / "usr/share/doc/bytwina"
         shutil.copyfile("packaging/appimage/README.md", doc / "AppImage-README.md")
         shutil.copyfile("packaging/appimage/RUNTIME-LICENSE", doc / "licenses/AppImage-runtime.txt")
         (doc / "AppImage-host-libraries.txt").write_text(libraries, encoding="utf-8")
-        subprocess.run(["desktop-file-validate", str(appdir / "io.github.ninokiru.Lumina.desktop")], check=True)
+        subprocess.run(["desktop-file-validate", str(appdir / "io.github.ninokiru.Bytwina.desktop")], check=True)
         candidate = temporary / name
         subprocess.run([str(appimagetool), "--runtime-file", str(runtime),
                         "--updateinformation", information, "--file-url", url,
@@ -86,7 +86,7 @@ def build(root, version):
                 target = extracted / source.relative_to(appdir)
                 if not target.is_file() or not filecmp.cmp(source, target, shallow=False):
                     raise ValueError(f"AppImage changed payload: {source.relative_to(appdir)}")
-        for name in ["AppRun", "usr/bin/lumina"]:
+        for name in ["AppRun", "usr/bin/bytwina"]:
             if not os.access(extracted / name, os.X_OK):
                 raise ValueError(f"AppImage lost executable permission: {name}")
         destination = root / candidate.name

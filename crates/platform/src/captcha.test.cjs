@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 const template = fs.readFileSync(__dirname + "/captcha.js", "utf8");
-function page({invisible = false, origin = "https://lumina-captcha.verification.invalid", subframe = false, href = origin + "/"} = {}) {
+function page({invisible = false, origin = "https://bytwina-captcha.verification.invalid", subframe = false, href = origin + "/"} = {}) {
   const listeners = {}, messages = [], calls = [];
   const nodes = Object.fromEntries(["status", "verify"].map(id => [id, {addEventListener: (name, cb) => listeners[id + name] = cb}]));
   let params;
@@ -23,16 +23,16 @@ function page({invisible = false, origin = "https://lumina-captcha.verification.
     head: {appendChild: script => calls.push(["script", script])}
   };
   const config = {capability: "random-capability:", sitekey: "service-sitekey", rqdata: 'quoted"data', dark: true, invisible};
-  vm.runInNewContext(template.replace("__LUMINA_CAPTCHA_CONFIG__", JSON.stringify(config)), {window, document, location: {origin, href}});
+  vm.runInNewContext(template.replace("__BYTWINA_CAPTCHA_CONFIG__", JSON.stringify(config)), {window, document, location: {origin, href}});
   listeners.DOMContentLoaded?.();
-  window.luminaCaptchaLoaded?.();
+  window.bytwinaCaptchaLoaded?.();
   return {listeners, messages, calls, params};
 }
 let current = page();
 assert.equal(current.params.sitekey, "service-sitekey");
 assert.equal(current.params.theme, "dark");
 assert.equal(current.params.size, "normal");
-assert.equal(current.calls[0][1].src, "https://js.hcaptcha.com/1/api.js?onload=luminaCaptchaLoaded&render=explicit&recaptchacompat=off&host=service-sitekey.react-native.hcaptcha.com");
+assert.equal(current.calls[0][1].src, "https://js.hcaptcha.com/1/api.js?onload=bytwinaCaptchaLoaded&render=explicit&recaptchacompat=off&host=service-sitekey.react-native.hcaptcha.com");
 assert.deepEqual(current.calls[1], ["data", 7, 'quoted"data']);
 assert.equal(current.calls.some(call => call[0] === "execute"), false);
 current.params.callback("synthetic-passcode");
@@ -57,5 +57,5 @@ assert.equal(page({subframe: true}).calls.length, 0);
 assert.equal(page({origin: "https://discord.com"}).calls.length, 0);
 console.log("Offline CAPTCHA callback checks passed.");
 
-assert.ok(page({origin: "null", href: "lumina-captcha://verification.invalid/"}).params);
-assert.equal(page({href: "lumina-captcha://verification.invalid/other"}).calls.length, 0);
+assert.ok(page({origin: "null", href: "bytwina-captcha://verification.invalid/"}).params);
+assert.equal(page({href: "bytwina-captcha://verification.invalid/other"}).calls.length, 0);

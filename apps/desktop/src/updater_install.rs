@@ -13,7 +13,7 @@ use std::{
 const MAX_FILES: usize = 8192;
 const MAX_UNPACKED: u64 = 1024 * 1024 * 1024;
 const WINDOWS_FILES: &[&str] = &[
-	"lumina.exe",
+	"bytwina.exe",
 	"README.md",
 	"THIRD_PARTY_NOTICES.md",
 	"docs",
@@ -71,7 +71,7 @@ pub(super) fn linux_package_manager_update_command() -> Option<&'static str> {
 			|| id_like.contains("fedora")
 			|| id_like.contains("rhel")
 		{
-			return Some("sudo dnf upgrade lumina");
+			return Some("sudo dnf upgrade bytwina");
 		}
 		if id == "ubuntu"
 			|| id == "debian"
@@ -80,23 +80,23 @@ pub(super) fn linux_package_manager_update_command() -> Option<&'static str> {
 			|| id_like.contains("debian")
 			|| id_like.contains("ubuntu")
 		{
-			return Some("sudo apt update && sudo apt install --only-upgrade lumina");
+			return Some("sudo apt update && sudo apt install --only-upgrade bytwina");
 		}
 		if id == "arch" || id == "manjaro" || id == "endeavouros" || id_like.contains("arch") {
-			return Some("sudo pacman -Syu lumina");
+			return Some("sudo pacman -Syu bytwina");
 		}
 		if id.contains("suse") || id_like.contains("suse") {
-			return Some("sudo zypper update lumina");
+			return Some("sudo zypper update bytwina");
 		}
 	}
 	if Path::new("/usr/bin/dnf").is_file() {
-		Some("sudo dnf upgrade lumina")
+		Some("sudo dnf upgrade bytwina")
 	} else if Path::new("/usr/bin/apt").is_file() {
-		Some("sudo apt update && sudo apt install --only-upgrade lumina")
+		Some("sudo apt update && sudo apt install --only-upgrade bytwina")
 	} else if Path::new("/usr/bin/pacman").is_file() {
-		Some("sudo pacman -Syu lumina")
+		Some("sudo pacman -Syu bytwina")
 	} else if Path::new("/usr/bin/zypper").is_file() {
-		Some("sudo zypper update lumina")
+		Some("sudo zypper update bytwina")
 	} else {
 		None
 	}
@@ -142,15 +142,15 @@ fn installation() -> Result<PathBuf, String> {
 				);
 			}
 			return Err(
-				"Use your package manager to update Lumina, or run a release AppImage.".into(),
+				"Use your package manager to update Bytwina, or run a release AppImage.".into(),
 			);
 		}
 		let appdir = PathBuf::from(std::env::var_os("APPDIR").ok_or("Missing AppImage mount.")?);
-		if fs::canonicalize(appdir.join("usr/bin/lumina"))
+		if fs::canonicalize(appdir.join("usr/bin/bytwina"))
 			.ok()
 			.as_ref() != Some(&exe)
 		{
-			return Err("Run Lumina from its AppImage to install updates.".into());
+			return Err("Run Bytwina from its AppImage to install updates.".into());
 		}
 		let image = PathBuf::from(std::env::var_os("APPIMAGE").ok_or("Missing AppImage path.")?);
 		let image = fs::canonicalize(image).map_err(|_| "Cannot locate the installed AppImage.")?;
@@ -176,19 +176,19 @@ fn installation() -> Result<PathBuf, String> {
 			.parent()
 			.and_then(Path::parent)
 			.and_then(Path::parent)
-			.ok_or("Run the installed Lumina.app to install updates.")?;
-		if exe.file_name().is_none_or(|name| name != "lumina")
+			.ok_or("Run the installed Bytwina.app to install updates.")?;
+		if exe.file_name().is_none_or(|name| name != "bytwina")
 			|| exe
 				.parent()
 				.and_then(Path::file_name)
 				.is_none_or(|name| name != "MacOS")
 			|| app.extension().is_none_or(|extension| extension != "app")
 		{
-			return Err("Run the installed Lumina.app to install updates; source builds cannot replace themselves.".into());
+			return Err("Run the installed Bytwina.app to install updates; source builds cannot replace themselves.".into());
 		}
 		if app.starts_with("/Volumes") || app.to_string_lossy().contains("/AppTranslocation/") {
 			return Err(
-				"Move Lumina to Applications or another writable folder before updating.".into(),
+				"Move Bytwina to Applications or another writable folder before updating.".into(),
 			);
 		}
 		Ok(app.to_owned())
@@ -196,14 +196,14 @@ fn installation() -> Result<PathBuf, String> {
 		let root = exe
 			.parent()
 			.ok_or("Cannot locate the installed application folder.")?;
-		if exe.file_name().is_none_or(|name| name != "lumina.exe")
+		if exe.file_name().is_none_or(|name| name != "bytwina.exe")
 			|| !root.join("licenses").is_dir()
 		{
-			return Err("Run Lumina from an extracted release package to install updates; source builds cannot replace themselves.".into());
+			return Err("Run Bytwina from an extracted release package to install updates; source builds cannot replace themselves.".into());
 		}
 		Ok(root.to_owned())
 	} else {
-		Err("Use your package manager to update Lumina on Linux.".into())
+		Err("Use your package manager to update Bytwina on Linux.".into())
 	}
 }
 
@@ -216,7 +216,7 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 	} else {
 		installation.as_path()
 	};
-	let lock_path = parent.join(".lumina-update.lock");
+	let lock_path = parent.join(".bytwina-update.lock");
 	if fs::symlink_metadata(&lock_path).is_ok_and(|metadata| !metadata.is_file()) {
 		return Err("Unexpected update lock file.".into());
 	}
@@ -228,7 +228,7 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 		.open(&lock_path)
 		.map_err(|_| "The installation folder is not writable.".to_owned())?;
 	lock.try_lock()
-		.map_err(|_| "Another Lumina instance is preparing update storage.".to_owned())?;
+		.map_err(|_| "Another Bytwina instance is preparing update storage.".to_owned())?;
 	// One bounded staging directory per installation; discard leftovers only after their owner exits.
 	let mut count = 0;
 	for entry in
@@ -236,13 +236,13 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 	{
 		count += 1;
 		if count > 16_384 {
-			return Err("The installation folder contains too many entries. Move Lumina into its own folder.".into());
+			return Err("The installation folder contains too many entries. Move Bytwina into its own folder.".into());
 		}
 		let entry = entry.map_err(|_| "Cannot inspect update storage.".to_owned())?;
 		let name = entry.file_name();
 		let name = name.to_string_lossy();
 		let Some(pid) = name
-			.strip_prefix(".lumina-update-")
+			.strip_prefix(".bytwina-update-")
 			.and_then(|pid| pid.parse::<u32>().ok())
 			.filter(|pid| *pid > 0)
 		else {
@@ -262,10 +262,10 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 			.is_some_and(process_alive);
 		if helper_alive || (pid != std::process::id() && process_alive(pid)) {
 			return Err(
-				"Another Lumina instance is preparing an update. Close it and try again.".into(),
+				"Another Bytwina instance is preparing an update. Close it and try again.".into(),
 			);
 		}
-		if fs::read(entry.path().join("owner")).ok().as_deref() != Some(b"lumina-updater-v1") {
+		if fs::read(entry.path().join("owner")).ok().as_deref() != Some(b"bytwina-updater-v1") {
 			return Err(
 				"An unrecognized directory occupies update storage; move it before trying again."
 					.into(),
@@ -290,7 +290,7 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 			);
 		}
 	}
-	let directory = parent.join(format!(".lumina-update-{}", std::process::id()));
+	let directory = parent.join(format!(".bytwina-update-{}", std::process::id()));
 	let builder = fs::DirBuilder::new();
 	#[cfg(unix)]
 	let mut builder = builder;
@@ -299,8 +299,8 @@ pub(super) fn create_stage() -> Result<Staged, String> {
 		use std::os::unix::fs::DirBuilderExt;
 		builder.mode(0o700);
 	}
-	builder.create(&directory).map_err(|_| "The installation folder is not writable. Move Lumina to a writable folder and try again.".to_owned())?;
-	fs::write(directory.join("owner"), b"lumina-updater-v1")
+	builder.create(&directory).map_err(|_| "The installation folder is not writable. Move Bytwina to a writable folder and try again.".to_owned())?;
+	fs::write(directory.join("owner"), b"bytwina-updater-v1")
 		.map_err(|_| "Cannot mark update storage ownership.".to_owned())?;
 	Ok(Staged {
 		directory,
@@ -383,7 +383,7 @@ pub(super) fn cleanup(directory: &Path) {
 		Err(_) => return,
 	}
 	if fs::remove_dir(directory).is_err() {
-		let _ = fs::write(owner, b"lumina-updater-v1");
+		let _ = fs::write(owner, b"bytwina-updater-v1");
 	}
 }
 
@@ -633,7 +633,7 @@ pub(super) fn unpack(
 			.and_then(|p| p.as_os_str().to_str())
 			.ok_or("Invalid package path.")?;
 		if cfg!(target_os = "macos") {
-			if top != "Lumina.app" && !WINDOWS_FILES.contains(&top) {
+			if top != "Bytwina.app" && !WINDOWS_FILES.contains(&top) {
 				return Err("The update contains unexpected package content.".into());
 			}
 		} else if !WINDOWS_FILES.contains(&top) {
@@ -702,13 +702,13 @@ pub(super) fn unpack(
 	}
 	if cfg!(target_os = "macos") {
 		if !destination
-			.join("Lumina.app/Contents/MacOS/lumina")
+			.join("Bytwina.app/Contents/MacOS/bytwina")
 			.is_file()
 		{
-			return Err("The update does not contain Lumina.app.".into());
+			return Err("The update does not contain Bytwina.app.".into());
 		}
-		verify_mac(&destination.join("Lumina.app"), installed)?;
-	} else if !destination.join("lumina.exe").is_file()
+		verify_mac(&destination.join("Bytwina.app"), installed)?;
+	} else if !destination.join("bytwina.exe").is_file()
 		|| !destination.join("licenses").is_dir()
 	{
 		return Err("The update is missing its executable or bundled notices.".into());
@@ -745,7 +745,7 @@ fn verify_mac(candidate: &Path, installed: &Path) -> Result<(), String> {
 			.lines()
 			.find_map(|line| line.strip_prefix("TeamIdentifier="))
 			.filter(|team| team.len() == 10 && team.bytes().all(|b| b.is_ascii_alphanumeric()))
-			.ok_or("In-app installation requires a Developer ID signed release of Lumina.")?;
+			.ok_or("In-app installation requires a Developer ID signed release of Bytwina.")?;
 		let identifier = text
 			.lines()
 			.find_map(|line| line.strip_prefix("Identifier="))
@@ -754,8 +754,8 @@ fn verify_mac(candidate: &Path, installed: &Path) -> Result<(), String> {
 	}
 	let old = identity(installed)?;
 	let new = identity(candidate)?;
-	if old != new || new.1 != "io.github.ninokiru.Lumina" {
-		return Err("The update was not signed by this Lumina publisher.".into());
+	if old != new || new.1 != "io.github.ninokiru.Bytwina" {
+		return Err("The update was not signed by this Bytwina publisher.".into());
 	}
 	let status = Command::new("/usr/sbin/spctl")
 		.args(["--assess", "--type", "execute"])
@@ -799,7 +799,7 @@ pub(super) fn prepare_restart(
 	let _ = version;
 	#[cfg(target_os = "macos")]
 	let mut child = {
-		verify_mac(&directory.join("package/Lumina.app"), installation)?;
+		verify_mac(&directory.join("package/Bytwina.app"), installation)?;
 		let script = directory.join("install.sh");
 		fs::write(&script, MAC_HELPER)
 			.map_err(|_| "Cannot prepare the update helper.".to_owned())?;
@@ -888,7 +888,7 @@ pub(super) fn prepare_restart(
 		}
 		let _ = child.kill();
 		let _ = child.wait();
-		Err("The update helper did not start. Lumina will remain open.".into())
+		Err("The update helper did not start. Bytwina will remain open.".into())
 	}
 }
 
@@ -929,7 +929,7 @@ if ! /bin/mv "$installed" "$backup"; then
   /usr/bin/open "$installed" || true
   exit 1
 fi
-if ! /bin/mv "$stage/package/Lumina.app" "$installed"; then
+if ! /bin/mv "$stage/package/Bytwina.app" "$installed"; then
   /bin/mv "$backup" "$installed"
   /usr/bin/open "$installed" || true
   exit 1
@@ -977,11 +977,11 @@ try {
     Move-Item -LiteralPath $source -Destination $target
     $replaced.Add($name)
   }
-  $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Lumina'
+  $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Bytwina'
   if ($plan.version -and (Test-Path -LiteralPath $uninstallKey)) {
     Set-ItemProperty -LiteralPath $uninstallKey -Name 'DisplayVersion' -Value ([string]$plan.version) -ErrorAction SilentlyContinue
   }
-  Start-Process -FilePath (Join-Path $installation 'lumina.exe') -WorkingDirectory $installation
+  Start-Process -FilePath (Join-Path $installation 'bytwina.exe') -WorkingDirectory $installation
 } catch {
   foreach ($name in $replaced) {
     $target = Join-Path $installation $name
@@ -990,7 +990,7 @@ try {
   foreach ($name in $moved) {
     Move-Item -LiteralPath (Join-Path $backup $name) -Destination (Join-Path $installation $name) -ErrorAction SilentlyContinue
   }
-  Start-Process -FilePath (Join-Path $installation 'lumina.exe') -WorkingDirectory $installation -ErrorAction SilentlyContinue
+  Start-Process -FilePath (Join-Path $installation 'bytwina.exe') -WorkingDirectory $installation -ErrorAction SilentlyContinue
   exit 1
 }
 try {
@@ -1009,7 +1009,7 @@ if ($remaining.Count -eq 0) {
   if (Test-Path -LiteralPath (Join-Path $stage 'owner')) { exit 0 }
   Remove-Item -LiteralPath $stage -Force -ErrorAction SilentlyContinue
   if (Test-Path -LiteralPath $stage) {
-    [IO.File]::WriteAllText((Join-Path $stage 'owner'), 'lumina-updater-v1')
+    [IO.File]::WriteAllText((Join-Path $stage 'owner'), 'bytwina-updater-v1')
   }
 }
 "#;
@@ -1043,13 +1043,13 @@ pub(super) fn debug_check() -> Result<(), String> {
 			return Err(format!("Archive path validation accepted {path}"));
 		}
 	}
-	if safe_path("Lumina.app/Contents/MacOS/lumina").is_err() {
+	if safe_path("Bytwina.app/Contents/MacOS/bytwina").is_err() {
 		return Err("Valid archive path rejected.".into());
 	}
 	let mut writer = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
 	writer
 		.start_file(
-			"Lumina.app/Contents/MacOS/lumina",
+			"Bytwina.app/Contents/MacOS/bytwina",
 			zip::write::SimpleFileOptions::default(),
 		)
 		.map_err(|_| "Cannot create synthetic ZIP.")?;
@@ -1098,11 +1098,11 @@ pub(super) fn debug_check() -> Result<(), String> {
 		let mut nonce = [0_u8; 8];
 		getrandom::fill(&mut nonce).map_err(|_| "Cannot create cleanup check storage.")?;
 		let directory = std::env::temp_dir().join(format!(
-			"lumina-update-cleanup-check-{:016x}",
+			"bytwina-update-cleanup-check-{:016x}",
 			u64::from_ne_bytes(nonce)
 		));
 		fs::create_dir(&directory).map_err(|_| "Cannot create cleanup check storage.")?;
-		fs::write(directory.join("owner"), b"lumina-updater-v1")
+		fs::write(directory.join("owner"), b"bytwina-updater-v1")
 			.map_err(|_| "Cannot create cleanup ownership marker.")?;
 		let locked = fs::OpenOptions::new()
 			.write(true)

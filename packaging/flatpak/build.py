@@ -10,7 +10,7 @@ import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_REPO_URL = "https://bytwlumina.github.io/Bytwina/flatpak/repo"
+DEFAULT_REPO_URL = "https://bytwbytwina.github.io/Bytwina/flatpak/repo"
 
 
 def output(*args, cwd=ROOT):
@@ -19,11 +19,11 @@ def output(*args, cwd=ROOT):
 
 def generate_flatpakref(repo_url=DEFAULT_REPO_URL):
     return f"""[Flatpak Ref]
-Name=io.github.ninokiru.Lumina
+Name=io.github.ninokiru.Bytwina
 Branch=master
-Title=Lumina
+Title=Bytwina
 Comment=Fast, secure and lightweight native Discord client
-Icon=https://bytwlumina.github.io/Bytwina/icons/lumina.png
+Icon=https://bytwbytwina.github.io/Bytwina/icons/bytwina.png
 Url={repo_url}
 RuntimeRepo=https://flathub.org/repo/flathub.flatpakrepo
 IsRuntime=false
@@ -36,7 +36,7 @@ def prepare(destination):
     pin = tomllib.loads((ROOT / "rust-toolchain.toml").read_text())["toolchain"]["channel"]
     sysroot = Path(output("rustup", "run", pin, "rustc", "--print", "sysroot"))
     version = output(str(sysroot / "bin/rustc"), "--version").split()[1]
-    manifest = json.loads((ROOT / "packaging/flatpak/io.github.ninokiru.Lumina.json").read_text())
+    manifest = json.loads((ROOT / "packaging/flatpak/io.github.ninokiru.Bytwina.json").read_text())
     if version != pin or f"= {pin}" not in manifest["modules"][0]["build-commands"][0]:
         raise ValueError("Flatpak manifest and installed Rust must match rust-toolchain.toml")
     destination.mkdir(parents=True, exist_ok=False)
@@ -61,7 +61,7 @@ def prepare(destination):
     config = output("rustup", "run", pin, "cargo", "vendor", "--locked", "cargo-vendor", cwd=source)
     with (source / ".cargo/config.toml").open("a") as stream:
         stream.write("\n" + config + "\n")
-    (destination / "io.github.ninokiru.Lumina.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    (destination / "io.github.ninokiru.Bytwina.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
 def main():
@@ -75,12 +75,12 @@ def main():
     prepare(destination)
     if not args.prepare_only:
         subprocess.run(["flatpak-builder", "--user", "--repo=repo", "build",
-                        "io.github.ninokiru.Lumina.json"], cwd=destination, check=True)
+                        "io.github.ninokiru.Bytwina.json"], cwd=destination, check=True)
         subprocess.run(["flatpak", "build-update-repo", "--generate-static-deltas", "repo"],
                        cwd=destination, check=True)
         subprocess.run(["flatpak", "build-bundle", "--runtime-repo=https://flathub.org/repo/flathub.flatpakrepo",
-                        "repo", "Lumina-linux.flatpak", "io.github.ninokiru.Lumina"], cwd=destination, check=True)
-        (destination / "lumina.flatpakref").write_text(generate_flatpakref(args.repo_url))
+                        "repo", "Bytwina-linux.flatpak", "io.github.ninokiru.Bytwina"], cwd=destination, check=True)
+        (destination / "bytwina.flatpakref").write_text(generate_flatpakref(args.repo_url))
 
 
 if __name__ == "__main__":

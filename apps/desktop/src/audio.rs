@@ -150,7 +150,7 @@ impl Audio {
 			let runtime = runtime.clone();
 			let context = context.clone();
 			std::thread::Builder::new()
-				.name("lumina-attachment-audio".into())
+				.name("bytwina-attachment-audio".into())
 				.spawn(move || {
 					worker(receiver, status, gate, worker_wake, runtime, context);
 				})
@@ -172,8 +172,8 @@ impl Audio {
 		};
 		let worker = self.worker.as_ref().expect("worker created");
 		if worker.requests.is_closed() {
-			self.status.state = State::Failed("Audio worker stopped; restart Lumina");
-			return Err("Audio worker stopped; restart Lumina");
+			self.status.state = State::Failed("Audio worker stopped; restart Bytwina");
+			return Err("Audio worker stopped; restart Bytwina");
 		}
 		worker.requests.send_replace(Some(Request {
 			generation,

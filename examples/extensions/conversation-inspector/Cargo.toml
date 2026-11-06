@@ -9,4 +9,4 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-lumina-extension-sdk.workspace = true
+bytwina-extension-sdk.workspace = true

@@ -4425,7 +4425,7 @@ fn call_failure(ui: &mut egui::Ui, error: Option<&str>, color: egui::Color32) {
 			.clicked()
 			{
 				ui.ctx()
-					.copy_text(format!("Lumina call failed\nReason: {error}"));
+					.copy_text(format!("Bytwina call failed\nReason: {error}"));
 			}
 			ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
 				ui.add(

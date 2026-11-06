@@ -50,8 +50,8 @@ pub(super) fn timestamp_niri_frames(source: &gst::Element) -> Result<(), &'stati
 }
 
 fn note(event: &str, value: &str) {
-	if std::env::var_os("LUMINA_VOICE_DIAGNOSTICS").is_some_and(|set| set == "1") {
-		eprintln!("[Lumina voice Screen] {event}={value}");
+	if std::env::var_os("BYTWINA_VOICE_DIAGNOSTICS").is_some_and(|set| set == "1") {
+		eprintln!("[Bytwina voice Screen] {event}={value}");
 	}
 }
 

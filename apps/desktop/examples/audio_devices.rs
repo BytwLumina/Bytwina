@@ -1,5 +1,5 @@
 //! Debug device-picker discovery without Discord, audio streams, or microphone capture.
-//! Run: cargo run --locked -p lumina --example audio_devices
+//! Run: cargo run --locked -p bytwina --example audio_devices
 use eframe::egui;
 
 fn frame(ctx: &egui::Context, messaging: &mut ui::MessagingUi, state: &mut client_core::State) {

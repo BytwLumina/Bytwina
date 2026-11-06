@@ -28,11 +28,11 @@ description-appearance = テーマ、色、ウィンドウ効果、レイアウ�
 description-chat = メッセージ、メディア、リンク、スクロールの動作。
 description-messaging-permissions = 誰があなたに連絡できるか、そしてメッセージをどのようにフィルタリングするかを制御します。
 description-notifications = 受信する通知とその表示方法を選択します。
-description-registered-games = プレイ中のゲームを共有し、Lumina が検出したゲームを修正・追加します。
+description-registered-games = プレイ中のゲームを共有し、Bytwina が検出したゲームを修正・追加します。
 description-voice = マイク、スピーカー、カメラ、音声処理。
 description-keybinds = セレインのキーボード ショートカット。
-description-storage = Lumina がこのデバイスに保存しているもの。
-description-updates = このデバイスで Lumina を常に最新の状態に保ってください。
+description-storage = Bytwina がこのデバイスに保存しているもの。
+description-updates = このデバイスで Bytwina を常に最新の状態に保ってください。
 description-extensions = コミュニティプラグインを管理します。
 description-themes = コミュニティのテーマを選択します。
 theme-maker = テーマメーカー
@@ -45,34 +45,34 @@ log-out = ログアウト
 unofficial = 非公式・Discordによって承認されていません
 offline-preview = オフライン プレビュー · 変更はこのセッションに残り、送信されることはありません。
 general-startup = 起動する
-general-open-at-startup = コンピュータの起動時に Lumina を開きます
-general-open-at-startup-description = Lumina がサインインし、バックグラウンドで接続します。
+general-open-at-startup = コンピュータの起動時に Bytwina を開きます
+general-open-at-startup-description = Bytwina がサインインし、バックグラウンドで接続します。
 general-start-minimized = 最小化して開始
 general-start-minimized-description = 邪魔にならないバックグラウンドで開始します。
 general-startup-unavailable = 自動起動は Windows と macOS で利用できます。
 general-window = ウィンドウ
 general-hide-decorations = タイトルバーなし
-general-hide-decorations-description = タイル型ウィンドウ マネージャー向け: Lumina 独自のものを含め、すべてのタイトルバーと境界線を削除します。Lumina の移動、サイズ変更、終了はウィンドウ マネージャーで行います。
+general-hide-decorations-description = タイル型ウィンドウ マネージャー向け: Bytwina 独自のものを含め、すべてのタイトルバーと境界線を削除します。Bytwina の移動、サイズ変更、終了はウィンドウ マネージャーで行います。
 general-custom-title-bar = カスタムタイトルバー
-general-custom-title-bar-description = システムのタイトルバーを Lumina 独自の GTK 4 風ヘッダーバーに置き換えます。
+general-custom-title-bar-description = システムのタイトルバーを Bytwina 独自の GTK 4 風ヘッダーバーに置き換えます。
 general-hide-title-bar = セレインのタイトルバーを非表示にする
 general-hide-title-bar-description = 代わりに、システムのタイトル バーとウィンドウ ボタンを使用してください。
 general-keep-menu-bar = セレインをメニューバーに置いておく
-general-keep-system-tray = Lumina をシステム トレイに入れておきます
-general-menu-bar-description = ウィンドウを閉じると、Lumina がメニュー バーに表示されたままになります。終了するにはメニューから終了してください。
+general-keep-system-tray = Bytwina をシステム トレイに入れておきます
+general-menu-bar-description = ウィンドウを閉じると、Bytwina がメニュー バーに表示されたままになります。終了するにはメニューから終了してください。
 general-linux-tray-description = クロージングによりセレインは継続します。トレイを使用して、表示、最小化、または終了します。
-general-windows-tray-description = ウィンドウを閉じると、Lumina が通知領域に表示されたままになります。終了するにはメニューから終了してください。
+general-windows-tray-description = ウィンドウを閉じると、Bytwina が通知領域に表示されたままになります。終了するにはメニューから終了してください。
 general-tray-unavailable = このプラットフォームではトレイを使用できません。
 general-graphics = グラフィックス
 general-render-with = でレンダリング
 general-gpu-restart = 次回セレイン起動時に有効となります。
 general-gpu-current-prefix = 現在絵を描いているのは
 general-steady-refresh-rate = リフレッシュレートを固定
-general-steady-refresh-rate-description = Lumina がアクティブなウィンドウの間は、ディスプレイのリフレッシュレートで描画するため、可変リフレッシュレート (VRR、G-SYNC、FreeSync) のディスプレイでもちらつかずに一定のレートを保てます。消費電力が増えます。
+general-steady-refresh-rate-description = Bytwina がアクティブなウィンドウの間は、ディスプレイのリフレッシュレートで描画するため、可変リフレッシュレート (VRR、G-SYNC、FreeSync) のディスプレイでもちらつかずに一定のレートを保てます。消費電力が増えます。
 gpu-automatic = 自動
 gpu-high-performance = 高性能
 gpu-power-saving = 省電力
-gpu-automatic-description = Lumina にこのウィンドウを描画できる GPU を選択させます。
+gpu-automatic-description = Bytwina にこのウィンドウを描画できる GPU を選択させます。
 gpu-high-performance-description = 専用グラフィックス カードが利用可能な場合は、それを使用してください。
 gpu-power-saving-description = 内蔵グラフィックスを使用してバッテリーを節約します。
 direct-messages = ダイレクトメッセージ
@@ -217,7 +217,7 @@ account-menu-custom-status-editor-clear-after = 後クリア
 # Context: custom_status_editor
 account-menu-custom-status-editor-no-custom-status = カスタムステータスなし
 # Context: custom_status_editor
-account-menu-custom-status-editor-lumina-clears-it = セレインがクリアする
+account-menu-custom-status-editor-bytwina-clears-it = セレインがクリアする
 # Context: custom_status_editor
 account-menu-custom-status-editor-status-text = ステータステキスト
 # Context: custom_status_editor
@@ -1557,7 +1557,7 @@ keybinds-show-voice-enable-global-keybinds = グローバルキーバインド�
 # Context: show_voice
 keybinds-show-voice-global-availability = グローバルな可用性
 # Context: show_voice
-keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = 別のアプリがフォーカスされているときに音声ショートカットを使用します。オフの場合、ショートカットは Lumina がフォーカスされている間のみ機能します。
+keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = 別のアプリがフォーカスされているときに音声ショートカットを使用します。オフの場合、ショートカットは Bytwina がフォーカスされている間のみ機能します。
 
 ## crates/ui/src/lib.rs
 # Context: account_card
@@ -1635,7 +1635,7 @@ main-restoring-checking-your-saved-login = 保存されたログイン情報を�
 # Context: restoring
 main-restoring-connecting-to-discord = Discordに接続する
 # Context: restoring_screen
-main-restoring-screen-lumina = セレイン
+main-restoring-screen-bytwina = セレイン
 # Context: restoring_screen
 main-restoring-screen-use-a-different-account = 別のアカウントを使用する
 # Context: restoring_screen
@@ -1647,11 +1647,11 @@ main-sign-in-consent-i-own-this-account-and-authorize-this-session = 私はこ�
 # Context: sign_in_consent
 main-sign-in-consent-passwords-and-2fa-stay-on-discord-s-own-login-page = パスワードと 2FA は Discord 自体のログイン ページに残ります。セッション トークンのみが OS 資格情報ストアに保持されます。
 # Context: sign_in_disclosures
-main-sign-in-disclosures-about-lumina = セレインについて
+main-sign-in-disclosures-about-bytwina = セレインについて
 # Context: sign_in_disclosures
 main-sign-in-disclosures-connect-with-this-token = このトークンで接続します
 # Context: sign_in_disclosures
-main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = サインインした別の Lumina インストールなどから、すでに有効な Discord セッション トークンを保持しているオーナーの場合。ここではパスワードと 2FA は決して使用されません。これにより、Discord がホストするログイン ページが完全にバイパスされます。
+main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = サインインした別の Bytwina インストールなどから、すでに有効な Discord セッション トークンを保持しているオーナーの場合。ここではパスワードと 2FA は決して使用されません。これにより、Discord がホストするログイン ページが完全にバイパスされます。
 # Context: sign_in_disclosures
 main-sign-in-disclosures-forget-saved-login = 保存したログイン情報を忘れる
 # Context: sign_in_disclosures
@@ -1665,7 +1665,7 @@ main-sign-in-header-sign-in-with-your-discord-account-to-get-started = 始める
 # Context: sign_in_header
 main-sign-in-header-welcome-back = おかえり
 # Context: sign_in_header
-main-sign-in-header-welcome-to-lumina = セレインへようこそ
+main-sign-in-header-welcome-to-bytwina = セレインへようこそ
 # Context: sign_in_preview
 main-sign-in-status-copy-failure-details = エラーの詳細をコピー
 main-sign-in-preview-explore-the-offline-preview = オフライン プレビューを確認する
@@ -1674,7 +1674,7 @@ main-sign-in-preview-sample-conversations-no-discord-connection = 会話例。 D
 # Context: sign_in_screen
 main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord = 独立したオープンソース。 Discordとは関係ありません。
 # Context: sign_in_screen
-main-sign-in-screen-lumina = セレイン
+main-sign-in-screen-bytwina = セレイン
 # Context: ui
 main-ui-cancel = キャンセル
 # Context: ui
@@ -2271,9 +2271,9 @@ screen-body-refresh = リフレッシュ
 # Context: body
 screen-body-screen-or-window = スクリーンまたはウィンドウ
 # Context: body
-screen-body-send-what-your-mac-plays-along-with-the-screen-lumina = Mac で再生しているものを画面とともに送信します。セレイン自身の通話音声は省略されています。
+screen-body-send-what-your-mac-plays-along-with-the-screen-bytwina = Mac で再生しているものを画面とともに送信します。セレイン自身の通話音声は省略されています。
 # Context: body
-screen-body-share-sound-from-other-apps-even-when-sharing-one-window = 1 つのウィンドウを共有している場合でも、他のアプリのサウンドを共有します。 Lumina 自身の音声は省略されています。
+screen-body-share-sound-from-other-apps-even-when-sharing-one-window = 1 つのウィンドウを共有している場合でも、他のアプリのサウンドを共有します。 Bytwina 自身の音声は省略されています。
 # Context: body
 screen-body-share-system-audio = システムオーディオを共有する
 # Context: body
@@ -3434,7 +3434,7 @@ settings-activity-added-games = 追加済みのゲーム
 # Context: activity_settings
 settings-activity-no-games-added = 追加されたゲームはありません
 # Context: activity_settings
-settings-activity-hidden = 非表示。Lumina はこのゲームを検出しません。
+settings-activity-hidden = 非表示。Bytwina はこのゲームを検出しません。
 # Context: activity_settings
 settings-activity-detected = 自動検出
 # Context: activity_settings
@@ -3456,7 +3456,7 @@ settings-activity-click-to-rename = クリックして名前を変更
 # Context: activity_settings
 settings-activity-add-a-game = ゲームを追加
 # Context: activity_settings
-settings-activity-choose-program = 実行中のプログラムを選んでください。実行されるたびに Lumina がゲームとして表示します。
+settings-activity-choose-program = 実行中のプログラムを選んでください。実行されるたびに Bytwina がゲームとして表示します。
 # Context: activity_settings
 settings-activity-search-programs = 実行中のプログラムを検索
 # Context: activity_settings
@@ -3484,7 +3484,7 @@ settings-appearance-settings-primary-color = 原色
 # Context: appearance_settings
 settings-appearance-settings-reset = リセット
 # Context: appearance_settings
-settings-appearance-settings-restart-lumina-after-changing-this-themes-can-customize-effects-while = これを変更した後、Lumina を再起動します。テーマは有効になっている間、効果をカスタマイズできます。
+settings-appearance-settings-restart-bytwina-after-changing-this-themes-can-customize-effects-while = これを変更した後、Bytwina を再起動します。テーマは有効になっている間、効果をカスタマイズできます。
 # Context: appearance_settings
 settings-appearance-settings-the-active-theme-brings-its-own-accent-it-takes-over = アクティブなテーマが独自のアクセントをもたらします。テーマの使用中はそれが引き継がれます。
 # Context: appearance_settings
@@ -3521,11 +3521,11 @@ settings-storage-page-clear-cache = キャッシュをクリアする
 # Context: storage_page
 settings-storage-page-local-storage = ローカルストレージ
 # Context: storage_page
-settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = メッセージと下書きは、このデバイス上の制限されたアカウント分離ファイル内にキャッシュされます。キャッシュ データは Lumina によって暗号化されません。保存されたログイン トークンは OS 資格情報ストアを使用します。
+settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = メッセージと下書きは、このデバイス上の制限されたアカウント分離ファイル内にキャッシュされます。キャッシュ データは Bytwina によって暗号化されません。保存されたログイン トークンは OS 資格情報ストアを使用します。
 # Context: storage_page
 settings-storage-page-removes-cached-messages-and-media-drafts-and-your-login-stay = キャッシュされたメッセージとメディアを削除します。下書きとログインはそのまま残ります。
 # Context: storage_page
-settings-storage-page-lumina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Lumina はテレメトリを収集したり、診断をアップロードしたりしません。 Discord は、独自のポリシーに従ってサービス側のデータを保持します。
+settings-storage-page-bytwina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Bytwina はテレメトリを収集したり、診断をアップロードしたりしません。 Discord は、独自のポリシーに従ってサービス側のデータを保持します。
 # Context: storage_page
 settings-storage-page-your-privacy = あなたのプライバシー
 # Context: cosmetic_settings
@@ -3969,7 +3969,7 @@ updates-update-settings-could-not-load-or-save-update-preferences-changes-may-no
 # Context: update_settings
 updates-update-settings-download-update = アップデートをダウンロード
 # Context: update_settings
-updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = バックグラウンドでアップデートをダウンロードします。準備ができたら再起動します。 Lumina は起動時と、これがオフの場合でも定期的にチェックします。
+updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = バックグラウンドでアップデートをダウンロードします。準備ができたら再起動します。 Bytwina は起動時と、これがオフの場合でも定期的にチェックします。
 # Context: update_settings
 updates-update-settings-early-builds-with-the-newest-changes-nightly-releases-can-be = 最新の変更を加えた初期のビルド。夜間リリースは信頼性が低くなる可能性があります。
 # Context: update_settings
@@ -3995,7 +3995,7 @@ updates-update-settings-release-channel = リリースチャンネル
 # Context: update_settings
 updates-update-settings-restart-to-update = 更新するには再起動してください
 # Context: update_settings
-updates-update-settings-lumina-was-installed-via-your-distribution-run-this-in-a = Lumina はディストリビューション経由でインストールされました。ターミナルでこれを実行して更新します。
+updates-update-settings-bytwina-was-installed-via-your-distribution-run-this-in-a = Bytwina はディストリビューション経由でインストールされました。ターミナルでこれを実行して更新します。
 # Context: update_settings
 updates-update-settings-save-diagnostics = 診断を保存
 # Context: update_settings
@@ -4017,7 +4017,7 @@ updates-update-settings-log-warnings = エラーと警告
 # Context: update_settings
 updates-update-settings-open-folder = フォルダーを開く
 # Context: update_settings
-updates-update-settings-the-log-folder-could-not-be-written = ログフォルダーに書き込めませんでした。Lumina のデータフォルダーを確認して、もう一度お試しください。
+updates-update-settings-the-log-folder-could-not-be-written = ログフォルダーに書き込めませんでした。Bytwina のデータフォルダーを確認して、もう一度お試しください。
 # Context: update_settings
 updates-update-settings-timings-stages-and-failures-in-one-local-file-no-account-channel-or = タイミング、段階、失敗を 1 つのローカルログファイルに記録します。アカウント、チャンネル、メッセージ、認証情報は書き込まれず、どこにも送信されません。
 # Context: update_log
@@ -4472,7 +4472,7 @@ onboarding-rules-heading = サーバールール
 # Context: rules
 onboarding-rules-review = チャットする前に、モデレーターがこれらの回答を確認します。
 # Context: field
-onboarding-field-unsupported = このサーバーには Lumina がまだ表示できない質問があります。Discord アプリで参加を完了してください。
+onboarding-field-unsupported = このサーバーには Bytwina がまだ表示できない質問があります。Discord アプリで参加を完了してください。
 # Context: field
 onboarding-field-agree = ルールを読み、同意します
 
@@ -4601,7 +4601,7 @@ reading-double-click-reaction = Double-click reaction
 
 ## crates/platform/src/app_menu.rs
 # Context: macos_menu_bar
-app-menu-about = Luminaについて
+app-menu-about = Bytwinaについて
 # Context: macos_menu_bar
 app-menu-updates = アップデートを確認…
 # Context: macos_menu_bar
@@ -4609,13 +4609,13 @@ app-menu-settings = 設定…
 # Context: macos_menu_bar
 app-menu-services = サービス
 # Context: macos_menu_bar
-app-menu-hide = Luminaを非表示
+app-menu-hide = Bytwinaを非表示
 # Context: macos_menu_bar
 app-menu-hide-others = ほかを非表示
 # Context: macos_menu_bar
 app-menu-show-all = すべてを表示
 # Context: macos_menu_bar
-app-menu-quit = Luminaを終了
+app-menu-quit = Bytwinaを終了
 # Context: macos_menu_bar
 app-menu-file = ファイル
 # Context: macos_menu_bar
@@ -4657,7 +4657,7 @@ app-menu-bring-all-to-front = すべてを手前に移動
 # Context: macos_menu_bar
 app-menu-help = ヘルプ
 # Context: macos_menu_bar
-app-menu-github = GitHubのLumina
+app-menu-github = GitHubのBytwina
 # Context: macos_menu_bar
 app-menu-report-issue = 問題を報告…
 

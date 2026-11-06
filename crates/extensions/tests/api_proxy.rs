@@ -57,7 +57,7 @@ fn proxy_origin_and_capability_boundaries() {
 		output.validate(&manifest, &input),
 		Err(Error::Capability)
 	));
-	let encoded = serde_json::to_value(lumina_extension_sdk::ApiProxyConfig::Url {
+	let encoded = serde_json::to_value(bytwina_extension_sdk::ApiProxyConfig::Url {
 		url: "http://localhost:8080".into(),
 	})
 	.unwrap();
@@ -76,16 +76,16 @@ fn proxy_modes_reject_unknown_fields_in_host_and_sdk() {
 		r#"{"mode":"automatic","url":"http://localhost"}"#,
 	] {
 		assert!(serde_json::from_str::<ApiProxyConfig>(text).is_err());
-		assert!(serde_json::from_str::<lumina_extension_sdk::ApiProxyConfig>(text).is_err());
+		assert!(serde_json::from_str::<bytwina_extension_sdk::ApiProxyConfig>(text).is_err());
 	}
 }
 
 #[test]
 fn sdk_proxy_wrapper_flattens_into_host_output() {
-	let output = lumina_extension_sdk::ApiProxyOutput {
-		api_proxy: Some(lumina_extension_sdk::ApiProxyConfig::Automatic),
-		output: lumina_extension_sdk::Output {
-			panel: vec![lumina_extension_sdk::Element::Text {
+	let output = bytwina_extension_sdk::ApiProxyOutput {
+		api_proxy: Some(bytwina_extension_sdk::ApiProxyConfig::Automatic),
+		output: bytwina_extension_sdk::Output {
+			panel: vec![bytwina_extension_sdk::Element::Text {
 				text: "Settings".into(),
 			}],
 			..Default::default()

@@ -3,7 +3,7 @@
 fn main() {
 	let ctx = egui::Context::default();
 	let package = extensions::parse_package(include_bytes!(
-		"../../../extensions/themes/ocean.lumina-extension"
+		"../../../extensions/themes/ocean.bytwina-extension"
 	))
 	.expect("existing color-only themes remain compatible");
 	let mut theme = package.theme.unwrap();

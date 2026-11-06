@@ -1,12 +1,12 @@
 #!/bin/sh
-# Lumina Package Repository Setup Script
+# Bytwina Package Repository Setup Script
 # Detects distribution (Ubuntu/Debian, Fedora, openSUSE, Arch Linux),
 # imports and verifies the GPG signing key, and configures the package repository.
 set -eu
 
-BASE_URL="${LUMINA_REPO_BASE_URL:-https://bytwlumina.github.io/Bytwina}"
-CHANNEL="${LUMINA_CHANNEL:-nightly}"
-EXPECTED_FINGERPRINT="${LUMINA_FINGERPRINT:-CA19DA939E9BCAB500751CE480FE95CAD86141A5}"
+BASE_URL="${BYTWINA_REPO_BASE_URL:-https://bytwbytwina.github.io/Bytwina}"
+CHANNEL="${BYTWINA_CHANNEL:-nightly}"
+EXPECTED_FINGERPRINT="${BYTWINA_FINGERPRINT:-CA19DA939E9BCAB500751CE480FE95CAD86141A5}"
 
 if [ "$(id -u)" -ne 0 ]; then
     SUDO="sudo"
@@ -118,7 +118,7 @@ case "$ARCH" in
         DEB_ARCH=arm64
         ;;
     *)
-        error "Architecture $ARCH is not currently supported by Lumina package repositories."
+        error "Architecture $ARCH is not currently supported by Bytwina package repositories."
         ;;
 esac
 
@@ -133,10 +133,10 @@ esac
 REPO_URL="$BASE_URL/$CHANNEL/$REPO_PATH"
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT HUP INT TERM
-KEY_URL="$REPO_URL/lumina.asc"
-KEY_FILE="$TEMP_DIR/lumina.asc"
+KEY_URL="$REPO_URL/bytwina.asc"
+KEY_FILE="$TEMP_DIR/bytwina.asc"
 
-log "Configuring Lumina ${BOLD}${CHANNEL}${NC} repository for ${BOLD}${PRETTY_NAME:-$ID}${NC} (${ARCH})..."
+log "Configuring Bytwina ${BOLD}${CHANNEL}${NC} repository for ${BOLD}${PRETTY_NAME:-$ID}${NC} (${ARCH})..."
 log "Fetching official signing key..."
 download "$KEY_URL" "$KEY_FILE" || error "Signing key unavailable for this distribution; its signed repository must be published before setup."
 verify_key "$KEY_FILE"
@@ -146,38 +146,38 @@ INSTALL_CMD=""
 case "$DISTRO_ID" in
     ubuntu)
         log "Installing APT keyring and source list..."
-        $SUDO install -Dm644 "$KEY_FILE" /etc/apt/keyrings/lumina.asc
+        $SUDO install -Dm644 "$KEY_FILE" /etc/apt/keyrings/bytwina.asc
 
-        printf 'deb [arch=%s signed-by=/etc/apt/keyrings/lumina.asc] %s ./\n' "$DEB_ARCH" "$REPO_URL" | \
-            $SUDO tee /etc/apt/sources.list.d/lumina.list >/dev/null
+        printf 'deb [arch=%s signed-by=/etc/apt/keyrings/bytwina.asc] %s ./\n' "$DEB_ARCH" "$REPO_URL" | \
+            $SUDO tee /etc/apt/sources.list.d/bytwina.list >/dev/null
 
         log "Updating APT package lists..."
-        $SUDO apt-get update -o Dir::Etc::sourcelist="sources.list.d/lumina.list" -o Dir::Etc::sourceparts="-" >/dev/null 2>&1 || $SUDO apt-get update >/dev/null 2>&1
+        $SUDO apt-get update -o Dir::Etc::sourcelist="sources.list.d/bytwina.list" -o Dir::Etc::sourceparts="-" >/dev/null 2>&1 || $SUDO apt-get update >/dev/null 2>&1
 
-        INSTALL_CMD="$SUDO apt install lumina"
+        INSTALL_CMD="$SUDO apt install bytwina"
         ;;
 
     fedora)
         log "Importing RPM key and configuring DNF repository..."
 
-        REPO_FILE="$TEMP_DIR/lumina.repo"
-        download "$REPO_URL/lumina.repo" "$REPO_FILE"
+        REPO_FILE="$TEMP_DIR/bytwina.repo"
+        download "$REPO_URL/bytwina.repo" "$REPO_FILE"
         $SUDO rpm --import "$KEY_FILE"
-        $SUDO install -m644 "$REPO_FILE" /etc/yum.repos.d/lumina.repo
+        $SUDO install -m644 "$REPO_FILE" /etc/yum.repos.d/bytwina.repo
 
-        INSTALL_CMD="$SUDO dnf install lumina"
+        INSTALL_CMD="$SUDO dnf install bytwina"
         ;;
 
     opensuse-tumbleweed)
         log "Importing RPM key and configuring Zypper repository..."
         $SUDO rpm --import "$KEY_FILE"
 
-        REPO_FILE="$TEMP_DIR/lumina.repo"
-        download "$REPO_URL/lumina.repo" "$REPO_FILE"
-        $SUDO install -m644 "$REPO_FILE" /etc/zypp/repos.d/lumina.repo
-        $SUDO zypper --non-interactive refresh lumina-$CHANNEL >/dev/null 2>&1 || true
+        REPO_FILE="$TEMP_DIR/bytwina.repo"
+        download "$REPO_URL/bytwina.repo" "$REPO_FILE"
+        $SUDO install -m644 "$REPO_FILE" /etc/zypp/repos.d/bytwina.repo
+        $SUDO zypper --non-interactive refresh bytwina-$CHANNEL >/dev/null 2>&1 || true
 
-        INSTALL_CMD="$SUDO zypper install lumina"
+        INSTALL_CMD="$SUDO zypper install bytwina"
         ;;
 
     arch)
@@ -187,14 +187,14 @@ case "$DISTRO_ID" in
 
         PACMAN_CONF="/etc/pacman.conf"
 
-        if grep -q "\[lumina\]" "$PACMAN_CONF"; then
-            log "Repository [lumina] already present in $PACMAN_CONF."
+        if grep -q "\[bytwina\]" "$PACMAN_CONF"; then
+            log "Repository [bytwina] already present in $PACMAN_CONF."
         else
-            printf '\n[lumina]\nSigLevel = Required\nServer = %s\n' "$REPO_URL" | \
+            printf '\n[bytwina]\nSigLevel = Required\nServer = %s\n' "$REPO_URL" | \
                 $SUDO tee -a "$PACMAN_CONF" >/dev/null
         fi
 
-        INSTALL_CMD="$SUDO pacman -Syu lumina"
+        INSTALL_CMD="$SUDO pacman -Syu bytwina"
         ;;
 
     *)
@@ -218,7 +218,7 @@ else
 fi
 
 if [ "$TTY_INPUT" -eq 1 ]; then
-    printf "%b?%b Would you like to install %bLumina%b now? [Y/n]: " "${PURPLE}" "${NC}" "${BOLD}" "${NC}"
+    printf "%b?%b Would you like to install %bBytwina%b now? [Y/n]: " "${PURPLE}" "${NC}" "${BOLD}" "${NC}"
     if [ -t 0 ]; then
         read -r answer || answer=n
     else
@@ -235,7 +235,7 @@ if [ "$TTY_INPUT" -eq 1 ]; then
 fi
 
 if [ "$DO_INSTALL" = "true" ]; then
-    log "Installing Lumina (${INSTALL_CMD})..."
+    log "Installing Bytwina (${INSTALL_CMD})..."
     # Package managers also prompt for keys/transactions when the script is piped.
     if [ -t 0 ]; then
         $INSTALL_CMD
@@ -243,9 +243,9 @@ if [ "$DO_INSTALL" = "true" ]; then
         $INSTALL_CMD </dev/tty
     fi
     printf '\n'
-    success "${BOLD}Lumina installed successfully!${NC}"
-    log "Launch it from your desktop application launcher or run ${BOLD}lumina${NC}."
+    success "${BOLD}Bytwina installed successfully!${NC}"
+    log "Launch it from your desktop application launcher or run ${BOLD}bytwina${NC}."
 else
-    log "To install Lumina later, run:"
+    log "To install Bytwina later, run:"
     printf '\n    %b%s%b\n\n' "${CYAN}" "$INSTALL_CMD" "${NC}"
 fi

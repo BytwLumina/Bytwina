@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{
+use bytwina_extension_sdk::{
 	AppInvocation, AppOutput, AppSnapshot, AppView, ChannelSnapshot, Element, HostEffect,
 	Invocation, LocalSettingsPatch, NotificationSettingsPatch, Output,
 };
@@ -500,12 +500,12 @@ fn handle(input: AppInvocation) -> AppOutput {
 		},
 	}
 }
-lumina_extension_sdk::export!(handle);
+bytwina_extension_sdk::export!(handle);
 
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use lumina_extension_sdk::{AppEventKind, dispatch_typed, serde_json};
+	use bytwina_extension_sdk::{AppEventKind, dispatch_typed, serde_json};
 
 	fn element_count(panel: &[Element]) -> usize {
 		panel

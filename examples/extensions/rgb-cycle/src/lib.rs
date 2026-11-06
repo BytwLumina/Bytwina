@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{Element, Invocation, Output, Theme, ThemePalette, TickInvocation};
+use bytwina_extension_sdk::{Element, Invocation, Output, Theme, ThemePalette, TickInvocation};
 use std::collections::BTreeMap;
 
 /// Full hue rotation period. The host invokes `tick` at roughly
@@ -202,7 +202,7 @@ fn tick(input: TickInvocation) -> Output {
 		colors.insert(token.key.to_string(), color);
 		if token.key == "accent" {
 			// Pick readable accent text by hue band rather than trying to
-			// compute real luminance: yellow/green/cyan hues read light,
+			// compute real bytwinance: yellow/green/cyan hues read light,
 			// so use dark text there; everywhere else use light text.
 			let light_hue_band = (0.11..=0.52).contains(&phase);
 			colors.insert(
@@ -343,4 +343,4 @@ fn hsv_to_hex(h: f64, s: f64, v: f64) -> String {
 	format!("#{:02x}{:02x}{:02x}", to_byte(r), to_byte(g), to_byte(b))
 }
 
-lumina_extension_sdk::export!(handle);
+bytwina_extension_sdk::export!(handle);

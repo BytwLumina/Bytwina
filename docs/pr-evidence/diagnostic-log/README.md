@@ -3,7 +3,7 @@
 Both images come from the offline fixture renderer, not from a window capture:
 
 ```sh
-cargo run --locked -p lumina --features demo --example profile_preview -- \
+cargo run --locked -p bytwina --features demo --example profile_preview -- \
   --demo --page=updates --output=after.png --width=1120 --height=760 --scroll=150
 ```
 

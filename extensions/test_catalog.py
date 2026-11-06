@@ -3,13 +3,13 @@ import json
 
 import catalog
 
-theme = (catalog.ROOT / "themes/ocean.lumina-extension").read_bytes()
-plugin = (catalog.ROOT / "plugins/packages/message-delete-protector.lumina-extension").read_bytes()
-assert catalog.validate(theme)["id"] == "lumina-ocean"
+theme = (catalog.ROOT / "themes/ocean.bytwina-extension").read_bytes()
+plugin = (catalog.ROOT / "plugins/packages/message-delete-protector.bytwina-extension").read_bytes()
+assert catalog.validate(theme)["id"] == "bytwina-ocean"
 assert catalog.validate(plugin)["kind"] == "plugin"
-rpc = (catalog.ROOT / "plugins/packages/custom-rpc.lumina-extension").read_bytes()
+rpc = (catalog.ROOT / "plugins/packages/custom-rpc.bytwina-extension").read_bytes()
 assert catalog.validate(rpc)["capabilities"] == ["rich_presence", "storage"]
-proxy = (catalog.ROOT / "plugins/packages/api-proxy.lumina-extension").read_bytes()
+proxy = (catalog.ROOT / "plugins/packages/api-proxy.bytwina-extension").read_bytes()
 assert catalog.validate(proxy)["capabilities"] == ["api_proxy", "storage"]
 for data, mutate in (
     (proxy, lambda p: p["manifest"].update(capabilities=["api_proxy", "composer"])),
@@ -45,7 +45,7 @@ for entry in moved["entries"]:
         key = "release_url" if value is entry else "url"
         value[key] = value[key].replace(old, "f" * 40)
 assert catalog.content(pinned, "BytwLumina/Bytwina") == catalog.content(moved, "BytwLumina/Bytwina") is not None
-assert catalog.content(pinned, "Lumina/Other") is None
+assert catalog.content(pinned, "Bytwina/Other") is None
 moved["entries"][0]["sha256"] = "0" * 64
 assert catalog.content(pinned, "BytwLumina/Bytwina") != catalog.content(moved, "BytwLumina/Bytwina")
 print("Theme/plugin identity, byte, capability, action and URL checks passed.")

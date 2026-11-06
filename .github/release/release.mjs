@@ -15,8 +15,8 @@ assert(['nightly', 'production'].includes(channel), 'Choose nightly or productio
 const planPath = 'target/release-plan.json';
 const plan = mode === 'publish' ? JSON.parse(readFileSync(planPath, 'utf8')) : null;
 if (plan) assert.equal(channel, plan.channel, 'Release channel changed');
-const tapRepo = 'Lumina/homebrew-lumina';
-const caskPath = 'Casks/lumina.rb';
+const tapRepo = 'Bytwina/homebrew-bytwina';
+const caskPath = 'Casks/bytwina.rb';
 const tapToken = process.env.HOMEBREW_TAP_TOKEN;
 if (plan) assert(tapToken, 'HOMEBREW_TAP_TOKEN is required to publish the Homebrew cask');
 
@@ -42,7 +42,7 @@ if (plan && !resumed) checkTapAccess();
 // The cask lives in its own tap repository so users do not clone this one. The tap file is the
 // single source of truth; releases only rewrite its version and checksum.
 function publishCask() {
-  const asset = `release-assets/lumina-${plan.gitTag}-macOS-ARM64.zip`;
+  const asset = `release-assets/bytwina-${plan.gitTag}-macOS-ARM64.zip`;
   const checksum = createHash('sha256').update(readFileSync(asset)).digest('hex');
   const gh = args => execFileSync('gh', args, {
     encoding: 'utf8', env: { ...process.env, GH_TOKEN: tapToken },
@@ -79,7 +79,7 @@ if (plan && channel === 'production') {
       successComment: false,
       failComment: false,
       releasedLabels: false,
-      releaseNameTemplate: 'Lumina <%= nextRelease.version %>',
+      releaseNameTemplate: 'Bytwina <%= nextRelease.version %>',
     }],
   );
 }
@@ -126,7 +126,7 @@ if (mode === 'plan') {
       const assets = readdirSync('release-assets')
         .map(name => `release-assets/${name}`);
       execFileSync('gh', ['release', 'create', plan.gitTag, ...assets,
-        '--target', plan.gitHead, '--title', `Lumina ${plan.version}`,
+        '--target', plan.gitHead, '--title', `Bytwina ${plan.version}`,
         '--notes-file', 'target/release-notes.md', '--prerelease', '--latest=false', '--draft'],
       { stdio: 'inherit' });
     }

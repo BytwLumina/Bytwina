@@ -54,5 +54,5 @@ pillow_heif.from_pillow(Image.new("RGB", (6000, 4000), (64, 128, 192))).save(
 )
 ```
 
-Neither generation dependency is installed by Cargo or bundled with Lumina.
+Neither generation dependency is installed by Cargo or bundled with Bytwina.
 The successful Windows decode check requires the installed HEIF/HEVC codecs.

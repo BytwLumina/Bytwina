@@ -1,7 +1,7 @@
 {
   "manifest": {
     "api_version": 1,
-    "id": "lumina-latte",
+    "id": "bytwina-latte",
     "name": "Latte",
     "version": "1.0.0",
     "author": "Lumina contributors",

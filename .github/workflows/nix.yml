@@ -48,13 +48,13 @@ jobs:
           use-flakehub: false
 
       - name: Build
-        run: nix build --print-build-logs --show-trace .#lumina
+        run: nix build --print-build-logs --show-trace .#bytwina
       - name: Verify installed binary
-        run: test -x result/bin/lumina
+        run: test -x result/bin/bytwina
       - name: Verify bundled notices and corresponding source
         shell: bash
         run: |
-          docs=result/share/doc/lumina
+          docs=result/share/doc/bytwina
           for file in README.md THIRD_PARTY_NOTICES.md LICENSE-MIT LICENSE-APACHE NOTICE; do
             cmp "$file" "$docs/$file"
           done
@@ -73,10 +73,10 @@ jobs:
       - name: Verify Linux desktop assets
         if: runner.os == 'Linux'
         run: |
-          test -f result/share/applications/io.github.ninokiru.Lumina.desktop
-          test -f result/share/icons/hicolor/256x256/apps/lumina.png
+          test -f result/share/applications/io.github.ninokiru.Bytwina.desktop
+          test -f result/share/icons/hicolor/256x256/apps/bytwina.png
       - name: Verify macOS app bundle
         if: runner.os == 'macOS'
         run: |
-          test -x result/Applications/Lumina.app/Contents/MacOS/lumina
-          plutil -lint result/Applications/Lumina.app/Contents/Info.plist
+          test -x result/Applications/Bytwina.app/Contents/MacOS/bytwina
+          plutil -lint result/Applications/Bytwina.app/Contents/Info.plist

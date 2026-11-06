@@ -1,5 +1,5 @@
 //! Offline decoder check: rotate only the synthetic MOV's track matrix, never its pixels.
-//! Run: cargo run --locked -p lumina --example video_orientation
+//! Run: cargo run --locked -p bytwina --example video_orientation
 #[cfg(target_os = "windows")]
 fn main() {
 	use platform::video::{Decoder, Sample};

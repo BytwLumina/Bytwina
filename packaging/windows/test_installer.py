@@ -52,7 +52,7 @@ def check_shortcut(shortcut, executable):
         try:
             assert ctypes.c_ushort.from_buffer(value).value == 31
             app_id = ctypes.c_void_p.from_buffer(value, 8).value
-            assert ctypes.wstring_at(app_id) == "io.github.ninokiru.Lumina"
+            assert ctypes.wstring_at(app_id) == "io.github.ninokiru.Bytwina"
         finally:
             ole.PropVariantClear(value)
     finally:
@@ -77,29 +77,29 @@ def main():
     compiler = shutil.which("makensis") or r"C:\Program Files (x86)\NSIS\makensis.exe"
     programs = ctypes.create_unicode_buffer(1024)
     ctypes.OleDLL("shell32").SHGetFolderPathW(None, 2, None, 0, programs)
-    shortcut = Path(programs.value) / "Lumina.lnk"
-    uninstall_key = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\Lumina"
-    assert not shortcut.exists(), "Refusing to overwrite an existing Lumina shortcut"
+    shortcut = Path(programs.value) / "Bytwina.lnk"
+    uninstall_key = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\Bytwina"
+    assert not shortcut.exists(), "Refusing to overwrite an existing Bytwina shortcut"
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, uninstall_key):
-            raise AssertionError("Refusing to overwrite an existing Lumina installation")
+            raise AssertionError("Refusing to overwrite an existing Bytwina installation")
     except FileNotFoundError:
         pass
-    with tempfile.TemporaryDirectory(prefix="lumina-installer-offline-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="bytwina-installer-offline-") as temporary:
         root = Path(temporary)
         payload, output = root / "payload", root / "output"
         payload.mkdir()
         output.mkdir()
         fixture = root / "fixture.rs"
         fixture.write_text('fn main() { if let Some(p) = std::env::args().nth(1) { std::fs::write(p, b"ready").unwrap(); std::thread::sleep(std::time::Duration::from_secs(120)); } }')
-        subprocess.run(["rustc", "--edition=2024", "-O", str(fixture), "-o", str(payload / "lumina.exe")], check=True)
+        subprocess.run(["rustc", "--edition=2024", "-O", str(fixture), "-o", str(payload / "bytwina.exe")], check=True)
         for name in ("install-notifications.ps1", "setup.ps1"):
             (payload / name).write_text("throw 'Installer must not run or install this optional script'")
         subprocess.run([compiler, "-V2", "-NOCD", "-DVERSION=0.0.0-offline", f"-DDIST_DIR={payload}",
                         f"-DOUTPUT_DIR={output}", str(repository / "packaging/windows/installer.nsi")],
                        cwd=repository, check=True, timeout=120)
-        setup = output / "lumina-0.0.0-offline-setup.exe"
-        installed = root / "Installed Lumina žluťoučký"
+        setup = output / "bytwina-0.0.0-offline-setup.exe"
+        installed = root / "Installed Bytwina žluťoučký"
         uninstaller = installed / "uninstall.exe"
         copied_uninstaller = root / "uninstall-test.exe"
 
@@ -123,7 +123,7 @@ def main():
         try:
             # Case-insensitive process recognition, with no GUI, Discord or audio.
             running_exe = root / "LUMINA.EXE"
-            shutil.copy2(payload / "lumina.exe", running_exe)
+            shutil.copy2(payload / "bytwina.exe", running_exe)
             ready = root / "ready"
             running = subprocess.Popen([str(running_exe), str(ready)])
             wait_for(ready.exists)
@@ -138,11 +138,11 @@ def main():
                 start = time.perf_counter()
                 subprocess.run(f'"{setup}" /S /D={installed}', check=True, timeout=30)
                 timings.append(round((time.perf_counter() - start) * 1000, 3))
-                assert (installed / "lumina.exe").read_bytes() == (payload / "lumina.exe").read_bytes()
+                assert (installed / "bytwina.exe").read_bytes() == (payload / "bytwina.exe").read_bytes()
                 assert uninstaller.is_file()
                 assert not (installed / "install-notifications.ps1").exists()
                 assert not (installed / "setup.ps1").exists()
-                check_shortcut(shortcut, installed / "lumina.exe")
+                check_shortcut(shortcut, installed / "bytwina.exe")
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, uninstall_key, 0,
                                     winreg.KEY_READ | winreg.KEY_WOW64_64KEY) as key:
                     assert winreg.QueryValueEx(key, "DisplayVersion")[0] == "0.0.0-offline"
@@ -151,11 +151,11 @@ def main():
                 for name in ("install-notifications.ps1", "setup.ps1"):
                     (installed / name).write_text("legacy fixture")
             ready.unlink()
-            running = subprocess.Popen([str(installed / "lumina.exe"), str(ready)])
+            running = subprocess.Popen([str(installed / "bytwina.exe"), str(ready)])
             wait_for(ready.exists)
             result = uninstall()
             assert result.returncode == 1, result.returncode
-            assert (installed / "lumina.exe").exists() and shortcut.exists()
+            assert (installed / "bytwina.exe").exists() and shortcut.exists()
             running.terminate()
             running.wait(timeout=10)
             running = None

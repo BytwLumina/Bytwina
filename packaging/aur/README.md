@@ -1,6 +1,6 @@
 # AUR binary recipe
 
-This directory prepares `lumina-bin` for an AUR maintainer. It is **not an AUR
+This directory prepares `bytwina-bin` for an AUR maintainer. It is **not an AUR
 publication**, and no AUR package availability or ownership is claimed. The recipe
 repackages the project's existing, voice-enabled x86_64 Arch release without
 compiling Rust or configuring an additional pacman repository. It currently pins
@@ -18,8 +18,8 @@ makepkg -si
 ```
 
 These are owner installation instructions; automated validation never installs
-or launches Lumina. `lumina-bin` conflicts with the repository/source `lumina`
-package and a future `lumina-git` variant because they install the same executable.
+or launches Bytwina. `bytwina-bin` conflicts with the repository/source `bytwina`
+package and a future `bytwina-git` variant because they install the same executable.
 Pacman handles a deliberate replacement. Account caches and saved credentials
 are unaffected by package removal; see the normal storage policy.
 

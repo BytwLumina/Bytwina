@@ -121,7 +121,7 @@ async fn worker(
 	dir: PathBuf,
 	target: Target,
 ) {
-	let name = format!("lumina-tray-{}", std::process::id());
+	let name = format!("bytwina-tray-{}", std::process::id());
 	let paths = [State::Shown, State::Hidden, State::Minimized]
 		.map(|state| dir.join(format!("{name}-{}.js", state as u8)));
 	let connected = tokio::time::timeout(TIMEOUT, async {
@@ -204,10 +204,10 @@ mod tests {
 		let pid = script(State::Hidden, &Target::Pid(42));
 		assert!(pid.contains("w.pid === 42"));
 		assert!(pid.contains("skip(w, true); w.minimized = true;"));
-		let app = script(State::Shown, &Target::App("io.github.ninokiru.Lumina".into()));
-		assert!(app.contains("w.desktopFileName === \"io.github.ninokiru.Lumina\""));
+		let app = script(State::Shown, &Target::App("io.github.ninokiru.Bytwina".into()));
+		assert!(app.contains("w.desktopFileName === \"io.github.ninokiru.Bytwina\""));
 		assert!(app.contains("workspace.activeWindow = w"));
-		assert!(valid_app_id("io.github.ninokiru.Lumina"));
+		assert!(valid_app_id("io.github.ninokiru.Bytwina"));
 		assert!(!valid_app_id("../x"));
 		assert!(!valid_app_id(".."));
 		assert!(!valid_app_id("a\"b"));

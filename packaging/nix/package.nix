@@ -92,7 +92,7 @@
     ];
 in
     rustPlatform.buildRustPackage (finalAttrs: {
-        pname = "lumina";
+        pname = "bytwina";
         # Match `cargo build`: release automation versions Cargo.toml, not this file.
         version = (lib.importTOML ../../Cargo.toml).workspace.package.version;
 
@@ -108,7 +108,7 @@ in
 
         cargoBuildFlags = [
             "--package"
-            "lumina"
+            "bytwina"
         ];
 
         nativeBuildInputs =
@@ -160,10 +160,10 @@ in
         # MPL-2.0 hpke-rs source ship with every binary.
         postInstall =
             ''
-                docs="$out/share/doc/lumina"
+                docs="$out/share/doc/bytwina"
             ''
             + lib.optionalString isDarwin ''
-                app="$out/Applications/Lumina.app/Contents"
+                app="$out/Applications/Bytwina.app/Contents"
                 docs="$app/Resources"
             ''
             + ''
@@ -179,10 +179,10 @@ in
                 cp -R vendor/hpke-rs "$docs/source/"
             ''
             + lib.optionalString isLinux ''
-                install -Dm444 packaging/linux/lumina.desktop \
-                  $out/share/applications/io.github.ninokiru.Lumina.desktop
-                substituteInPlace $out/share/applications/io.github.ninokiru.Lumina.desktop \
-                  --replace-fail "Exec=lumina" "Exec=$out/bin/lumina"
+                install -Dm444 packaging/linux/bytwina.desktop \
+                  $out/share/applications/io.github.ninokiru.Bytwina.desktop
+                substituteInPlace $out/share/applications/io.github.ninokiru.Bytwina.desktop \
+                  --replace-fail "Exec=bytwina" "Exec=$out/bin/bytwina"
                 mkdir -p $out/share/icons
                 cp -R packaging/linux/hicolor $out/share/icons/
             ''
@@ -190,11 +190,11 @@ in
             # (privacy usage descriptions, identifier and icon) from the launched binary.
             + lib.optionalString isDarwin ''
                 install -Dm444 packaging/macos/Info.plist "$app/Info.plist"
-                install -Dm444 packaging/macos/Lumina.icns "$app/Resources/Lumina.icns"
+                install -Dm444 packaging/macos/Bytwina.icns "$app/Resources/Bytwina.icns"
                 mkdir -p "$app/MacOS" "$out/share/doc"
-                mv "$out/bin/lumina" "$app/MacOS/lumina"
-                ln -s "$app/MacOS/lumina" "$out/bin/lumina"
-                ln -s "$app/Resources" "$out/share/doc/lumina"
+                mv "$out/bin/bytwina" "$app/MacOS/bytwina"
+                ln -s "$app/MacOS/bytwina" "$out/bin/bytwina"
+                ln -s "$app/Resources" "$out/share/doc/bytwina"
             '';
 
         meta = {
@@ -205,7 +205,7 @@ in
                 asl20
             ];
             platforms = lib.platforms.linux ++ lib.platforms.darwin;
-            mainProgram = "lumina";
+            mainProgram = "bytwina";
             maintainers = with lib.maintainers; [
                 myamusashi
             ];

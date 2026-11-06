@@ -4,11 +4,11 @@ use std::sync::{Arc, Mutex, Weak};
 
 pub const MAX_CUSTOM_FONT_BYTES: usize = 32 * 1024 * 1024;
 const CUSTOM: [&str; 3] = [
-	"Lumina Custom",
-	"Lumina Custom Medium",
-	"Lumina Custom SemiBold",
+	"Bytwina Custom",
+	"Bytwina Custom Medium",
+	"Bytwina Custom SemiBold",
 ];
-const DEFINITIONS_KEY: &str = "lumina-font-definitions";
+const DEFINITIONS_KEY: &str = "bytwina-font-definitions";
 
 #[derive(Clone)]
 pub struct CustomFont {
@@ -406,72 +406,72 @@ const INTER_SEMIBOLD: &[u8] = include_bytes!("../../../assets/fonts/Inter-SemiBo
 const NAME_FONTS: [(u32, &str, &[u8]); 14] = [
 	(
 		1,
-		"Lumina Name Bangers",
+		"Bytwina Name Bangers",
 		include_bytes!("../../../assets/fonts/Bangers-Regular.ttf"),
 	),
 	(
 		2,
-		"Lumina Name BioRhyme",
+		"Bytwina Name BioRhyme",
 		include_bytes!("../../../assets/fonts/BioRhyme.ttf"),
 	),
 	(
 		3,
-		"Lumina Name Cherry Bomb",
+		"Bytwina Name Cherry Bomb",
 		include_bytes!("../../../assets/fonts/CherryBombOne-Regular.ttf"),
 	),
 	(
 		4,
-		"Lumina Name Chicle",
+		"Bytwina Name Chicle",
 		include_bytes!("../../../assets/fonts/Chicle-Regular.ttf"),
 	),
 	(
 		5,
-		"Lumina Name Compagnon",
+		"Bytwina Name Compagnon",
 		include_bytes!("../../../assets/fonts/Compagnon-Roman.otf"),
 	),
 	(
 		6,
-		"Lumina Name MuseoModerno",
+		"Bytwina Name MuseoModerno",
 		include_bytes!("../../../assets/fonts/MuseoModerno.ttf"),
 	),
 	(
 		8,
-		"Lumina Name Pixelify",
+		"Bytwina Name Pixelify",
 		include_bytes!("../../../assets/fonts/PixelifySans.ttf"),
 	),
 	(
 		9,
-		"Lumina Name Ribes",
+		"Bytwina Name Ribes",
 		include_bytes!("../../../assets/fonts/Ribes-Regular.otf"),
 	),
 	(
 		10,
-		"Lumina Name Sinistre",
+		"Bytwina Name Sinistre",
 		include_bytes!("../../../assets/fonts/Sinistre-Regular.otf"),
 	),
 	(
 		12,
-		"Lumina Name Zilla Slab",
+		"Bytwina Name Zilla Slab",
 		include_bytes!("../../../assets/fonts/ZillaSlab-Regular.ttf"),
 	),
 	(
 		13,
-		"Lumina Name Playpen Sans",
+		"Bytwina Name Playpen Sans",
 		include_bytes!("../../../assets/fonts/PlaypenSans.ttf"),
 	),
 	(
 		14,
-		"Lumina Name Orbitron",
+		"Bytwina Name Orbitron",
 		include_bytes!("../../../assets/fonts/Orbitron.ttf"),
 	),
 	(
 		15,
-		"Lumina Name New Rocker",
+		"Bytwina Name New Rocker",
 		include_bytes!("../../../assets/fonts/NewRocker-Regular.ttf"),
 	),
 	(
 		16,
-		"Lumina Name Kalam",
+		"Bytwina Name Kalam",
 		include_bytes!("../../../assets/fonts/Kalam-Regular.ttf"),
 	),
 ];
@@ -671,7 +671,7 @@ fn add_fallback(definitions: &mut FontDefinitions, name: &str, data: FontData) {
 			.push(name.into());
 	}
 	for (family, list) in &mut definitions.families {
-		if matches!(family, FontFamily::Name(family) if family.starts_with("Lumina Name ")) {
+		if matches!(family, FontFamily::Name(family) if family.starts_with("Bytwina Name ")) {
 			list.push(name.into());
 		}
 	}
@@ -813,7 +813,7 @@ mod tests {
 					fonts
 						.definitions()
 						.font_data
-						.contains_key("Lumina Name Kalam")
+						.contains_key("Bytwina Name Kalam")
 				}));
 			})
 			.drop_without_applying_deltas();
@@ -822,7 +822,7 @@ mod tests {
 		let family = families[1].clone().expect("installed on the next pass");
 		ctx.run_ui(Default::default(), |ui| {
 			let list = &ui.fonts(|fonts| fonts.definitions().families[&family].clone());
-			assert_eq!(list[0], "Lumina Name Bangers");
+			assert_eq!(list[0], "Bytwina Name Bangers");
 			assert!(list.iter().any(|face| face == "Inter Medium"));
 			assert!(list.iter().any(|face| face == "Noto Sans Arabic"));
 			ui.label(egui::RichText::new("Synthetic name").family(family.clone()));
@@ -844,10 +844,10 @@ mod tests {
 			name: "Synthetic".into(),
 			data: FontData::from_static(INTER),
 		};
-		let family = FontFamily::Name("Lumina Name Bangers".into());
+		let family = FontFamily::Name("Bytwina Name Bangers".into());
 		apply_custom(&ctx, Some(&custom));
 		let list = ctx.fonts(|fonts| fonts.definitions().families[&family].clone());
-		assert_eq!(&list[..2], ["Lumina Name Bangers", CUSTOM[1]]);
+		assert_eq!(&list[..2], ["Bytwina Name Bangers", CUSTOM[1]]);
 		apply_custom(&ctx, None);
 		ctx.run_ui(Default::default(), |ui| {
 			let definitions = ui.fonts(|fonts| fonts.definitions().clone());

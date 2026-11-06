@@ -46,7 +46,7 @@ pub(super) fn show(
 	section(
 		ui,
 		"Navigation",
-		"Move around Lumina without reaching for the mouse.",
+		"Move around Bytwina without reaching for the mouse.",
 		NAVIGATION,
 		bindings,
 		capturing,

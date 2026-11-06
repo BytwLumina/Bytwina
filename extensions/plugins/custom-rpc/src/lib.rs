@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use lumina_extension_sdk::{
+use bytwina_extension_sdk::{
 	CustomRichPresence, Element, Invocation, Output, RichPresenceButton, RichPresenceImage,
 	RichPresenceKind, RichPresenceOutput, RichPresenceParty, RichPresenceTimer, RichPresenceUpdate,
 };
@@ -383,7 +383,7 @@ fn handle(input: Invocation) -> RichPresenceOutput {
 	}
 }
 
-lumina_extension_sdk::export!(handle);
+bytwina_extension_sdk::export!(handle);
 
 #[cfg(test)]
 mod tests {

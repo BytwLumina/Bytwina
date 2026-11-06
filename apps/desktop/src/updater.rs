@@ -129,7 +129,7 @@ impl Updater {
 				self.demo_available = true;
 				view.log = demo_log();
 				self.status =
-					"Synthetic preview: Lumina 99.0.0 is available. No network request was made."
+					"Synthetic preview: Bytwina 99.0.0 is available. No network request was made."
 						.into();
 			}
 			if download && self.demo_available {
@@ -204,27 +204,27 @@ impl Updater {
 							Ok(Outcome::Checked(package, log)) => {
 								self.log = Some(log);
 								self.status = package.as_ref().map_or_else(
-									|| "Lumina is up to date on this channel.".into(),
+									|| "Bytwina is up to date on this channel.".into(),
 									|p| {
 										if install::flatpak_session() {
 											format!(
-												"Lumina {} is available. Update with `flatpak update` or your Software center.",
+												"Bytwina {} is available. Update with `flatpak update` or your Software center.",
 												p.version,
 											)
 										} else if install::nix_session() {
 											format!(
-												"Lumina {} is available. Update it through Nix.",
+												"Bytwina {} is available. Update it through Nix.",
 												p.version,
 											)
 										} else if let Some(cmd) =
 											install::linux_package_manager_update_command()
 										{
 											format!(
-												"Lumina {} is available. Run `{cmd}` to update.",
+												"Bytwina {} is available. Run `{cmd}` to update.",
 												p.version,
 											)
 										} else {
-											format!("Lumina {} is available.", p.version)
+											format!("Bytwina {} is available.", p.version)
 										}
 									},
 								);
@@ -243,7 +243,7 @@ impl Updater {
 								self.armed = true;
 								self.close_requested = true;
 								self.status =
-									"Update ready. Close Lumina to install and restart.".into();
+									"Update ready. Close Bytwina to install and restart.".into();
 							}
 							Err(error) => {
 								self.auto_download = false;
@@ -307,7 +307,7 @@ impl Updater {
 					.expect("a supported platform's checked package has a downloadable archive")
 					.size;
 				self.auto_download = false;
-				self.status = format!("Downloading Lumina {}…", package.version);
+				self.status = format!("Downloading Bytwina {}…", package.version);
 				self.start(runtime, ctx, total, move |cancel, progress| {
 					download_package(package, cancel, progress)
 				});
@@ -445,7 +445,7 @@ fn client() -> Result<reqwest::Client, String> {
 	reqwest::Client::builder()
 		.https_only(true)
 		.no_proxy()
-		.user_agent(concat!("Lumina/", env!("CARGO_PKG_VERSION")))
+		.user_agent(concat!("Bytwina/", env!("CARGO_PKG_VERSION")))
 		.connect_timeout(Duration::from_secs(10))
 		.read_timeout(Duration::from_secs(30))
 		.timeout(Duration::from_secs(600))
@@ -532,7 +532,7 @@ fn release_version(tag: &str) -> Option<semver::Version> {
 }
 fn asset_name(tag: &str) -> Option<String> {
 	if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
-		return install::appimage_session().then(|| format!("lumina-{tag}-Linux-X64.AppImage"));
+		return install::appimage_session().then(|| format!("bytwina-{tag}-Linux-X64.AppImage"));
 	}
 	let os = if cfg!(target_os = "macos") {
 		"macOS"
@@ -548,7 +548,7 @@ fn asset_name(tag: &str) -> Option<String> {
 	} else {
 		return None;
 	};
-	Some(format!("lumina-{tag}-{os}-{arch}.zip"))
+	Some(format!("bytwina-{tag}-{os}-{arch}.zip"))
 }
 fn on_channel(release: &Release, version: &semver::Version, nightly: bool) -> bool {
 	let is_nightly = version.pre.as_str().starts_with("nightly.");
@@ -691,7 +691,7 @@ fn select_release(
 			release.tag_name
 		);
 		if asset.browser_download_url != expected {
-			return Err("The asset is not from the Lumina release repository.".into());
+			return Err("The asset is not from the Bytwina release repository.".into());
 		}
 		Ok(asset.clone())
 	};

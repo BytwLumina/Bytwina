@@ -307,7 +307,7 @@ impl ScreenUi {
 				ui,
 				"screen-body-share-system-audio",
 				Some(if cfg!(target_os = "macos") {
-					"screen-body-send-what-your-mac-plays-along-with-the-screen-lumina"
+					"screen-body-send-what-your-mac-plays-along-with-the-screen-bytwina"
 				} else {
 					"screen-body-share-sound-from-other-apps-even-when-sharing-one-window"
 				}),

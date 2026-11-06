@@ -1,7 +1,7 @@
 # Camera continuity during Gateway resume
 
 Synthetic offline evidence for PR #844. The images are native eframe/Wgpu framebuffers
-from Lumina's call UI, captured without a Discord connection or camera/audio devices.
+from Bytwina's call UI, captured without a Discord connection or camera/audio devices.
 
 ## Revisions and isolation
 
@@ -62,12 +62,12 @@ Use Rust 1.98.1 and the build settings above. In each checkout, set `CARGO_TARGE
 to its own directory, then run the same commands:
 
 ```sh
-cargo test --locked --offline -p lumina --features demo --bin lumina \
+cargo test --locked --offline -p bytwina --features demo --bin bytwina \
   camera_gateway_demo::tests::disconnected_gateway_retains_active_camera_but_blocks_new_activation \
   -- --exact --nocapture
-cargo build --locked --offline -p lumina --features demo --bin lumina
-"$CARGO_TARGET_DIR/debug/lumina" --demo --demo-check-camera-gateway
-"$CARGO_TARGET_DIR/debug/lumina" --demo \
+cargo build --locked --offline -p bytwina --features demo --bin bytwina
+"$CARGO_TARGET_DIR/debug/bytwina" --demo --demo-check-camera-gateway
+"$CARGO_TARGET_DIR/debug/bytwina" --demo \
   --demo-camera-gateway-evidence=/absolute/path/to/capture.png
 ```
 

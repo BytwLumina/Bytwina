@@ -483,42 +483,42 @@ fn extension_fixture(
 	),
 	Box<dyn std::error::Error>,
 > {
-	let external = std::env::var_os("LUMINA_PREVIEW_PACKAGE")
+	let external = std::env::var_os("BYTWINA_PREVIEW_PACKAGE")
 		.map(std::fs::read)
 		.transpose()?;
 	let bytes: &[u8] = match id {
 		"custom-rpc" | "api-proxy" => external
 			.as_deref()
-			.ok_or("Set LUMINA_PREVIEW_PACKAGE to the external plugin package")?,
-		"lumina-ocean" => {
-			include_bytes!("../../../extensions/themes/ocean.lumina-extension")
+			.ok_or("Set BYTWINA_PREVIEW_PACKAGE to the external plugin package")?,
+		"bytwina-ocean" => {
+			include_bytes!("../../../extensions/themes/ocean.bytwina-extension")
 		}
 		"message-delete-protector" => include_bytes!(
-			"../../../extensions/plugins/packages/message-delete-protector.lumina-extension"
+			"../../../extensions/plugins/packages/message-delete-protector.bytwina-extension"
 		),
-		"lumina-midnight" => {
-			include_bytes!("../../../extensions/themes/midnight.lumina-extension")
+		"bytwina-midnight" => {
+			include_bytes!("../../../extensions/themes/midnight.bytwina-extension")
 		}
-		"lumina-rose" => {
-			include_bytes!("../../../extensions/themes/rose.lumina-extension")
+		"bytwina-rose" => {
+			include_bytes!("../../../extensions/themes/rose.bytwina-extension")
 		}
-		"lumina-forest" => {
-			include_bytes!("../../../extensions/themes/forest.lumina-extension")
+		"bytwina-forest" => {
+			include_bytes!("../../../extensions/themes/forest.bytwina-extension")
 		}
-		"lumina-latte" => {
-			include_bytes!("../../../extensions/themes/latte.lumina-extension")
+		"bytwina-latte" => {
+			include_bytes!("../../../extensions/themes/latte.bytwina-extension")
 		}
 		"golden-theme" => {
-			include_bytes!("../../../extensions/themes/golden.lumina-extension")
+			include_bytes!("../../../extensions/themes/golden.bytwina-extension")
 		}
 		"black-theme" => {
-			include_bytes!("../../../extensions/themes/katana.lumina-extension")
+			include_bytes!("../../../extensions/themes/katana.bytwina-extension")
 		}
 		"obsidian-theme" => {
-			include_bytes!("../../../extensions/themes/obsidian.lumina-extension")
+			include_bytes!("../../../extensions/themes/obsidian.bytwina-extension")
 		}
 		"teal-theme" => {
-			include_bytes!("../../../extensions/themes/teal.lumina-extension")
+			include_bytes!("../../../extensions/themes/teal.bytwina-extension")
 		}
 		_ => return Err("Unknown fixture extension".into()),
 	};
@@ -563,27 +563,27 @@ fn seed_catalog(extensions: &mut ui::ExtensionUi, themes: bool) {
 	if themes {
 		let packages: [(&[u8], &str); 6] = [
 			(
-				include_bytes!("../../../extensions/themes/ocean.lumina-extension"),
+				include_bytes!("../../../extensions/themes/ocean.bytwina-extension"),
 				"",
 			),
 			(
-				include_bytes!("../../../extensions/themes/obsidian.lumina-extension"),
+				include_bytes!("../../../extensions/themes/obsidian.bytwina-extension"),
 				"Obsidian violet surfaces and lavender accents.",
 			),
 			(
-				include_bytes!("../../../extensions/themes/forest.lumina-extension"),
+				include_bytes!("../../../extensions/themes/forest.bytwina-extension"),
 				"Calm forest greens and fresh leafy accents.",
 			),
 			(
-				include_bytes!("../../../extensions/themes/latte.lumina-extension"),
+				include_bytes!("../../../extensions/themes/latte.bytwina-extension"),
 				"Warm coffee tones and a creamy caramel accent.",
 			),
 			(
-				include_bytes!("../../../extensions/themes/rose.lumina-extension"),
+				include_bytes!("../../../extensions/themes/rose.bytwina-extension"),
 				"Soft rose accents.",
 			),
 			(
-				include_bytes!("../../../extensions/themes/midnight.lumina-extension"),
+				include_bytes!("../../../extensions/themes/midnight.bytwina-extension"),
 				"Deep, quiet surfaces.",
 			),
 		];
@@ -648,7 +648,7 @@ fn seed_catalog(extensions: &mut ui::ExtensionUi, themes: bool) {
 	);
 	let previews = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../extensions/previews");
 	{
-		let (id, filename) = ("lumina-ocean", "ocean.png");
+		let (id, filename) = ("bytwina-ocean", "ocean.png");
 		let image = image::open(previews.join(filename))
 			.expect("valid fixture preview")
 			.to_rgba8();
@@ -799,7 +799,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let saved = Arc::new(AtomicBool::new(false));
 	let completed = saved.clone();
 	eframe::run_native(
-		"Lumina · offline profile preview",
+		"Bytwina · offline profile preview",
 		eframe::NativeOptions {
 			viewport: egui::ViewportBuilder::default()
 				.with_inner_size([width, height])
@@ -1282,7 +1282,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 					if theme_preview {
 						prime_extension_chat(&mut state);
 						let package = extensions::parse_package(include_bytes!(
-							"../../../extensions/themes/katana.lumina-extension"
+							"../../../extensions/themes/katana.bytwina-extension"
 						))?;
 						messaging.extensions.receive_theme_edit(
 							Box::new(package),
@@ -1294,7 +1294,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 					}
 					if let Some(tab) = &theme_editor {
 						let mut package = extensions::parse_package(include_bytes!(
-							"../../../extensions/themes/ocean.lumina-extension"
+							"../../../extensions/themes/ocean.bytwina-extension"
 						))
 						.expect("valid theme fixture");
 						package.manifest.name = "My ocean".into();

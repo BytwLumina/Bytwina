@@ -3,7 +3,7 @@
 language-system = System
 language-group = Language
 language-label = Display language
-language-description = Choose Lumina's language. Discord content is never translated.
+language-description = Choose Bytwina's language. Discord content is never translated.
 section-user = User settings
 section-app = App settings
 section-customization = Customization
@@ -28,11 +28,11 @@ description-appearance = Theme, colours, window effects and layout.
 description-chat = How messages, media, links and scrolling behave.
 description-messaging-permissions = Control who can contact you and how messages are filtered.
 description-notifications = Choose which notifications you receive and how they appear.
-description-registered-games = Share what you play, and fix or add the games Lumina detects.
+description-registered-games = Share what you play, and fix or add the games Bytwina detects.
 description-voice = Microphone, speakers, camera and voice processing.
-description-keybinds = Keyboard shortcuts for Lumina.
-description-storage = What Lumina keeps on this device.
-description-updates = Keep Lumina up to date on this device.
+description-keybinds = Keyboard shortcuts for Bytwina.
+description-storage = What Bytwina keeps on this device.
+description-updates = Keep Bytwina up to date on this device.
 description-extensions = Manage community plugins.
 description-themes = Choose a community theme.
 theme-maker = Theme maker
@@ -45,34 +45,34 @@ log-out = Log out
 unofficial = Unofficial · not endorsed by Discord
 offline-preview = Offline preview · changes stay in this session and are never sent.
 general-startup = Startup
-general-open-at-startup = Open Lumina when your computer starts
-general-open-at-startup-description = Lumina signs in and connects in the background.
+general-open-at-startup = Open Bytwina when your computer starts
+general-open-at-startup-description = Bytwina signs in and connects in the background.
 general-start-minimized = Start minimized
 general-start-minimized-description = Start in the background, out of your way.
 general-startup-unavailable = Automatic startup is available on Windows and macOS.
 general-window = Window
 general-hide-decorations = No title bar
-general-hide-decorations-description = For tiling window managers: remove every title bar and border, including Lumina's own. Move, resize and close Lumina with your window manager.
+general-hide-decorations-description = For tiling window managers: remove every title bar and border, including Bytwina's own. Move, resize and close Bytwina with your window manager.
 general-custom-title-bar = Custom title bar
-general-custom-title-bar-description = Replace the system title bar with Lumina's own GTK 4 style header bar.
-general-hide-title-bar = Hide Lumina title bar
+general-custom-title-bar-description = Replace the system title bar with Bytwina's own GTK 4 style header bar.
+general-hide-title-bar = Hide Bytwina title bar
 general-hide-title-bar-description = Use the system title bar and window buttons instead.
-general-keep-menu-bar = Keep Lumina in the menu bar
-general-keep-system-tray = Keep Lumina in the system tray
-general-menu-bar-description = Closing the window keeps Lumina in the menu bar. Quit from its menu to exit.
-general-linux-tray-description = Closing keeps Lumina running. Use the tray to show, minimize or quit.
-general-windows-tray-description = Closing the window keeps Lumina in the notification area. Quit from its menu to exit.
+general-keep-menu-bar = Keep Bytwina in the menu bar
+general-keep-system-tray = Keep Bytwina in the system tray
+general-menu-bar-description = Closing the window keeps Bytwina in the menu bar. Quit from its menu to exit.
+general-linux-tray-description = Closing keeps Bytwina running. Use the tray to show, minimize or quit.
+general-windows-tray-description = Closing the window keeps Bytwina in the notification area. Quit from its menu to exit.
 general-tray-unavailable = The tray is unavailable on this platform.
 general-graphics = Graphics
 general-render-with = Render with
-general-gpu-restart = Takes effect the next time Lumina starts.
+general-gpu-restart = Takes effect the next time Bytwina starts.
 general-gpu-current-prefix = Currently drawing with
 general-steady-refresh-rate = Steady refresh rate
-general-steady-refresh-rate-description = While Lumina is the active window, draw at the display's refresh rate so variable refresh rate (VRR, G-SYNC, FreeSync) displays can hold one rate instead of flickering. Uses more power.
+general-steady-refresh-rate-description = While Bytwina is the active window, draw at the display's refresh rate so variable refresh rate (VRR, G-SYNC, FreeSync) displays can hold one rate instead of flickering. Uses more power.
 gpu-automatic = Automatic
 gpu-high-performance = High performance
 gpu-power-saving = Power saving
-gpu-automatic-description = Let Lumina choose the GPU that can draw this window.
+gpu-automatic-description = Let Bytwina choose the GPU that can draw this window.
 gpu-high-performance-description = Use the discrete graphics card when one is available.
 gpu-power-saving-description = Use integrated graphics to save battery.
 direct-messages = Direct Messages
@@ -216,7 +216,7 @@ account-menu-custom-status-editor-clear-after = Clear after
 # Context: custom_status_editor
 account-menu-custom-status-editor-no-custom-status = No custom status
 # Context: custom_status_editor
-account-menu-custom-status-editor-lumina-clears-it = Lumina clears it
+account-menu-custom-status-editor-bytwina-clears-it = Bytwina clears it
 # Context: custom_status_editor
 account-menu-custom-status-editor-status-text = Status text
 # Context: custom_status_editor
@@ -1050,7 +1050,7 @@ fonts-show-none-installed = No installed fonts were found on this system.
 # Context: show
 fonts-show-the-quick-brown-fox-jumps-over-the-lazy-dog-0123456789 = The quick brown fox jumps over the lazy dog. 0123456789
 # Context: show
-fonts-show-ttf-or-otf-up-to-32-mib-saved-on-this = Fonts installed on this device, up to 32 MiB. A copy is saved for Lumina. Code keeps its monospace font.
+fonts-show-ttf-or-otf-up-to-32-mib-saved-on-this = Fonts installed on this device, up to 32 MiB. A copy is saved for Bytwina. Code keeps its monospace font.
 # Context: show
 fonts-show-typography = Typography
 
@@ -1568,7 +1568,7 @@ keybinds-show-voice-enable-global-keybinds = Enable global keybinds
 # Context: show_voice
 keybinds-show-voice-global-availability = Global availability
 # Context: show_voice
-keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = Use voice shortcuts while another app is focused. When off, shortcuts only work while Lumina is focused.
+keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = Use voice shortcuts while another app is focused. When off, shortcuts only work while Bytwina is focused.
 
 ## crates/ui/src/lib.rs
 # Context: account_card
@@ -1646,7 +1646,7 @@ main-restoring-checking-your-saved-login = Checking your saved login
 # Context: restoring
 main-restoring-connecting-to-discord = Connecting to Discord
 # Context: restoring_screen
-main-restoring-screen-lumina = Lumina
+main-restoring-screen-bytwina = Bytwina
 # Context: restoring_screen
 main-restoring-screen-use-a-different-account = Use a different account
 # Context: restoring_screen
@@ -1658,11 +1658,11 @@ main-sign-in-consent-i-own-this-account-and-authorize-this-session = I own this 
 # Context: sign_in_consent
 main-sign-in-consent-passwords-and-2fa-stay-on-discord-s-own-login-page = Passwords and 2FA stay on Discord's own login page; only the session token is kept, in your OS credential store.
 # Context: sign_in_disclosures
-main-sign-in-disclosures-about-lumina = About Lumina
+main-sign-in-disclosures-about-bytwina = About Bytwina
 # Context: sign_in_disclosures
 main-sign-in-disclosures-connect-with-this-token = Connect with this token
 # Context: sign_in_disclosures
-main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = For owners who already hold a valid Discord session token, for example from another signed-in Lumina install. Passwords and 2FA are never used here; this bypasses Discord's hosted login page entirely.
+main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = For owners who already hold a valid Discord session token, for example from another signed-in Bytwina install. Passwords and 2FA are never used here; this bypasses Discord's hosted login page entirely.
 # Context: sign_in_disclosures
 main-sign-in-disclosures-forget-saved-login = Forget saved login
 # Context: sign_in_disclosures
@@ -1676,7 +1676,7 @@ main-sign-in-header-sign-in-with-your-discord-account-to-get-started = Sign in w
 # Context: sign_in_header
 main-sign-in-header-welcome-back = Welcome back
 # Context: sign_in_header
-main-sign-in-header-welcome-to-lumina = Welcome to Lumina
+main-sign-in-header-welcome-to-bytwina = Welcome to Bytwina
 # Context: sign_in_preview
 main-sign-in-status-copy-failure-details = Copy failure details
 main-sign-in-preview-explore-the-offline-preview = Explore the offline preview
@@ -1685,7 +1685,7 @@ main-sign-in-preview-sample-conversations-no-discord-connection = Sample convers
 # Context: sign_in_screen
 main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord = Independent and open source. Not affiliated with Discord.
 # Context: sign_in_screen
-main-sign-in-screen-lumina = Lumina
+main-sign-in-screen-bytwina = Bytwina
 # Context: ui
 main-ui-cancel = Cancel
 # Context: ui
@@ -2284,9 +2284,9 @@ screen-body-refresh = Refresh
 # Context: body
 screen-body-screen-or-window = Screen or window
 # Context: body
-screen-body-send-what-your-mac-plays-along-with-the-screen-lumina = Send what your Mac plays along with the screen. Lumina's own call audio is left out.
+screen-body-send-what-your-mac-plays-along-with-the-screen-bytwina = Send what your Mac plays along with the screen. Bytwina's own call audio is left out.
 # Context: body
-screen-body-share-sound-from-other-apps-even-when-sharing-one-window = Share sound from other apps, even when sharing one window. Lumina's own audio is left out.
+screen-body-share-sound-from-other-apps-even-when-sharing-one-window = Share sound from other apps, even when sharing one window. Bytwina's own audio is left out.
 # Context: body
 screen-body-share-system-audio = Share system audio
 # Context: body
@@ -3447,7 +3447,7 @@ settings-activity-added-games = Added Games
 # Context: activity_settings
 settings-activity-no-games-added = No games added
 # Context: activity_settings
-settings-activity-hidden = Hidden. Lumina will not detect this game.
+settings-activity-hidden = Hidden. Bytwina will not detect this game.
 # Context: activity_settings
 settings-activity-detected = Detected automatically
 # Context: activity_settings
@@ -3469,7 +3469,7 @@ settings-activity-click-to-rename = Click to rename
 # Context: activity_settings
 settings-activity-add-a-game = Add a game
 # Context: activity_settings
-settings-activity-choose-program = Choose a running program. Lumina shows it as your game whenever it runs.
+settings-activity-choose-program = Choose a running program. Bytwina shows it as your game whenever it runs.
 # Context: activity_settings
 settings-activity-search-programs = Search running programs
 # Context: activity_settings
@@ -3497,7 +3497,7 @@ settings-appearance-settings-primary-color = Primary color
 # Context: appearance_settings
 settings-appearance-settings-reset = Reset
 # Context: appearance_settings
-settings-appearance-settings-restart-lumina-after-changing-this-themes-can-customize-effects-while = Restart Lumina after changing this. Themes can customize effects while enabled.
+settings-appearance-settings-restart-bytwina-after-changing-this-themes-can-customize-effects-while = Restart Bytwina after changing this. Themes can customize effects while enabled.
 # Context: appearance_settings
 settings-appearance-settings-the-active-theme-brings-its-own-accent-it-takes-over = The active theme brings its own accent; it takes over while the theme is in use.
 # Context: appearance_settings
@@ -3534,16 +3534,16 @@ settings-storage-page-clear-cache = Clear cache
 # Context: storage_page
 settings-storage-page-local-storage = Local storage
 # Context: storage_page
-settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = Messages and drafts are cached on this device inside bounded, account-isolated files. Cache data is not encrypted by Lumina; saved login tokens use the OS credential store.
+settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = Messages and drafts are cached on this device inside bounded, account-isolated files. Cache data is not encrypted by Bytwina; saved login tokens use the OS credential store.
 # Context: storage_page
 settings-storage-page-removes-cached-messages-and-media-drafts-and-your-login-stay = Removes cached messages and media. Drafts and your login stay.
 # Context: storage_page
-settings-storage-page-lumina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Lumina does not collect telemetry or upload diagnostics. Discord retains service-side data according to its own policies.
+settings-storage-page-bytwina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Bytwina does not collect telemetry or upload diagnostics. Discord retains service-side data according to its own policies.
 # Context: storage_page
 settings-storage-page-your-privacy = Your privacy
 settings-storage-page-saved-login = Saved login
 settings-storage-page-plaintext-login = Save login in plaintext without a keyring
-settings-storage-page-plaintext-login-description = Used only when no OS keyring (GNOME Keyring, KWallet, Keychain or Credential Manager) works. The token is stored unencrypted in a private file in Lumina's data folder, where anyone with access to your user account can read it. Turning this off deletes those files.
+settings-storage-page-plaintext-login-description = Used only when no OS keyring (GNOME Keyring, KWallet, Keychain or Credential Manager) works. The token is stored unencrypted in a private file in Bytwina's data folder, where anyone with access to your user account can read it. Turning this off deletes those files.
 # Context: cosmetic_settings
 settings-cosmetics = Profile cosmetics
 # Context: cosmetic_settings
@@ -3992,7 +3992,7 @@ updates-update-settings-could-not-load-or-save-update-preferences-changes-may-no
 # Context: update_settings
 updates-update-settings-download-update = Download update
 # Context: update_settings
-updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = Download updates in the background. Restart when you are ready. Lumina still checks at startup and periodically when this is off.
+updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = Download updates in the background. Restart when you are ready. Bytwina still checks at startup and periodically when this is off.
 # Context: update_settings
 updates-update-settings-early-builds-with-the-newest-changes-nightly-releases-can-be = Early builds with the newest changes. Nightly releases can be less reliable.
 # Context: update_settings
@@ -4018,7 +4018,7 @@ updates-update-settings-release-channel = Release channel
 # Context: update_settings
 updates-update-settings-restart-to-update = Restart to update
 # Context: update_settings
-updates-update-settings-lumina-was-installed-via-your-distribution-run-this-in-a = Lumina was installed via your distribution. Run this in a terminal to update.
+updates-update-settings-bytwina-was-installed-via-your-distribution-run-this-in-a = Bytwina was installed via your distribution. Run this in a terminal to update.
 # Context: update_settings
 updates-update-settings-save-diagnostics = Save diagnostics
 # Context: update_settings
@@ -4040,7 +4040,7 @@ updates-update-settings-log-warnings = Errors and warnings
 # Context: update_settings
 updates-update-settings-open-folder = Open folder
 # Context: update_settings
-updates-update-settings-the-log-folder-could-not-be-written = The log folder could not be written. Check Lumina's data folder and try again.
+updates-update-settings-the-log-folder-could-not-be-written = The log folder could not be written. Check Bytwina's data folder and try again.
 # Context: update_settings
 updates-update-settings-timings-stages-and-failures-in-one-local-file-no-account-channel-or = Timings, stages and failures in one local log file. Account, channel, message and credential data are never written, and nothing is uploaded.
 # Context: update_log
@@ -4523,7 +4523,7 @@ onboarding-rules-heading = Server rules
 # Context: rules
 onboarding-rules-review = A moderator reviews these answers before you can chat.
 # Context: field
-onboarding-field-unsupported = This server asks a question Lumina can't show yet. Finish joining in the Discord app.
+onboarding-field-unsupported = This server asks a question Bytwina can't show yet. Finish joining in the Discord app.
 # Context: field
 onboarding-field-agree = I have read and agree to the rules
 
@@ -4563,7 +4563,7 @@ public-upload-host-catbox = Up to 200 MB (GIF 20 MB) · may be removed after two
 public-upload-host-litterbox = Up to 1 GB · temporary, deleted after 72 hours
 public-upload-over-limit = { $size } · over your { $limit } Discord upload limit
 public-upload-uploading = Uploading to { $host } · { $sent } of { $total }
-public-upload-privacy = Anyone with the link can open this file. It is uploaded unchanged, metadata included, outside Discord, and Lumina cannot delete it later.
+public-upload-privacy = Anyone with the link can open this file. It is uploaded unchanged, metadata included, outside Discord, and Bytwina cannot delete it later.
 public-upload-review = Nothing is sent yet. Add the link to your draft or copy it, then send it yourself.
 public-upload-return = Return to the original conversation to add its link.
 public-upload-preparing = Preparing public upload…
@@ -4712,7 +4712,7 @@ reading-double-click-reaction = Double-click reaction
 
 ## crates/platform/src/app_menu.rs
 # Context: macos_menu_bar
-app-menu-about = About Lumina
+app-menu-about = About Bytwina
 # Context: macos_menu_bar
 app-menu-updates = Check for Updates…
 # Context: macos_menu_bar
@@ -4720,13 +4720,13 @@ app-menu-settings = Settings…
 # Context: macos_menu_bar
 app-menu-services = Services
 # Context: macos_menu_bar
-app-menu-hide = Hide Lumina
+app-menu-hide = Hide Bytwina
 # Context: macos_menu_bar
 app-menu-hide-others = Hide Others
 # Context: macos_menu_bar
 app-menu-show-all = Show All
 # Context: macos_menu_bar
-app-menu-quit = Quit Lumina
+app-menu-quit = Quit Bytwina
 # Context: macos_menu_bar
 app-menu-file = File
 # Context: macos_menu_bar
@@ -4768,7 +4768,7 @@ app-menu-bring-all-to-front = Bring All to Front
 # Context: macos_menu_bar
 app-menu-help = Help
 # Context: macos_menu_bar
-app-menu-github = Lumina on GitHub
+app-menu-github = Bytwina on GitHub
 # Context: macos_menu_bar
 app-menu-report-issue = Report an Issue…
 

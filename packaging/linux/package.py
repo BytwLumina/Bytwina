@@ -47,11 +47,11 @@ def stage_payload(root, stage, prefix="usr"):
     """Copy the shared, allowlisted native/Flatpak installation payload."""
     if prefix not in {"usr", "app"}:
         raise ValueError("Installation prefix must be usr or app")
-    doc = stage / prefix / "share/doc/lumina"
-    copy(root / "lumina", stage / prefix / "bin/lumina")
-    desktop = stage / prefix / "share/applications/io.github.ninokiru.Lumina.desktop"
+    doc = stage / prefix / "share/doc/bytwina"
+    copy(root / "bytwina", stage / prefix / "bin/bytwina")
+    desktop = stage / prefix / "share/applications/io.github.ninokiru.Bytwina.desktop"
     desktop.parent.mkdir(parents=True)
-    desktop.write_text(Path("packaging/linux/lumina.desktop").read_text(), encoding="utf-8")
+    desktop.write_text(Path("packaging/linux/bytwina.desktop").read_text(), encoding="utf-8")
     copy(Path("packaging/linux/hicolor"), stage / prefix / "share/icons/hicolor")
     for name in ["README.md", "THIRD_PARTY_NOTICES.md", "LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]:
         copy(root / name, doc / name)
@@ -66,12 +66,12 @@ def stage_payload(root, stage, prefix="usr"):
     for name in ["files", "notifications", "login", "audio", "voice", "dependencies"]:
         copy(root / "licenses" / name, doc / "licenses" / name, Path("assets/licenses") / name)
     for path in [stage, *stage.rglob("*")]:
-        path.chmod(0o755 if path.is_dir() or path == stage / prefix / "bin/lumina" else 0o644)
+        path.chmod(0o755 if path.is_dir() or path == stage / prefix / "bin/bytwina" else 0o644)
 
 
 def smoke(package, stage, temporary, version, architecture, depends):
     fields = {
-        "Package": "lumina", "Version": version, "Architecture": architecture,
+        "Package": "bytwina", "Version": version, "Architecture": architecture,
         "Depends": depends,
     }
     for field, expected in fields.items():
@@ -85,7 +85,7 @@ def smoke(package, stage, temporary, version, architecture, depends):
     with tarfile.open(archive) as contents:
         for member in contents:
             path = Path(member.name)
-            expected_mode = 0o755 if member.isdir() or member.name == "./usr/bin/lumina" else 0o644
+            expected_mode = 0o755 if member.isdir() or member.name == "./usr/bin/bytwina" else 0o644
             if (path.is_absolute() or ".." in path.parts
                     or not (member.isfile() or member.isdir())
                     or member.mode != expected_mode or member.uid or member.gid):
@@ -102,8 +102,8 @@ def smoke(package, stage, temporary, version, architecture, depends):
     checked("dpkg-deb", "--control", str(package), str(control))
     if payload_files(control) != ["control"]:
         raise ValueError("Unexpected control files or maintainer scripts")
-    checked("desktop-file-validate", str(extracted / "usr/share/applications/io.github.ninokiru.Lumina.desktop"))
-    libraries = output("ldd", str(extracted / "usr/bin/lumina"))
+    checked("desktop-file-validate", str(extracted / "usr/share/applications/io.github.ninokiru.Bytwina.desktop"))
+    libraries = output("ldd", str(extracted / "usr/bin/bytwina"))
     if "not found" in libraries:
         raise ValueError(f"Unresolved packaged executable dependencies:\n{libraries}")
     print(f"Debian package smoke passed: {len(expected)} files; executable, desktop entry, "
@@ -118,7 +118,7 @@ def package(root, application_version):
     if machine is None:
         raise ValueError(f"Unverified Debian package architecture: {architecture}")
     # Rust and dpkg must agree: do not label a cross-built binary as the host arch.
-    with (root / "lumina").open("rb") as executable:
+    with (root / "bytwina").open("rb") as executable:
         header = executable.read(20)
     if (len(header) != 20 or header[:6] != b"\x7fELF\x02\x01"
             or struct.unpack("<H", header[18:20])[0] != machine):
@@ -127,19 +127,19 @@ def package(root, application_version):
     checked("dpkg", "--validate-version", version)
     # A fresh owned directory prevents stale files, logs or credentials in dist
     # from entering a package. TemporaryDirectory removes only this invocation.
-    with tempfile.TemporaryDirectory(prefix="lumina-debian-package-") as directory:
+    with tempfile.TemporaryDirectory(prefix="bytwina-debian-package-") as directory:
         temporary = Path(directory).resolve()
-        stage = temporary / "debian/lumina"
+        stage = temporary / "debian/bytwina"
         stage_payload(root, stage)
         debian = temporary / "debian"
         debian.mkdir(exist_ok=True)
         (debian / "control").write_text(
-            "Source: lumina\nSection: net\nPriority: optional\n"
+            "Source: bytwina\nSection: net\nPriority: optional\n"
             "Maintainer: Lumina contributors <noreply@github.com>\n\n"
-            "Package: lumina\nArchitecture: any\nDescription: Unofficial native Discord client\n",
+            "Package: bytwina\nArchitecture: any\nDescription: Unofficial native Discord client\n",
             encoding="utf-8")
         (stage / "DEBIAN").mkdir()
-        dependencies = output("dpkg-shlibdeps", "-O", "debian/lumina/usr/bin/lumina", cwd=temporary)
+        dependencies = output("dpkg-shlibdeps", "-O", "debian/bytwina/usr/bin/bytwina", cwd=temporary)
         depends = next(line.removeprefix("shlibs:Depends=") for line in dependencies.splitlines()
                        if line.startswith("shlibs:Depends="))
         # dlopen libraries and desktop services are invisible to ELF DT_NEEDED.
@@ -150,7 +150,7 @@ def package(root, application_version):
                             for p in stage.rglob("*"))
         control = stage / "DEBIAN/control"
         control.write_text(
-            f"Package: lumina\nVersion: {version}\nArchitecture: {architecture}\n"
+            f"Package: bytwina\nVersion: {version}\nArchitecture: {architecture}\n"
             "Section: net\nPriority: optional\n"
             "Maintainer: Lumina contributors <noreply@github.com>\n"
             "Homepage: https://github.com/BytwLumina/Bytwina\n"
@@ -162,9 +162,9 @@ def package(root, application_version):
             " Unofficial, experimental, and not endorsed by Discord.\n",
             encoding="utf-8")
         for path in [stage, *stage.rglob("*")]:
-            path.chmod(0o755 if path.is_dir() or path == stage / "usr/bin/lumina" else 0o644)
-        checked("desktop-file-validate", str(stage / "usr/share/applications/io.github.ninokiru.Lumina.desktop"))
-        artifact = root / f"lumina_{version}_{architecture}.deb"
+            path.chmod(0o755 if path.is_dir() or path == stage / "usr/bin/bytwina" else 0o644)
+        checked("desktop-file-validate", str(stage / "usr/share/applications/io.github.ninokiru.Bytwina.desktop"))
+        artifact = root / f"bytwina_{version}_{architecture}.deb"
         candidate = temporary / artifact.name
         checked("dpkg-deb", "--root-owner-group", "-Zxz", "--build", str(stage), str(candidate))
         smoke(candidate, stage, temporary, version, architecture, depends)
@@ -177,7 +177,7 @@ def package(root, application_version):
 
 def native_elf(root):
     machine = {"x86_64": 62, "aarch64": 183}.get(platform.machine())
-    with (root / "lumina").open("rb") as stream:
+    with (root / "bytwina").open("rb") as stream:
         header = stream.read(20)
     if (sys.platform != "linux" or machine is None or len(header) != 20
             or header[:6] != b"\x7fELF\x02\x01"
@@ -216,12 +216,12 @@ def native_package(root, application_version, format):
         raise ValueError(f"Build {format} natively on its supported distribution, not {distro}")
     if format == "arch" and os.getuid() == 0:
         raise ValueError("Run Arch builds as an unprivileged user; makepkg refuses root")
-    with tempfile.TemporaryDirectory(prefix="lumina-linux-package-") as directory:
+    with tempfile.TemporaryDirectory(prefix="bytwina-linux-package-") as directory:
         temporary = Path(directory).resolve()
         stage = temporary / "payload"
         stage_payload(root, stage)
-        checked("desktop-file-validate", str(stage / "usr/share/applications/io.github.ninokiru.Lumina.desktop"))
-        libraries = output("ldd", str(stage / "usr/bin/lumina"))
+        checked("desktop-file-validate", str(stage / "usr/share/applications/io.github.ninokiru.Bytwina.desktop"))
+        libraries = output("ldd", str(stage / "usr/bin/bytwina"))
         if "not found" in libraries:
             raise ValueError(f"Unresolved packaged executable dependencies:\n{libraries}")
         if format == "rpm":
@@ -249,30 +249,30 @@ def rpm_package(temporary, stage, application_version, distro):
             "gstreamer1-plugins-base" if distro == "fedora" else "gstreamer-plugins-base",
             "pipewire-gstreamer" if distro == "fedora" else "gstreamer-plugin-pipewire"]
     plugins = "gstreamer1-plugins-base" if distro == "fedora" else "gstreamer-plugins-base"
-    spec = temporary / "lumina.spec"
+    spec = temporary / "bytwina.spec"
     spec.write_text(
         "%global debug_package %{nil}\n%global __os_install_post %{nil}\n"
         "%global _build_id_links none\n"
-        f"Name: lumina\nVersion: {version}\nRelease: {release}\n"
+        f"Name: bytwina\nVersion: {version}\nRelease: {release}\n"
         "Summary: Unofficial native Discord client\nLicense: Proprietary\n"
         "URL: https://github.com/BytwLumina/Bytwina\n"
         + "\n".join(f"Requires: {item}" for item in requires)
         + f"\nRecommends: gnome-keyring, {plugins}\n"
         "\n%description\nNative Rust client for existing Discord accounts, including voice.\n"
         "Unofficial, experimental, and not endorsed by Discord.\n"
-        "\n%install\nmkdir -p %{buildroot}\ncp -a %{_lumina_payload}/. %{buildroot}/\n"
-        "\n%files\n%defattr(-,root,root,-)\n/usr/bin/lumina\n"
-        "/usr/share/applications/io.github.ninokiru.Lumina.desktop\n/usr/share/doc/lumina\n"
+        "\n%install\nmkdir -p %{buildroot}\ncp -a %{_bytwina_payload}/. %{buildroot}/\n"
+        "\n%files\n%defattr(-,root,root,-)\n/usr/bin/bytwina\n"
+        "/usr/share/applications/io.github.ninokiru.Bytwina.desktop\n/usr/share/doc/bytwina\n"
         + "".join(f"/{name}\n" for name in payload_files(stage) if name.startswith("usr/share/icons/")),
         encoding="utf-8")
     # Paths are passed as RPM macro values; reject macro/shell metacharacters.
     if not re.fullmatch(r"[/A-Za-z0-9_.-]+", str(temporary)):
         raise ValueError("RPM temporary directory must have a simple absolute path")
     checked("rpmbuild", "-bb", "--define", f"_topdir {temporary}/rpm",
-            "--define", f"_lumina_payload {stage}", str(spec))
+            "--define", f"_bytwina_payload {stage}", str(spec))
     artifact, = (temporary / "rpm/RPMS").rglob("*.rpm")
     actual = output("rpm", "-qp", "--qf", "%{NAME}\n%{VERSION}\n%{RELEASE}\n%{ARCH}", str(artifact))
-    if actual != f"lumina\n{version}\n{release}\n{platform.machine()}":
+    if actual != f"bytwina\n{version}\n{release}\n{platform.machine()}":
         raise ValueError(f"Incorrect RPM metadata: {actual}")
     if output("rpm", "-qp", "--scripts", str(artifact)):
         raise ValueError("Unexpected RPM install scripts")
@@ -280,7 +280,7 @@ def rpm_package(temporary, stage, application_version, distro):
     for line in listing.splitlines():
         name, mode, user, group = line.split("\t")
         path = stage / name.removeprefix("/")
-        expected_mode = 0o40755 if path.is_dir() else 0o100755 if name == "/usr/bin/lumina" else 0o100644
+        expected_mode = 0o40755 if path.is_dir() else 0o100755 if name == "/usr/bin/bytwina" else 0o100644
         if (".." in Path(name).parts or not path.exists()
                 or int(mode, 8) != expected_mode or user != "root" or group != "root"):
             raise ValueError(f"Unexpected RPM payload entry: {line}")
@@ -316,7 +316,7 @@ def arch_package(temporary, stage, application_version, libraries):
     if any(not re.fullmatch(r"[A-Za-z0-9@._+:>=-]+", item) for item in depends):
         raise ValueError("Invalid native Arch dependency metadata")
     (temporary / "PKGBUILD").write_text(
-        f"pkgname=lumina\npkgver='{version}'\npkgrel=1\n"
+        f"pkgname=bytwina\npkgver='{version}'\npkgrel=1\n"
         "pkgdesc='Unofficial native Discord client'\n"
         f"arch=('{platform.machine()}')\nurl='https://github.com/BytwLumina/Bytwina'\n"
         "license=('MIT' 'Apache-2.0')\noptions=('!strip' '!debug' '!lto')\n"
@@ -325,7 +325,7 @@ def arch_package(temporary, stage, application_version, libraries):
         "'gst-plugins-bad: hardware screen encoding' 'gst-libav: inline video')\n"
         "package() { cp -a \"$startdir/payload/.\" \"$pkgdir/\"; }\n", encoding="utf-8")
     checked("makepkg", "--nodeps", "--noconfirm", cwd=temporary)
-    artifact, = temporary.glob("lumina-*.pkg.tar.*")
+    artifact, = temporary.glob("bytwina-*.pkg.tar.*")
     archive = temporary / "payload.tar"
     with archive.open("wb") as stream:
         subprocess.run(["bsdtar", "-cf", "-", "--format=ustar", "@" + str(artifact)], stdout=stream, check=True)
@@ -333,7 +333,7 @@ def arch_package(temporary, stage, application_version, libraries):
     extracted.mkdir()
     with tarfile.open(archive) as contents:
         metadata = contents.extractfile(".PKGINFO").read().decode()
-        for item in [f"pkgname = lumina", f"pkgver = {version}-1", f"arch = {platform.machine()}",
+        for item in [f"pkgname = bytwina", f"pkgver = {version}-1", f"arch = {platform.machine()}",
                      *(f"depend = {dependency}" for dependency in depends)]:
             if item not in metadata.splitlines():
                 raise ValueError(f"Missing Arch metadata: {item}")
@@ -344,7 +344,7 @@ def arch_package(temporary, stage, application_version, libraries):
                 raise ValueError(f"Unsafe Arch archive member: {member.name}")
             if member.name in {".PKGINFO", ".BUILDINFO", ".MTREE"}:
                 continue
-            expected_mode = 0o755 if member.isdir() or member.name == "usr/bin/lumina" else 0o644
+            expected_mode = 0o755 if member.isdir() or member.name == "usr/bin/bytwina" else 0o644
             if member.mode != expected_mode:
                 raise ValueError(f"Incorrect Arch payload mode: {member.name}")
             contents.extract(member, extracted, filter="data")

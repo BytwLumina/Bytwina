@@ -2,12 +2,12 @@
 
 `build.py` prepares static HTTPS repository trees for apt, dnf/zypper and pacman.
 The repository is hosted on GitHub Pages at
-`https://bytwlumina.github.io/Bytwina/`. Its current package-signing fingerprint is
+`https://bytwbytwina.github.io/Bytwina/`. Its current package-signing fingerprint is
 `CA19DA939E9BCAB500751CE480FE95CAD86141A5`; verify this through an independent
 channel before trusting the key. Configure the repository Actions secret
 `PACKAGE_SIGNING_KEY` with the ASCII-armored dedicated private signing key, and
 Actions variable `PACKAGE_SIGNING_FINGERPRINT` with its full fingerprint. Run the package-repository preparation workflow with
-`tag` (an existing Lumina release), `channel` (`nightly` or `production`) and
+`tag` (an existing Bytwina release), `channel` (`nightly` or `production`) and
 `base_url` (the final HTTPS root). It downloads the distribution-labelled assets,
 verifies their release `SHA256SUMS`, signs repositories and uploads the
 `signed-package-repositories` artifact. The release workflow calls the same workflow
@@ -65,22 +65,22 @@ containing the ARM64 build and matching signed apt repository. Other versions an
 instead of incompatible native packages:
 
 ```sh
-curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh
+curl -fsSL https://bytwbytwina.github.io/Bytwina/setup.sh | sh
 # Or run from the cloned repository:
 # sh packaging/repositories/setup.sh
 ```
 
 To configure a specific channel or base URL:
 ```sh
-curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | LUMINA_CHANNEL=production sh
+curl -fsSL https://bytwbytwina.github.io/Bytwina/setup.sh | BYTWINA_CHANNEL=production sh
 ```
 
-After running the script, update your package lists and install `lumina` using your distribution's native package manager (`apt`, `dnf`, `zypper`, or `pacman`). Subsequent system updates will automatically update Lumina.
+After running the script, update your package lists and install `bytwina` using your distribution's native package manager (`apt`, `dnf`, `zypper`, or `pacman`). Subsequent system updates will automatically update Bytwina.
 
 Fedora setup selects the host's exact version (43 or 44). Fedora 43 needs a new
 release containing its matching build and signed repository; older releases only
 contain Fedora 44 packages. Rerunning the corrected script after publication replaces
-the previously incorrect `/etc/yum.repos.d/lumina.repo` on Fedora 43.
+the previously incorrect `/etc/yum.repos.d/bytwina.repo` on Fedora 43.
 The installer passes terminal input to the package manager even under `curl | sh`,
 so DNF's separate repository-key confirmation remains interactive. Compare its
 fingerprint with the verified key above before accepting; signature checks stay enabled.
@@ -102,14 +102,14 @@ For Ubuntu 26.04 amd64:
 
 ```sh
 URL="$BASE/$CHANNEL/ubuntu-26.04/amd64/apt"
-curl --fail --location "$URL/lumina.asc" -o lumina.asc
-gpg --show-keys --with-subkey-fingerprint lumina.asc
+curl --fail --location "$URL/bytwina.asc" -o bytwina.asc
+gpg --show-keys --with-subkey-fingerprint bytwina.asc
 # Compare the displayed full fingerprint with EXPECTED_FINGERPRINT before continuing.
-sudo install -Dm644 lumina.asc /etc/apt/keyrings/lumina.asc
-printf 'deb [arch=amd64 signed-by=/etc/apt/keyrings/lumina.asc] %s ./\n' "$URL" |
-  sudo tee /etc/apt/sources.list.d/lumina.list
+sudo install -Dm644 bytwina.asc /etc/apt/keyrings/bytwina.asc
+printf 'deb [arch=amd64 signed-by=/etc/apt/keyrings/bytwina.asc] %s ./\n' "$URL" |
+  sudo tee /etc/apt/sources.list.d/bytwina.list
 sudo apt update
-sudo apt install lumina
+sudo apt install bytwina
 ```
 
 For Fedora 43/44 x86_64 (use `opensuse-tumbleweed` and zypper commands for openSUSE):
@@ -117,42 +117,42 @@ For Fedora 43/44 x86_64 (use `opensuse-tumbleweed` and zypper commands for openS
 ```sh
 . /etc/os-release
 URL="$BASE/$CHANNEL/fedora-$VERSION_ID/x86_64/rpm"
-curl --fail --location "$URL/lumina.asc" -o lumina.asc
-gpg --show-keys --with-subkey-fingerprint lumina.asc
+curl --fail --location "$URL/bytwina.asc" -o bytwina.asc
+gpg --show-keys --with-subkey-fingerprint bytwina.asc
 # Compare the full fingerprint before importing.
-sudo rpm --import lumina.asc
-curl --fail --location "$URL/lumina.repo" -o lumina.repo
-sudo install -m644 lumina.repo /etc/yum.repos.d/lumina.repo
-sudo dnf install lumina
+sudo rpm --import bytwina.asc
+curl --fail --location "$URL/bytwina.repo" -o bytwina.repo
+sudo install -m644 bytwina.repo /etc/yum.repos.d/bytwina.repo
+sudo dnf install bytwina
 ```
 
-On openSUSE copy `lumina.repo` to `/etc/zypp/repos.d/lumina.repo`, then run
-`sudo zypper refresh && sudo zypper install lumina`. Retain both package and
+On openSUSE copy `bytwina.repo` to `/etc/zypp/repos.d/bytwina.repo`, then run
+`sudo zypper refresh && sudo zypper install bytwina`. Retain both package and
 repository signature checking; never work around a signature failure by disabling it.
 
 For Arch x86_64:
 
 ```sh
 URL="$BASE/$CHANNEL/arch/x86_64/arch"
-curl --fail --location "$URL/lumina.asc" -o lumina.asc
-gpg --show-keys --with-subkey-fingerprint lumina.asc
+curl --fail --location "$URL/bytwina.asc" -o bytwina.asc
+gpg --show-keys --with-subkey-fingerprint bytwina.asc
 # Compare the full fingerprint before importing and locally trusting it.
-sudo pacman-key --add lumina.asc
+sudo pacman-key --add bytwina.asc
 sudo pacman-key --lsign-key "$EXPECTED_FINGERPRINT"
 ```
 
 Add this stanza to `/etc/pacman.conf`, substituting the actual URL:
 
 ```ini
-[lumina]
+[bytwina]
 SigLevel = Required
 Server = https://YOUR-HOST/YOUR-PATH/nightly/arch/x86_64/arch
 ```
 
-Run `sudo pacman -Syu lumina`. Normal `apt upgrade`, `dnf upgrade`, `zypper update`
-or `pacman -Syu` subsequently update Lumina. Switching channels may require an
+Run `sudo pacman -Syu bytwina`. Normal `apt upgrade`, `dnf upgrade`, `zypper update`
+or `pacman -Syu` subsequently update Bytwina. Switching channels may require an
 explicit package-manager downgrade; do not enable both channels concurrently.
-This does not register Lumina with Ubuntu/Debian archives, Fedora, AUR or Flathub.
+This does not register Bytwina with Ubuntu/Debian archives, Fedora, AUR or Flathub.
 
 Run `python3 packaging/repositories/test_build.py` for input-boundary checks and
 `sh packaging/repositories/smoke-deb.sh` on a Debian/Ubuntu host with the tools above

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Lumina
+Name=Bytwina
 Comment=Experimental unofficial native Discord client
-Exec=lumina
-Icon=lumina
-StartupWMClass=io.github.ninokiru.Lumina
+Exec=bytwina
+Icon=bytwina
+StartupWMClass=io.github.ninokiru.Bytwina
 Terminal=false
 Categories=Network;InstantMessaging;

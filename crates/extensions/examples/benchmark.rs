@@ -76,7 +76,7 @@ fn main() {
 	measure(
 		"message-delete-protector",
 		include_bytes!(
-			"../../../extensions/plugins/packages/message-delete-protector.lumina-extension"
+			"../../../extensions/plugins/packages/message-delete-protector.bytwina-extension"
 		),
 		Invocation {
 			action: "activate".into(),

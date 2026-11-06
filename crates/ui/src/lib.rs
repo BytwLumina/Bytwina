@@ -1003,7 +1003,7 @@ impl MessagingUi {
 					guild: Some(Id(424242)),
 					channel: None,
 					embed: model::Embed {
-						title: Some("Lumina community".into()),
+						title: Some("Bytwina community".into()),
 						..Default::default()
 					},
 				})),
@@ -4078,7 +4078,7 @@ impl MessagingUi {
 			!self.hide_title_bar
 		}
 	}
-	/// Linux only: Lumina draws its own GTK 4 style header bar instead of the system one.
+	/// Linux only: Bytwina draws its own GTK 4 style header bar instead of the system one.
 	pub fn uses_custom_title_bar(&self) -> bool {
 		cfg!(target_os = "linux") && self.custom_title_bar
 	}
@@ -10319,7 +10319,7 @@ pub fn debug_pr565(mut state: State, mut user: model::User) {
 	state.own_profile.data = Some(profiles::synthetic(&own, None));
 	assert_eq!(
 		profiles::known_username(&state, own.id).as_deref(),
-		Some("lumina.preview")
+		Some("bytwina.preview")
 	);
 	click(
 		&mut view,

@@ -1,9 +1,9 @@
 ---
-name: lumina-delivery
-description: Implement and deliver Lumina repository changes as pull requests, or as a local pass in !fast mode.
+name: bytwina-delivery
+description: Implement and deliver Bytwina repository changes as pull requests, or as a local pass in !fast mode.
 ---
 
-# Lumina delivery
+# Bytwina delivery
 
 Follow the delivery mode and authorization in [AGENTS.md](../../../AGENTS.md).
 Completion means the requested implementation, relevant verification and agreed delivery are done,
@@ -19,7 +19,7 @@ or a concrete external blocker has been reported with a reviewable local result.
   tests, packages, screenshots or runtime measurements are needed.
 - Visible or runtime changes: read [evidence guidance](references/evidence.md) before editing so
   the relevant baseline can be collected. Load only the screenshot/measurement sections that apply.
-- Author-visible SDK changes: also use `lumina-sdk-wiki`; read the affected canonical authoring docs.
+- Author-visible SDK changes: also use `bytwina-sdk-wiki`; read the affected canonical authoring docs.
 
 ## Review and deliver
 

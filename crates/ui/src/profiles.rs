@@ -2474,7 +2474,7 @@ fn full_panel(
 }
 
 pub(crate) fn profile_opener_id() -> egui::Id {
-	egui::Id::unique("lumina-profile-opener")
+	egui::Id::unique("bytwina-profile-opener")
 }
 
 #[derive(Default)]
@@ -4549,7 +4549,7 @@ pub fn synthetic(user: &User, guild: Option<Id>) -> model::UserProfile {
 	let hash = |c: char| c.to_string().repeat(32);
 	model::UserProfile {
         user: user.clone(),
-        username: "lumina.preview".into(),
+        username: "bytwina.preview".into(),
         board: Some(vec![model::ProfileGameWidget {
             kind: model::ProfileGameWidgetKind::Favorite,
             games: vec![model::ProfileGame { id: Id(90001), name: Some("Synthetic favorite game".into()), icon: Some(hash('b')), cover: Some(hash('b')), comment: None, tags: vec![] }],
@@ -4705,8 +4705,8 @@ mod tests {
 					background.lerp_to_gamma(Color32::from_rgb(r, g, b), f32::from(alpha) / 255.0);
 				for background in [background, body] {
 					for foreground in [theme.text, theme.muted, theme.link] {
-						let a = design::luminance(foreground) + 0.05;
-						let b = design::luminance(background) + 0.05;
+						let a = design::bytwinance(foreground) + 0.05;
+						let b = design::bytwinance(background) + 0.05;
 						assert!(
 							a.max(b) / a.min(b) >= 4.5,
 							"{raw:x?}, step {step}, {foreground:?} on {background:?}"
@@ -4726,8 +4726,8 @@ mod tests {
 			background.lerp_to_gamma(Color32::WHITE, f32::from(alpha) / 255.0)
 		};
 		let contrast = |foreground: Color32, background: Color32| {
-			let a = design::luminance(foreground) + 0.05;
-			let b = design::luminance(background) + 0.05;
+			let a = design::bytwinance(foreground) + 0.05;
+			let b = design::bytwinance(background) + 0.05;
 			a.max(b) / a.min(b)
 		};
 		assert_ne!(top, bottom, "retain the profile's two-color gradient");

@@ -3,7 +3,7 @@
 language-system = System
 language-group = Język
 language-label = Język wyświetlacza
-language-description = Wybierz język Luminaa. Treści Discorda nigdy nie są tłumaczone.
+language-description = Wybierz język Bytwinaa. Treści Discorda nigdy nie są tłumaczone.
 section-user = Ustawienia użytkownika
 section-app = Ustawienia aplikacji
 section-customization = Personalizacja
@@ -28,11 +28,11 @@ description-appearance = Motyw, kolory, efekty okienne i układ.
 description-chat = Jak zachowują się wiadomości, multimedia, linki i przewijanie.
 description-messaging-permissions = Kontroluj, kto może się z Tobą kontaktować i w jaki sposób wiadomości są filtrowane.
 description-notifications = Wybierz, jakie powiadomienia chcesz otrzymywać i jak mają się wyświetlać.
-description-registered-games = Udostępniaj, w co grasz, oraz poprawiaj lub dodawaj gry wykryte przez Lumina.
+description-registered-games = Udostępniaj, w co grasz, oraz poprawiaj lub dodawaj gry wykryte przez Bytwina.
 description-voice = Mikrofon, głośniki, kamera i przetwarzanie głosu.
-description-keybinds = Skróty klawiaturowe dla Lumina.
-description-storage = Co Lumina przechowuje na tym urządzeniu.
-description-updates = Aktualizuj Lumina na tym urządzeniu.
+description-keybinds = Skróty klawiaturowe dla Bytwina.
+description-storage = Co Bytwina przechowuje na tym urządzeniu.
+description-updates = Aktualizuj Bytwina na tym urządzeniu.
 description-extensions = Zarządzaj wtyczkami społeczności.
 description-themes = Wybierz motyw społeczności.
 theme-maker = Kreator motywów
@@ -45,34 +45,34 @@ log-out = Wyloguj się
 unofficial = Nieoficjalne · niezatwierdzone przez Discord
 offline-preview = Podgląd offline · zmiany pozostają w tej sesji i nigdy nie są wysyłane.
 general-startup = Uruchomienie
-general-open-at-startup = Otwórz Lumina po uruchomieniu komputera
-general-open-at-startup-description = Lumina loguje się i łączy w tle.
+general-open-at-startup = Otwórz Bytwina po uruchomieniu komputera
+general-open-at-startup-description = Bytwina loguje się i łączy w tle.
 general-start-minimized = Rozpocznij zminimalizowany
 general-start-minimized-description = Zacznij w tle, na uboczu.
 general-startup-unavailable = Automatyczne uruchamianie jest dostępne w systemach Windows i macOS.
 general-window = Okno
 general-hide-decorations = Bez paska tytułu
-general-hide-decorations-description = Dla kafelkowych menedżerów okien: usuwa wszystkie paski tytułu i obramowania, w tym własny pasek Lumina. Przenoś, zmieniaj rozmiar i zamykaj Lumina za pomocą menedżera okien.
+general-hide-decorations-description = Dla kafelkowych menedżerów okien: usuwa wszystkie paski tytułu i obramowania, w tym własny pasek Bytwina. Przenoś, zmieniaj rozmiar i zamykaj Bytwina za pomocą menedżera okien.
 general-custom-title-bar = Własny pasek tytułu
-general-custom-title-bar-description = Zastępuje systemowy pasek tytułu własnym paskiem nagłówka Lumina w stylu GTK 4.
-general-hide-title-bar = Ukryj pasek tytułu Lumina
+general-custom-title-bar-description = Zastępuje systemowy pasek tytułu własnym paskiem nagłówka Bytwina w stylu GTK 4.
+general-hide-title-bar = Ukryj pasek tytułu Bytwina
 general-hide-title-bar-description = Zamiast tego użyj systemowego paska tytułu i przycisków okien.
-general-keep-menu-bar = Trzymaj Lumina na pasku menu
-general-keep-system-tray = Trzymaj Lumina w zasobniku systemowym
-general-menu-bar-description = Zamknięcie okna powoduje zatrzymanie Luminaa na pasku menu. Wyjdź z menu, aby wyjść.
-general-linux-tray-description = Zamknięcie sprawia, że ​​Lumina działa. Użyj zasobnika, aby wyświetlić, zminimalizować lub wyjść.
-general-windows-tray-description = Zamknięcie okna powoduje, że Lumina pozostaje w obszarze powiadomień. Wyjdź z menu, aby wyjść.
+general-keep-menu-bar = Trzymaj Bytwina na pasku menu
+general-keep-system-tray = Trzymaj Bytwina w zasobniku systemowym
+general-menu-bar-description = Zamknięcie okna powoduje zatrzymanie Bytwinaa na pasku menu. Wyjdź z menu, aby wyjść.
+general-linux-tray-description = Zamknięcie sprawia, że ​​Bytwina działa. Użyj zasobnika, aby wyświetlić, zminimalizować lub wyjść.
+general-windows-tray-description = Zamknięcie okna powoduje, że Bytwina pozostaje w obszarze powiadomień. Wyjdź z menu, aby wyjść.
 general-tray-unavailable = Taca nie jest dostępna na tej platformie.
 general-graphics = Grafika
 general-render-with = Renderuj za pomocą
-general-gpu-restart = Zaczyna obowiązywać przy następnym uruchomieniu Luminaa.
+general-gpu-restart = Zaczyna obowiązywać przy następnym uruchomieniu Bytwinaa.
 general-gpu-current-prefix = Obecnie rysuję z
 general-steady-refresh-rate = Stała częstotliwość odświeżania
-general-steady-refresh-rate-description = Gdy Lumina jest aktywnym oknem, rysuje z częstotliwością odświeżania ekranu, dzięki czemu ekrany o zmiennej częstotliwości odświeżania (VRR, G-SYNC, FreeSync) mogą utrzymać jedną częstotliwość zamiast migotać. Zużywa więcej energii.
+general-steady-refresh-rate-description = Gdy Bytwina jest aktywnym oknem, rysuje z częstotliwością odświeżania ekranu, dzięki czemu ekrany o zmiennej częstotliwości odświeżania (VRR, G-SYNC, FreeSync) mogą utrzymać jedną częstotliwość zamiast migotać. Zużywa więcej energii.
 gpu-automatic = Automatyczny
 gpu-high-performance = Wysoka wydajność
 gpu-power-saving = Oszczędność energii
-gpu-automatic-description = Pozwól Luminaowi wybrać procesor graficzny, który może narysować to okno.
+gpu-automatic-description = Pozwól Bytwinaowi wybrać procesor graficzny, który może narysować to okno.
 gpu-high-performance-description = Użyj oddzielnej karty graficznej, jeśli jest dostępna.
 gpu-power-saving-description = Użyj zintegrowanej grafiki, aby oszczędzać baterię.
 direct-messages = Wiadomości bezpośrednie
@@ -216,7 +216,7 @@ account-menu-custom-status-editor-clear-after = Wyczyść po
 # Context: custom_status_editor
 account-menu-custom-status-editor-no-custom-status = Brak statusu niestandardowego
 # Context: custom_status_editor
-account-menu-custom-status-editor-lumina-clears-it = Lumina to wyjaśnia
+account-menu-custom-status-editor-bytwina-clears-it = Bytwina to wyjaśnia
 # Context: custom_status_editor
 account-menu-custom-status-editor-status-text = Tekst stanu
 # Context: custom_status_editor
@@ -1556,7 +1556,7 @@ keybinds-show-voice-enable-global-keybinds = Włącz globalne skróty klawiszowe
 # Context: show_voice
 keybinds-show-voice-global-availability = Globalna dostępność
 # Context: show_voice
-keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = Używaj skrótów głosowych, gdy aktywna jest inna aplikacja. Gdy opcja ta jest wyłączona, skróty działają tylko wtedy, gdy Lumina jest skupiony.
+keybinds-show-voice-use-voice-shortcuts-while-another-app-is-focused-when-off = Używaj skrótów głosowych, gdy aktywna jest inna aplikacja. Gdy opcja ta jest wyłączona, skróty działają tylko wtedy, gdy Bytwina jest skupiony.
 
 ## crates/ui/src/lib.rs
 # Context: account_card
@@ -1634,7 +1634,7 @@ main-restoring-checking-your-saved-login = Sprawdzam zapisany login
 # Context: restoring
 main-restoring-connecting-to-discord = Łączenie z Discordem
 # Context: restoring_screen
-main-restoring-screen-lumina = Serena
+main-restoring-screen-bytwina = Serena
 # Context: restoring_screen
 main-restoring-screen-use-a-different-account = Użyj innego konta
 # Context: restoring_screen
@@ -1646,11 +1646,11 @@ main-sign-in-consent-i-own-this-account-and-authorize-this-session = Jestem wła
 # Context: sign_in_consent
 main-sign-in-consent-passwords-and-2fa-stay-on-discord-s-own-login-page = Hasła i 2FA pozostają na własnej stronie logowania Discord; w magazynie danych uwierzytelniających systemu operacyjnego przechowywany jest tylko token sesji.
 # Context: sign_in_disclosures
-main-sign-in-disclosures-about-lumina = O Luminaie
+main-sign-in-disclosures-about-bytwina = O Bytwinaie
 # Context: sign_in_disclosures
 main-sign-in-disclosures-connect-with-this-token = Połącz się z tym tokenem
 # Context: sign_in_disclosures
-main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = Dla właścicieli, którzy posiadają już ważny token sesji Discord, na przykład z innej zalogowanej instalacji Lumina. Hasła i 2FA nigdy nie są tutaj używane; całkowicie pomija to hostowaną stronę logowania Discord.
+main-sign-in-disclosures-for-owners-who-already-hold-a-valid-discord-session-token = Dla właścicieli, którzy posiadają już ważny token sesji Discord, na przykład z innej zalogowanej instalacji Bytwina. Hasła i 2FA nigdy nie są tutaj używane; całkowicie pomija to hostowaną stronę logowania Discord.
 # Context: sign_in_disclosures
 main-sign-in-disclosures-forget-saved-login = Zapomnij zapisane logowanie
 # Context: sign_in_disclosures
@@ -1664,7 +1664,7 @@ main-sign-in-header-sign-in-with-your-discord-account-to-get-started = Aby rozpo
 # Context: sign_in_header
 main-sign-in-header-welcome-back = Witamy z powrotem
 # Context: sign_in_header
-main-sign-in-header-welcome-to-lumina = Witamy w Luminaie
+main-sign-in-header-welcome-to-bytwina = Witamy w Bytwinaie
 # Context: sign_in_preview
 main-sign-in-status-copy-failure-details = Kopiuj szczegóły błędu
 main-sign-in-preview-explore-the-offline-preview = Poznaj podgląd offline
@@ -1673,7 +1673,7 @@ main-sign-in-preview-sample-conversations-no-discord-connection = Przykładowe r
 # Context: sign_in_screen
 main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord = Niezależne i otwarte źródło. Nie powiązany z Discordem.
 # Context: sign_in_screen
-main-sign-in-screen-lumina = Serena
+main-sign-in-screen-bytwina = Serena
 # Context: ui
 main-ui-cancel = Anulować
 # Context: ui
@@ -2270,9 +2270,9 @@ screen-body-refresh = Odświeżać
 # Context: body
 screen-body-screen-or-window = Ekran lub okno
 # Context: body
-screen-body-send-what-your-mac-plays-along-with-the-screen-lumina = Wysyłaj zawartość odtwarzaną na komputerze Mac wraz z ekranem. Dźwięk rozmowy Luminaa został pominięty.
+screen-body-send-what-your-mac-plays-along-with-the-screen-bytwina = Wysyłaj zawartość odtwarzaną na komputerze Mac wraz z ekranem. Dźwięk rozmowy Bytwinaa został pominięty.
 # Context: body
-screen-body-share-sound-from-other-apps-even-when-sharing-one-window = Udostępniaj dźwięk z innych aplikacji, nawet jeśli udostępniasz jedno okno. Własny dźwięk Luminaa został pominięty.
+screen-body-share-sound-from-other-apps-even-when-sharing-one-window = Udostępniaj dźwięk z innych aplikacji, nawet jeśli udostępniasz jedno okno. Własny dźwięk Bytwinaa został pominięty.
 # Context: body
 screen-body-share-system-audio = Udostępnij dźwięk systemowy
 # Context: body
@@ -3433,7 +3433,7 @@ settings-activity-added-games = Dodane gry
 # Context: activity_settings
 settings-activity-no-games-added = Brak dodanych gier
 # Context: activity_settings
-settings-activity-hidden = Ukryta. Lumina nie będzie wykrywać tej gry.
+settings-activity-hidden = Ukryta. Bytwina nie będzie wykrywać tej gry.
 # Context: activity_settings
 settings-activity-detected = Wykryto automatycznie
 # Context: activity_settings
@@ -3455,7 +3455,7 @@ settings-activity-click-to-rename = Kliknij, aby zmienić nazwę
 # Context: activity_settings
 settings-activity-add-a-game = Dodaj grę
 # Context: activity_settings
-settings-activity-choose-program = Wybierz uruchomiony program. Lumina pokaże go jako Twoją grę, gdy tylko będzie działać.
+settings-activity-choose-program = Wybierz uruchomiony program. Bytwina pokaże go jako Twoją grę, gdy tylko będzie działać.
 # Context: activity_settings
 settings-activity-search-programs = Szukaj uruchomionych programów
 # Context: activity_settings
@@ -3483,7 +3483,7 @@ settings-appearance-settings-primary-color = Kolor podstawowy
 # Context: appearance_settings
 settings-appearance-settings-reset = Zresetuj
 # Context: appearance_settings
-settings-appearance-settings-restart-lumina-after-changing-this-themes-can-customize-effects-while = Po zmianie tego ustawienia uruchom ponownie Lumina. Motywy mogą dostosowywać efekty, gdy są włączone.
+settings-appearance-settings-restart-bytwina-after-changing-this-themes-can-customize-effects-while = Po zmianie tego ustawienia uruchom ponownie Bytwina. Motywy mogą dostosowywać efekty, gdy są włączone.
 # Context: appearance_settings
 settings-appearance-settings-the-active-theme-brings-its-own-accent-it-takes-over = Aktywny temat wnosi swój własny akcent; przejmuje kontrolę, gdy motyw jest używany.
 # Context: appearance_settings
@@ -3520,11 +3520,11 @@ settings-storage-page-clear-cache = Wyczyść pamięć podręczną
 # Context: storage_page
 settings-storage-page-local-storage = Magazyn lokalny
 # Context: storage_page
-settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = Wiadomości i wersje robocze są przechowywane na tym urządzeniu w ograniczonych plikach izolowanych od konta. Dane w pamięci podręcznej nie są szyfrowane przez Lumina; zapisane tokeny logowania korzystają z magazynu danych logowania systemu operacyjnego.
+settings-storage-page-messages-and-drafts-are-cached-on-this-device-inside-bounded = Wiadomości i wersje robocze są przechowywane na tym urządzeniu w ograniczonych plikach izolowanych od konta. Dane w pamięci podręcznej nie są szyfrowane przez Bytwina; zapisane tokeny logowania korzystają z magazynu danych logowania systemu operacyjnego.
 # Context: storage_page
 settings-storage-page-removes-cached-messages-and-media-drafts-and-your-login-stay = Usuwa wiadomości i multimedia z pamięci podręcznej. Wersje robocze i Twój login pozostają.
 # Context: storage_page
-settings-storage-page-lumina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Lumina nie zbiera danych telemetrycznych ani nie przesyła diagnostyki. Discord przechowuje dane po stronie usługi zgodnie ze swoimi własnymi zasadami.
+settings-storage-page-bytwina-does-not-collect-telemetry-or-upload-diagnostics-discord-retains = Bytwina nie zbiera danych telemetrycznych ani nie przesyła diagnostyki. Discord przechowuje dane po stronie usługi zgodnie ze swoimi własnymi zasadami.
 # Context: storage_page
 settings-storage-page-your-privacy = Twoja prywatność
 # Context: cosmetic_settings
@@ -3978,7 +3978,7 @@ updates-update-settings-could-not-load-or-save-update-preferences-changes-may-no
 # Context: update_settings
 updates-update-settings-download-update = Pobierz aktualizację
 # Context: update_settings
-updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = Pobierz aktualizacje w tle. Uruchom ponownie, gdy będziesz gotowy. Lumina nadal sprawdza przy uruchomieniu i okresowo, gdy jest wyłączony.
+updates-update-settings-download-updates-in-the-background-restart-when-you-are-ready = Pobierz aktualizacje w tle. Uruchom ponownie, gdy będziesz gotowy. Bytwina nadal sprawdza przy uruchomieniu i okresowo, gdy jest wyłączony.
 # Context: update_settings
 updates-update-settings-early-builds-with-the-newest-changes-nightly-releases-can-be = Wczesne kompilacje z najnowszymi zmianami. Wydania nocne mogą być mniej wiarygodne.
 # Context: update_settings
@@ -4004,7 +4004,7 @@ updates-update-settings-release-channel = Zwolnij kanał
 # Context: update_settings
 updates-update-settings-restart-to-update = Uruchom ponownie, aby zaktualizować
 # Context: update_settings
-updates-update-settings-lumina-was-installed-via-your-distribution-run-this-in-a = Lumina został zainstalowany poprzez twoją dystrybucję. Uruchom to w terminalu, aby zaktualizować.
+updates-update-settings-bytwina-was-installed-via-your-distribution-run-this-in-a = Bytwina został zainstalowany poprzez twoją dystrybucję. Uruchom to w terminalu, aby zaktualizować.
 # Context: update_settings
 updates-update-settings-save-diagnostics = Zapisz diagnostykę
 # Context: update_settings
@@ -4026,7 +4026,7 @@ updates-update-settings-log-warnings = Błędy i ostrzeżenia
 # Context: update_settings
 updates-update-settings-open-folder = Otwórz folder
 # Context: update_settings
-updates-update-settings-the-log-folder-could-not-be-written = Nie udało się zapisać folderu dziennika. Sprawdź folder danych Lumina i spróbuj ponownie.
+updates-update-settings-the-log-folder-could-not-be-written = Nie udało się zapisać folderu dziennika. Sprawdź folder danych Bytwina i spróbuj ponownie.
 # Context: update_settings
 updates-update-settings-timings-stages-and-failures-in-one-local-file-no-account-channel-or = Czasy, etapy i błędy w jednym lokalnym pliku dziennika. Dane konta, kanałów, wiadomości i poświadczenia nigdy nie są zapisywane, a nic nie jest wysyłane.
 # Context: update_log
@@ -4491,7 +4491,7 @@ onboarding-rules-heading = Zasady serwera
 # Context: rules
 onboarding-rules-review = Moderator sprawdza te odpowiedzi, zanim będziesz mógł pisać.
 # Context: field
-onboarding-field-unsupported = Ten serwer zadaje pytanie, którego Lumina nie potrafi jeszcze wyświetlić. Dokończ dołączanie w aplikacji Discord.
+onboarding-field-unsupported = Ten serwer zadaje pytanie, którego Bytwina nie potrafi jeszcze wyświetlić. Dokończ dołączanie w aplikacji Discord.
 # Context: field
 onboarding-field-agree = Przeczytałem(-am) i akceptuję zasady
 
@@ -4620,7 +4620,7 @@ reading-double-click-reaction = Double-click reaction
 
 ## crates/platform/src/app_menu.rs
 # Context: macos_menu_bar
-app-menu-about = Lumina – informacje
+app-menu-about = Bytwina – informacje
 # Context: macos_menu_bar
 app-menu-updates = Sprawdź uaktualnienia…
 # Context: macos_menu_bar
@@ -4628,13 +4628,13 @@ app-menu-settings = Ustawienia…
 # Context: macos_menu_bar
 app-menu-services = Usługi
 # Context: macos_menu_bar
-app-menu-hide = Ukryj Lumina
+app-menu-hide = Ukryj Bytwina
 # Context: macos_menu_bar
 app-menu-hide-others = Ukryj pozostałe
 # Context: macos_menu_bar
 app-menu-show-all = Pokaż wszystko
 # Context: macos_menu_bar
-app-menu-quit = Zakończ Lumina
+app-menu-quit = Zakończ Bytwina
 # Context: macos_menu_bar
 app-menu-file = Plik
 # Context: macos_menu_bar
@@ -4676,7 +4676,7 @@ app-menu-bring-all-to-front = Wszystkie na wierzch
 # Context: macos_menu_bar
 app-menu-help = Pomoc
 # Context: macos_menu_bar
-app-menu-github = Lumina w serwisie GitHub
+app-menu-github = Bytwina w serwisie GitHub
 # Context: macos_menu_bar
 app-menu-report-issue = Zgłoś problem…
 

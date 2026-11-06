@@ -1,7 +1,7 @@
 # Compiled legacy SDK fixture
 
-`app-toolbox.lumina-extension` is copied byte-for-byte from
-[`3d94c76228d9f2918fa8d22e78f40233ae4f90dc`](https://github.com/BytwLumina/Bytwina/blob/main28d9f2918fa8d22e78f40233ae4f90dc/examples/extensions/packages/app-toolbox.lumina-extension),
+`app-toolbox.bytwina-extension` is copied byte-for-byte from
+[`3d94c76228d9f2918fa8d22e78f40233ae4f90dc`](https://github.com/BytwLumina/Bytwina/blob/main28d9f2918fa8d22e78f40233ae4f90dc/examples/extensions/packages/app-toolbox.bytwina-extension),
 not rebuilt with the current SDK. Source and package are synthetic offline fixtures for this private build.
 
 - Package bytes: 574992

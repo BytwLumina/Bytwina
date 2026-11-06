@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{
+use bytwina_extension_sdk::{
 	Error, Invocation, MAX_IO_BYTES, Output, TickInvocation, dispatch, dispatch_typed, serde_json,
 };
 
@@ -17,16 +17,16 @@ mod abi {
 		panic!("invalid ABI input reached handler")
 	}
 
-	lumina_extension_sdk::export!(handler);
+	bytwina_extension_sdk::export!(handler);
 }
 
 #[test]
 fn abi_rejects_empty_null_and_oversized_buffers_before_reading_memory() {
-	assert_eq!(abi::lumina_alloc(0), 0);
-	assert_eq!(abi::lumina_alloc(MAX_IO_BYTES as u32 + 1), 0);
+	assert_eq!(abi::bytwina_alloc(0), 0);
+	assert_eq!(abi::bytwina_alloc(MAX_IO_BYTES as u32 + 1), 0);
 	for (pointer, length) in [(0, 1), (1, 0), (1, MAX_IO_BYTES as u32 + 1)] {
 		// SAFETY: each invalid argument is rejected before dereferencing the pointer.
-		assert_eq!(unsafe { abi::lumina_invoke(pointer, length) }, 0);
+		assert_eq!(unsafe { abi::bytwina_invoke(pointer, length) }, 0);
 	}
 }
 
@@ -174,7 +174,7 @@ fn typed_values_and_storage_distinguish_missing_from_invalid() {
 
 #[test]
 fn typed_event_dispatch_keeps_bounds_and_rejects_bad_json_before_the_handler() {
-	use lumina_extension_sdk::{EventInvocation, MessageEventKind, dispatch_typed};
+	use bytwina_extension_sdk::{EventInvocation, MessageEventKind, dispatch_typed};
 	let bytes = dispatch_typed(
 		br#"{"action":"event","message_event":{"kind":"delete","channel_id":"1","message_id":"2"}}"#,
 		|input: EventInvocation| {

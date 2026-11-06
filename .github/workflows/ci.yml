@@ -39,11 +39,11 @@ jobs:
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Check production build without development fixtures
-        run: cargo check --locked -p lumina --bin lumina --no-default-features
+        run: cargo check --locked -p bytwina --bin bytwina --no-default-features
       - name: Check offline demo targets
-        run: cargo check --locked -p lumina -p ui --all-targets --features lumina/demo
+        run: cargo check --locked -p bytwina -p ui --all-targets --features bytwina/demo
       - name: Test offline typing with demo support
-        run: cargo test --locked -p lumina -p ui -p client-core -p discord-api --features lumina/demo --lib --bins typing
+        run: cargo test --locked -p bytwina -p ui -p client-core -p discord-api --features bytwina/demo --lib --bins typing
       - run: cargo xtask check
       - parallel:
           - name: Flatpak encoding after GTK initialization (synthetic)
@@ -60,7 +60,7 @@ jobs:
         run: cargo xtask package
       - uses: actions/upload-artifact@v7.0.1
         with:
-          name: lumina-${{ runner.os }}-${{ runner.arch }}-unsigned
+          name: bytwina-${{ runner.os }}-${{ runner.arch }}-unsigned
           path: dist/
   extension-sdk:
     runs-on: ubuntu-latest

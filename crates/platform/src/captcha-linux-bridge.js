@@ -1,14 +1,14 @@
 // The passcode stays in the main frame until a bounded native query drains it.
 (() => {
   "use strict";
-  const page = "https://lumina-captcha.verification.invalid/";
+  const page = "https://bytwina-captcha.verification.invalid/";
   if (window !== window.top || location.href !== page) return;
-  const capability = "__LUMINA_CAPTCHA_CAPABILITY__";
+  const capability = "__BYTWINA_CAPTCHA_CAPABILITY__";
   const opened = Date.now();
   let pending = null;
   let delivered = false;
   const active = () => window === window.top && location.href === page && Date.now() - opened <= 300000;
-  Object.defineProperty(window, "__lumina_captcha_take_" + capability.slice(0, -1), {
+  Object.defineProperty(window, "__bytwina_captcha_take_" + capability.slice(0, -1), {
     value: () => {
       const value = active() ? pending : null;
       pending = null;

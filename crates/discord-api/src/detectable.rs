@@ -187,7 +187,7 @@ mod mention_tests {
 	}
 }
 
-/// The reduced form Lumina caches on disk. It is re-checked exactly like a fresh download.
+/// The reduced form Bytwina caches on disk. It is re-checked exactly like a fresh download.
 pub fn decode_cached(bytes: &[u8]) -> Result<Vec<Game>, &'static str> {
 	let failure = "The cached game list is invalid.";
 	if bytes.len() > MAX_LIST {

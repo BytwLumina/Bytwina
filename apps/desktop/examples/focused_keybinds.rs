@@ -1,4 +1,4 @@
-//! Offline check: cargo run --locked -p lumina --example focused_keybinds
+//! Offline check: cargo run --locked -p bytwina --example focused_keybinds
 use eframe::egui;
 
 fn main() {

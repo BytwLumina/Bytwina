@@ -890,7 +890,7 @@ impl MessagingUi {
 				ui,
 				&format!(
 					"{} {clears}.",
-					crate::i18n::translate("account-menu-custom-status-editor-lumina-clears-it")
+					crate::i18n::translate("account-menu-custom-status-editor-bytwina-clears-it")
 				),
 			);
 		}

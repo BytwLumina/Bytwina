@@ -10,19 +10,19 @@ Download the file labelled for your distribution from
 [Releases](https://github.com/BytwLumina/Bytwina/releases), then use its actual filename:
 
 ```sh
-sudo apt install ./lumina-*.deb                     # Ubuntu 26.04
-sudo dnf install ./lumina-*.fc43.*.rpm              # Fedora 43
-sudo dnf install ./lumina-*.fc44.*.rpm              # Fedora 44
-sudo zypper install ./lumina-*.suse.*.rpm           # openSUSE Tumbleweed
-sudo pacman -U ./lumina-*.pkg.tar.zst               # Arch
-flatpak install --user ./lumina-*.flatpak           # Flatpak bundle
+sudo apt install ./bytwina-*.deb                     # Ubuntu 26.04
+sudo dnf install ./bytwina-*.fc43.*.rpm              # Fedora 43
+sudo dnf install ./bytwina-*.fc44.*.rpm              # Fedora 44
+sudo zypper install ./bytwina-*.suse.*.rpm           # openSUSE Tumbleweed
+sudo pacman -U ./bytwina-*.pkg.tar.zst               # Arch
+flatpak install --user ./bytwina-*.flatpak           # Flatpak bundle
 ```
 
 Use a directory containing only the selected package. Local build artifacts are
 unsigned; package-manager signature policy may require an operator-signed package.
 The [signed repository setup](../repositories/README.md) prepares apt, dnf/zypper
 and pacman repositories for normal package-manager upgrades. Hosting and signing
-credentials must be configured before those repository URLs are usable. Lumina is
+credentials must be configured before those repository URLs are usable. Bytwina is
 not listed in distribution archives or Flathub by this change. An optional
 [AUR binary recipe](../aur/README.md) is prepared in this repository for maintainer
 submission; it does not configure a pacman repository or claim AUR publication.
@@ -38,10 +38,10 @@ these are native package dependencies (`gstreamer1.0-pipewire` on Debian/Ubuntu,
 `pipewire-gstreamer` on Fedora, `gstreamer-plugin-pipewire` on openSUSE and
 `gst-plugin-pipewire` on Arch). Use a ScreenCast-capable portal backend matching your
 desktop; the GTK fallback alone does not provide screen capture. VA-API/NVENC and OpenGL
-plugins plus compatible drivers enable hardware encoding; otherwise Lumina uses bundled
+plugins plus compatible drivers enable hardware encoding; otherwise Bytwina uses bundled
 OpenH264. Hardware plugin names/availability vary by distribution and repository.
 Stream audio additionally links the system `libpulse` client library and uses individual
-application monitors on PulseAudio or PipeWire-Pulse. Lumina's playback is excluded;
+application monitors on PulseAudio or PipeWire-Pulse. Bytwina's playback is excluded;
 no virtual device or output rerouting is required. Native package tools derive the
 linked libpulse runtime dependency from the executable. Source builds require its
 development package, installed by `install-build-deps.sh`.
@@ -76,7 +76,7 @@ Tumbleweed it refreshes repository metadata and runs `zypper dist-upgrade` with
 explicit downgrade permission before installing dependencies, so the rolling
 container and repository packages use consistent versions. This can downgrade
 packages in the disposable builder when its image is ahead of the mirror. Normal
-packaging runs without root and never installs or starts Lumina. RPM uses
+packaging runs without root and never installs or starts Bytwina. RPM uses
 `rpmbuild` dependency generation; Arch derives native library package dependencies
 from the host package database and uses `makepkg`. Both inspect package metadata,
 payload contents/permissions and the native executable's library closure. Runtime
@@ -90,13 +90,13 @@ python3 packaging/linux/test_package.py --format rpm
 python3 packaging/linux/test_package.py --format arch
 ```
 
-These package `/bin/true`, never Lumina or a live account. Native application
+These package `/bin/true`, never Bytwina or a live account. Native application
 builds and package inspection do not prove desktop login, graphics or physical audio.
 
 ## Debian / Ubuntu details
 
 On a Debian/Ubuntu Linux build host, `cargo xtask package` produces the standard
-`dist/lumina_<version>-1_<architecture>.deb` including voice. Native `amd64` and `arm64`
+`dist/bytwina_<version>-1_<architecture>.deb` including voice. Native `amd64` and `arm64`
 ELF headers are accepted; a build does not prove desktop or audio support on that
 architecture. These are unsigned host-distribution packages, not portable Linux
 archives or a promise of compatibility with older distributions.
@@ -111,18 +111,18 @@ and source trees are not included. It excludes stale archives, nested voice outp
 logs, and stale license files. Temporary files are removed when packaging finishes
 or raises an error.
 
-The archive installs `/usr/bin/lumina`, a launcher in
-`/usr/share/applications/io.github.ninokiru.Lumina.desktop`, and notices and licenses under
-`/usr/share/doc/lumina`. No maintainer
+The archive installs `/usr/bin/bytwina`, a launcher in
+`/usr/share/applications/io.github.ninokiru.Bytwina.desktop`, and notices and licenses under
+`/usr/share/doc/bytwina`. No maintainer
 scripts, background updater, automatic launch or user-profile writes are added.
 For a deliberate manual installation, use the local file:
 
 ```sh
-sudo apt install --reinstall ./dist/lumina_0.1.0-1_amd64.deb
+sudo apt install --reinstall ./dist/bytwina_0.1.0-1_amd64.deb
 ```
 
 These are user installation instructions; the build and smoke checks do not run
-them. Remove the application with `sudo apt remove lumina`; normal package
+them. Remove the application with `sudo apt remove bytwina`; normal package
 removal does not delete account data. Use in-app logout/cache controls as described
 in the storage policy.
 
@@ -154,7 +154,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 packaging/linux/test_package.py
 
 It deliberately supplies synthetic documentation and source trees, verifies they are
 omitted, then checks mismatched payload and invalid ELF detection. The fixture is not
-a Lumina build.
+a Bytwina build.
 
 Tool contracts: [dpkg-shlibdeps](https://manpages.debian.org/trixie/dpkg-dev/dpkg-shlibdeps.1.en.html)
 and [dpkg-deb](https://manpages.debian.org/trixie/dpkg/dpkg-deb.1.en.html).

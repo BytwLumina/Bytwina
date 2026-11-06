@@ -1,5 +1,5 @@
 use extensions::{Action, Capability, ExtensionKind, Invocation, Manifest, Output, Surface};
-use lumina_extension_sdk as sdk;
+use bytwina_extension_sdk as sdk;
 
 fn manifest(action: &str, surface: Surface) -> Manifest {
 	let mut capabilities = vec![Capability::Storage];
@@ -213,7 +213,7 @@ fn every_sdk_panel_and_appearance_field_is_accepted_by_the_host() {
 					TextInput {
 						id: "name".into(),
 						label: "Name".into(),
-						value: "Lumina".into(),
+						value: "Bytwina".into(),
 					},
 					Checkbox {
 						id: "enabled".into(),

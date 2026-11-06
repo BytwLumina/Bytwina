@@ -1,10 +1,10 @@
 {
-  "app-id": "io.github.ninokiru.Lumina",
+  "app-id": "io.github.ninokiru.Bytwina",
   "runtime": "org.gnome.Platform",
   "runtime-version": "51",
   "sdk": "org.gnome.Sdk",
-  "command": "lumina",
-  "rename-icon": "lumina",
+  "command": "bytwina",
+  "rename-icon": "bytwina",
   "finish-args": [
     "--share=network",
     "--share=ipc",
@@ -22,18 +22,18 @@
   ],
   "modules": [
     {
-      "name": "lumina",
+      "name": "bytwina",
       "buildsystem": "simple",
       "build-options": {
-        "append-path": "/run/build/lumina/flatpak-rust/bin",
-        "env": {"CARGO_NET_OFFLINE": "true", "CARGO_HOME": "/run/build/lumina/flatpak-cargo-home"}
+        "append-path": "/run/build/bytwina/flatpak-rust/bin",
+        "env": {"CARGO_NET_OFFLINE": "true", "CARGO_HOME": "/run/build/bytwina/flatpak-cargo-home"}
       },
       "build-commands": [
         "test \"$(rustc --version | cut -d ' ' -f 2)\" = 1.98.1",
         "cargo xtask package --format dir",
         "cp -a dist/linux-root/usr/. /app/",
-        "rm -f /app/share/icons/hicolor/1024x1024/apps/lumina.png",
-        "install -Dm644 packaging/flatpak/io.github.ninokiru.Lumina.metainfo.xml /app/share/metainfo/io.github.ninokiru.Lumina.metainfo.xml"
+        "rm -f /app/share/icons/hicolor/1024x1024/apps/bytwina.png",
+        "install -Dm644 packaging/flatpak/io.github.ninokiru.Bytwina.metainfo.xml /app/share/metainfo/io.github.ninokiru.Bytwina.metainfo.xml"
       ],
       "sources": [{"type": "dir", "path": "source"}]
     }

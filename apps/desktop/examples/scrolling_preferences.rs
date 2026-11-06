@@ -1,4 +1,4 @@
-//! Offline check: cargo run --locked -p lumina --example scrolling_preferences
+//! Offline check: cargo run --locked -p bytwina --example scrolling_preferences
 use eframe::egui;
 use model::ReadingPreferences;
 

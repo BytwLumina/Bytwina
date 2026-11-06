@@ -1,4 +1,4 @@
-use lumina_extension_sdk::{Invocation, Output};
+use bytwina_extension_sdk::{Invocation, Output};
 
 // The host retains bounded session memory; this plugin receives no message bodies.
 fn activate(input: Invocation) -> Output {
@@ -8,4 +8,4 @@ fn activate(input: Invocation) -> Output {
 	}
 }
 
-lumina_extension_sdk::export!(activate);
+bytwina_extension_sdk::export!(activate);

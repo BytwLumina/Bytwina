@@ -1,4 +1,4 @@
-//! Phosphor Icons (MIT), Simple Icons brand marks (CC0) and the Lumina mark rasterized once
+//! Phosphor Icons (MIT), Simple Icons brand marks (CC0) and the Bytwina mark rasterized once
 //! into one bundled atlas and tinted at draw time.
 //!
 //! `assets/icons/atlas.png` holds white glyphs on transparency in fixed 64px cells;
@@ -77,7 +77,7 @@ pub enum Icon {
 	Copy,
 	Verified,
 	Calendar,
-	Lumina,
+	Bytwina,
 	File,
 	FileImage,
 	FilePdf,
@@ -192,7 +192,7 @@ impl Icon {
 		Icon::Copy,
 		Icon::Verified,
 		Icon::Calendar,
-		Icon::Lumina,
+		Icon::Bytwina,
 		Icon::File,
 		Icon::FileImage,
 		Icon::FilePdf,
@@ -306,7 +306,7 @@ impl Icon {
 			Icon::Copy => "copy",
 			Icon::Verified => "seal-check",
 			Icon::Calendar => "calendar-blank",
-			Icon::Lumina => "lumina-mark",
+			Icon::Bytwina => "bytwina-mark",
 			Icon::File => "file",
 			Icon::FileImage => "file-image",
 			Icon::FilePdf => "file-pdf",
