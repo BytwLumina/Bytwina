@@ -300,11 +300,12 @@ impl Diagnostics {
 		self.record_to(label, &mut std::io::stderr());
 	}
 	fn record_to(&mut self, label: &'static str, writer: &mut impl std::io::Write) {
+		// Framing around scope and label: "[Bytwina " + "] " + newline = 12 bytes.
 		let bytes = self
 			.scope
 			.len()
 			.saturating_add(label.len())
-			.saturating_add(11);
+			.saturating_add(12);
 		if self.remaining == 0 || bytes > self.bytes {
 			return;
 		}
@@ -3448,7 +3449,7 @@ mod member_tests {
 		// Byte accounting includes UTF-8 and formatting, independently of the line cap.
 		output.clear();
 		let mut short = Diagnostics::new("members", true);
-		short.bytes = 20;
+		short.bytes = 21;
 		short.record_to("\u{e9}", &mut output);
 		short.record_to("another line", &mut output);
 		assert_eq!(output, "[Bytwina members] \u{e9}\n".as_bytes());
@@ -3457,7 +3458,7 @@ mod member_tests {
 		let mut oversized = Diagnostics::new("gateway", true);
 		oversized.record_to(std::str::from_utf8(&OVERSIZED).unwrap(), &mut output);
 		assert_eq!(oversized.remaining, 64);
-		assert_eq!(output.len(), 20);
+		assert_eq!(output.len(), 21);
 
 		struct Closed;
 		impl std::io::Write for Closed {
