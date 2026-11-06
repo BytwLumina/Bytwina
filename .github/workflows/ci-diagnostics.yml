@@ -1,0 +1,82 @@
+name: CI diagnostics
+
+# Writes formatter and test failures into a file so they can be read without
+# downloading per-job logs (which need an authenticated CLI).
+on:
+  workflow_dispatch:
+    inputs:
+      fix_format:
+        description: Run cargo fmt and commit the result instead of only reporting
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths: [".github/workflows/ci-diagnostics.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-diagnostics
+  cancel-in-progress: true
+
+jobs:
+  report:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@1.98.1
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2.9.2
+
+      - name: Collect formatter state
+        shell: bash
+        run: |
+          mkdir -p diagnostics
+          : > diagnostics/fmt.txt
+          for dir in . extensions examples/extensions fuzz; do
+            echo "=== $dir ===" >> diagnostics/fmt.txt
+            cargo fmt --manifest-path "$dir/Cargo.toml" --all -- --check >> diagnostics/fmt.txt 2>&1 || echo "FORMAT-DIFF($dir)" >> diagnostics/fmt.txt
+          done
+
+      - name: Apply formatter when requested
+        if: inputs.fix_format
+        shell: bash
+        run: |
+          for dir in . extensions examples/extensions fuzz; do
+            cargo fmt --manifest-path "$dir/Cargo.toml" --all
+          done
+
+      - name: Publish formatter report
+        shell: bash
+        run: |
+          git config user.name "ci-diagnostics"
+          git config user.email "ci-diagnostics@users.noreply.github.com"
+          git checkout -B ci-diagnostics
+          git add diagnostics
+          git diff --cached --quiet || git commit -m "chore: record formatter state for ${GITHUB_SHA:0:7}"
+          git push --force origin ci-diagnostics
+
+      - name: Collect typing test output
+        shell: bash
+        run: |
+          cargo test --locked -p bytwina -p ui -p client-core -p discord-api \
+            --features bytwina/demo --lib --bins typing > diagnostics/typing.txt 2>&1 || true
+          tail -n 120 diagnostics/typing.txt > diagnostics/typing-tail.txt
+          rm -f diagnostics/typing.txt
+          mv diagnostics/typing-tail.txt diagnostics/typing.txt
+
+      - name: Publish diagnostics branch
+        shell: bash
+        run: |
+          git config user.name "ci-diagnostics"
+          git config user.email "ci-diagnostics@users.noreply.github.com"
+          git checkout -B ci-diagnostics
+          git add diagnostics
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: record CI diagnostics for ${GITHUB_SHA:0:7}"
+          git push --force origin ci-diagnostics
