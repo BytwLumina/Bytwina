@@ -63,6 +63,8 @@ jobs:
           name: bytwina-${{ runner.os }}-${{ runner.arch }}-unsigned
           path: dist/
   extension-sdk:
+    # Paused while the pipeline targets Windows only.
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -116,7 +118,8 @@ jobs:
       - run: cargo install cargo-audit --version 0.22.2 --locked --no-default-features
       - run: cargo audit --deny warnings
   fuzz:
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    # Paused while the pipeline targets Windows only.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
