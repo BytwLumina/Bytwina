@@ -494,7 +494,15 @@ fn main() -> ExitCode {
 					])
 				})
 				.and_then(|_| run(&["test", "--workspace", "--locked"]))
-				.and_then(|_| run(&["check", "-p", "bytwina", "--no-default-features", "--locked"]))
+				.and_then(|_| {
+					run(&[
+						"check",
+						"-p",
+						"bytwina",
+						"--no-default-features",
+						"--locked",
+					])
+				})
 				.and_then(|_| policy()),
 			"policy" => policy(),
 			"licenses" => licenses(),

@@ -708,9 +708,7 @@ pub(super) fn unpack(
 			return Err("The update does not contain Bytwina.app.".into());
 		}
 		verify_mac(&destination.join("Bytwina.app"), installed)?;
-	} else if !destination.join("bytwina.exe").is_file()
-		|| !destination.join("licenses").is_dir()
-	{
+	} else if !destination.join("bytwina.exe").is_file() || !destination.join("licenses").is_dir() {
 		return Err("The update is missing its executable or bundled notices.".into());
 	}
 	fs::remove_file(directory.join("package.zip"))

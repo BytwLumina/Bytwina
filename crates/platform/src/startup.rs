@@ -169,7 +169,9 @@ mod native {
 			let executable = Path::new(r"C:\Program Files\Bytwina\bytwina.exe");
 			for minimized in [false, true] {
 				let command = startup_command(executable, minimized).unwrap();
-				assert!(command.starts_with(r#""C:\Program Files\Bytwina\bytwina.exe" --autostart"#));
+				assert!(
+					command.starts_with(r#""C:\Program Files\Bytwina\bytwina.exe" --autostart"#)
+				);
 				assert_eq!(
 					parse_command(&command, executable),
 					Ok(Settings {

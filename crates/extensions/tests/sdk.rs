@@ -1,5 +1,5 @@
-use extensions::{Action, Capability, ExtensionKind, Invocation, Manifest, Output, Surface};
 use bytwina_extension_sdk as sdk;
+use extensions::{Action, Capability, ExtensionKind, Invocation, Manifest, Output, Surface};
 
 fn manifest(action: &str, surface: Surface) -> Manifest {
 	let mut capabilities = vec![Capability::Storage];

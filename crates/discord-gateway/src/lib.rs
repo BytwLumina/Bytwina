@@ -1252,7 +1252,8 @@ async fn run_recoverable(
 	outgoing_activity.update_afk(*afk.borrow_and_update());
 	let mut member_diagnostics = Diagnostics::new(
 		"members",
-		std::env::var_os("BYTWINA_MEMBER_DIAGNOSTICS").as_deref() == Some(std::ffi::OsStr::new("1")),
+		std::env::var_os("BYTWINA_MEMBER_DIAGNOSTICS").as_deref()
+			== Some(std::ffi::OsStr::new("1")),
 	);
 	let mut gateway_diagnostics = Diagnostics::new(
 		"gateway",

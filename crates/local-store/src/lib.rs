@@ -3155,8 +3155,10 @@ mod tests {
 
 	#[test]
 	fn known_deletions_survive_reopen_and_preserve_other_channels_accounts_and_drafts() {
-		let root =
-			std::env::temp_dir().join(format!("bytwina-synthetic-deletions-{}", std::process::id()));
+		let root = std::env::temp_dir().join(format!(
+			"bytwina-synthetic-deletions-{}",
+			std::process::id()
+		));
 		std::fs::create_dir_all(&root).unwrap();
 		let path = root.join("test.sqlite3");
 		let mut store = LocalStore::open(&path).unwrap();

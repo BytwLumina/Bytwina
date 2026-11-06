@@ -1,6 +1,6 @@
-#[path = "lumina_sha3.rs"]
-mod lumina_sha3;
-use lumina_sha3::shake256;
+#[path = "bytwina_sha3.rs"]
+mod bytwina_sha3;
+use bytwina_sha3::shake256;
 
 use alloc::{vec, vec::Vec};
 

@@ -1,5 +1,5 @@
-use extensions::*;
 use bytwina_extension_sdk as sdk;
+use extensions::*;
 
 #[test]
 fn sdk_manifests_round_trip_all_capabilities_and_surfaces_through_host_validation() {
