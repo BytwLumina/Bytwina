@@ -62,7 +62,7 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRO
 
 ; UI Pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\..\NOTICE"
+!insertmacro MUI_PAGE_LICENSE "NOTICE"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
