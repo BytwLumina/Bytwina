@@ -101,6 +101,12 @@ jobs:
           cargo xtask fuzz > fuzz-report.txt 2>&1 || true
           tail -n 120 fuzz-report.txt > diagnostics-fuzz.txt
           rm -f fuzz-report.txt
+      - name: Collect lockfile drift
+        shell: bash
+        run: |
+          git diff -- fuzz/Cargo.lock > drift.diff || true
+          tail -n 200 drift.diff > diagnostics-lock.txt
+          rm -f drift.diff
       - name: Collect legacy SDK output
         shell: bash
         run: |
@@ -116,6 +122,7 @@ jobs:
           git checkout -B ci-fuzz origin/ci-fuzz || git checkout -B ci-fuzz
           mkdir -p diagnostics
           mv diagnostics-fuzz.txt diagnostics/fuzz.txt
+          mv diagnostics-lock.txt diagnostics/lock-drift.txt
           mv diagnostics-legacy.txt diagnostics/legacy.txt
           git add diagnostics
           git diff --cached --quiet && exit 0
