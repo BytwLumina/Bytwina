@@ -15,7 +15,7 @@ on:
       base_url:
         description: Public HTTPS root where the generated repository tree will be hosted
         required: false
-        default: https://bytwbytwina.github.io/Bytwina
+        default: https://bytwlumina.github.io/Bytwina
         type: string
       deploy:
         description: Deploy the signed tree to the configured GitHub Pages site
@@ -182,7 +182,7 @@ jobs:
           import os
           from pathlib import Path
           template = Path("packaging/flatpak/bytwina.flatpakref").read_text()
-          reference = template.replace("https://bytwbytwina.github.io/Bytwina", os.environ["BASE_URL"].rstrip("/"))
+          reference = template.replace("https://bytwlumina.github.io/Bytwina", os.environ["BASE_URL"].rstrip("/"))
           Path("site/flatpak/bytwina.flatpakref").write_text(reference)
           PY
           cp packaging/linux/hicolor/256x256/apps/bytwina.png site/icons/bytwina.png

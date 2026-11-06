@@ -166,7 +166,7 @@ def generate_index(destination: Path):
   <div class="card">
     <h1>Bytwina Linux Repositories</h1>
     <p>Signed native packages and Flatpak repository for Bytwina.</p>
-    <p>Run <code>curl -fsSL https://bytwbytwina.github.io/Bytwina/setup.sh | sh</code> to install.</p>
+    <p>Run <code>curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh</code> to install.</p>
     <p><a href="https://github.com/BytwLumina/Bytwina">View project on GitHub &rarr;</a></p>
   </div>
 </body>

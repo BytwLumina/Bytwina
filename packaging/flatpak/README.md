@@ -31,7 +31,7 @@ To install Bytwina configured to receive automatic updates from the hosted OSTre
 ```sh
 flatpak install --user packaging/flatpak/bytwina.flatpakref
 # Or from a published URL:
-# flatpak install --user https://bytwbytwina.github.io/Bytwina/flatpak/bytwina.flatpakref
+# flatpak install --user https://bytwlumina.github.io/Bytwina/flatpak/bytwina.flatpakref
 ```
 
 Once installed via `.flatpakref`, your desktop environment (GNOME Software, KDE Discover)

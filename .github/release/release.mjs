@@ -37,7 +37,8 @@ function releaseExists() {
   }
 }
 const resumed = plan !== null && releaseExists();
-if (plan && !resumed) checkTapAccess();
+const tapEnabled = process.env.HOMEBREW_TAP_TOKEN !== undefined;
+if (plan && !resumed && tapEnabled) checkTapAccess();
 
 // The cask lives in its own tap repository so users do not clone this one. The tap file is the
 // single source of truth; releases only rewrite its version and checksum.
@@ -133,5 +134,5 @@ if (mode === 'plan') {
     execFileSync('gh', ['release', 'edit', plan.gitTag, '--draft=false', '--prerelease', '--latest=false'],
     { stdio: 'inherit' });
   }
-  publishCask();
+  if (tapEnabled) publishCask();
 }

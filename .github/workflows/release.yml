@@ -12,6 +12,16 @@ on:
         options: [nightly, production]
         default: nightly
         required: true
+  push:
+    branches: [main]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "apps/**"
+      - "crates/**"
+      - ".github/release/**"
+      - ".github/workflows/release.yml"
+      - "packaging/windows/**"
 
 permissions:
   contents: read
@@ -47,19 +57,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: bun .github/release/release.mjs plan
-      - name: Require Mac signing credentials before building
-        if: steps.version.outputs.release == 'true'
-        env:
-          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        run: |
-          for name in MACOS_CERTIFICATE_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_SIGNING_IDENTITY APPLE_ID APPLE_TEAM_ID APPLE_APP_SPECIFIC_PASSWORD; do
-            test -n "${!name}" || { echo "Missing Actions secret: $name"; exit 1; }
-          done
       - name: Apply planned version to manifests
         if: steps.version.outputs.release == 'true'
         env:
@@ -84,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, windows-11-arm]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     env:
@@ -148,16 +145,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  linux:
-    needs: prepare
-    if: needs.prepare.outputs.release == 'true'
-    uses: ./.github/workflows/linux-packages.yml
-    with:
-      release: true
-      tag: ${{ needs.prepare.outputs.tag }}
-
   publish:
-    needs: [prepare, build, linux]
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -193,7 +182,7 @@ jobs:
         run: bun .github/release/release.mjs publish
 
   repositories:
-    needs: [prepare, build, linux, publish]
+    needs: [prepare, build, publish]
     if: needs.prepare.outputs.release == 'true'
     permissions:
       contents: read
@@ -203,6 +192,6 @@ jobs:
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       channel: ${{ inputs.channel || 'nightly' }}
-      base_url: https://bytwbytwina.github.io/Bytwina
+      base_url: https://bytwlumina.github.io/Bytwina
       deploy: true
     secrets: inherit

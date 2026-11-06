@@ -32,6 +32,8 @@ permissions:
 
 jobs:
   build:
+    # Linux and macOS builds are paused until Windows release automation is proven.
+    if: false
     strategy:
       fail-fast: false
       matrix:

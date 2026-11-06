@@ -4,7 +4,7 @@
 # imports and verifies the GPG signing key, and configures the package repository.
 set -eu
 
-BASE_URL="${BYTWINA_REPO_BASE_URL:-https://bytwbytwina.github.io/Bytwina}"
+BASE_URL="${BYTWINA_REPO_BASE_URL:-https://bytwlumina.github.io/Bytwina}"
 CHANNEL="${BYTWINA_CHANNEL:-nightly}"
 EXPECTED_FINGERPRINT="${BYTWINA_FINGERPRINT:-CA19DA939E9BCAB500751CE480FE95CAD86141A5}"
 

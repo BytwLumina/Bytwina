@@ -56,7 +56,7 @@ Flatpak is the recommended distribution format for Linux, featuring sandbox isol
 
 - **One-Click Repository Install (Automatic Updates)**:
   ```sh
-  flatpak install --user https://bytwbytwina.github.io/Bytwina/flatpak/bytwina.flatpakref
+  flatpak install --user https://bytwlumina.github.io/Bytwina/flatpak/bytwina.flatpakref
   ```
   Once installed, your desktop software store (GNOME Software, KDE Discover) or `flatpak update` will automatically discover and install updates.
 
@@ -73,7 +73,7 @@ See [Flatpak guide](packaging/flatpak/README.md) for sandbox permissions and sou
 
 Configure the signed package repository for your distribution with one command:
 ```sh
-curl -fsSL https://bytwbytwina.github.io/Bytwina/setup.sh | sh
+curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh
 ```
 The script detects your distribution (Ubuntu/Debian, Fedora, openSUSE, Arch Linux), cryptographically verifies the GPG signing key, and configures the repository with an option to install immediately.
 

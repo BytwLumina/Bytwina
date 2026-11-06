@@ -10,7 +10,7 @@ import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_REPO_URL = "https://bytwbytwina.github.io/Bytwina/flatpak/repo"
+DEFAULT_REPO_URL = "https://bytwlumina.github.io/Bytwina/flatpak/repo"
 
 
 def output(*args, cwd=ROOT):
@@ -23,7 +23,7 @@ Name=io.github.ninokiru.Bytwina
 Branch=master
 Title=Bytwina
 Comment=Fast, secure and lightweight native Discord client
-Icon=https://bytwbytwina.github.io/Bytwina/icons/bytwina.png
+Icon=https://bytwlumina.github.io/Bytwina/icons/bytwina.png
 Url={repo_url}
 RuntimeRepo=https://flathub.org/repo/flathub.flatpakrepo
 IsRuntime=false
