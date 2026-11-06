@@ -199,7 +199,7 @@ in
 
         meta = {
             description = "Tiny, performant, native Discord client written in Rust (egui/wgpu)";
-            homepage = "https://github.com/BytwLumina/Lumina";
+            homepage = "https://github.com/BytwLumina/Bytwina";
             license = with lib.licenses; [
                 mit
                 asl20

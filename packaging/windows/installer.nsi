@@ -15,7 +15,7 @@ SetCompressor /SOLID lzma
 
 !define PRODUCT_NAME "Lumina"
 !define PRODUCT_PUBLISHER "Lumina contributors"
-!define PRODUCT_WEB_SITE "https://github.com/BytwLumina/Lumina"
+!define PRODUCT_WEB_SITE "https://github.com/BytwLumina/Bytwina"
 !define APP_EXE "lumina.exe"
 !define APP_ID "io.github.ninokiru.Lumina"
 

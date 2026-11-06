@@ -5,8 +5,8 @@ description: Synchronize Lumina’s creator wiki for author-visible extension SD
 
 # Maintain the Lumina SDK wiki
 
-The creator wiki is `https://github.com/BytwLumina/Lumina/wiki`; its separate Git
-remote is `https://github.com/BytwLumina/Lumina.wiki.git`. The authoritative sources
+The creator wiki is `https://github.com/BytwLumina/Bytwina/wiki`; its separate Git
+remote is `https://github.com/BytwLumina/Bytwina.wiki.git`. The authoritative sources
 are `examples/extensions/README.md`, `docs/extension-sdk-reference.md`,
 `docs/extension-sdk-actions.md`, `docs/extension-sdk-overview.md`,
 `docs/extension-sdk-troubleshooting.md`, `docs/extensions.md`, and `docs/theme-api.md`.

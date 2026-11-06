@@ -1,7 +1,7 @@
 # Lumina
 
 <p align="center">
-  <a href="https://github.com/BytwLumina/Lumina">
+  <a href="https://github.com/BytwLumina/Bytwina">
     <img src="docs/preview.png" alt="Lumina Native Discord Client" width="900" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
   </a>
 </p>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BytwLumina/Lumina/releases"><img src="https://img.shields.io/github/v/release/BytwLumina/Lumina?label=release&color=blue" alt="GitHub Release" /></a>
+  <a href="https://github.com/BytwLumina/Bytwina/releases"><img src="https://img.shields.io/github/v/release/BytwLumina/Bytwina?label=release&color=blue" alt="GitHub Release" /></a>
   <a href="Cargo.toml"><img src="https://img.shields.io/badge/rust-1.98.1_pinned-blue.svg?logo=rust" alt="Rust 1.98.1 Pinned" /></a>
   <a href="crates/ui"><img src="https://img.shields.io/badge/ui-egui%20%2F%20wgpu-orange.svg" alt="UI egui/wgpu" /></a>
   <a href="docs/platform-support.md"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-informational.svg" alt="Platform Support" /></a>
@@ -37,7 +37,7 @@
 
 ## Downloads & Installation
 
-Pre-compiled releases for macOS, Linux, and Windows are published on GitHub [Releases](https://github.com/BytwLumina/Lumina/releases).
+Pre-compiled releases for macOS, Linux, and Windows are published on GitHub [Releases](https://github.com/BytwLumina/Bytwina/releases).
 
 | Platform | Format | Architectures | Details |
 |---|---|---|---|
@@ -56,12 +56,12 @@ Flatpak is the recommended distribution format for Linux, featuring sandbox isol
 
 - **One-Click Repository Install (Automatic Updates)**:
   ```sh
-  flatpak install --user https://bytwlumina.github.io/Lumina/flatpak/lumina.flatpakref
+  flatpak install --user https://bytwlumina.github.io/Bytwina/flatpak/lumina.flatpakref
   ```
   Once installed, your desktop software store (GNOME Software, KDE Discover) or `flatpak update` will automatically discover and install updates.
 
 - **Standalone Offline Bundle**:
-  Download `Lumina-linux.flatpak` from [Releases](https://github.com/BytwLumina/Lumina/releases):
+  Download `Lumina-linux.flatpak` from [Releases](https://github.com/BytwLumina/Bytwina/releases):
   ```sh
   flatpak install --user ./Lumina-linux.flatpak
   flatpak run io.github.ninokiru.Lumina
@@ -73,7 +73,7 @@ See [Flatpak guide](packaging/flatpak/README.md) for sandbox permissions and sou
 
 Configure the signed package repository for your distribution with one command:
 ```sh
-curl -fsSL https://bytwlumina.github.io/Lumina/setup.sh | sh
+curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh
 ```
 The script detects your distribution (Ubuntu/Debian, Fedora, openSUSE, Arch Linux), cryptographically verifies the GPG signing key, and configures the repository with an option to install immediately.
 
@@ -106,8 +106,8 @@ Nix installs are updated through Nix, not the in-app updater. On macOS the build
 The repository flake builds Lumina from source for `x86_64-linux` and `aarch64-darwin`:
 
 ```sh
-nix run github:BytwLumina/Lumina#lumina
-nix profile install github:BytwLumina/Lumina#lumina
+nix run github:BytwLumina/Bytwina#lumina
+nix profile install github:BytwLumina/Bytwina#lumina
 ```
 
 Or declaring it in the flake
@@ -124,7 +124,7 @@ Both modules below take `inputs` as an argument, so your flake must pass it thro
             inputs.nixpkgs.follows = "nixpkgs";
         };
         lumina = {
-            url = "github:BytwLumina/Lumina";
+            url = "github:BytwLumina/Bytwina";
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
@@ -194,7 +194,7 @@ If you use Home Manager as a NixOS module instead, pass `inputs` through its own
 
 #### 5. Standalone AppImage (Portable)
 
-Download `lumina-<version>-Linux-X64.AppImage` from [Releases](https://github.com/BytwLumina/Lumina/releases), make it executable, and run:
+Download `lumina-<version>-Linux-X64.AppImage` from [Releases](https://github.com/BytwLumina/Bytwina/releases), make it executable, and run:
 ```sh
 chmod +x ./lumina-*-Linux-X64.AppImage
 ./lumina-*-Linux-X64.AppImage
@@ -207,7 +207,7 @@ Keep the AppImage in a writable directory to receive in-app updates via **Settin
 <summary><h3>🪟 Windows (Installer, PowerShell, Portable)</h3></summary>
 
 #### 1. Setup Installer (Recommended)
-Download the `Windows-X64-Setup.exe` or `Windows-ARM64-Setup.exe` asset for your system from [Releases](https://github.com/BytwLumina/Lumina/releases) and run it:
+Download the `Windows-X64-Setup.exe` or `Windows-ARM64-Setup.exe` asset for your system from [Releases](https://github.com/BytwLumina/Bytwina/releases) and run it:
 - Installs per-user to `%LOCALAPPDATA%\Programs\Lumina` without requiring administrator/UAC elevation.
 - Automatically registers Start Menu shortcuts and configures AppUserModelID (`io.github.ninokiru.Lumina`) for native Windows toast notifications.
 - Registers in Windows Settings (Installed Apps / Add or Remove Programs) with full uninstall support.
@@ -243,7 +243,7 @@ brew install --cask lumina
 The cask lives in the small [`homebrew-lumina`](https://github.com/BytwLumina/homebrew-lumina) tap, so installing does not clone this repository. If you tapped the old URL, run `brew untap BytwLumina/lumina` first and tap again.
 
 #### Standalone Bundle
-Download `lumina-<version>-macOS-ARM64.zip` from [Releases](https://github.com/BytwLumina/Lumina/releases), unzip, and drag `Lumina.app` to your `/Applications` folder.
+Download `lumina-<version>-macOS-ARM64.zip` from [Releases](https://github.com/BytwLumina/Bytwina/releases), unzip, and drag `Lumina.app` to your `/Applications` folder.
 
 </details>
 
@@ -421,7 +421,7 @@ For full details, review the [Storage Policy](docs/storage-policy.md) and [Threa
 - [Voice Architecture & Procedure](docs/voice.md)
 - [Design Tokens & UI Styling](docs/design.md)
 - [Extensions & Plugin Architecture](docs/extensions.md)
-- [Extension SDK Creator Wiki](https://github.com/BytwLumina/Lumina/wiki)
+- [Extension SDK Creator Wiki](https://github.com/BytwLumina/Bytwina/wiki)
 - [SDK Examples and Offline Authoring Guide](examples/extensions/README.md)
 - [Theme API Specification](docs/theme-api.md)
 - [Threat Model & Security](docs/threat-model.md)

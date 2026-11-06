@@ -2377,7 +2377,7 @@ HTTPS URL. A URL is never fetched or forwarded raw; it is exchanged for a media-
 through `/applications/{id}/external-assets`, the same unofficial route Discord's client uses,
 and cached per connection so repeated identical updates cost nothing. Registered assets are
 refetched at most once a minute when a key misses, so artwork uploaded seconds after a game
-connects still resolves. This addresses [#237](https://github.com/BytwLumina/Lumina/issues/237),
+connects still resolves. This addresses [#237](https://github.com/BytwLumina/Bytwina/issues/237),
 where a plugin published its cover art as a URL.
 
 A small image is a corner badge. Both the outgoing path and received presences now fall back
@@ -2552,7 +2552,7 @@ conservative. Expired guild mute timers no longer suppress alerts indefinitely.
 The new mute switch sets an untimed mute; it does not add a duration picker.
 
 The guild stream-preview part of issue #458 was already delivered in
-[PR #457](https://github.com/BytwLumina/Lumina/pull/457): hover a LIVE participant
+[PR #457](https://github.com/BytwLumina/Bytwina/pull/457): hover a LIVE participant
 for a still preview and an explicit Watch Stream action. This change adds no
 stream transport or automatic call joining. Notification writes and previews
 remain unofficial normal-account behavior, verified with synthetic fixtures

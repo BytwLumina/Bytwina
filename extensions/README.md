@@ -48,7 +48,7 @@ embedded in their packages.
 
 ## History
 
-These packages were maintained in `BytwLumina/Lumina` until they moved
+These packages were maintained in `BytwLumina/Bytwina` until they moved
 here. That repository's catalog and package URLs remain valid for clients released
 before the move. Manifest `source` links that point there are part of the reviewed
 package bytes and change only with a new package version.
@@ -70,9 +70,9 @@ compatibility evidence.
 
 Package bytes and stable IDs are preserved from the existing client/theme repository:
 
-- Nine original themes, two plugin packages, their Rust source/SDK/build files, and Ocean preview originate from `BytwLumina/Lumina` at `9e6bbcdef06b997ee3de3e228b2f2a54c940b7d0`.
+- Nine original themes, two plugin packages, their Rust source/SDK/build files, and Ocean preview originate from `BytwLumina/Bytwina` at `9e6bbcdef06b997ee3de3e228b2f2a54c940b7d0`.
 - Forest Piano and Soft White originate from the owner's desktop packages normalized for Lumina import at `a217f86c56b13ee51c4eb956f235b13eafb7609f`.
-- All eleven theme packages are also recorded in `BytwLumina/Lumina-themes` at `6d2a97be4f8b0040aa9eada5648bceff55acb612`.
+- All eleven theme packages are also recorded in `BytwLumina/Bytwina-themes` at `6d2a97be4f8b0040aa9eada5648bceff55acb612`.
 - Existing authors, license labels, and source URLs remain in every manifest. Lumina's MIT and Apache-2.0 notices are retained at the repository root and do not replace individual artwork terms.
 - Forest Piano and Soft White retain supplied `CC0-1.0` metadata; this is not independent verification of image rights. Consult their original sources for artwork provenance.
 

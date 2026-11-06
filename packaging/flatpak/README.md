@@ -31,7 +31,7 @@ To install Lumina configured to receive automatic updates from the hosted OSTree
 ```sh
 flatpak install --user packaging/flatpak/lumina.flatpakref
 # Or from a published URL:
-# flatpak install --user https://bytwlumina.github.io/Lumina/flatpak/lumina.flatpakref
+# flatpak install --user https://bytwlumina.github.io/Bytwina/flatpak/lumina.flatpakref
 ```
 
 Once installed via `.flatpakref`, your desktop environment (GNOME Software, KDE Discover)

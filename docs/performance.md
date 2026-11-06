@@ -486,10 +486,10 @@ and strict Clippy pass.
 The workspace unit run passes 1,338 tests and fails the unchanged
 `categories::tests::collapsed_categories_follow_service_order_selection_and_buttons` at
 `crates/ui/src/categories.rs:2240`; an isolated rerun fails identically. The same assertion
-fails in [upstream Linux CI](https://github.com/BytwLumina/Lumina/actions/runs/40329311638/job/121594172966).
+fails in [upstream Linux CI](https://github.com/BytwLumina/Bytwina/actions/runs/40329311638/job/121594172966).
 Production, policy and doctest checks pass. The full `cargo xtask check` is therefore not claimed
 as passing for this integrated revision. No sidebar test or implementation is changed here.
-Upstream also has an unchanged [fuzz fixture compilation failure](https://github.com/BytwLumina/Lumina/actions/runs/40329311638/job/121594172868)
+Upstream also has an unchanged [fuzz fixture compilation failure](https://github.com/BytwLumina/Bytwina/actions/runs/40329311638/job/121594172868)
 (`Role::managed` is missing from its initializer) and the previously reported dependency
 security audit failure. None is suppressed by this integration.
 

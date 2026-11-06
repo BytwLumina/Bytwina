@@ -1,7 +1,7 @@
 # Linux AppImage
 
 Download `lumina-<version>-Linux-X64.AppImage` from
-[Releases](https://github.com/BytwLumina/Lumina/releases), keep it in a writable
+[Releases](https://github.com/BytwLumina/Bytwina/releases), keep it in a writable
 directory, and make it executable:
 
 ```sh

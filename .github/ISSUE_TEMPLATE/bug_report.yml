@@ -174,7 +174,7 @@ body:
         which can also contain framework logs: review the file before uploading and remove tokens,
         credentials and private content. Diagnostics are disabled on the next normal launch after
         clearing the PowerShell variables above (or closing that terminal).
-        See the [voice diagnostics guide](https://github.com/BytwLumina/Lumina/blob/main/docs/voice.md#investigating-high-cpu-during-a-call) for details.
+        See the [voice diagnostics guide](https://github.com/BytwLumina/Bytwina/blob/main/docs/voice.md#investigating-high-cpu-during-a-call) for details.
 
   - type: textarea
     id: runtime_diagnostics

@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "author": "Lumina contributors",
   "license": "MIT OR Apache-2.0",
-  "source": "https://github.com/BytwLumina/Lumina/tree/main/examples/extensions/app-toolbox",
+  "source": "https://github.com/BytwLumina/Bytwina/tree/main/examples/extensions/app-toolbox",
   "kind": "plugin",
   "capabilities": [
     "app_context", "channel_directory", "timeline", "members", "presence",

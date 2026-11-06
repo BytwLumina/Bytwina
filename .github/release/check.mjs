@@ -31,7 +31,7 @@ const notes = await generateNotes({ preset: 'conventionalcommits' }, {
 assert(notes.includes('fix scrolling'));
 
 const releaseNotesContext = {
-  cwd: process.cwd(), logger, options: { repositoryUrl: 'https://github.com/BytwLumina/Lumina' },
+  cwd: process.cwd(), logger, options: { repositoryUrl: 'https://github.com/BytwLumina/Bytwina' },
   commits: [
     { hash: 'eb98a663421d6e142fe0f5f3be6f175a1b95a8e9', author: { name: 'Release Note Author', email: 'release-note-author@example.invalid' }, message: 'feat(ui): add category and channel permission settings (#149)' },
     { hash: 'baec1dfc7b5755b0f063a1ea16d05f81936d0dc0', author: { name: 'Audio Note Author', email: 'audio-note-author@example.invalid' }, message: 'feat(audio): bundle notification sounds (#140)' },
@@ -43,7 +43,7 @@ const prodNotes = await generateReleaseNotes('production', { preset: 'convention
 assert(prodNotes.includes('category and channel permission settings'));
 assert(prodNotes.includes('notification sounds'));
 assert(prodNotes.includes('by Release Note Author'));
-assert(prodNotes.includes('[#149](https://github.com/BytwLumina/Lumina/pull/149)'));
+assert(prodNotes.includes('[#149](https://github.com/BytwLumina/Bytwina/pull/149)'));
 assert(prodNotes.includes('## New Contributors'));
 assert(prodNotes.indexOf('## New Contributors') > prodNotes.indexOf('notification sounds'));
 assert(prodNotes.includes('Release Note Author made their first contribution'));

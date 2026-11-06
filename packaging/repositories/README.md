@@ -2,7 +2,7 @@
 
 `build.py` prepares static HTTPS repository trees for apt, dnf/zypper and pacman.
 The repository is hosted on GitHub Pages at
-`https://bytwlumina.github.io/Lumina/`. Its current package-signing fingerprint is
+`https://bytwlumina.github.io/Bytwina/`. Its current package-signing fingerprint is
 `CA19DA939E9BCAB500751CE480FE95CAD86141A5`; verify this through an independent
 channel before trusting the key. Configure the repository Actions secret
 `PACKAGE_SIGNING_KEY` with the ASCII-armored dedicated private signing key, and
@@ -65,14 +65,14 @@ containing the ARM64 build and matching signed apt repository. Other versions an
 instead of incompatible native packages:
 
 ```sh
-curl -fsSL https://bytwlumina.github.io/Lumina/setup.sh | sh
+curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh
 # Or run from the cloned repository:
 # sh packaging/repositories/setup.sh
 ```
 
 To configure a specific channel or base URL:
 ```sh
-curl -fsSL https://bytwlumina.github.io/Lumina/setup.sh | LUMINA_CHANNEL=production sh
+curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | LUMINA_CHANNEL=production sh
 ```
 
 After running the script, update your package lists and install `lumina` using your distribution's native package manager (`apt`, `dnf`, `zypper`, or `pacman`). Subsequent system updates will automatically update Lumina.

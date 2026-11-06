@@ -7,7 +7,7 @@ The [AppImage](../appimage/README.md) supports in-app updates on Linux x86_64 wi
 the documented host GTK4/WebKit6 runtime; its release build targets Ubuntu 24.04
 for glibc 2.39 compatibility.
 Download the file labelled for your distribution from
-[Releases](https://github.com/BytwLumina/Lumina/releases), then use its actual filename:
+[Releases](https://github.com/BytwLumina/Bytwina/releases), then use its actual filename:
 
 ```sh
 sudo apt install ./lumina-*.deb                     # Ubuntu 26.04

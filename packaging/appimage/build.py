@@ -23,7 +23,7 @@ def update_metadata(version, release_tag):
     name = f"lumina-{release_tag or version}-Linux-X64.AppImage"
     channel = "latest-pre" if "-" in version.split("+", 1)[0] else "latest"
     information = f"gh-releases-zsync|Lumina|Lumina|{channel}|lumina-*-Linux-X64.AppImage.zsync"
-    url = f"https://github.com/BytwLumina/Lumina/releases/download/v{version}/lumina-v{version}-Linux-X64.AppImage"
+    url = f"https://github.com/BytwLumina/Bytwina/releases/download/v{version}/lumina-v{version}-Linux-X64.AppImage"
     return name, information, url
 
 

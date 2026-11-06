@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "author": "Lumina contributors",
   "license": "MIT OR Apache-2.0",
-  "source": "https://github.com/BytwLumina/Lumina/tree/main/extensions/plugins/api-proxy",
+  "source": "https://github.com/BytwLumina/Bytwina/tree/main/extensions/plugins/api-proxy",
   "kind": "plugin",
   "capabilities": [
     "api_proxy",

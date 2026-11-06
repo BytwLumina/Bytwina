@@ -3082,13 +3082,13 @@ impl Desktop {
 				}
 				Command::Website => {
 					ctx.open_url(egui::OpenUrl::new_tab(
-						"https://github.com/BytwLumina/Lumina",
+						"https://github.com/BytwLumina/Bytwina",
 					));
 					None
 				}
 				Command::ReportIssue => {
 					ctx.open_url(egui::OpenUrl::new_tab(
-						"https://github.com/BytwLumina/Lumina/issues/new/choose",
+						"https://github.com/BytwLumina/Bytwina/issues/new/choose",
 					));
 					None
 				}

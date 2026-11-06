@@ -116,7 +116,7 @@ the [performance report](../../performance.md#review-follow-up-package) compares
 it with the same baseline. NSIS remains unavailable locally; this is an unsigned
 directory and ZIP, not an installer executable.
 
-[Ubuntu CI at `7d9c0d05`](https://github.com/BytwLumina/Lumina/actions/runs/37639466527/job/112854794590)
+[Ubuntu CI at `7d9c0d05`](https://github.com/BytwLumina/Bytwina/actions/runs/37639466527/job/112854794590)
 also failed on those same eight baseline UI tests (415 passed, 8 failed, 5 ignored).
 CodeRabbit approved the runtime changes and all five review threads were resolved;
 that approval does not waive the test and native-verification blockers.

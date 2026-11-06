@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $appName = 'Lumina'
 $publisher = 'Lumina contributors'
-$website = 'https://github.com/BytwLumina/Lumina'
+$website = 'https://github.com/BytwLumina/Bytwina'
 $installDir = Join-Path $env:LOCALAPPDATA "Programs\$appName"
 $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\$appName"
 $shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) "$appName.lnk"

@@ -10,8 +10,8 @@
     <p>This client is unofficial and is not affiliated with Discord.</p>
   </description>
   <launchable type="desktop-id">io.github.ninokiru.Lumina.desktop</launchable>
-  <url type="homepage">https://github.com/BytwLumina/Lumina</url>
-  <url type="bugtracker">https://github.com/BytwLumina/Lumina/issues</url>
+  <url type="homepage">https://github.com/BytwLumina/Bytwina</url>
+  <url type="bugtracker">https://github.com/BytwLumina/Bytwina/issues</url>
   <developer id="io.github.ninokiru"><name>Lumina contributors</name></developer>
   <content_rating type="oars-1.1">
     <content_attribute id="social-chat">intense</content_attribute>

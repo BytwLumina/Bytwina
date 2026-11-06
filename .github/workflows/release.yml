@@ -203,6 +203,6 @@ jobs:
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       channel: ${{ inputs.channel || 'nightly' }}
-      base_url: https://bytwlumina.github.io/Lumina
+      base_url: https://bytwlumina.github.io/Bytwina
       deploy: true
     secrets: inherit

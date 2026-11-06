@@ -22,7 +22,7 @@ use sha2::{Digest, Sha256};
 
 /// Generated from `extensions/` and pinned to a merged commit by the catalog workflow.
 const CATALOG_URL: &str =
-	"https://raw.githubusercontent.com/BytwLumina/Lumina/main/extensions/catalog.json";
+	"https://raw.githubusercontent.com/BytwLumina/Bytwina/main/extensions/catalog.json";
 const MAX_PACKAGE: usize = 16 * 1024 * 1024;
 const MAX_RECORD: usize = MAX_PACKAGE + 64 * 1024;
 const MAX_CATALOG: usize = 1024 * 1024;
@@ -1167,7 +1167,7 @@ fn load(
 							version: "invalid".into(),
 							author: "Unknown".into(),
 							license: "Unknown".into(),
-							source: "https://github.com/BytwLumina/Lumina".into(),
+							source: "https://github.com/BytwLumina/Bytwina".into(),
 							kind,
 							capabilities: if parent == root.join("proxy-plugins") {
 								vec![Capability::ApiProxy]
@@ -1712,7 +1712,7 @@ mod tests {
 				version: "1.0.0".into(),
 				author: "Synthetic test".into(),
 				license: "MIT".into(),
-				source: "https://github.com/BytwLumina/Lumina".into(),
+				source: "https://github.com/BytwLumina/Bytwina".into(),
 				kind: ExtensionKind::Theme,
 				capabilities: Vec::new(),
 				actions: Vec::new(),

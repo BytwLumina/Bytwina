@@ -18,7 +18,7 @@ mod delta;
 #[path = "updater_install.rs"]
 mod install;
 
-const RELEASES: &str = "https://api.github.com/repos/BytwLumina/Lumina/releases";
+const RELEASES: &str = "https://api.github.com/repos/BytwLumina/Bytwina/releases";
 const MAX_METADATA: usize = 2 * 1024 * 1024;
 const MAX_DOWNLOAD: u64 = 512 * 1024 * 1024;
 const CHECK_INTERVAL: Duration = Duration::from_secs(60 * 60);
@@ -687,7 +687,7 @@ fn select_release(
 			return Err("The release asset metadata is invalid.".into());
 		}
 		let expected = format!(
-			"https://github.com/BytwLumina/Lumina/releases/download/{}/{name}",
+			"https://github.com/BytwLumina/Bytwina/releases/download/{}/{name}",
 			release.tag_name
 		);
 		if asset.browser_download_url != expected {

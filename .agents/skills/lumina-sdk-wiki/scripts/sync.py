@@ -7,8 +7,8 @@ from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
 REPOSITORY = Path(__file__).resolve().parents[4]
-GITHUB = "https://github.com/BytwLumina/Lumina"
-WIKI_ORIGINS = {GITHUB + ".wiki.git", "git@github.com:BytwLumina/Lumina.wiki.git"}
+GITHUB = "https://github.com/BytwLumina/Bytwina"
+WIKI_ORIGINS = {GITHUB + ".wiki.git", "git@github.com:BytwLumina/Bytwina.wiki.git"}
 SOURCES = (
     "examples/extensions/README.md", "docs/extensions.md", "docs/theme-api.md",
     "docs/extension-sdk-reference.md", "docs/extension-sdk-actions.md",
@@ -299,7 +299,7 @@ def main():
         if Path(git(directory, "rev-parse", "--show-toplevel")).resolve() != directory:
             raise ValueError("--wiki-dir must name the wiki checkout root")
         if git(directory, "remote", "get-url", "origin") not in WIKI_ORIGINS:
-            raise ValueError("wiki origin must be the existing BytwLumina/Lumina.wiki.git remote")
+            raise ValueError("wiki origin must be the existing BytwLumina/Bytwina.wiki.git remote")
         if not args.status.strip() or len(args.status) > 256 or any(ord(c) < 32 for c in args.status):
             raise ValueError("--status must be one nonempty line, at most 256 characters")
         generated = pages(revision, args.status)

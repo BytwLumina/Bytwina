@@ -152,7 +152,7 @@ def generate_index(destination: Path):
 <head>
   <meta charset="UTF-8">
   <title>Lumina Linux Repositories</title>
-  <meta http-equiv="refresh" content="0; url=https://github.com/BytwLumina/Lumina">
+  <meta http-equiv="refresh" content="0; url=https://github.com/BytwLumina/Bytwina">
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background: #111214; color: #dbdee1; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     .card { background: #2b2d31; padding: 2rem; border-radius: 8px; text-align: center; max-width: 480px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
@@ -166,8 +166,8 @@ def generate_index(destination: Path):
   <div class="card">
     <h1>Lumina Linux Repositories</h1>
     <p>Signed native packages and Flatpak repository for Lumina.</p>
-    <p>Run <code>curl -fsSL https://bytwlumina.github.io/Lumina/setup.sh | sh</code> to install.</p>
-    <p><a href="https://github.com/BytwLumina/Lumina">View project on GitHub &rarr;</a></p>
+    <p>Run <code>curl -fsSL https://bytwlumina.github.io/Bytwina/setup.sh | sh</code> to install.</p>
+    <p><a href="https://github.com/BytwLumina/Bytwina">View project on GitHub &rarr;</a></p>
   </div>
 </body>
 </html>

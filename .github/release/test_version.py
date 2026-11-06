@@ -68,14 +68,14 @@ CASK = f"""cask "lumina" do
   version "0.1.0"
   sha256 "{CHECKSUM}"
 
-  url "https://github.com/BytwLumina/Lumina/releases/download/v#{{version}}/lumina-v#{{version}}-macOS-ARM64.zip"
+  url "https://github.com/BytwLumina/Bytwina/releases/download/v#{{version}}/lumina-v#{{version}}-macOS-ARM64.zip"
 end
 """
 # Pinned by the shipped recipe: pkgver names the asset, so pkgver and the URL move together.
 PINNED_TAG = 'v1.0.0-nightly.20261001.53'
 PINNED_PKGVER = '1.0.0pre.nightly.20261001.53'
 PINNED_URL = (
-    'https://github.com/BytwLumina/Lumina/releases/download/'
+    'https://github.com/BytwLumina/Bytwina/releases/download/'
     f'{PINNED_TAG}/lumina-{PINNED_TAG}-Linux-arch-lumina-{PINNED_PKGVER}-1-x86_64.pkg.tar.zst'
 )
 
@@ -272,7 +272,7 @@ class ArchRecipe(unittest.TestCase):
     def test_recipe_cannot_pin_a_release_that_has_not_been_cut(self):
         future_tag = 'v1.2.4-nightly.20261001.53'
         future_pkgver = '1.2.4pre.nightly.20261001.53'
-        url = (f'https://github.com/BytwLumina/Lumina/releases/download/{future_tag}/lumina-'
+        url = (f'https://github.com/BytwLumina/Bytwina/releases/download/{future_tag}/lumina-'
                f'{future_tag}-Linux-arch-lumina-{future_pkgver}-1-x86_64.pkg.tar.zst')
         with Fixture(arch=recipe(pkgver=future_pkgver, url=url)) as tree:
             with self.assertRaisesRegex(ValueError, 'newer than'):

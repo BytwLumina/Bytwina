@@ -36,7 +36,7 @@ for entry in pinned["entries"]:
     commit = entry["source_commit"]
     for value in [entry] + ([entry["preview"]] if "preview" in entry else []):
         key = "release_url" if value is entry else "url"
-        value[key] = value[key].replace("BytwLumina/Lumina/" + commit + "/", "BytwLumina/Lumina/" + commit + "/extensions/")
+        value[key] = value[key].replace("BytwLumina/Bytwina/" + commit + "/", "BytwLumina/Bytwina/" + commit + "/extensions/")
 moved = json.loads(json.dumps(pinned))
 for entry in moved["entries"]:
     old = entry["source_commit"]
@@ -44,8 +44,8 @@ for entry in moved["entries"]:
     for value in [entry] + ([entry["preview"]] if "preview" in entry else []):
         key = "release_url" if value is entry else "url"
         value[key] = value[key].replace(old, "f" * 40)
-assert catalog.content(pinned, "BytwLumina/Lumina") == catalog.content(moved, "BytwLumina/Lumina") is not None
+assert catalog.content(pinned, "BytwLumina/Bytwina") == catalog.content(moved, "BytwLumina/Bytwina") is not None
 assert catalog.content(pinned, "Lumina/Other") is None
 moved["entries"][0]["sha256"] = "0" * 64
-assert catalog.content(pinned, "BytwLumina/Lumina") != catalog.content(moved, "BytwLumina/Lumina")
+assert catalog.content(pinned, "BytwLumina/Bytwina") != catalog.content(moved, "BytwLumina/Bytwina")
 print("Theme/plugin identity, byte, capability, action and URL checks passed.")
