@@ -1,5 +1,5 @@
 [1m[92m   Compiling[0m bytwina-extension-sdk v0.1.0 (/home/runner/work/Bytwina/Bytwina/extensions/sdk)
 [1m[92m   Compiling[0m extensions v0.1.0 (/home/runner/work/Bytwina/Bytwina/crates/extensions)
-[1m[92m    Finished[0m `release` profile [optimized + debuginfo] target(s) in 56.01s
+[1m[92m    Finished[0m `release` profile [optimized + debuginfo] target(s) in 49.69s
 [1m[92m     Running[0m `target/release/examples/legacy_sdk_check`
 immutable legacy App Toolbox: foreground snapshot, 5 old data events and 10 new-event grant rejections passed
