@@ -516,7 +516,7 @@ fn parse_avcc(avcc: &[u8]) -> Result<VideoCodec, &'static str> {
 	let nal_length = (avcc.get(4).ok_or(INVALID)? & 3) + 1;
 	let mut parameter_sets = Vec::new();
 	let mut at = 6;
-	let sps_count = usize::from(avcc[5] & 0x1f);
+	let sps_count = usize::from(*avcc.get(5).ok_or(INVALID)? & 0x1f);
 	at = read_parameter_sets(avcc, at, sps_count, &mut parameter_sets)?;
 	let pps_count = usize::from(*avcc.get(at).ok_or(INVALID)?);
 	read_parameter_sets(avcc, at + 1, pps_count, &mut parameter_sets)?;

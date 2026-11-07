@@ -1646,6 +1646,9 @@ async fn run_recoverable(
 							continue;
 						}
 						if same_identity && next.ranges != active.subscription.ranges {
+							if !validate_member_ranges(&next.ranges) {
+								return Err(Failure::Protocol);
+							}
 							active.retarget_ranges(next.ranges.clone());
 							active.subscription.channel = next.channel;
 							active.subscription.request = next.request;

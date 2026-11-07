@@ -1648,7 +1648,7 @@ fn preset_swatch(
 	let [top, bottom] = swatch.backdrop.unwrap_or_else(|| {
 		// Opaque presets run from their lightest surface to their darkest one.
 		let mut surfaces = [swatch.chat, swatch.selected, swatch.base];
-		surfaces.sort_by(|a, b| design::bytwinance(*b).total_cmp(&design::bytwinance(*a)));
+		surfaces.sort_by(|a, b| design::luminance(*b).total_cmp(&design::luminance(*a)));
 		[surfaces[0], surfaces[2]]
 	});
 	gradient_circle(painter, center, 20.0, top, bottom);

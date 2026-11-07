@@ -1903,7 +1903,7 @@ pub fn role_name_color(rgb: u32, background: Color32, fallback: Color32) -> Colo
 	}
 	fallback
 }
-pub(crate) fn bytwinance(c: Color32) -> f32 {
+pub(crate) fn luminance(c: Color32) -> f32 {
 	let channel = |v: u8| {
 		let v = v as f32 / 255.0;
 		if v <= 0.03928 {
@@ -1915,7 +1915,7 @@ pub(crate) fn bytwinance(c: Color32) -> f32 {
 	0.2126 * channel(c.r()) + 0.7152 * channel(c.g()) + 0.0722 * channel(c.b())
 }
 fn contrast(a: Color32, b: Color32) -> f32 {
-	let (l1, l2) = (bytwinance(a) + 0.05, bytwinance(b) + 0.05);
+	let (l1, l2) = (luminance(a) + 0.05, luminance(b) + 0.05);
 	l1.max(l2) / l1.min(l2)
 }
 

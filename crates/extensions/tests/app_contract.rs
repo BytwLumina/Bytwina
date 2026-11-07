@@ -103,6 +103,18 @@ fn sdk_manifests_round_trip_all_capabilities_and_surfaces_through_host_validatio
 	imported.validate().unwrap();
 }
 
+#[test]
+fn sdk_manifest_round_trips_api_proxy_capability() {
+	let manifest = test_manifest(vec![Capability::ApiProxy, Capability::Storage]);
+	manifest.validate().unwrap();
+	let wire = serde_json::to_value(&manifest).unwrap();
+	let authored: sdk::Manifest = serde_json::from_value(wire.clone()).unwrap();
+	assert_eq!(serde_json::to_value(&authored).unwrap(), wire);
+	let imported: Manifest = serde_json::from_value(wire).unwrap();
+	imported.validate().unwrap();
+	assert_eq!(imported, manifest);
+}
+
 fn test_manifest(capabilities: Vec<Capability>) -> Manifest {
 	Manifest {
 		api_version: API_VERSION,

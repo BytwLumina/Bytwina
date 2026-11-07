@@ -1653,7 +1653,9 @@ fn public_ip(ip: IpAddr) -> bool {
 		}
 		IpAddr::V6(ip) => {
 			let segments = ip.segments();
+			// 6to4 (2002::/16) can embed a private IPv4 address, so refuse it like Teredo.
 			segments[0] & 0xe000 == 0x2000
+				&& segments[0] != 0x2002
 				&& !(segments[0] == 0x2001 && (segments[1] == 0xdb8 || segments[1] < 0x200))
 		}
 	}
@@ -2337,6 +2339,7 @@ mod tests {
 			"fe80::1",
 			"::ffff:127.0.0.1",
 			"2001:db8::1",
+			"2002:0a00:0001::1",
 		] {
 			assert!(!public_ip(ip.parse().unwrap()), "{ip}");
 		}

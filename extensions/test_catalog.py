@@ -21,6 +21,10 @@ for data, mutate in (
     (plugin, lambda p: p.update(wasm=[0, 1])),
     (plugin, lambda p: p["manifest"].update(capabilities=["unknown"])),
     (plugin, lambda p: p["manifest"]["actions"][0].update(surface="composer")),
+    (theme, lambda p: p["manifest"].update(api_version=True)),
+    (theme, lambda p: p["manifest"].update(unexpected="x")),
+    (theme, lambda p: p.update(unexpected="x")),
+    (plugin, lambda p: p["manifest"]["actions"][0].update(unexpected="x")),
 ):
     invalid = json.loads(data)
     mutate(invalid)

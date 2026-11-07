@@ -35,7 +35,9 @@ def validate(data):
     require(0 < len(data) <= 16 * 1024 * 1024, "package exceeds 16 MiB")
     package = json.loads(data)
     manifest = package["manifest"]
-    require(manifest["api_version"] == 1 and valid_id(manifest["id"]), "invalid API version or ID")
+    require(set(package) <= {"manifest", "theme", "wasm", "background_image", "cover_image"}, "unknown package field")
+    require(set(manifest) <= {"api_version", "id", "name", "version", "author", "license", "source", "kind", "capabilities", "actions"}, "unknown manifest field")
+    require(type(manifest["api_version"]) is int and manifest["api_version"] == 1 and valid_id(manifest["id"]), "invalid API version or ID")
     for key in ("name", "version", "author", "license"):
         value = manifest[key]
         require(isinstance(value, str) and 0 < len(value.encode()) <= 128 and not any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in value), f"invalid {key}")
@@ -49,6 +51,7 @@ def validate(data):
     if "api_proxy" in capabilities:
         require(set(capabilities) <= {"api_proxy", "storage"} and all(a["surface"] in ("panel", "activation") for a in actions), "API proxy requires connection-only actions and capabilities")
     for action in actions:
+        require(set(action) <= {"id", "label", "surface"}, "unknown action field")
         require(valid_id(action["id"]) and action["surface"] in ("message", "composer", "panel", "activation"), "invalid action")
         label = action["label"]
         require(isinstance(label, str) and 0 < len(label.encode()) <= 128 and not any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in label), "invalid action label")

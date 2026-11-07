@@ -489,11 +489,13 @@ impl State {
 			if let Some(update) = updates.iter().find(|update| update.user == row.user.id)
 				&& (row.status != update.status
 					|| row.custom_status != update.custom_status
-					|| row.activities != update.activities)
+					|| row.activities != update.activities
+					|| row.clients != update.clients)
 			{
 				row.status = update.status.clone();
 				row.custom_status = update.custom_status.clone();
 				row.activities = update.activities.clone();
+				row.clients = update.clients;
 				changed = true;
 			}
 		}

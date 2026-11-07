@@ -202,7 +202,7 @@ fn tick(input: TickInvocation) -> Output {
 		colors.insert(token.key.to_string(), color);
 		if token.key == "accent" {
 			// Pick readable accent text by hue band rather than trying to
-			// compute real bytwinance: yellow/green/cyan hues read light,
+			// compute real luminance: yellow/green/cyan hues read light,
 			// so use dark text there; everywhere else use light text.
 			let light_hue_band = (0.11..=0.52).contains(&phase);
 			colors.insert(
