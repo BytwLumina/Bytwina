@@ -602,13 +602,14 @@ impl State {
 			self.user_actions.dm_origin = None;
 			self.user_actions.opened_dm = None;
 		}
-		self.user_actions.status = Some(match (direct, cancelled) {
+		let status = match (direct, cancelled) {
 			(true, true) => "Verification cancelled; the conversation was not opened.",
 			(true, false) => "Verification expired; open the conversation again.",
 			(false, true) => "Verification cancelled; the friend request was not sent.",
 			(false, false) => "Verification expired; send the friend request again.",
-		});
-		self.status = self.user_actions.status.unwrap();
+		};
+		self.user_actions.status = Some(status);
+		self.status = status;
 	}
 	/// Builds the one explicit retry that resumes a solved account challenge.
 	pub fn resume_account_challenge(
@@ -898,9 +899,9 @@ impl State {
 				.iter()
 				.any(|user| self.friend(*user).is_none() || !self.dm_target_allowed(*user, true))
 		{
-			self.user_actions.status =
-				Some("Choose between two and nine friends for a group message");
-			self.status = self.user_actions.status.unwrap();
+			const STATUS: &str = "Choose between two and nine friends for a group message";
+			self.user_actions.status = Some(STATUS);
+			self.status = STATUS;
 			return None;
 		}
 		people.sort_unstable_by_key(|user| user.0);
@@ -977,9 +978,10 @@ impl State {
 				.as_ref()
 				.is_some_and(|call| call.channel == channel)
 		{
-			self.user_actions.status =
-				Some("Finish pending messages and leave the call before closing this DM");
-			self.status = self.user_actions.status.unwrap();
+			const STATUS: &str =
+				"Finish pending messages and leave the call before closing this DM";
+			self.user_actions.status = Some(STATUS);
+			self.status = STATUS;
 			return None;
 		}
 		self.request_user_action(Action::CloseDm(channel))
@@ -1019,8 +1021,9 @@ impl State {
 			return None;
 		}
 		if !self.demo && (self.auth != AuthState::Authenticated || !self.gateway_connected) {
-			self.user_actions.status = Some("User actions unavailable while disconnected");
-			self.status = self.user_actions.status.unwrap();
+			const STATUS: &str = "User actions unavailable while disconnected";
+			self.user_actions.status = Some(STATUS);
+			self.status = STATUS;
 			return None;
 		}
 		self.user_actions.sequence = self.user_actions.sequence.wrapping_add(1);

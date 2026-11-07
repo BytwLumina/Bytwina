@@ -20,7 +20,7 @@ The composer schedules one visible expiry deadline and performs no animation or 
 - `ui`: egui panels, viewport virtualization and multiline composition; typed commands only. No network requests or tokens.
 - `apps/desktop`: wiring, cancellation, bounded queues, native login lifecycle, cache hydration and eframe options. `test-support` is explicitly synthetic; `xtask` and `replay-bench` are development tools.
 
-No generic plugin system, bot SDK or external database is introduced. The `discord-voice` crate provides native DM and guild media in every desktop build.
+Extensions are declarative themes or sandboxed WebAssembly plugins (`crates/extensions`, capability-gated, 16 MiB packages) and are the only plugin surface: no bot SDK, no external database and no unpackaged native code. The `discord-voice` crate provides native DM and guild media in every desktop build.
 
 Loaded threads reuse channel models, selection and history. READY and thread dispatches supply validated guild/parent metadata; the core reconciles scoped active snapshots atomically before removing missing active threads. Removed selected conversations cancel pending history/search and invalidate visible/cache state while preserving drafts. The sidebar builds a bounded two-level parent/thread index with root fallback for malformed parents. Explicit archive browsing shares search/pins' single replaceable read worker and admits at most one transient navigation entry on Open. Active snapshot omission preserves that archived entry; matching Gateway metadata can adopt it. Sidebar forum discovery shares the existing active-post loader for the displayed guild, with one page in flight and at most 200 posts per forum. No subscription expansion is introduced.
 
