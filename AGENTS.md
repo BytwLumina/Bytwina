@@ -3,6 +3,8 @@
 Bytwina is an unofficial native Rust/egui client for existing Discord accounts. It is not a bot,
 backend, web wrapper, or separate voice service.
 
+Repository: <https://github.com/BytwLumina/Bytwina> · Releases: <https://github.com/BytwLumina/Bytwina/releases>
+
 This is the single entry point for every agent working in this repository (Codex, Claude, MiniMax,
 Cursor…). Sections 1–5 are binding rules. Section 6 onward is the technical map you need to change
 code without re-deriving the architecture from 350k lines.
@@ -338,6 +340,142 @@ ui (input) ──► Command ──► apps/desktop ──► discord-api / gate
 Every reconnect or new session increments `generation`; events from an older generation are dropped.
 This is the core race defence. **Preserve it when adding events or callbacks**, and prefer the
 existing `read_state` epoch mechanism over inventing a new one.
+
+### Read state flow (`crates/client-core/src/read_state.rs`)
+
+`ReadState` keeps `entries: BTreeMap<Id, (Option<Id>, epoch)>`, one `pending` operation, a `revision`
+used as both request id and epoch, and `continue_all` for a capped batch.
+
+```
+ USER INTENT                          OWNER STATE                    NETWORK
+ ───────────                          ───────────                    ───────
+ prepare_mark_read(message) ──┐
+ prepare_mark_channel_read(ch)├─► pending = Pending::Channel   ──► Command::MarkRead
+ prepare_mark_left_channel(   │     { channel, message,              { channel, message,
+   channel, message)          │       request, epoch, manual,          request, manual,
+                              │       mention_count }                    mention_count }
+                              │                                          │
+                              │                                          ▼
+                              │                                    REST PUT ack
+                              │                                          │
+                              │                                    Event::Result
+                              └─────────────────────────────────────►  { request, result }
+
+ prepare_mark_all_read()  ──┐
+ prepare_mark_guilds_read()├─► pending = Pending::All          ──► Command::MarkAllRead
+   (scope All | Guilds)    │   { request, scope, more,              { request, channels }
+                           │     channels: Vec<Option<           (≤ MAX_BULK_ACK = 1024)
+                           │       (channel, epoch, message)>> }      │
+                           │                                          ▼
+                           │                                    REST bulk ack
+                           │                                          │
+                           │                                    Event::AllAck
+                           │                                    { request, acked, result }
+                           │                                    Event::GuildAck (same shape)
+                           └─────────────────────────────────────►
+
+ INBOUND EVENTS
+ Event::Snapshot { entries, version, partial }  initial REST read state; partial marks gaps
+ Event::Ack      { channel, message, manual, mention_count, version }  Gateway ACK (any epoch)
+ Event::Latest   { Vec<(channel, Patch<Id>)> }  newest message pointers
+ Event::Result / AllAck / GuildAck              HTTP outcomes for a request we sent
+```
+
+**Invariants to preserve**
+
+1. **One pending operation at a time.** Every `prepare_*` returns `None` while `pending.is_some()`;
+   the UI must disable the control, not queue.
+2. **`revision` is the request id *and* the epoch.** Increment it (`wrapping_add`) before creating
+   the pending entry, and store that value in `entries` when the read lands.
+3. **An automatic ACK may race an HTTP read.** Compare the pending entry's `epoch`; if it still
+   matches and the ACK cursor does not cross it, keep the pending request eligible. Never let an
+   automatic ACK override a `manual` unread.
+4. **Bulk is capped.** More than `MAX_BULK_ACK` unread channels sets `more`; on success
+   `continue_all` parks the scope and `continue_mark_all_read()` sends the next batch. A failed or
+   reconnect-interrupted batch parks the scope instead of dropping it.
+5. **Partial results are prefix-only.** `AllAck { acked }` means the first `acked` channels were
+   confirmed; apply only those and leave the rest unread.
+6. **No optimistic cursor.** `prepare_*` records `pending` but never writes `entries`; the visible
+   cursor and badge move only when `Ack`, `Result` or `AllAck` lands. Keep any "saving…" affordance
+   in UI state keyed by `request` — do not advance the cursor locally.
+7. **A channel you are reading at the bottom is not unread.** `channel_unread` returns
+   `Some(false)` when the channel is selected, fresh, not mid-history and the newest loaded message
+   is at or below the cursor. Preserve that guard when changing unread logic.
+8. **`cancel()`** clears notifications, parks an `All` scope for retry, and resets status; call it on
+   logout and on reconnect, never mid-request without parking.
+
+### Permissions flow (`crates/client-core/src/permissions.rs`)
+
+`Permissions` mirrors guild/role/member/overwrite metadata and caches decisions. Discord stays
+authoritative; this is a bounded session cache (minimum 4 000, up to 32 768 decisions, 128 B each).
+
+```
+ EVENTS (bounded, validated)                STATE
+ ─────────────────────────                  ─────
+ Snapshot(snapshot)              ──►  permissions.guilds:  BTreeMap<Id, Guild>
+ Guild(guild)                    ──►    roles, member.roles, owner, bits
+ Role { guild, role }            ──►  permissions.channels: BTreeMap<Id, Channel>
+ RoleRemoved { guild, id }       ──►    guild, overwrites: Option<Vec<Overwrite>>
+ Member(s) { roles, timeout }    ──►  cache: RefCell<BTreeMap<(guild, target, user), Decision>>
+ Owner { guild, owner }          ──►    Decision { at, until, bits: Option<u128> }
+ Channel { overwrites }          ──►
+ UnavailableGuild(id)            ──►  (drop that guild's rows)
+
+ QUERY
+ ─────
+ permission(channel, bits) ──► channel.guild == None ? (kind ∈ {1,3}) : true
+        │
+        ├─ overwrite_target(channel)
+        │     thread (kind 10..=12) → parent_id, parent must be kind 0|5|15|16 and same guild
+        │     otherwise             → channel.id
+        │
+        ├─ cache hit? (now ∈ [at, until)) ──► return cached bits
+        │
+        └─ p::effective(guild, user, overwrites, now)
+               owner or ADMINISTRATOR            → u128::MAX
+               else  bits = @everyone role bits
+                     bits |= member role bits
+                     bits = (bits & !everyone.deny) | everyone.allow
+                     bits = (bits & !role_deny)     | role_allow
+                     bits = (bits & !member.deny)   | member.allow
+                     timeout active (timeout_until > now)
+                       → bits &= VIEW_CHANNEL | READ_MESSAGE_HISTORY
+               invalid metadata (unknown role, duplicate overwrite) → None
+               → cache { at: now, until: timeout_until or i64::MAX, bits }
+               → return bits
+
+        finally: permissions & bits == bits
+```
+
+Derived predicates are thin wrappers over `permission()`: `can_view` (`VIEW_CHANNEL`),
+`can_read_history` (`VIEW_CHANNEL | READ_MESSAGE_HISTORY`), `can_send`, `can_compose`, `can_attach`,
+`can_speak`, `can_stream`, `can_react`, `can_edit`.
+
+`channel_access()` returns `ChannelAccess { hidden, muted, limited }`:
+
+- `hidden` — `VIEW_CHANNEL` is not `Some(true)`.
+- `muted` — DM mute setting, or guild channel mute.
+- `limited` — `everyone_view(channel) == Some(false)`, i.e. the channel is permission-restricted, so
+  the UI can show the lock affordance.
+
+**Invariants to preserve**
+
+1. **Unknown is `None`, never `false`.** A missing guild, channel, member, role or overwrite list
+   returns `None` so callers can distinguish "not loaded" from "denied". Invalid metadata (unknown
+   role id, duplicate overwrite, more than `MAX_ROLES`/`MAX_MEMBER_ROLES`/`MAX_OVERWRITES`) is also
+   `None` — reject, do not approximate.
+2. **Never cache a decision past its validity.** `until` is the member timeout boundary, otherwise
+   `i64::MAX`; a timeout change or a role/overwrite event must evict or overwrite the entry.
+3. **The cache is bounded and resized.** `decision_limit` is recomputed after every update as
+   `(MAX_BYTES - bytes) / 128`, clamped to 4 000..32 768. Eviction is a single `pop_last`, so a
+   large scan keeps most decisions warm.
+4. **Threads inherit from the parent.** A thread without a valid parent of kind 0/5/15/16 is unknown,
+   not allowed.
+5. **DM channels short-circuit.** Only kinds 1 and 3 are readable without guild metadata; everything
+   else needs the guild mirror.
+6. **Invalidate on identity change.** `State::logout()` rebuilds state from `Self::default()`, which
+   drops the permission mirror and the decision cache — a cached bit from another account is a
+   security bug.
 
 ## 6.5 Task recipes
 
