@@ -24,7 +24,7 @@
   <a href="https://github.com/BytwLumina/Bytwina/releases"><img src="https://img.shields.io/github/v/release/BytwLumina/Bytwina?label=release&color=blue" alt="GitHub Release" /></a>
   <a href="Cargo.toml"><img src="https://img.shields.io/badge/rust-1.98.1_pinned-blue.svg?logo=rust" alt="Rust 1.98.1 Pinned" /></a>
   <a href="crates/ui"><img src="https://img.shields.io/badge/ui-egui%20%2F%20wgpu-orange.svg" alt="UI egui/wgpu" /></a>
-  <a href="docs/platform-support.md"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-informational.svg" alt="Platform Support" /></a>
+  <a href="docs/platform-support.md"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%26%20Linux%20paused-informational.svg" alt="Platform Support" /></a>
 </p>
 
 ---
