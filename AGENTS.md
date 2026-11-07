@@ -478,4 +478,149 @@ Changing any of these without updating the test breaks CI:
 - Prefer editing an existing module over adding a new one; the crate boundaries in §6.2 are not
   suggestions.
 
+---
+
+# 7. Local development
+
+## 7.1 Prerequisites
+
+The toolchain is pinned by `rust-toolchain.toml` (`1.98.1`, rustfmt + clippy); never override it.
+Build with the committed `Cargo.lock`.
+
+| Purpose | Windows | Notes |
+|---|---|---|
+| Build | Visual Studio C++ build tools + Windows SDK | `build.rs` needs `rc.exe` to embed the icon |
+| Run | WebView2 Runtime | login and invite verification only |
+| Installer | NSIS (`choco install nsis`) | `cargo xtask package` |
+| JS tests | Bun 1.4.2 | `tests/login-handoff.cjs`, `tests/xtask-workspace.cjs` |
+| Catalog/installer tests | Python 3 | `extensions/test_catalog.py`, `packaging/windows/test_installer.py` (stdlib only) |
+| Icon regeneration | Python 3 + Pillow | `tools/generate-app-icon.py`, `tools/generate-twemoji.py` |
+| Licence gate | `cargo install cargo-deny --version 0.20.2 --locked` | `cargo xtask licenses` |
+| Fuzz | `nightly-2026-09-09` + `cargo-fuzz 0.13.2` | see `fuzz/README.md` |
+
+Linux additionally needs GTK 4, WebKitGTK 6.0, ALSA headers, `pkg-config`, fontconfig and Vulkan
+drivers; macOS needs Xcode command-line tools. Both are paused for release builds but still compile.
+
+## 7.2 Running
+
+```sh
+cargo run --locked --features demo -- --demo   # synthetic conversations, no account needed
+cargo run --locked                             # real client (saved login or official webview)
+```
+
+`demo` enables `test-support` and `ui/demo`, which unlock the `*_demo` modules and the `profile_preview`,
+`gif_favorites` and `double_click_settings` examples. Use demo mode for UI work.
+
+## 7.3 Where data lives
+
+| Build | Directory |
+|---|---|
+| `cargo run` | OS local data dir + `bytwina-development` |
+| Packaged | OS local data dir + `bytwina` |
+| Override | `BYTWINA_DATA_DIR` (absolute path; isolated extra roots) |
+
+Tokens are in the OS credential store under separate development and packaged entries. The
+diagnostic log path is `diagnostics::path()` (the app's "open log folder" button; failure copies the
+path to the clipboard). Never commit a data directory or a log.
+
+Set a distinct `CARGO_TARGET_DIR` per worktree; sharing one reuses stale artifacts across edits.
+
+## 7.4 Error model
+
+`client_core::auth::Failure` is the single error type crossing the boundary:
+
+`Expired`, `Challenged`, `Forbidden`, `RateLimited`, `Network`, `Ambiguous`, `Protocol`,
+`ProtocolAt(&'static str)`, `Capacity`, `CapacityAt(&'static str)`, `InvalidCredential`.
+
+`ProtocolAt`/`CapacityAt` take **compile-time labels only** — never remote text, IDs or decode
+details. `Network` and `Ambiguous` mean "no automatic retry"; sends are single-attempt by design.
+When adding a failure, prefer an existing variant over extending the enum, and never put remote
+content in a label.
+
+## 7.5 Threading model
+
+- **UI thread** owns `client-core::State` and all `egui` rendering. Nothing else mutates it.
+- **Tokio runtime** runs the Gateway task, REST calls, voice transport and updater.
+- **Storage worker** serialises SQLite off the render thread: at most 16 operations inside a 16 MiB
+  estimated-allocation budget, with a separate 16 MiB result queue.
+- **Message-write worker** is a 16-slot serial queue so slow REST writes cannot block call controls.
+- **Credential worker** serialises four small operations, ordering saves before logout deletion.
+- **Profile fetches** are one cancellable task per request, matched by generation and selection.
+
+Network callbacks never touch state directly; they emit generation-tagged `Event`s (§6.4).
+
+## 7.6 Storage migrations
+
+Schema version lives in `NATIVE_SCHEMA` (`crates/local-store/src/lib.rs`, currently 29) and SQLite
+`PRAGMA user_version`. A migration runs inside one transaction, adds the DDL, and sets
+`user_version = version.max(NATIVE_SCHEMA)`. Rules:
+
+1. Bump `NATIVE_SCHEMA` and add the next `if version < N` block; never edit an old block.
+2. Keep it transactional; a failure must leave the old schema intact.
+3. Add a test that opens a legacy-shaped database and migrates it.
+4. Update `docs/storage-policy.md` when retention or a ceiling changes.
+
+## 7.7 Extensions authoring
+
+```sh
+rustup target add wasm32-unknown-unknown
+
+# from examples/extensions (a separate workspace)
+cargo build --locked --release --target wasm32-unknown-unknown -p app-toolbox
+python ../../extensions/pack.py app-toolbox/manifest.json \
+  ../target/wasm32-unknown-unknown/release/app_toolbox.wasm \
+  packages/hello-context.bytwina-extension
+
+# whole-workspace checks the CI-style way
+cargo clippy --manifest-path examples/extensions/Cargo.toml --workspace --all-targets --locked -- -D warnings
+cargo build --manifest-path extensions/Cargo.toml --workspace --locked --release --target wasm32-unknown-unknown
+cargo run --locked --release -p extensions --example sdk_check -- \
+  examples/extensions/target/wasm32-unknown-unknown/release extensions/target/wasm32-unknown-unknown/release
+
+python extensions/catalog.py --validate          # pull requests
+python extensions/catalog.py --pin <full-sha>    # after merge, CI does this
+```
+
+Cargo may not write into the example's own `target/`; pass the path `pack.py` reports.
+
+`extensions/catalog.json` is **generated — never edit it by hand**. It pins each package's manifest,
+byte length, SHA-256 and an immutable URL to a full commit on `main`. The client verifies every hash
+before install and never runs build scripts.
+
+## 7.8 Debugging
+
+```sh
+cargo replay                    # reducer benchmark, release build
+cargo replay --soak 120         # sustained lifecycle pressure (1..3600 s)
+node tests/xtask-workspace.cjs  # verifies xtask resolves the caller's workspace
+cargo xtask fuzz                # bounded offline decoder/state fuzzing
+```
+
+The diagnostic log is opt-in, bounded and redacted (§6.3). For CI failures see §6.8 — prefer the
+`ci-diagnostics` branch file or the public Annotations panel over guessing.
+
+## 7.9 Common pitfalls
+
+- Changing a brand string or format can break byte-pinned tests (§6.10).
+- Adding a `Command`/`Event` without a reducer arm compiles but silently does nothing.
+- Building `ui` without `--features demo` skips the demo targets, so demo-only breakage hides.
+- Editing `catalog.json`, `Cargo.lock` ordering, or a generated atlas by hand.
+- Using `std::thread::sleep` in tests or asserting wall-clock performance.
+- Putting a remote value into a `Failure` label or a diagnostic field.
+
+# 8. Glossary
+
+| Term | Meaning |
+|---|---|
+| Gateway | Discord's WebSocket event stream (Identify/Resume/heartbeat) |
+| REST | Discord's HTTPS API; here the `discord-api` crate |
+| Generation | Monotonic counter bumped per session; stale events are dropped |
+| DAVE | Discord's end-to-end audio encryption protocol used by `discord-voice` |
+| AUMID | AppUserModelID; lets Windows attribute notifications to Bytwina |
+| Roster | The participant list of a voice channel |
+| Capability | An explicit permission an extension declares and the host gates per call |
+| Presence | Online/idle/dnd status plus activities and client platforms |
+| Read state | Per-channel read cursor, unread count and mention badge |
+| Resident | Long-lived preloaded state kept across navigation |
+
 _Licence: MIT OR Apache-2.0. Copyright 2026 Lumina contributors._
