@@ -88,6 +88,7 @@ jobs:
       TAG: ${{ needs.prepare.outputs.tag }}
       VERSION: ${{ needs.prepare.outputs.version }}
       PACKAGE_ROOT: dist
+      RUSTC_WRAPPER: sccache
     defaults:
       run:
         shell: bash
@@ -102,10 +103,15 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
           components: rustfmt, clippy
-      # Reuse the dependency graph native-client already built for this commit. Cache keys
-      # include the profile, so the release build still compiles the crate itself.
+      # The nightly release recompiles an unchanged dependency graph every night. sccache
+      # keeps every crate compilation in the Actions cache, so only the changed crates and
+      # the final link are rebuilt. The shipped binary still uses the fat-LTO profile.
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2.9.2
         with:
+          cache-targets: false
           cache-on-failure: true
       - name: Install NSIS
         if: runner.os == 'Windows'

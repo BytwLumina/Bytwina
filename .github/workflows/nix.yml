@@ -40,6 +40,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
+    env:
+      NIX_CONFIG: experimental-features = nix-command flakes
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -49,8 +51,11 @@ jobs:
         with:
           use-flakehub: false
 
+      # Printing every successful build log costs more than it helps: the Nix store
+      # cache already serves the unchanged derivations and a real failure still shows
+      # its trace. A full Rust build writes enough log output to slow itself down.
       - name: Build
-        run: nix build --print-build-logs --show-trace .#bytwina
+        run: nix build --show-trace .#bytwina
       - name: Verify installed binary
         run: test -x result/bin/bytwina
       - name: Verify bundled notices and corresponding source

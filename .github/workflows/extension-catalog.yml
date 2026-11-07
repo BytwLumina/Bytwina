@@ -29,10 +29,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7.0.1
-      - name: Validate packages
-        run: |
-          PYTHONDONTWRITEBYTECODE=1 python3 extensions/test_catalog.py
-          python3 extensions/catalog.py --validate
+      # The two validators read the same package tree independently.
+      - parallel:
+          - name: Validate catalog packages (offline)
+            run: PYTHONDONTWRITEBYTECODE=1 python3 extensions/test_catalog.py
+          - name: Validate catalog manifests and previews
+            run: python3 extensions/catalog.py --validate
       - name: Pin catalog to this commit
         run: python3 extensions/catalog.py --pin "$GITHUB_SHA"
       - name: Commit catalog

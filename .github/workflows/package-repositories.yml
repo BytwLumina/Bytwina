@@ -108,12 +108,27 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+      - name: Restore package manager caches
+        id: package-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/apt/lists
+            /var/cache/dnf
+            /var/cache/pacman/pkg
+          key: pkg-cache-${{ matrix.image }}-${{ matrix.architecture }}
       - name: Install repository tools
         env:
           FORMAT: ${{ matrix.format }}
+          CACHE_HIT: ${{ steps.package-cache.outputs.cache-hit }}
         run: |
+          set -eu
           case "$FORMAT" in
-            deb) apt-get update && apt-get install -y python3 apt-utils gnupg ca-certificates ;;
+            # An apt index is only reused on a complete cache hit. A partial restore
+            # refreshes the index, so a package can never resolve to a stale version.
+            deb)
+              if [ "$CACHE_HIT" != "true" ]; then apt-get update; fi
+              apt-get install -y python3 apt-utils gnupg ca-certificates ;;
             rpm) dnf install -y python3 rpm-sign createrepo_c gnupg2 ;;
             arch) pacman -Syu --noconfirm --needed python pacman gnupg libarchive ;;
           esac
@@ -163,9 +178,16 @@ jobs:
         with:
           name: repository-inputs
           path: packages
+      - name: Restore apt lists
+        id: apt-cache
+        uses: actions/cache@v4
+        with:
+          path: /var/lib/apt/lists
+          key: pkg-cache-assemble-ubuntu-latest
       - name: Assemble hosting tree
         env:
           BASE_URL: ${{ inputs.base_url }}
+          CACHE_HIT: ${{ steps.apt-cache.outputs.cache-hit }}
         run: |
           set -euo pipefail
           mkdir -p site
@@ -192,7 +214,7 @@ jobs:
             echo "Expected exactly one release Flatpak bundle; refusing to publish a broken install link." >&2
             exit 1
           fi
-          sudo apt-get update
+          if [ "$CACHE_HIT" != "true" ]; then sudo apt-get update; fi
           sudo apt-get install -y flatpak ostree
           ostree --repo=site/flatpak/repo init --mode=archive-z2
           flatpak build-import-bundle site/flatpak/repo "$1"

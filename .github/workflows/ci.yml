@@ -10,46 +10,146 @@ concurrency:
 permissions:
   contents: read
 jobs:
-  native:
+  # `cargo xtask check` runs fmt, clippy, the workspace tests, the no-default-features
+  # check and the policy gate in sequence, and every one of them compiles the whole
+  # dependency graph again under a different feature set. Running them as separate jobs
+  # lets the runners work in parallel, and sccache lets each job reuse the dependency
+  # objects the others already compiled instead of rebuilding them.
+  lint:
     if: github.event_name == 'push' || github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
     runs-on: ${{ matrix.os }}
-    # CI only proves the package builds; the shipped binary keeps the fat-LTO profile
-    # from Cargo.toml. Thin LTO with parallel codegen units is several times faster.
     env:
-      CARGO_PROFILE_RELEASE_LTO: thin
-      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+      RUSTC_WRAPPER: sccache
     steps:
       - uses: actions/checkout@v7.0.1
-      # Steps in one parallel group must not share a Cargo target directory.
-      - parallel:
-          - name: Mac signing regression (offline)
-            if: runner.os != 'Windows'
-            run: bash packaging/macos/test_sign_release.sh
-          - name: Linux native dependencies
-            if: runner.os == 'Linux'
-            run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-libav libxkbcommon-dev libwayland-dev libx11-dev libxi-dev libxrandr-dev libxcursor-dev libvulkan-dev libasound2-dev libpulse-dev cmake python3 dpkg-dev desktop-file-utils xvfb xauth
-          - uses: dtolnay/rust-toolchain@1.98.1
-            with:
-              components: rustfmt, clippy
-      # Parallel actions both open the runner event file; Windows can fail on the shared lock.
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: dtolnay/rust-toolchain@1.98.1
         with:
-          bun-version: 1.4.2
+          components: rustfmt, clippy
+      # sccache stores every crate compilation in the Actions cache, so the shared
+      # dependency graph is compiled once per feature set across the whole pipeline.
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2.9.2
         with:
+          # sccache replaces the target directory cache: it is far smaller and it is
+          # shared between the feature sets that this pipeline builds.
+          cache-targets: false
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fetch --locked
+      - run: cargo fmt --all -- --check
+      # The policy gate reads Cargo.lock and the desktop persistence controls.
+      - run: cargo xtask policy
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+  test:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-targets: false
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fetch --locked
+      - run: cargo test --workspace --locked
+  demo:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-targets: false
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fetch --locked
       # `cargo xtask check` already runs `check -p bytwina --no-default-features`, so the
       # demo feature is the only combination it does not cover.
       - name: Check and test demo targets
         run: |
           cargo check --locked -p bytwina -p ui --all-targets --features bytwina/demo
           cargo test --locked -p bytwina -p ui -p client-core -p discord-api --features bytwina/demo --lib --bins typing
-      - run: cargo xtask check
+  nodepfault:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-targets: false
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fetch --locked
+      - run: cargo check --locked -p bytwina --no-default-features
+  offline:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-targets: false
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      # Parallel actions both open the runner event file; Windows can fail on the shared lock.
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: 1.4.2
+      - name: Linux native dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-libav libxkbcommon-dev libwayland-dev libx11-dev libxi-dev libxrandr-dev libxcursor-dev libvulkan-dev libasound2-dev libpulse-dev cmake python3 dpkg-dev desktop-file-utils xvfb xauth
+      - run: cargo fetch --locked
+      # The workspace test drives the cached xtask binary, so it has to exist first.
+      - run: cargo build --locked -p xtask
+      - name: Mac signing regression (offline)
+        if: runner.os != 'Windows'
+        run: bash packaging/macos/test_sign_release.sh
       - parallel:
           - name: Flatpak encoding after GTK initialization (synthetic)
             if: runner.os == 'Linux'
@@ -59,12 +159,66 @@ jobs:
           - name: Linux package regression
             if: runner.os == 'Linux'
             run: PYTHONDONTWRITEBYTECODE=1 python3 packaging/linux/test_package.py
+  package:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    # CI only proves the package builds; the shipped binary keeps the fat-LTO profile
+    # from Cargo.toml. Thin LTO with parallel codegen units is several times faster.
+    env:
+      RUSTC_WRAPPER: sccache
+      CARGO_PROFILE_RELEASE_LTO: thin
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@1.98.1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-targets: false
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fetch --locked
       - name: Package app without demo or developer features
         run: cargo xtask package
       - uses: actions/upload-artifact@v7.0.1
         with:
           name: bytwina-${{ runner.os }}-${{ runner.arch }}-unsigned
           path: dist/
+  # Keeps the required-check name stable: it reports the aggregate of every gate, so a
+  # branch rule on "native" now waits for all of them instead of one sequential job.
+  native:
+    if: always() && (github.event_name == 'push' || github.event.pull_request.draft == false)
+    needs: [lint, test, demo, nodepfault, offline, package]
+    runs-on: windows-latest
+    steps:
+      - name: Fail if any gate failed
+        shell: bash
+        env:
+          LINT: ${{ needs.lint.result }}
+          TEST: ${{ needs.test.result }}
+          DEMO: ${{ needs.demo.result }}
+          NODEFAULT: ${{ needs.nodepfault.result }}
+          OFFLINE: ${{ needs.offline.result }}
+          PACKAGE: ${{ needs.package.result }}
+        run: |
+          failed=""
+          for gate in LINT TEST DEMO NODEFAULT OFFLINE PACKAGE; do
+            value="${!gate}"
+            if [ "$value" != "success" ]; then
+              failed="$failed $gate=$value"
+            fi
+          done
+          if [ -n "$failed" ]; then
+            echo "Failed gates:$failed"
+            exit 1
+          fi
+          echo "All gates passed."
   extension-sdk:
     # Paused while the pipeline targets Windows only.
     if: false
