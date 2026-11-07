@@ -19,8 +19,8 @@ const tapRepo = 'Bytwina/homebrew-bytwina';
 const caskPath = 'Casks/bytwina.rb';
 const tapToken = process.env.HOMEBREW_TAP_TOKEN;
 // macOS is not built right now, so the cask is skipped unless a tap token is supplied.
-const tapEnabled = tapToken !== undefined;
-if (plan && tapEnabled) assert(tapToken, 'HOMEBREW_TAP_TOKEN is empty');
+// An unset GitHub secret arrives as an empty string, not undefined, so test for a real value.
+const tapEnabled = Boolean(tapToken);
 
 function checkTapAccess() {
   const push = execFileSync('gh', ['api', `repos/${tapRepo}`, '--jq', '.permissions.push'], {
