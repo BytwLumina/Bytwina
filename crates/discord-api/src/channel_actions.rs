@@ -278,7 +278,10 @@ fn forum_from_value(value: &Value) -> Result<ForumEdit, Failure> {
 		match_all: value["default_tag_setting"].as_str() == Some("match_all"),
 		hide_after: value["default_auto_archive_duration"]
 			.as_u64()
-			.filter(|n| *n <= u32::MAX as u64 && client_core::channel_actions::HIDE_AFTER.contains(&(*n as u32)))
+			.filter(|n| {
+				*n <= u32::MAX as u64
+					&& client_core::channel_actions::HIDE_AFTER.contains(&(*n as u32))
+			})
 			.map(|n| n as u32)
 			.unwrap_or(4320),
 		flags: flags & !REQUIRE_TAG,
