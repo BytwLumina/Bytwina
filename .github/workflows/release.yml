@@ -102,11 +102,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
           components: rustfmt, clippy
+      # Reuse the dependency graph native-client already built for this commit. Cache keys
+      # include the profile, so the release build still compiles the crate itself.
+      - uses: Swatinem/rust-cache@v2.9.2
+        with:
+          cache-on-failure: true
       - name: Install NSIS
         if: runner.os == 'Windows'
         run: choco install nsis --no-progress -y
+      # Tests, clippy and the policy gate already ran in native-client for this commit;
+      # the release job only has to prove the shipped profile compiles and packages.
       - name: Offline checks
-        run: cargo xtask check
+        run: |
+          cargo fmt --all -- --check
+          cargo check --locked -p bytwina --bin bytwina --no-default-features
       - uses: oven-sh/setup-bun@v2.2.0
         with:
           bun-version: 1.4.2

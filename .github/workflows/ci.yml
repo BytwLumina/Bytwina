@@ -43,12 +43,12 @@ jobs:
         with:
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      - name: Check production build without development fixtures
-        run: cargo check --locked -p bytwina --bin bytwina --no-default-features
-      - name: Check offline demo targets
-        run: cargo check --locked -p bytwina -p ui --all-targets --features bytwina/demo
-      - name: Test offline typing with demo support
-        run: cargo test --locked -p bytwina -p ui -p client-core -p discord-api --features bytwina/demo --lib --bins typing
+      # `cargo xtask check` already runs `check -p bytwina --no-default-features`, so the
+      # demo feature is the only combination it does not cover.
+      - name: Check and test demo targets
+        run: |
+          cargo check --locked -p bytwina -p ui --all-targets --features bytwina/demo
+          cargo test --locked -p bytwina -p ui -p client-core -p discord-api --features bytwina/demo --lib --bins typing
       - run: cargo xtask check
       - parallel:
           - name: Flatpak encoding after GTK initialization (synthetic)
