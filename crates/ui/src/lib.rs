@@ -559,6 +559,8 @@ pub struct MessagingUi {
 	edit_sent: Option<SubmittedEdit>,
 	deleting: Option<(Id, Id)>,
 	ime_active: bool,
+	/// Enter the input method passed on after finishing a composition, replayed next frame.
+	ime_enter: Option<egui::Event>,
 	/// The composer claimed Tab last frame, so egui left it in the input for a suggestion menu.
 	composer_claims_tab: bool,
 	mention_menu: mentions::Menu,
@@ -3082,17 +3084,23 @@ impl MessagingUi {
 					});
 				return;
 			}
-			design::glass_frame(ui, colors.raised, egui::Margin::same(12))
+			// Same margin and row height as the writable composer, so switching channels
+			// never resizes the bar.
+			design::glass_frame(ui, colors.raised, egui::Margin::symmetric(10, 6))
 				.corner_radius(8)
 				.show(ui, |ui| {
-					let mut hint =
-						"You don't have permission to send messages in this channel.".to_owned();
-					ui.add_enabled(
-						false,
-						TextEdit::singleline(&mut hint)
-							.align(egui::Align2::LEFT_CENTER)
-							.desired_width(f32::INFINITY)
-							.frame(egui::Frame::NONE),
+					let hint = "You don't have permission to send messages in this channel.";
+					ui.allocate_ui_with_layout(
+						egui::vec2(ui.available_width(), ui.spacing().interact_size.y),
+						egui::Layout::left_to_right(egui::Align::Center),
+						|ui| {
+							ui.add_space(4.0);
+							ui.add(
+								egui::Label::new(egui::RichText::new(hint).color(colors.muted))
+									.truncate(),
+							)
+							.on_hover_text(hint);
+						},
 					);
 				});
 			return;
@@ -3278,6 +3286,31 @@ impl MessagingUi {
 					}
 				}
 			});
+			// Korean input methods commit the syllable and pass Enter on in the same frame;
+			// input methods that confirm with Enter keep it. Replay it once the commit is in
+			// the draft, so it sends or picks a suggestion instead of adding a newline.
+			if let Some(enter) = self.ime_enter.take() {
+				ctx.input_mut(|i| i.events.push(enter));
+			} else if ime_this_frame && !self.ime_active {
+				ctx.input_mut(|i| {
+					let at = i.events.iter().position(|event| {
+						matches!(
+							event,
+							egui::Event::Key {
+								key: egui::Key::Enter,
+								pressed: true,
+								..
+							}
+						)
+					});
+					self.ime_enter = at.map(|at| i.events.remove(at));
+				});
+				if self.ime_enter.is_some() {
+					ctx.request_repaint();
+				}
+			}
+		} else {
+			self.ime_enter = None;
 		}
 		let composer_id = ui.make_persistent_id(if editing_here {
 			"message-edit"
@@ -3515,23 +3548,30 @@ impl MessagingUi {
                 // width. Last pass's visible draft height decides.
                 let stack_id = composer_id.with("stacked-actions");
                 let (stacked, draft_height) = ctx.data(|d| d.get_temp::<(bool, f32)>(stack_id)).unwrap_or_default();
-                let column = |ui: &mut egui::Ui, add: &mut dyn FnMut(&mut egui::Ui)| {
+                // A column shorter than its buttons would grow upward past the panel's clip, so
+                // each keeps at least the height its buttons took last pass.
+                let column = |ui: &mut egui::Ui, side: &str, add: &mut dyn FnMut(&mut egui::Ui)| {
                     if stacked {
-                        ui.allocate_ui_with_layout(
-                            egui::vec2(28.0, draft_height),
+                        let id = stack_id.with(side);
+                        let buttons = ctx.data(|d| d.get_temp::<f32>(id)).unwrap_or_default();
+                        let height = ui.allocate_ui_with_layout(
+                            egui::vec2(28.0, draft_height.max(buttons)),
                             egui::Layout::bottom_up(egui::Align::Center),
                             |ui| {
                                 ui.spacing_mut().item_spacing.y = 4.0;
+                                let bottom = ui.cursor().bottom();
                                 add(ui);
+                                bottom - ui.min_rect().top()
                             },
-                        );
+                        ).inner;
+                        ctx.data_mut(|d| d.insert_temp(id, height));
                     } else {
                         add(ui);
                     }
                 };
                 ui.horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = 8.0;
-                    column(ui, &mut |ui| {
+                    column(ui, "start", &mut |ui| {
                     // An active application command shows its app in place of the attach button.
                     let attach = if !editing_here && self.slash_commands.composer_badge(ui, state, &mut self.avatars) {
                         None
@@ -3575,7 +3615,7 @@ impl MessagingUi {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.spacing_mut().item_spacing.x = 4.0;
                         let mut actions = None;
-                        column(ui, &mut |ui| {
+                        column(ui, "end", &mut |ui| {
                         let send_button = ui
                             .add_enabled_ui(can_send, |ui| {
                                 icons::button(
@@ -6785,7 +6825,7 @@ mod composer_tests {
 	}
 
 	#[test]
-	fn composer_enter_dismissing_composition_does_not_send() {
+	fn composer_enter_passed_on_after_composition_sends_next_frame() {
 		for finish in [
 			egui::ImeEvent::Preedit {
 				text: String::new(),
@@ -6826,20 +6866,14 @@ mod composer_tests {
 				.is_empty()
 			);
 			assert!(!view.ime_active);
+			assert!(
+				state
+					.drafts
+					.get(&Id(10))
+					.is_none_or(|draft| !draft.contains('\n'))
+			);
 			assert!(matches!(
-				edit_frame(
-					&ctx,
-					&mut view,
-					&mut state,
-					vec![
-						egui::Event::Ime(egui::ImeEvent::Preedit {
-							text: String::new(),
-							active_range_chars: None,
-						}),
-						edit_key(egui::Key::Enter)
-					]
-				)
-				.as_slice(),
+				edit_frame(&ctx, &mut view, &mut state, vec![]).as_slice(),
 				[Command::Send { .. }]
 			));
 		}
