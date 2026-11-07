@@ -73,9 +73,10 @@ jobs:
         shell: bash
         run: |
           cargo xtask check > check.txt 2>&1 || true
-          grep -nE "^(error|warning: unused|failures:|---- )|panicked|FAILED|assertion" check.txt | tail -n 60 > diagnostics-check.txt
-          tail -n 60 check.txt >> diagnostics-check.txt
+          { grep -nE "^(error|warning: unused|failures:|---- )|panicked|FAILED|assertion" check.txt | tail -n 80 || true; } > diagnostics-check.txt
+          tail -n 80 check.txt >> diagnostics-check.txt
           rm -f check.txt
+          test -s diagnostics-check.txt
 
       - name: Publish diagnostics branch
         shell: bash
