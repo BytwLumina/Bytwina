@@ -7638,9 +7638,10 @@ mod composer_tests {
 			matches!(commands.as_slice(), [Command::Edit { channel: Id(10), message: Id(20), content, .. }] if content.trim_end() == "Original <@1> 語")
 		);
 		assert!(view.has_edit(), "optimistic edits await confirmation");
+		// The Enter that confirms the IME commit picks a suggestion instead of adding a newline.
 		assert_eq!(
 			state.timeline.get(Id(20)).unwrap().content,
-			"Original <@1> 語\n"
+			"Original <@1> 語"
 		);
 		let [Command::Edit { request, .. }] = commands.as_slice() else {
 			panic!("Saving the edit emits one edit command");
@@ -7652,17 +7653,14 @@ mod composer_tests {
 			Err(client_core::auth::Failure::Network),
 		);
 		assert_eq!(state.timeline.get(Id(20)).unwrap().content, "Original");
-		assert_eq!(
-			state.message_actions.failed_edits[0].2,
-			"Original <@1> 語\n"
-		);
+		assert_eq!(state.message_actions.failed_edits[0].2, "Original <@1> 語");
 		assert_eq!(state.drafts[&Id(10)], "Unsent draft 👋");
 		assert!(
 			view.draft_changes.is_empty(),
 			"edits must not overwrite unsent drafts"
 		);
 		assert!(edit_frame(&ctx, &mut view, &mut state, vec![]).is_empty());
-		assert_eq!(view.editing.as_ref().unwrap().2, "Original <@1> 語\n");
+		assert_eq!(view.editing.as_ref().unwrap().2, "Original <@1> 語");
 		assert!(state.message_actions.failed_edits.is_empty());
 		let commands = edit_frame(
 			&ctx,
