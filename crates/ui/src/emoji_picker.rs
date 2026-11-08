@@ -2563,6 +2563,8 @@ fn cell(
 				image.paint_at(ui, inner);
 			}
 			None => {
+				// The atlas can still be decoding; show the name and keep the frame awake so
+				// the artwork replaces this placeholder without waiting for input.
 				let short: String = name.chars().take(3).collect();
 				ui.painter().text(
 					rect.center(),
@@ -2571,6 +2573,8 @@ fn cell(
 					egui::FontId::proportional(11.0),
 					colors.muted,
 				);
+				ui.ctx()
+					.request_repaint_after(std::time::Duration::from_millis(50));
 			}
 		}
 	}

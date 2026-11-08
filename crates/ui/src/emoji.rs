@@ -139,6 +139,11 @@ pub fn poll(ctx: &Context) {
 		return;
 	};
 	let decoded = pending.0.lock().ok().and_then(|mut slot| slot.take());
+	if decoded.is_none() {
+		// Still decoding: keep the frame loop awake so the upload is not deferred to the next
+		// mouse move, which is what made emoji appear only after a click.
+		ctx.request_repaint_after(std::time::Duration::from_millis(16));
+	}
 	if let Some((image, decode_us)) = decoded {
 		let upload = Instant::now();
 		let texture = ctx.load_texture("Twemoji 17.0.3", image, egui::TextureOptions::LINEAR);
@@ -153,8 +158,8 @@ pub fn poll(ctx: &Context) {
 		let cells = entries().len();
 		let index_us = index.elapsed().as_micros() as u64;
 		record(decode_us, upload_us, index_us, cells);
-	} else {
-		ctx.request_repaint_after(std::time::Duration::from_millis(16));
+		// The texture is new: draw it on this pass, not when input next arrives.
+		ctx.request_repaint();
 	}
 }
 
@@ -217,7 +222,18 @@ pub(crate) fn lookup(text: &str) -> Option<usize> {
 
 pub(crate) fn image(ctx: &Context, text: &str, size: f32) -> Option<Image<'static>> {
 	let cell = lookup(text)?;
-	Some(image_cell(atlas(ctx)?, text, cell, size))
+	// Ask for the atlas before it exists: a caller drawing text placeholders would otherwise
+	// keep them until some unrelated input repaints the frame.
+	Some(image_cell(atlas_or_request(ctx)?, text, cell, size))
+}
+
+/// The atlas texture, starting the background decode if the first request came before it ran.
+fn atlas_or_request(ctx: &Context) -> Option<egui::load::SizedTexture> {
+	if let Some(atlas) = atlas(ctx) {
+		return Some(atlas);
+	}
+	start(ctx);
+	None
 }
 
 pub(crate) fn atlas(ctx: &Context) -> Option<egui::load::SizedTexture> {
