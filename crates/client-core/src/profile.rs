@@ -513,6 +513,21 @@ impl State {
 	pub fn request_profile(&mut self, user: Id, guild: Option<Id>) -> Option<Command> {
 		self.request_profile_at(user, guild, Instant::now())
 	}
+	/// Badges from an already cached profile, for the badge row beside a message author.
+	/// Opens nothing and never requests; an uncached author simply has no badges yet.
+	pub fn cached_badges(&self, user: Id) -> Option<&[model::ProfileBadge]> {
+		let now = Instant::now();
+		self.profile_cache
+			.entries
+			.iter()
+			.find(|entry| {
+				entry.user == user
+					&& entry.guild.is_none()
+					&& now.saturating_duration_since(entry.fetched) < crate::profile::CACHE_TTL
+			})
+			.map(|entry| entry.data.badges.as_slice())
+	}
+
 	pub fn request_profile_at(
 		&mut self,
 		user: Id,

@@ -3590,6 +3590,24 @@ impl TimelineView {
 													},
 												)
 												.on_hover_cursor(egui::CursorIcon::PointingHand);
+												// Profile badges beside the author name, like Discord. Only a
+												// profile already cached has them; nothing is fetched here.
+												let author_badges: Vec<_> = state
+													.cached_badges(message.author.id)
+													.map(|badges| {
+														badges.iter().take(3).cloned().collect()
+													})
+													.unwrap_or_default();
+												for badge in &author_badges {
+													crate::badges::badge_icon(
+														ui,
+														&mut self.avatars,
+														badge,
+														None,
+														14.0,
+														state.demo,
+													);
+												}
 												if avatar_hot || author.hovered() {
 													let line = author.rect.bottom() - 1.0;
 													ui.painter().hline(

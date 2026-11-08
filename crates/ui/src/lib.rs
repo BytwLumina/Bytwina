@@ -1883,6 +1883,24 @@ impl MessagingUi {
 													)
 												},
 											);
+											// Badges from a cached profile only; the member list never
+											// opens one, so an unvisited member shows none.
+											let member_badges: Vec<_> = state
+												.cached_badges(member.user.id)
+												.map(|badges| {
+													badges.iter().take(2).cloned().collect()
+												})
+												.unwrap_or_default();
+											for badge in &member_badges {
+												crate::badges::badge_icon(
+													ui,
+													&mut self.avatars,
+													badge,
+													None,
+													14.0,
+													state.demo,
+												);
+											}
 											if let Some(tag) = server_tag {
 												profiles::server_tag(
 													ui,
