@@ -4912,3 +4912,13 @@ timestamp-style-full = Ngày và giờ đầy đủ
 timestamp-style-relative = Thời gian tương đối
 timestamp-style-short-date-time = Ngày và giờ ngắn
 timestamp-style-short-date-seconds = Ngày và giờ ngắn kèm giây
+
+profile-edit-form-banner = Ảnh bìa
+profile-edit-form-new-banner-chosen-save-to-upload-it = Đã chọn ảnh bìa mới · lưu để tải lên
+profile-edit-form-your-banner-will-be-removed-when-you-save = Ảnh bìa sẽ bị xoá khi bạn lưu
+profile-edit-form-premium-accounts-can-add-a-banner = Tài khoản Premium mới thêm được ảnh bìa
+profile-edit-form-decoration = Trang trí ảnh đại diện
+profile-edit-form-nameplate = Bảng tên
+profile-edit-form-profile-effect = Hiệu ứng hồ sơ
+profile-edit-form-default = Mặc định
+profile-edit-form-none = Không dùng

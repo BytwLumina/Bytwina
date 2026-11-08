@@ -5034,3 +5034,13 @@ timestamp-style-full = Full date and time
 timestamp-style-relative = Relative time
 timestamp-style-short-date-time = Short date and time
 timestamp-style-short-date-seconds = Short date and time with seconds
+
+profile-edit-form-banner = Banner
+profile-edit-form-new-banner-chosen-save-to-upload-it = New banner chosen · save to upload it
+profile-edit-form-your-banner-will-be-removed-when-you-save = Your banner will be removed when you save
+profile-edit-form-premium-accounts-can-add-a-banner = Premium accounts can add a banner
+profile-edit-form-decoration = Avatar decoration
+profile-edit-form-nameplate = Nameplate
+profile-edit-form-profile-effect = Profile effect
+profile-edit-form-default = Default
+profile-edit-form-none = None

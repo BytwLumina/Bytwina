@@ -86,6 +86,9 @@ enum AvatarAction {
 	Pick,
 	Remove,
 	Undo,
+	BannerPick,
+	BannerRemove,
+	BannerUndo,
 }
 
 #[derive(Default)]
@@ -100,6 +103,8 @@ pub(super) struct Editor {
 	pub avatar_request: Option<(u64, Id, u64)>,
 	revision: u64,
 	choosing: bool,
+	/// True while the native picker is filling the banner instead of the avatar.
+	choosing_banner: bool,
 	pending_picture: Option<egui::TextureHandle>,
 	/// Local copy of the last saved picture, keyed by the avatar hash the service returned.
 	saved_picture: Option<(Option<String>, egui::TextureHandle)>,
@@ -121,7 +126,9 @@ impl Editor {
 				) {
 			return Ok(());
 		}
+		let banner = self.choosing_banner;
 		self.choosing = false;
+		self.choosing_banner = false;
 		match result {
 			Ok(Some((uri, image))) => {
 				if !model::valid_avatar_uri(&uri) || image.size[0] > 512 || image.size[1] > 512 {
@@ -130,6 +137,16 @@ impl Editor {
 				let Some(draft) = self.draft.as_mut() else {
 					return Ok(());
 				};
+				if banner {
+					draft.banner = Some(Some(uri));
+					self.pending_picture = Some(ctx.load_texture(
+						"profile-banner-preview",
+						image,
+						egui::TextureOptions::LINEAR,
+					));
+					self.saved = false;
+					return Ok(());
+				}
 				draft.avatar = Some(Some(uri));
 				self.pending_picture = Some(ctx.load_texture(
 					"profile-avatar-preview",
@@ -163,6 +180,16 @@ impl Editor {
 			&& let Some(command) = state.load_own_profile()
 		{
 			commands.push(command);
+		}
+		// The decoration picker needs the owned list; load it once per session.
+		if state.collectibles.owned.is_empty()
+			&& !state.collectibles.busy
+			&& state.collectibles.error.is_none()
+			&& state.auth == client_core::auth::AuthState::Authenticated
+		{
+			let request = state.collectibles.request.wrapping_add(1);
+			state.collectibles.begin(request);
+			commands.push(Command::OwnedCollectibles { request });
 		}
 		if self.submitted == Some(state.own_profile.request) && !state.own_profile.saving {
 			self.submitted = None;
@@ -243,7 +270,8 @@ impl Editor {
 					egui::Layout::top_down(egui::Align::Min),
 					|ui| {
 						ui.add_enabled_ui(editable, |ui| {
-							action = form(ui, draft, profile, self.choosing);
+							action =
+								form(ui, draft, profile, self.choosing, &state.collectibles.owned);
 						});
 					},
 				);
@@ -265,7 +293,7 @@ impl Editor {
 			});
 		} else {
 			ui.add_enabled_ui(editable, |ui| {
-				action = form(ui, draft, profile, self.choosing);
+				action = form(ui, draft, profile, self.choosing, &state.collectibles.owned);
 			});
 		}
 		match action {
@@ -281,6 +309,18 @@ impl Editor {
 			Some(AvatarAction::Undo) => {
 				draft.avatar = None;
 				self.pending_picture = None;
+			}
+			Some(AvatarAction::BannerPick) if editable && !self.choosing => {
+				self.revision = self.revision.wrapping_add(1);
+				self.choosing = true;
+				self.choosing_banner = true;
+				self.avatar_request = Some((state.generation, profile.user.id, self.revision));
+			}
+			Some(AvatarAction::BannerRemove) => {
+				draft.banner = Some(None);
+			}
+			Some(AvatarAction::BannerUndo) => {
+				draft.banner = None;
 			}
 			_ => {}
 		}
@@ -407,6 +447,7 @@ fn form(
 	draft: &mut Draft,
 	profile: &UserProfile,
 	choosing: bool,
+	owned: &[model::OwnedCollectible],
 ) -> Option<AvatarAction> {
 	let colors = design::palette(ui);
 	ui.spacing_mut().item_spacing.y = 6.0;
@@ -488,6 +529,66 @@ fn form(
 	);
 	ui.add_space(8.0);
 	let mut enabled = draft.color.is_some();
+	ui.add_space(8.0);
+	let has_banner = match &draft.banner {
+		Some(value) => value.is_some(),
+		None => profile.banner.is_some(),
+	};
+	design::row(
+		ui,
+		"profile-edit-form-banner",
+		Some(match &draft.banner {
+			Some(Some(_)) => "profile-edit-form-new-banner-chosen-save-to-upload-it",
+			Some(None) => "profile-edit-form-your-banner-will-be-removed-when-you-save",
+			None => "profile-edit-form-premium-accounts-can-add-a-banner",
+		}),
+		|ui| {
+			ui.add_enabled_ui(!choosing, |ui| {
+				if design::button(
+					ui,
+					&crate::i18n::translate("profile-edit-form-change"),
+					design::ButtonKind::Outline,
+				)
+				.clicked()
+				{
+					action = Some(AvatarAction::BannerPick);
+				}
+			});
+			if draft.banner.is_some() {
+				if design::text_action(ui, &crate::i18n::translate("profile-edit-form-undo"))
+					.clicked()
+				{
+					action = Some(AvatarAction::BannerUndo);
+				}
+			} else if has_banner
+				&& design::text_action(ui, &crate::i18n::translate("profile-edit-form-remove"))
+					.clicked()
+			{
+				action = Some(AvatarAction::BannerRemove);
+			}
+		},
+	);
+	ui.add_space(8.0);
+	for (label, kind, slot) in [
+		(
+			"profile-edit-form-decoration",
+			model::CollectibleKind::Decoration,
+			&mut draft.decoration,
+		),
+		(
+			"profile-edit-form-nameplate",
+			model::CollectibleKind::Nameplate,
+			&mut draft.nameplate,
+		),
+		(
+			"profile-edit-form-profile-effect",
+			model::CollectibleKind::Effect,
+			&mut draft.effect,
+		),
+	] {
+		decor_row(ui, label, kind, slot, owned);
+		ui.add_space(6.0);
+	}
 	design::row(
 		ui,
 		"profile-edit-form-profile-color",
@@ -529,6 +630,61 @@ fn form(
 		});
 	}
 	action
+}
+
+/// One owned-collectible picker: "Default" plus every owned product of a category.
+fn decor_row(
+	ui: &mut egui::Ui,
+	label: &str,
+	kind: model::CollectibleKind,
+	slot: &mut Option<Option<Id>>,
+	owned: &[model::OwnedCollectible],
+) {
+	let chosen = match slot {
+		Some(Some(sku)) => Some(*sku),
+		_ => None,
+	};
+	let name = chosen
+		.and_then(|sku| owned.iter().find(|item| item.sku == sku))
+		.map_or_else(
+			|| crate::i18n::translate("profile-edit-form-default"),
+			|item| item.name.clone(),
+		);
+	design::row(ui, label, None, |ui| {
+		egui::ComboBox::from_id_salt(("profile-decor", label))
+			.selected_text(name)
+			.width(180.0)
+			.show_ui(ui, |ui| {
+				if ui
+					.selectable_value(
+						slot,
+						None,
+						crate::i18n::translate("profile-edit-form-default"),
+					)
+					.clicked()
+				{
+					return;
+				}
+				if ui
+					.selectable_value(
+						slot,
+						Some(None),
+						crate::i18n::translate("profile-edit-form-none"),
+					)
+					.clicked()
+				{
+					return;
+				}
+				for item in owned.iter().filter(|item| item.kind == kind) {
+					if ui
+						.selectable_value(slot, Some(Some(item.sku)), item.name.as_str())
+						.clicked()
+					{
+						return;
+					}
+				}
+			});
+	});
 }
 
 fn field(
