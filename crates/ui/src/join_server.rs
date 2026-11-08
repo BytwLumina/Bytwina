@@ -181,7 +181,9 @@ impl JoinDialog {
 				));
 				self.icon_error = None;
 			}
-			Ok(Some(_)) => self.icon_error = Some("Prepared icon is too large"),
+			Ok(Some(_)) => {
+				self.icon_error = Some("join-server-customize-prepared-icon-is-too-large");
+			}
 			Ok(None) => {}
 			Err(error) => self.icon_error = Some(error),
 		}
@@ -226,11 +228,11 @@ impl JoinDialog {
 				let busy = loading || state.invite_join.pending;
 				let enabled = !state.demo && !busy && !member && !accepted;
 				let text = if busy {
-					"Please wait…"
+					"join-server-customize-please-wait"
 				} else if ready {
-					"Join Server"
+					"join-server-show-join-join-a-server"
 				} else {
-					"Check Invite"
+					"join-server-show-join-check-invite"
 				};
 				ui.add_enabled_ui(enabled, |ui| {
 					if dialog::action(ui, text, dialog::Action::Primary).clicked() {
@@ -289,16 +291,16 @@ impl JoinDialog {
 		}
 		let (title, subtitle) = match self.page {
 			Page::Choose => (
-				"Create Your Server",
-				"Your server is where you and your friends hang out. Make yours and start talking.",
+				"join-server-create-title-create-your-server",
+				"join-server-create-body-your-server-is-where-you-and-your-friends-hang-out-make",
 			),
 			Page::Audience => (
-				"Tell Us More About Your Server",
-				"Is your new server for a few friends or a larger community?",
+				"join-server-create-title-tell-us-more-about-your-server",
+				"join-server-create-body-is-your-new-server-for-a-few-friends-or-a-larger",
 			),
 			Page::Customize => (
-				"Customize Your Server",
-				"Give your new server a name and icon. You can change them later.",
+				"join-server-create-title-customize-your-server",
+				"join-server-create-body-give-your-new-server-a-name-and-icon-you-can-change",
 			),
 			Page::Join => unreachable!(),
 		};
@@ -364,7 +366,12 @@ impl JoinDialog {
 			ui.add_space(8.0);
 			ui.horizontal_wrapped(|ui| {
 				ui.label(crate::i18n::translate("join-server-audience-not-sure"));
-				if ui.link("Skip this question").clicked() {
+				if ui
+					.link(crate::i18n::translate(
+						"join-server-audience-skip-this-question",
+					))
+					.clicked()
+				{
 					self.begin_customize(state);
 				}
 				ui.label(crate::i18n::translate("join-server-audience-for-now"));
@@ -530,7 +537,7 @@ impl JoinDialog {
 							self.submitted = true;
 							self.status = "";
 						}
-						None => self.status = "Unable to create this server right now.",
+						None => self.status = "join-server-status-unable-to-create-this-server",
 					}
 				}
 			});
@@ -788,7 +795,7 @@ impl JoinDialog {
 		commands: &mut Vec<Command>,
 	) {
 		let Some(code) = parsed else {
-			self.status = "Enter a valid Discord invite link or invite code.";
+			self.status = "join-server-status-enter-a-valid-discord-invite-link-or-invite-code";
 			return;
 		};
 		let command = if ready {
@@ -804,7 +811,7 @@ impl JoinDialog {
 				self.status = "";
 			}
 			None => {
-				self.status = "Unable to proceed. Check your connection or try again after the current request.";
+				self.status = "join-server-status-unable-to-proceed-check-your-connection";
 			}
 		}
 	}

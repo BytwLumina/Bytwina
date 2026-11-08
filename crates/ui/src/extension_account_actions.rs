@@ -12,11 +12,13 @@ fn id(value: &str) -> Result<Id, String> {
 		.ok()
 		.filter(|value| *value != 0)
 		.map(Id)
-		.ok_or_else(|| "Invalid identifier".into())
+		.ok_or_else(|| crate::i18n::translate("extension-account-actions-error-invalid-identifier"))
 }
 
 fn queue(command: Option<Command>, commands: &mut Vec<Command>) -> Result<(), String> {
-	commands.push(command.ok_or("This action is no longer available; refresh the app data")?);
+	commands.push(command.ok_or_else(|| {
+		crate::i18n::translate("extension-account-actions-error-this-action-is-no-longer")
+	})?);
 	Ok(())
 }
 
@@ -66,9 +68,9 @@ impl MessagingUi {
 			AppAction::OpenFriendDm { user_id } => {
 				let user = id(&user_id)?;
 				if state.friend(user).is_none() || !self.server_settings.navigate_away(state) {
-					return Err(
-						"The friend is unavailable or server settings need attention".into(),
-					);
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-the-friend-is-unavailable-or-server-settings",
+					));
 				}
 				let command = state.open_friend_dm(user);
 				let selected = state.selected.and_then(|channel| state.channel(channel));
@@ -78,7 +80,9 @@ impl MessagingUi {
 							&& channel.kind == 1 && channel.recipients.len() == 1
 							&& channel.recipients[0].id == user
 					}) {
-					return Err("Opening this direct conversation is no longer available".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-opening-this-direct-conversation",
+					));
 				}
 				commands.extend(command);
 				self.guild = None;
@@ -117,7 +121,9 @@ impl MessagingUi {
 							.is_some()
 						});
 				if !known {
-					return Err("This user is not available in the current session".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-this-user-is-not-available",
+					));
 				}
 				queue(state.set_user_blocked(user, blocked), commands)?;
 			}
@@ -143,8 +149,11 @@ impl MessagingUi {
 			AppAction::SetOwnPresence { presence } => {
 				let mut value = self.own_presence.clone();
 				if let Some(status) = presence.status {
-					value.status =
-						model::PresenceStatus::parse(&status).ok_or("Invalid presence status")?;
+					value.status = model::PresenceStatus::parse(&status).ok_or_else(|| {
+						crate::i18n::translate(
+							"extension-account-actions-error-invalid-presence-status",
+						)
+					})?;
 				}
 				if let Some(text) = presence.custom_status {
 					value.custom_status = text;
@@ -155,13 +164,25 @@ impl MessagingUi {
 					} else {
 						let now = std::time::SystemTime::now()
 							.duration_since(std::time::UNIX_EPOCH)
-							.map_err(|_| "System clock is unavailable")?
+							.map_err(|_| {
+								crate::i18n::translate(
+									"extension-account-actions-error-system-clock-is-unavailable",
+								)
+							})?
 							.as_millis();
 						Some(
 							u64::try_from(now)
-								.map_err(|_| "System clock is out of range")?
+								.map_err(|_| {
+									crate::i18n::translate(
+										"extension-account-actions-error-system-clock-is-out-of-range",
+									)
+								})?
 								.checked_add(u64::from(seconds) * 1000)
-								.ok_or("Expiry is out of range")?,
+								.ok_or_else(|| {
+									crate::i18n::translate(
+										"extension-account-actions-error-expiry-is-out-of-range",
+									)
+								})?,
 						)
 					};
 				}
@@ -169,7 +190,9 @@ impl MessagingUi {
 					value.expires_at_ms = None;
 				}
 				if !value.valid() {
-					return Err("Invalid presence preferences".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-invalid-presence-preferences",
+					));
 				}
 				if value != self.own_presence {
 					self.adopt_account_presence(value);
@@ -184,7 +207,11 @@ impl MessagingUi {
 						"voice_isolation" => InputProfile::VoiceIsolation,
 						"studio" => InputProfile::Studio,
 						"custom" => InputProfile::Custom,
-						_ => return Err("Invalid microphone profile".into()),
+						_ => {
+							return Err(crate::i18n::translate(
+								"extension-account-actions-error-invalid-microphone-profile",
+							));
+						}
 					};
 				}
 				if settings.suppression.is_some()
@@ -200,7 +227,11 @@ impl MessagingUi {
 							"off" => NoiseSuppression::Off,
 							"rnnoise" => NoiseSuppression::RnNoise,
 							"webrtc" => NoiseSuppression::WebRtc,
-							_ => return Err("Invalid suppression mode".into()),
+							_ => {
+								return Err(crate::i18n::translate(
+									"extension-account-actions-error-invalid-suppression-mode",
+								));
+							}
 						};
 					}
 					custom.suppression_level = settings
@@ -218,7 +249,9 @@ impl MessagingUi {
 					}
 				}
 				if !processing.custom.is_valid() {
-					return Err("Invalid microphone processing settings".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-invalid-microphone-processing-settings",
+					));
 				}
 				self.voice_processing = processing;
 				self.voice_gain.input_percent = settings
@@ -235,24 +268,26 @@ impl MessagingUi {
 				muted,
 			} => {
 				let user = id(&user_id)?;
-				let call = state
-					.voice
-					.active
-					.as_ref()
-					.ok_or("There is no active voice call")?;
+				let call = state.voice.active.as_ref().ok_or_else(|| {
+					crate::i18n::translate("extension-account-actions-error-no-active-voice-call")
+				})?;
 				if state.user.as_ref().is_some_and(|own| own.id == user)
 					|| !call
 						.participants
 						.iter()
 						.any(|participant| participant.user == user)
 				{
-					return Err("This remote participant is no longer in the call".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-this-remote-participant",
+					));
 				}
 				if muted == Some(true)
 					&& !self.voice_user_locally_muted(user)
 					&& self.voice_user_muted.len() >= 64
 				{
-					return Err("The local participant mute limit has been reached".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-the-local-participant-mute-limit",
+					));
 				}
 				if let Some(volume) = volume_percent {
 					self.set_voice_user_volume(user, volume);
@@ -271,7 +306,9 @@ impl MessagingUi {
 					.as_ref()
 					.is_none_or(|call| call.watching.is_none())
 				{
-					return Err("There is no watched stream".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-there-is-no-watched-stream",
+					));
 				}
 				if let Some(volume) = volume_percent {
 					self.voice_stream_volume = Some(volume);
@@ -288,7 +325,9 @@ impl MessagingUi {
 						.channel(channel)
 						.is_none_or(|value| !value.supports_text())
 				{
-					return Err("The selected conversation is no longer available".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-the-selected-conversation",
+					));
 				}
 				self.attach_requested = true;
 			}
@@ -298,13 +337,17 @@ impl MessagingUi {
 			} => {
 				if let Some(value) = input_id {
 					if !self.voice_inputs.iter().any(|(id, _)| id == &value) {
-						return Err("The microphone is no longer available".into());
+						return Err(crate::i18n::translate(
+							"extension-account-actions-error-the-microphone-is-no-longer-available",
+						));
 					}
 					self.voice_input = Some(value);
 				}
 				if let Some(value) = output_id {
 					if !self.voice_outputs.iter().any(|(id, _)| id == &value) {
-						return Err("The speaker device is no longer available".into());
+						return Err(crate::i18n::translate(
+							"extension-account-actions-error-the-speaker-device",
+						));
 					}
 					self.voice_output = Some(value);
 				}
@@ -317,26 +360,34 @@ impl MessagingUi {
 				if let Some(value) = device_id.as_ref()
 					&& !self.voice_cameras.iter().any(|(id, _)| id == value)
 				{
-					return Err("The camera is no longer available".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-the-camera-is-no-longer-available",
+					));
 				}
 				self.voice_camera_device = device_id;
 			}
 			AppAction::OpenScreenSharePicker => {
 				if state.voice.active.is_none() || self.screen.busy {
-					return Err("Screen sharing is unavailable in the current call".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-screen-sharing-is-unavailable",
+					));
 				}
 				self.screen.launch(state);
 			}
 			AppAction::StopScreenShare => {
 				if !self.screen.busy {
-					return Err("There is no active screen share".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-there-is-no-active-screen-share",
+					));
 				}
 				self.screen.request = Some(crate::screen::Request::Stop);
 			}
 			AppAction::WatchStream { user_id } => {
-				state
-					.watch_stream(id(&user_id)?)
-					.ok_or("This stream is no longer available")?;
+				state.watch_stream(id(&user_id)?).ok_or_else(|| {
+					crate::i18n::translate(
+						"extension-account-actions-error-this-stream-is-no-longer-available",
+					)
+				})?;
 			}
 			AppAction::StopWatching => {
 				if state
@@ -345,13 +396,17 @@ impl MessagingUi {
 					.as_ref()
 					.is_none_or(|call| call.watching.is_none())
 				{
-					return Err("There is no watched stream".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-there-is-no-watched-stream",
+					));
 				}
 				state.stop_watching();
 			}
 			AppAction::DeclineCall { channel_id } => {
 				if state.voice.incoming != Some(id(&channel_id)?) {
-					return Err("This incoming call is no longer available".into());
+					return Err(crate::i18n::translate(
+						"extension-account-actions-error-this-incoming-call",
+					));
 				}
 				queue(state.decline_call(), commands)?;
 			}

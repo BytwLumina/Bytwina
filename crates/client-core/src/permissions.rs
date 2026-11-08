@@ -731,6 +731,20 @@ impl State {
 			&& self.freshness != Freshness::Unavailable
 			&& self.can_compose(channel)
 	}
+	/// True while a guild timeout still suppresses this member's messages.
+	pub fn composer_timeout(&self, channel: Id) -> bool {
+		let Some(guild) = self.channel(channel).and_then(|c| c.guild) else {
+			return false;
+		};
+		let now = Self::permission_time();
+		self.permissions
+			.guilds
+			.get(&guild)
+			.and_then(|guild| guild.member.as_ref())
+			.and_then(|member| member.timeout_until)
+			.is_some_and(|until| until > now)
+	}
+
 	/// Permission-only composer availability, including while drafting offline.
 	pub fn can_compose(&self, channel: Id) -> bool {
 		self.channel(channel)

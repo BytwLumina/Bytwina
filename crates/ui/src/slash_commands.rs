@@ -165,7 +165,7 @@ impl Menu {
 						id: None,
 						path: Vec::new(),
 						name: entry.name.into(),
-						description: entry.description.into(),
+						description: crate::i18n::translate_if_key(entry.description),
 						application: "Built-In".into(),
 						application_id: None,
 						icon: None,
@@ -1457,7 +1457,9 @@ impl crate::MessagingUi {
 					.iter()
 					.any(|command| command.name == name)
 			{
-				state.status = "Choose a command from the list before running it.";
+				state.status = &crate::i18n::translate(
+					"slash-commands-status-choose-a-command-from-the-list-before-running-it",
+				);
 				self.slash_commands.dismissed = false;
 				return true;
 			}

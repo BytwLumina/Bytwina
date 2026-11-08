@@ -22,6 +22,7 @@ pub struct ScreenUi {
 	pub request: Option<Request>,
 	pub busy: bool,
 	pub status: &'static str,
+	/// Locale key of an active capture problem; translated where it is shown.
 	pub capture_status: Option<&'static str>,
 	pub supported: bool,
 	pub preview: Option<egui::TextureHandle>,
@@ -75,7 +76,7 @@ impl ScreenUi {
 			self.sources = if cfg!(target_os = "macos") {
 				vec![Source {
 					id: SourceId::SystemPicker,
-					name: "Choose with the macOS system picker".into(),
+					name: crate::i18n::translate("screen-macos-system-picker"),
 					width: 0,
 					height: 0,
 					refresh_hz: 0,
@@ -84,14 +85,18 @@ impl ScreenUi {
 				vec![
 					Source {
 						id: SourceId::Display(1),
-						name: "Display 1 · Synthetic preview".into(),
+						name: crate::i18n::translate("screen-launch-display-1-synthetic-preview")
+							.into(),
 						width: 2560,
 						height: 1440,
 						refresh_hz: 165,
 					},
 					Source {
 						id: SourceId::Window(2),
-						name: "Project notes · Synthetic window".into(),
+						name: crate::i18n::translate(
+							"screen-launch-project-notes-synthetic-window",
+						)
+						.into(),
 						width: 1280,
 						height: 720,
 						refresh_hz: 60,
@@ -99,10 +104,11 @@ impl ScreenUi {
 				]
 			};
 			self.selected = self.sources.first().map(|source| source.id);
-			self.status = "Offline preview · no screen is captured";
+			self.status =
+				crate::i18n::translate("screen-launch-offline-preview-no-screen-is-captured");
 		} else {
 			self.refresh_requested = true;
-			self.status = "Looking for screens and windows…";
+			self.status = crate::i18n::translate("screen-launch-looking-for-screens-and-windows");
 		}
 	}
 	fn selected_source(&self) -> Option<&Source> {
@@ -238,7 +244,8 @@ impl ScreenUi {
 					self.quality_for = None;
 					self.sources.clear();
 					self.refresh_requested = true;
-					self.status = "Looking for screens and windows…";
+					self.status =
+						crate::i18n::translate("screen-body-looking-for-screens-and-windows");
 				}
 			});
 		});
@@ -278,7 +285,9 @@ impl ScreenUi {
 		ui.horizontal_wrapped(|ui| {
 			ui.spacing_mut().item_spacing = egui::vec2(6.0, 6.0);
 			for fps in offered_frame_rates(refresh) {
-				if segment(ui, &format!("{fps} fps"), self.fps == fps).clicked() {
+				let label =
+					crate::i18n::translate_args("screen-body-fps", &[("fps", &fps.to_string())]);
+				if segment(ui, &label, self.fps == fps).clicked() {
 					self.fps = fps;
 				}
 			}
@@ -420,13 +429,15 @@ impl ScreenUi {
 			);
 			let kind = ui.painter().layout_no_wrap(
 				match source.id {
-					SourceId::Display(_) | SourceId::X11Desktop => "Screen".to_owned(),
-					SourceId::Window(_) => "Window".to_owned(),
+					SourceId::Display(_) | SourceId::X11Desktop => {
+						crate::i18n::translate("screen-source-list-screen")
+					}
+					SourceId::Window(_) => crate::i18n::translate("screen-source-list-window"),
 					SourceId::SystemPicker => {
 						crate::i18n::translate("screen-macos-system-picker-kind")
 					}
 					#[allow(unreachable_patterns)] // Portal may be absent outside Linux.
-					_ => "System permission dialog".to_owned(),
+					_ => crate::i18n::translate("screen-source-list-system-permission-dialog"),
 				},
 				egui::FontId::proportional(11.0),
 				colors.muted,

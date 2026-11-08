@@ -234,8 +234,12 @@ impl MessagingUi {
 	}
 
 	fn reading_save_notice(&mut self, ui: &mut egui::Ui, demo: bool) {
-		if !demo && self.reading_status.contains("could not") {
-			design::notice(ui, design::Level::Warning, self.reading_status);
+		let status = crate::i18n::translate_if_key(self.reading_status);
+		if !demo
+			&& self.reading_status
+				== "reading-reading-save-notice-reading-settings-could-not-be-saved"
+		{
+			design::notice(ui, design::Level::Warning, &status);
 			if design::text_action(
 				ui,
 				&crate::i18n::translate(
@@ -436,7 +440,7 @@ mod tests {
 			view.notifications_enabled,
 			"Reading defaults do not change OS notification consent"
 		);
-		view.reading_status = "Reading settings could not be saved";
+		view.reading_status = "reading-reading-save-notice-reading-settings-could-not-be-saved";
 		let found = frame(&mut view, vec![]);
 		let retry = found
 			.iter()

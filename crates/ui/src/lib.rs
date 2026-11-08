@@ -1127,7 +1127,7 @@ impl MessagingUi {
 				ctx.input_mut(|i| i.events.push(egui::Event::Paste(text)));
 				self.pasted_text_frame = Some(ctx.cumulative_frame_nr());
 			} else {
-				state.status = "Paste cancelled; focus the message and paste again";
+				state.status = "lib-status-paste-cancelled-focus-the-message-and-paste-again";
 			}
 		} else if paste_enabled && self.pasted_text_frame != Some(ctx.cumulative_frame_nr()) {
 			let mut request = AttachmentPaste {
@@ -1175,13 +1175,13 @@ impl MessagingUi {
 					.as_ref()
 					.is_some_and(|text| text.len() > MAX_DRAFT_BYTES)
 				{
-					state.status = "Pasted text exceeds the draft limit";
+					state.status = "lib-status-pasted-text-exceeds-the-draft-limit";
 				} else if request
 					.image
 					.as_ref()
 					.is_some_and(|image| image.pixels.len() > 4 * 1024 * 1024)
 				{
-					state.status = "Paste an image with at most 4 million pixels";
+					state.status = "lib-status-paste-an-image-with-at-most-4-million-pixels";
 				} else {
 					self.attachment_paste_requested = Some(request);
 					self.upload_busy = true;
@@ -2811,11 +2811,12 @@ impl MessagingUi {
 					"Draft budget full. Clear an existing draft before restoring pending text";
 			} else if state.pending[index].reply_conflicts(state.reply) {
 				// Restoring now would send this text to the newer reply's author.
-				state.status = "Cancel the current reply before restoring this message";
+				state.status = "lib-status-cancel-the-current-reply-before-restoring-this-message";
 			} else if state.drafts.get(&channel).is_none_or(String::is_empty) {
 				let pending = state.pending.remove(index);
 				if !pending.attachments.is_empty() {
-					state.status = "Text restored; reselect the attachment before sending again";
+					state.status =
+						"lib-status-text-restored-reselect-the-attachment-before-sending-again";
 				}
 				state.drafts.insert(channel, pending.content);
 				self.draft_changes.push(channel);
@@ -2826,7 +2827,8 @@ impl MessagingUi {
 						.filter(|reply| !state.timeline.is_deleted(reply.target()));
 				}
 			} else {
-				state.status = "Keep or clear the existing draft before restoring pending text";
+				state.status =
+					"lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text";
 			}
 		}
 	}
@@ -3060,7 +3062,8 @@ impl MessagingUi {
 		}
 		if !editing_here && !state.can_compose(channel) {
 			if self.pending_mention.take().is_some() {
-				state.status = "You don't have permission to mention anyone in this channel.";
+				state.status =
+					"lib-status-you-don-t-have-permission-to-mention-anyone-in-this-channel";
 			}
 			// Returning to an edit must restore its focus after visiting a read-only channel.
 			self.composer_edit = None;
@@ -3687,16 +3690,16 @@ impl MessagingUi {
                             },
                             Some(emoji_picker::Pick::React(_, _) | emoji_picker::Pick::Choose(_)) => None,
                             Some(emoji_picker::Pick::Sticker(sticker)) => {
-                                if editing_here { state.status = "Finish or cancel the edit before sending a sticker."; }
-                                else if self.upload_busy { state.status = "Wait for the upload before sending a sticker."; }
+                                if editing_here { state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker"; }
+                                else if self.upload_busy { state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker"; }
                                 else if let Some(command) = state.prepare_sticker_send(&sticker) { self.timeline.follow_latest(state); commands.push(command); }
                                 None
                             },
                             Some(emoji_picker::Pick::Send(url)) => {
                                 if editing_here {
-                                    state.status = "Finish or cancel the edit before sending a GIF.";
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-gif";
                                 } else if self.upload_busy || !state.can_send(channel) {
-                                    state.status = "Sending is unavailable with the current connection or permissions";
+                                    state.status = "lib-status-sending-is-unavailable-with-the-current-connection-or-permissions";
                                 } else {
                                     let saved = state.drafts.insert(channel, url);
                                     let command = state.prepare_send();
@@ -3771,7 +3774,7 @@ impl MessagingUi {
 							None => {}
 							Some(MentionWrite::Inserted) => mention_changed = true,
 							Some(MentionWrite::DidNotFit) => {
-								state.status = "Mention will not fit. Shorten this message or free draft space.";
+								state.status = "lib-status-mention-will-not-fit-shorten-this-message-or-free-draft-space";
 							}
 						}
 						if let Some(pick) = pick {
@@ -3838,7 +3841,7 @@ impl MessagingUi {
                                 edit_state.store(ctx, composer_id);
                                 mention_changed = true;
                             } else {
-                                state.status = "Formatting will not fit. Shorten this message or free draft space.";
+                                state.status = "lib-status-formatting-will-not-fit-shorten-this-message-or-free-draft-space";
                             }
                         }
                         let rich_layout = &mut self.composer_layout;
@@ -4038,7 +4041,7 @@ impl MessagingUi {
                                     }
                                     commands.push(command);
                                 } else {
-                                    state.status = "Edit kept. Wait for your current message and connection, and enter nonempty text.";
+                                    state.status = "lib-status-edit-kept-wait-for-your-current-message-and-connection-and-enter-nonempty-text";
                                 }
                             } else if self.send_application_command(state, channel, commands)
                                 || self.handle_builtin_slash(state, channel, ctx, commands) {
@@ -4532,7 +4535,9 @@ impl MessagingUi {
 		crate::i18n::set_current(self.language);
 		let language = self.language;
 		if let Some(status) = state.take_user_action_status() {
-			self.toasts.push(design::Level::Error, status);
+			// Status text is a locale key; flows that set literal text pass through unchanged.
+			let text = crate::i18n::translate_if_key(status);
+			self.toasts.push(design::Level::Error, text);
 		}
 		let mention_waiting = self.pending_mention.is_some();
 		let composer_open = self.editing.is_some()
@@ -4543,7 +4548,7 @@ impl MessagingUi {
 			});
 		if mention_waiting && !composer_open {
 			self.pending_mention = None;
-			state.status = "This view has no message box, so the mention was not added.";
+			state.status = "lib-status-this-view-has-no-message-box-so-the-mention-was-not-added";
 		}
 		if self.editing.is_none()
 			&& let Some(index) = state

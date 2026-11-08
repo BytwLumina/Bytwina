@@ -436,7 +436,7 @@ impl ExtensionUi {
 		};
 		if !self.status.is_empty() {
 			design::card(ui, |ui| {
-				ui.add(egui::Label::new(&self.status).wrap());
+				ui.add(egui::Label::new(crate::i18n::translate_if_key(&self.status)).wrap());
 			});
 			ui.add_space(12.0);
 		}
@@ -747,12 +747,12 @@ impl ExtensionUi {
 		ui.painter().text(
 			inset.center() + egui::vec2(0.0, 23.0),
 			egui::Align2::CENTER_CENTER,
-			if self.previews.get(id).is_some_and(|preview| preview.loading) {
-				"Loading preview..."
+			&if self.previews.get(id).is_some_and(|preview| preview.loading) {
+				crate::i18n::translate("extensions-ui-preview-image-loading-preview")
 			} else if entry.preview.is_some() && !self.previews.contains_key(id) {
-				"Preview not loaded"
+				crate::i18n::translate("extensions-ui-preview-image-preview-not-loaded")
 			} else {
-				"Preview unavailable"
+				crate::i18n::translate("extensions-ui-preview-image-preview-unavailable")
 			},
 			egui::FontId::proportional(12.0),
 			colors.muted,
@@ -891,7 +891,9 @@ impl ExtensionUi {
 		state: &State,
 	) {
 		if !context.is_current(state) {
-			self.status = "Result discarded because the conversation or draft changed.".into();
+			self.status =
+				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed"
+					.into();
 			return;
 		}
 		invocation.storage = None;
@@ -1184,7 +1186,7 @@ impl ExtensionUi {
 			}
 			if toolbar_button(
 				ui,
-				"Import package…",
+				&crate::i18n::translate("extensions-ui-toolbar-import-package"),
 				true,
 				!self.busy,
 				egui::vec2(150.0, height),
@@ -1622,14 +1624,15 @@ impl ExtensionUi {
 			)
 			.on_hover_text(&entry.manifest.author);
 			ui.spacing_mut().item_spacing.y = 8.0;
+			let fallback = crate::i18n::translate("extensions-ui-card-body-add-a-new-tool-to-your");
 			let description = if entry.description.is_empty() {
-				"Add a new tool to your conversations."
+				fallback.as_str()
 			} else {
 				&entry.description
 			};
 			ui.allocate_ui(egui::vec2(ui.available_width(), 36.0), |ui| {
 				let mut text = egui::text::LayoutJob::simple(
-					description.into(),
+					crate::i18n::translate_if_key(description),
 					egui::FontId::proportional(13.0),
 					colors.text,
 					ui.available_width(),
@@ -1679,11 +1682,11 @@ impl ExtensionUi {
 					.add_enabled_ui(!self.busy, |ui| {
 						card_button(
 							ui,
-							if self.themes {
-								"Install theme"
+							&crate::i18n::translate(if self.themes {
+								"extensions-ui-card-body-install-theme"
 							} else {
-								"Review & enable"
-							},
+								"extensions-ui-card-body-review-and-enable"
+							}),
 							egui::vec2(width, FOOTER_HEIGHT),
 							if self.themes { neutral } else { colors.accent },
 							if self.themes {
@@ -1859,7 +1862,7 @@ impl ExtensionUi {
 			}
 			if card_button(
 				ui,
-				"Disable",
+				&crate::i18n::translate("extensions-ui-card-body-disable"),
 				egui::vec2(ui.available_width().max(1.0), FOOTER_HEIGHT),
 				neutral,
 				outline,
@@ -2220,7 +2223,9 @@ impl ExtensionUi {
 		};
 		if !result.context.is_current(state) {
 			self.proxy_auth.clear_draft();
-			self.status = "Result discarded because the conversation or draft changed.".into();
+			self.status =
+				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed"
+					.into();
 			return None;
 		}
 		let mut applied = false;
@@ -2230,7 +2235,10 @@ impl ExtensionUi {
 			.entries
 			.iter()
 			.find(|entry| entry.manifest.id == result.id)
-			.map_or("Extension tool", |entry| entry.manifest.name.as_str())
+			.map_or_else(
+				|| crate::i18n::translate("extensions-ui-show-result-extension-tool"),
+				|entry| entry.manifest.name.clone(),
+			)
 			.to_owned();
 		let rich = self.entries.iter().any(|entry| {
 			entry.manifest.id == result.id
@@ -2249,7 +2257,7 @@ impl ExtensionUi {
 		let mut close = false;
 		let response = crate::dialog::Dialog::new("extension-result", title)
 			.subtitle(if rich {
-				"Create your activity, preview it, then apply when ready.".into()
+				crate::i18n::translate("extensions-ui-show-result-create-your-activity-preview-it")
 			} else {
 				crate::i18n::translate(
 					"extensions-ui-show-result-review-the-result-app-actions-and-draft-changes-need-your",
@@ -2745,103 +2753,67 @@ fn badge(ui: &mut egui::Ui, text: &str, foreground: egui::Color32, background: e
 		.galley(rect.center() - galley.size() / 2.0, galley, foreground);
 }
 
-fn capability_label(capability: Capability) -> &'static str {
+fn capability_key(capability: Capability) -> &'static str {
 	match capability {
-		Capability::ApiProxy => {
-			"Route the Discord REST API through a proxy across accounts (not calls or media)"
-		}
-		Capability::RichPresence => "Publish custom activity while activity sharing is enabled",
-		Capability::ImageSharing => "Enable explicit emoji and sticker image attachment selection",
-		Capability::Appearance => "Customize app colors, typography and control styling",
-		Capability::MessageEvents => "Read live message events and text in the active conversation",
-		Capability::SelectedMessage => "Read the message I choose for an action",
-		Capability::Composer => "Read my draft and propose text changes",
-		Capability::Storage => "Store up to 1 MiB of local data for this account",
-		Capability::AppContext => "Read my account and current conversation details",
-		Capability::AccountProfile => "Read my loaded profile, including biography and pronouns",
-		Capability::GuildDirectory => "Read my loaded server names and identifiers",
-		Capability::ChannelDetails => "Read current channel metadata, recipients and permissions",
-		Capability::DataEvents => {
-			"Receive changes to separately granted account and conversation data"
-		}
-		Capability::MessageContent => {
-			"Read loaded embed text, stickers and message reference metadata"
-		}
-		Capability::ForumData => "Read loaded forum and thread summaries",
-		Capability::ConversationActivity => {
-			"Read current typing users and loaded pins; observe reactions"
-		}
-		Capability::ChannelMetadata => {
-			"Read loaded channel topics, categories, thread details and permissions"
-		}
-		Capability::MemberDetails => "Read loaded server members, roles and server profiles",
-		Capability::ChannelDirectory => "Read the list of loaded, readable conversations",
-		Capability::MessageDetails => {
-			"Read loaded message replies, mentions, attachment metadata and reactions"
-		}
-		Capability::Relationships => "Read my loaded friends, requests, blocked and ignored users",
-		Capability::Timeline => "Read loaded messages in the active conversation",
-		Capability::Members => "Read loaded members of the active conversation",
-		Capability::Presence => "Read loaded user presence status",
-		Capability::VoiceState => "Read current call state and participant identifiers",
-		Capability::ReadState => "Read unread and mention counts in the active conversation",
-		Capability::LocalSettings => "Read local reading settings and propose changes for approval",
-		Capability::NotificationSettings => {
-			"Read local sound and notification settings and propose changes for approval"
-		}
-		Capability::MessageSend => "Propose sending messages for approval",
-		Capability::MessageManage => "Propose editing, deleting or pinning messages for approval",
-		Capability::ReactionsControl => "Propose adding or removing my reactions for approval",
-		Capability::ReadStateControl => "Propose marking conversations read or unread for approval",
-		Capability::ThreadsControl => {
-			"Propose creating and managing threads or forum posts for approval"
-		}
-		Capability::ChannelControl => {
-			"Propose channel, category, group conversation and mute changes for approval"
-		}
-		Capability::ServerControl => {
-			"Propose server settings, invites, emoji and membership changes for approval"
-		}
-		Capability::RoleControl => "Propose server role changes for approval",
-		Capability::ModerationControl => {
-			"Propose member role, nickname, kick and prune actions for approval"
-		}
-		Capability::MediaControl => {
-			"Propose camera, screen-share and local media-device changes for approval"
-		}
-		Capability::ActionFeedback => {
-			"Receive whether a confirmed app action was accepted by Bytwina"
-		}
-		Capability::DataQueries => {
-			"Request and read bounded search, pin, thread, member, profile and GIF results"
-		}
-		Capability::MessagingSettings => {
-			"Read and propose account messaging privacy changes for approval"
-		}
-		Capability::GuildFolders => "Read and propose server-folder changes for approval",
-		Capability::RelationshipControl => {
-			"Propose friend, block, nickname and note changes for approval"
-		}
-		Capability::AccountControl => {
-			"Read own presence and activity-sharing preferences; propose account changes for approval"
-		}
-		Capability::AudioSettings => {
-			"Read audio preferences; propose audio settings, participant and stream volume changes for approval"
-		}
-		Capability::VoiceConnect => "Propose joining, ringing or declining calls for approval",
-		Capability::CameraControl => "Propose enabling or disabling my camera for approval",
-		Capability::Navigation => "Propose opening conversations, profiles, search and app views",
-		Capability::LocalNotices => "Propose local notices for approval",
-		Capability::ClipboardWrite => "Propose clipboard text for approval",
-		Capability::VoiceControl => {
-			"Propose call mute/deafen, leaving or watching a stream for approval"
-		}
-		Capability::AppEvents => "Receive app lifecycle and navigation events while enabled",
-		Capability::DeletedMessages => {
-			"Keep loaded deleted messages in session memory while enabled"
-		}
+		Capability::ApiProxy => "extensions-ui-capability-apiproxy",
+		Capability::RichPresence => "extensions-ui-capability-richpresence",
+		Capability::ImageSharing => "extensions-ui-capability-imagesharing",
+		Capability::Appearance => "extensions-ui-capability-appearance",
+		Capability::MessageEvents => "extensions-ui-capability-messageevents",
+		Capability::SelectedMessage => "extensions-ui-capability-selectedmessage",
+		Capability::Composer => "extensions-ui-capability-composer",
+		Capability::Storage => "extensions-ui-capability-storage",
+		Capability::AppContext => "extensions-ui-capability-appcontext",
+		Capability::AccountProfile => "extensions-ui-capability-accountprofile",
+		Capability::GuildDirectory => "extensions-ui-capability-guilddirectory",
+		Capability::ChannelDetails => "extensions-ui-capability-channeldetails",
+		Capability::DataEvents => "extensions-ui-capability-dataevents",
+		Capability::MessageContent => "extensions-ui-capability-messagecontent",
+		Capability::ForumData => "extensions-ui-capability-forumdata",
+		Capability::ConversationActivity => "extensions-ui-capability-conversationactivity",
+		Capability::ChannelMetadata => "extensions-ui-capability-channelmetadata",
+		Capability::MemberDetails => "extensions-ui-capability-memberdetails",
+		Capability::ChannelDirectory => "extensions-ui-capability-channeldirectory",
+		Capability::MessageDetails => "extensions-ui-capability-messagedetails",
+		Capability::Relationships => "extensions-ui-capability-relationships",
+		Capability::Timeline => "extensions-ui-capability-timeline",
+		Capability::Members => "extensions-ui-capability-members",
+		Capability::Presence => "extensions-ui-capability-presence",
+		Capability::VoiceState => "extensions-ui-capability-voicestate",
+		Capability::ReadState => "extensions-ui-capability-readstate",
+		Capability::LocalSettings => "extensions-ui-capability-localsettings",
+		Capability::NotificationSettings => "extensions-ui-capability-notificationsettings",
+		Capability::MessageSend => "extensions-ui-capability-messagesend",
+		Capability::MessageManage => "extensions-ui-capability-messagemanage",
+		Capability::ReactionsControl => "extensions-ui-capability-reactionscontrol",
+		Capability::ReadStateControl => "extensions-ui-capability-readstatecontrol",
+		Capability::ThreadsControl => "extensions-ui-capability-threadscontrol",
+		Capability::ChannelControl => "extensions-ui-capability-channelcontrol",
+		Capability::ServerControl => "extensions-ui-capability-servercontrol",
+		Capability::RoleControl => "extensions-ui-capability-rolecontrol",
+		Capability::ModerationControl => "extensions-ui-capability-moderationcontrol",
+		Capability::MediaControl => "extensions-ui-capability-mediacontrol",
+		Capability::ActionFeedback => "extensions-ui-capability-actionfeedback",
+		Capability::DataQueries => "extensions-ui-capability-dataqueries",
+		Capability::MessagingSettings => "extensions-ui-capability-messagingsettings",
+		Capability::RelationshipControl => "extensions-ui-capability-relationshipcontrol",
+		Capability::AccountControl => "extensions-ui-capability-accountcontrol",
+		Capability::AudioSettings => "extensions-ui-capability-audiosettings",
+		Capability::VoiceConnect => "extensions-ui-capability-voiceconnect",
+		Capability::CameraControl => "extensions-ui-capability-cameracontrol",
+		Capability::Navigation => "extensions-ui-capability-navigation",
+		Capability::LocalNotices => "extensions-ui-capability-localnotices",
+		Capability::ClipboardWrite => "extensions-ui-capability-clipboardwrite",
+		Capability::VoiceControl => "extensions-ui-capability-voicecontrol",
+		Capability::AppEvents => "extensions-ui-capability-appevents",
+		Capability::DeletedMessages => "extensions-ui-capability-deletedmessages",
 	}
 }
+
+fn capability_label(capability: Capability) -> String {
+	crate::i18n::translate(capability_key(capability))
+}
+
 pub(crate) fn render_elements(
 	ui: &mut egui::Ui,
 	elements: &[Element],

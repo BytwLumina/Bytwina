@@ -236,7 +236,10 @@ fn restore_processing_preserves_existing_drafts_and_ignores_late_confirmations()
 			0 => {
 				assert_eq!(state.drafts[&channel], "Text to recover");
 				assert!(state.pending.is_empty());
-				assert!(state.status.contains("reselect the attachment"));
+				assert_eq!(
+					state.status,
+					"lib-status-text-restored-reselect-the-attachment-before-sending-again"
+				);
 				assert!(messaging.draft_changes.contains(&channel));
 			}
 			1 => {
@@ -424,7 +427,10 @@ fn restore_never_swaps_or_resurrects_a_reply_target() {
 	assert_eq!(state.reply_target(), Some(second));
 	assert!(!state.drafts.contains_key(&channel));
 	assert_eq!(state.pending.len(), 1);
-	assert!(state.status.contains("Cancel the current reply"));
+	assert_eq!(
+		state.status,
+		"lib-status-cancel-the-current-reply-before-restoring-this-message"
+	);
 	state.reply = None;
 	messaging.restore_pending(&mut state, channel, &nonce);
 	assert_eq!(state.reply_target(), Some(first));

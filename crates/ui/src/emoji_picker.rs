@@ -131,6 +131,55 @@ pub(crate) fn complete_shortcode(
 	)
 }
 
+/// Emoji skin-tone modifiers, ordered from lightest to darkest.
+pub(crate) const TONES: [char; 5] = [
+	'\u{1f3fb}',
+	'\u{1f3fc}',
+	'\u{1f3fd}',
+	'\u{1f3fe}',
+	'\u{1f3ff}',
+];
+
+/// Strip a trailing skin-tone modifier so variants collapse onto their base emoji.
+pub(crate) fn base_emoji(text: &str) -> &str {
+	match text.chars().last() {
+		Some(last) if TONES.contains(&last) => &text[..text.len() - last.len_utf8()],
+		_ => text,
+	}
+}
+
+/// One grid entry per base emoji: the catalog index used when browsing without a query.
+pub(crate) fn browse_indices() -> &'static [usize] {
+	static ENTRIES: OnceLock<Vec<usize>> = OnceLock::new();
+	ENTRIES.get_or_init(|| {
+		let mut seen = std::collections::BTreeSet::new();
+		standard()
+			.iter()
+			.enumerate()
+			.filter(|(_, (text, _))| seen.insert(base_emoji(text)))
+			.map(|(index, _)| index)
+			.collect()
+	})
+}
+
+/// Variant indices for a base emoji, base first then each available tone.
+pub(crate) fn tone_variants(base: &str) -> Vec<usize> {
+	let mut out = Vec::with_capacity(6);
+	if let Some(index) = standard()
+		.binary_search_by_key(&base, |(text, _)| *text)
+		.ok()
+	{
+		out.push(index);
+	}
+	for tone in TONES {
+		let candidate = format!("{base}{tone}");
+		if let Ok(index) = standard().binary_search_by_key(&candidate.as_str(), |(t, _)| *t) {
+			out.push(index);
+		}
+	}
+	out
+}
+
 pub(crate) fn standard() -> &'static [(&'static str, &'static str)] {
 	static ENTRIES: OnceLock<Vec<(&'static str, &'static str)>> = OnceLock::new();
 	ENTRIES.get_or_init(|| {
@@ -420,7 +469,7 @@ impl Default for Picker {
 			#[cfg(test)]
 			rail_scroll: None,
 			query: String::new(),
-			matches: (0..standard().len()).collect(),
+			matches: browse_indices().to_vec(),
 			custom: CustomMatches::default(),
 			tab: Tab::Emoji,
 			gif_section: GifSection::Home,
@@ -593,20 +642,26 @@ impl Picker {
 	fn filter(&mut self) {
 		let query = self.query.trim().to_lowercase();
 		self.matches.clear();
-		self.matches.extend(
-			standard()
-				.iter()
-				.enumerate()
-				.filter(|(index, (text, name))| {
-					name.contains(&query)
-						|| text.contains(&query)
-						|| discord_names()[*index]
-							.2
-							.split(',')
-							.any(|alias| alias.contains(&query))
-				})
-				.map(|(index, _)| index),
-		);
+		if query.is_empty() {
+			// Browsing collapses skin-tone variants onto their base emoji.
+			self.matches.extend_from_slice(browse_indices());
+			return;
+		}
+		let words: Vec<&str> = query.split_whitespace().collect();
+		let matches = |name: &str, index: usize| {
+			let aliases = discord_names()[index].2;
+			words.iter().all(|word| {
+				name.contains(word)
+					|| aliases.split(',').any(|alias| alias.contains(word))
+					|| shortcodes()[index].contains(word)
+			})
+		};
+		for (index, (text, name)) in standard().iter().enumerate() {
+			// Searching reaches tone variants, so "thumbs up" lists all six.
+			if matches(name, index) || text == &query {
+				self.matches.push(index);
+			}
+		}
 	}
 	fn close_gifs(&mut self, state: &mut State, commands: &mut Vec<Command>) {
 		if self.reaction.is_some() {

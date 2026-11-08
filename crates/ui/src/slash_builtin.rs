@@ -236,7 +236,8 @@ impl crate::MessagingUi {
 		let source = source.clone();
 		let invocation = parse(&source).expect("recognized builtin");
 		if !invocation.command.available(state, channel) {
-			state.status = "You don't have permission to use this command in this channel.";
+			state.status =
+				&crate::i18n::translate("slash-builtin-status-no-permission-to-use-this-command");
 			return true;
 		}
 		let action = match invocation.action() {
@@ -247,7 +248,9 @@ impl crate::MessagingUi {
 			}
 		};
 		if state.selected != Some(channel) || self.editing.is_some() || self.upload_busy {
-			state.status = "Finish editing or uploading before using a slash command.";
+			state.status = &crate::i18n::translate(
+				"slash-builtin-status-finish-editing-or-uploading-before-using-a-slash-command",
+			);
 			return true;
 		}
 		match action {
@@ -285,11 +288,15 @@ impl crate::MessagingUi {
 				text,
 			} => {
 				if self.attachment.is_some() || !self.attachment_files.is_empty() {
-					state.status = "Send or remove the selected attachments before using /msg.";
+					state.status = &crate::i18n::translate(
+						"slash-builtin-status-send-or-remove-the-selected-attachments-before-using-msg",
+					);
 					return true;
 				}
 				if self.slash_direct.is_some() {
-					state.status = "Wait for the previous direct message to open.";
+					state.status = &crate::i18n::translate(
+						"slash-builtin-status-wait-for-the-previous-direct-message-to-open",
+					);
 					return true;
 				}
 				let user = match recipient(state, channel, query) {
@@ -301,7 +308,9 @@ impl crate::MessagingUi {
 				};
 				let text = text.to_owned();
 				if state.draft_bytes() + source.capacity() + text.capacity() > MAX_DRAFT_BYTES {
-					state.status = "Clear some draft space before using /msg. Your draft was kept.";
+					state.status = &crate::i18n::translate(
+						"slash-builtin-status-clear-some-draft-space-before-using-msg-your-draft-was-kept",
+					);
 					return true;
 				}
 				let pending = PendingMessage {
@@ -323,7 +332,9 @@ impl crate::MessagingUi {
 						self.stage_slash_direct(state, pending, target);
 					}
 				} else if state.friend(user).is_none() {
-					state.status = "Open a DM with this user first, or choose a friend with /msg.";
+					state.status = &crate::i18n::translate(
+						"slash-builtin-status-open-a-dm-with-this-user-first-or-choose-a-friend-with-msg",
+					);
 				} else if let Some(command) = state.open_friend_dm(user) {
 					self.slash_direct = Some(pending);
 					commands.push(command);
@@ -397,7 +408,9 @@ impl crate::MessagingUi {
 			self.draft_changes.push(target);
 		}
 		self.focus_switched_composer = true;
-		state.status = "Direct message opened. Review the message, then press Enter to send.";
+		state.status = &crate::i18n::translate(
+			"slash-builtin-status-direct-message-opened-review-the-message-then-press-enter-to-send",
+		);
 	}
 }
 
