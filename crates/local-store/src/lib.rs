@@ -2305,9 +2305,9 @@ mod tests {
 			store.app_preferences().unwrap().gpu_preference,
 			model::GpuPreference::PowerSaving
 		);
-		// Older rows show no cosmetics (they are opt-in) and keep the historical budgets.
+		// Older rows show every cosmetic, matching the client default, and keep the historical budgets.
 		let legacy: AppPreferences = serde_json::from_str("{}").unwrap();
-		assert_eq!(legacy.cosmetics, model::CosmeticPreferences::default());
+		assert_eq!(legacy.cosmetics, model::CosmeticPreferences::SHOWN);
 		assert_eq!(legacy.image_cache, model::CachePreferences::default());
 		assert_eq!(legacy.time_format, model::TimeFormat::Auto);
 		assert!(
@@ -2324,10 +2324,13 @@ mod tests {
 			assert_eq!(saved.time_format, format);
 		}
 		let partial: AppPreferences = serde_json::from_str(
-			r#"{"cosmetics":{"nameplates":true},"image_cache":{"media_mib":512}}"#,
+			r#"{"cosmetics":{"decorations":false},"image_cache":{"media_mib":512}}"#,
 		)
 		.unwrap();
-		assert!(partial.cosmetics.nameplates && !partial.cosmetics.decorations);
+		assert!(
+			!partial.cosmetics.decorations && partial.cosmetics.nameplates,
+			"an explicit opt-out overrides the shown-by-default cosmetics"
+		);
 		assert_eq!(partial.image_cache.artwork_mib, 128);
 		let mut cache = AppPreferences {
 			cosmetics: model::CosmeticPreferences::SHOWN,

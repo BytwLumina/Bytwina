@@ -36,17 +36,23 @@ fn active(expires_at: Option<u64>, now: u64) -> bool {
 	expires_at.is_none_or(|expires| expires > now)
 }
 
-/// Which cosmetics this device shows. Each is opt-in: hidden cosmetics are neither painted
-/// nor downloaded, and hidden effects and frames skip their catalog read.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+/// Which cosmetics this device shows. All are shown by default, matching the official client:
+/// hiding one stops it being painted or downloaded, and hidden effects and frames also skip
+/// their catalog read.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct CosmeticPreferences {
 	pub decorations: bool,
 	pub nameplates: bool,
 	pub effects: bool,
 	pub frames: bool,
-	/// Nitro display name colours and effects; older preferences keep them off.
+	/// Nitro display name colours and effects.
 	pub name_styles: bool,
+}
+impl Default for CosmeticPreferences {
+	fn default() -> Self {
+		Self::SHOWN
+	}
 }
 impl CosmeticPreferences {
 	pub const SHOWN: Self = Self {

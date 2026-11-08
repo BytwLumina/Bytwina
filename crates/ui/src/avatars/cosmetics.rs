@@ -579,11 +579,16 @@ mod tests {
 		let shown = paint(model::CosmeticPreferences::SHOWN);
 		assert!(shown.iter().any(|key| key.starts_with("decoration-")));
 		assert!(shown.iter().any(|key| key.starts_with("nameplate-")));
-		// Opt-in: nothing is drawn or requested by default.
-		assert!(paint(model::CosmeticPreferences::default()).is_empty());
+		// Hiding each cosmetic prevents painting and requests for it.
+		let hidden = model::CosmeticPreferences {
+			decorations: false,
+			nameplates: false,
+			..model::CosmeticPreferences::SHOWN
+		};
+		assert!(paint(hidden).is_empty());
 		let only_nameplates = paint(model::CosmeticPreferences {
 			nameplates: true,
-			..Default::default()
+			..hidden
 		});
 		assert!(
 			only_nameplates

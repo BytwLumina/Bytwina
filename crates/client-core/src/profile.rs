@@ -1435,23 +1435,24 @@ mod tests {
 			assert_eq!(state.profile_cache.len(), CACHE_ENTRIES);
 			assert!(state.profile_cache.bytes() <= CACHE_BYTES);
 			// Hiding cosmetics keeps cached profiles; showing effects refetches them.
-			assert!(
-				state
-					.set_profile_cosmetics(model::CosmeticPreferences::default())
-					.is_none()
-			);
+			let hidden = model::CosmeticPreferences {
+				effects: false,
+				frames: false,
+				..model::CosmeticPreferences::SHOWN
+			};
+			assert!(state.set_profile_cosmetics(hidden).is_none());
 			assert_eq!(state.profile_cache.len(), CACHE_ENTRIES);
 			let Some(Command::Profile { cosmetics, .. }) =
 				state.request_profile_at(Id(999), None, now)
 			else {
 				panic!("missing request")
 			};
-			assert_eq!(cosmetics, model::CosmeticPreferences::default());
+			assert_eq!(cosmetics, hidden);
 			assert!(
 				state
 					.set_profile_cosmetics(model::CosmeticPreferences {
 						decorations: true,
-						..Default::default()
+						..hidden
 					})
 					.is_none()
 			);

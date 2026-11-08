@@ -142,9 +142,9 @@ establish it.
 
 Unknown palettes, layer kinds, anchors, malformed values and expired items are dropped
 without rejecting the user, member row or profile. Cosmetic editing is not supported. All
-five are opt-in: they stay hidden, unrequested and without catalog reads until enabled in
-Settings › Appearance › Profile cosmetics. This is a local display choice; nothing is sent
-to Discord.
+five are shown by default, matching the official client; each can be hidden individually in
+Settings › Appearance › Profile cosmetics, and hidden ones stay unrequested and without
+catalog reads. This is a local display choice; nothing is sent to Discord.
 
 ## Guild voice moderation — October 8, 2026
 
