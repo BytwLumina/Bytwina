@@ -150,7 +150,7 @@ primary UI is not Electron and not a WebView; webviews exist only for login and 
 | Licence | Dual MIT OR Apache-2.0, `publish = false` |
 | Author | "Lumina contributors"; org `BytwLumina`; repo `BytwLumina/Bytwina` |
 | Platforms | **Windows 10/11 is the current target**; macOS/Linux code exists but builds are paused |
-| Size | ~353k lines of Rust across 14 crates and one app (excluding `vendor/`) |
+| Size | ~356k lines of Rust across 14 crates and one app (excluding `vendor/`) |
 
 Largest files, so you know where the weight is: `crates/ui/src/lib.rs` (10.4k lines),
 `apps/desktop/src/main.rs` (7.5k), `crates/client-core/src/lib.rs` (6.8k),
@@ -177,11 +177,11 @@ Bytwina/
 │   ├── discord-gateway/   11 modules — WebSocket Gateway (9.6k)
 │   ├── discord-api/       30 modules — REST adapter (13.7k)
 │   ├── discord-voice/     33 modules — media, DAVE/E2EE (25k)
-│   ├── client-core/       49 modules — state and domain logic (44.6k)
+│   ├── client-core/       51 modules — state and domain logic (45k)
 │   ├── session-cache/     bounded RAM timeline (1.7k)
 │   ├── local-store/       SQLite cache, schema v29 (4k)
 │   ├── platform/          OS integration (15k)
-│   ├── ui/                108 modules — egui views, theme, i18n (130k)
+│   ├── ui/                110 modules — egui views, theme, i18n (131k)
 │   ├── extensions/        Wasm plugin runtime (5k)
 │   ├── diagnostics/       opt-in bounded log (1.2k)
 │   └── test-support/      synthetic fixtures (2.8k)
@@ -244,11 +244,12 @@ retries `READ_RATE_LIMIT_RETRIES = 2`, `THREAD_PREVIEW_BYTES = 64 KiB`. 30 modul
 domain: channel_actions, forum, interactions, invites, messaging_permissions, onboarding, profile_edit,
 proxy, rpc, server_admin/audit_log/integrations/invites/roles/settings, spotify, upload, user_actions…
 
-### `crates/client-core` — state and domain (44.6k, 49 files)
+### `crates/client-core` — state and domain (45k, 51 files)
 The heart. `State` (102 public fields) owns every domain: permissions, read_state, notifications,
 presence, typing, replies, threads, forum, polls, stickers, invites, search, guild_folders,
 game_mentions, message_actions, user_actions, server_*, voice, auth, captcha, verification, profile,
-resident, preload, fingerprint.
+resident, preload, fingerprint, collectibles (owned-profile catalog behind the decoration picker),
+soundboard (sound catalogs and voice channel statuses).
 
 Two enums define the boundary with `apps/desktop`:
 
@@ -278,18 +279,24 @@ Account-isolated SQLite, schema **v29** (`NATIVE_SCHEMA`/`READABLE_SCHEMA`). Tab
 `channel_preferences`, `account_presence`, `accounts`. Windows of `MAX_WINDOW_BYTES = 4 MiB`,
 media JSON capped at `256 KiB`. Migrations are transactional and tested against legacy schemas.
 
-### `crates/ui` — interface (130k, 108 modules)
+### `crates/ui` — interface (131k, 110 modules)
 `lib.rs` is the shell; `design.rs` owns tokens and palette (`THEME_FIELDS`, 18 colour slots);
 `timeline.rs`, `markdown.rs`, `highlight.rs`, `emoji.rs`, `avatars.rs`, `fonts.rs` (name fonts),
 `i18n.rs` (Fluent), `local_time.rs`, `scroll.rs`, `settings.rs`, `theme_editor.rs`, `profiles.rs`,
-`role_names.rs`, `components.rs`, `dialog.rs`, `toasts.rs`.
+`role_names.rs`, `components.rs`, `dialog.rs`, `toasts.rs`. Profile surfaces: `name_styles.rs`
+(Nitro display-name fonts and effects), `badges.rs` and `account_badge.rs` (badge rows and the
+BOT/APP tag), `badge_directory`, `soundboard_ui.rs` (sound picker and voice channel status),
+`emoji_picker.rs` (grid, search, GIFs, stickers).
 
 Tokens: `RADIUS = 16`, `PAD = 20.0`, `BUTTON_HEIGHT = 38.0`, `TITLE_BAR_HEIGHT = 36.0`,
-`DEFAULT_PRIMARY_RGB = 0x1a72e8`, `MAX_CUSTOM_FONT_BYTES = 32 MiB`,
-`DEFAULT_IDLE_TIMEOUT_SECS = 600`.
+`DEFAULT_PRIMARY_RGB = 0x1a72e8` (`design::brand()` is the fixed mark colour, never the accent),
+`MAX_CUSTOM_FONT_BYTES = 32 MiB`, `DEFAULT_IDLE_TIMEOUT_SECS = 600`.
 
-i18n: 15 languages (`i18n::Language::ALL`) backed by `crates/ui/locales/<tag>/main.ftl`; `en-US` is
-~5 000 strings. Adding a string means adding it to **every** locale or it falls back to English.
+i18n: 14 languages (`i18n::Language::ALL`, `cs de en-US es fr it ja pl pt-BR ru tr vi zh-CN zh-TW`)
+backed by `crates/ui/locales/<tag>/main.ftl`; every locale carries the same **2917** keys. Adding a
+string means adding it to **every** locale or it falls back to English. Status strings in the core
+are `&'static str`, so the shell stores the locale *key* and translates once at the toast boundary
+via `translate_if_key`.
 
 ### `crates/discord-voice` — media (25k, 33 modules)
 Transport, crypto (DAVE/E2EE, vendored hpke), screen capture, camera, video encode/decode
@@ -501,6 +508,17 @@ test in `crates/extensions/tests/app_contract.rs`.
 **Add a theme field:** `THEME_FIELDS` in `design.rs`, `recolor`, `theme_editor::colors()`, the theme
 API doc, and the theme JSON in `extensions/themes/`.
 
+**Add a profile cosmetic or soundboard surface:** profile edits travel in `model::ProfileEdit` and
+split across two endpoints — account fields (`global_name`, `avatar`, `avatar_decoration_sku_id`,
+`nameplate_sku_id`) go to `PATCH /users/@me`; `banner` and `profile_effect_id` go to
+`PATCH /users/@me/profile`. `discord-protocol::profile::encode_profile_metadata` holds the second
+group. A new command needs a `Command`/`Event` pair, an API arm in `crates/discord-api/src/lib.rs`,
+a reducer in `client-core`, and a demo arm in `apps/desktop/src/main.rs`.
+
+**Badges beside a name:** badges exist only on the full profile, never on the gateway, so
+`State::cached_badges` reads a profile that is already cached and never fetches. Do not call the
+profile endpoint per visible row.
+
 ## 6.6 Configuration and identifiers
 
 | Variable | Meaning |
@@ -541,21 +559,26 @@ Workflows in `.github/workflows/`:
 
 | File | Purpose |
 |---|---|
-| `ci.yml` | `native` (Windows: check demo targets, `cargo xtask check`, bun tests, `cargo xtask package`, upload artifact) + `security` (cargo-audit on ubuntu) |
+| `ci.yml` | Windows gates split into parallel jobs: `lint` (fmt, policy, `clippy -D warnings`), `test`, `demo`, `nodepfault`, `offline`, `package` (builds + NSIS, uploads the artifact), then the aggregated `native` gate; plus `security` (cargo-audit on ubuntu) and the paused `extension-sdk` / `fuzz` |
 | `release.yml` | Nightly/production: prepare → build Windows → publish; `repositories` paused |
-| `ci-diagnostics.yml` | Re-runs `cargo xtask check` and publishes the failure to the `ci-diagnostics` branch (`diagnostics/check.txt`) |
+| `ci-diagnostics.yml` | Re-runs `cargo xtask check` and publishes the failure to the `ci-diagnostics` branch (`diagnostics/check.txt`); runs on dispatch and on `ci-diagnostics.yml` changes only |
 | `extension-catalog.yml` | Validates and pins `extensions/catalog.json` |
 | `nix.yml`, `linux-packages.yml`, `package-repositories.yml` | Paused, kept for when Linux returns |
 
 `release.yml` triggers on a 03:17 UTC schedule, manual dispatch (`nightly`/`production`), and pushes
 that touch `Cargo.*`, `apps/**`, `crates/**`, `.github/release/**`, or `packaging/windows/**`.
-Concurrency group `bytwina-release` runs one release at a time. Notes come from
-`.github/release/notes.mjs`: the first release is an introduction; later ones list only new, fixed,
-performance sections plus a versions table. `HOMEBREW_TAP_TOKEN` being unset disables the macOS cask.
+Concurrency group `bytwina-release` runs one release at a time, so a slow nightly blocks the next.
+Notes come from `.github/release/notes.mjs`: the first release is an introduction; later ones list
+only new, fixed and performance sections plus a versions table. `HOMEBREW_TAP_TOKEN` being unset
+disables the macOS cask — note that an unset secret arrives as an **empty string**, not `undefined`.
 
 **Reading CI without log access:** the logs API needs admin. Use the `ci-diagnostics` branch file, or
 open the public job page and read the Annotations panel. A diagnostics file can be stale — check the
-commit in its content before trusting it.
+file content against the commit you are debugging before trusting it.
+
+**Lint is the usual first failure.** `clippy -D warnings` stops at the first crate, so a fix that
+only addresses the reported lint can reveal the next one in a crate it never reached. Fix lint
+groups across the whole workspace before pushing.
 
 ## 6.9 Packaging
 
@@ -567,6 +590,13 @@ licence page, and a portable `.zip`. `build.rs` compiles `bytwina.rc` through `r
 macOS (`.app` + Info.plist) and Linux (Flatpak, AppImage, deb/rpm/arch) code exists but is not built
 by the current pipeline. Do not claim those artefacts exist in release notes or the README.
 
+**Self-update and the package allowlist.** `apps/desktop/src/updater_install.rs` validates every
+top-level name in the update archive against `WINDOWS_FILES`. Anything the packaged zip gains must be
+listed there, or every self-update is rejected with "The update contains unexpected package
+content" — this already happened when the licence files were added. When you change what
+`cargo xtask package` copies into `dist/`, mirror it in `WINDOWS_FILES` and in the installer's
+uninstall list.
+
 ## 6.10 Things that pin exact values
 
 Changing any of these without updating the test breaks CI:
@@ -576,6 +606,8 @@ Changing any of these without updating the test breaks CI:
 | diagnostics framing **12 bytes**, 8 KiB, 64 lines | `crates/discord-gateway/src/lib.rs` |
 | legacy SDK fixture **574_991 bytes** | `crates/extensions/examples/legacy_sdk_check.rs` + fixture README |
 | session cache **500 / 4 MiB / 1024** | `crates/session-cache/src/lib.rs` |
+| `WINDOWS_FILES` allowlist | `apps/desktop/src/updater_install.rs` — must list every packaged top-level entry |
+| locale key parity **2917** in every tag | `crates/ui/locales/*/main.ftl` |
 | SQLite schema **29** | `crates/local-store/src/lib.rs` |
 | extension limits (16/4/2/0.25 MiB, 8 plugins, 64 capabilities) | `crates/extensions/src/lib.rs` |
 | `THEME_FIELDS` order (18) | `crates/ui/src/design.rs` and `theme_editor` |
@@ -605,6 +637,15 @@ Changing any of these without updating the test breaks CI:
 - Windows binaries are unsigned: SmartScreen warns, users choose "More info → Run anyway".
 - Several protocol claims in `docs/discord-compatibility.md` are explicitly unverified; do not
   promote them to verified without evidence.
+- The emoji picker lists one tile per base emoji and expands skin-tone variants on search, but has
+  no tone chooser (Discord's `emoji_tone`) and no category jump bar; the bundled CLDR order allows
+  one without new data.
+- Name styles cover 14 of Discord's fonts (ids 1-6, 8-10, 12-16): Néo-Castel (7) and Hexagon (17)
+  have no identified source and Default (11) falls back to the interface font.
+- Badges beside a message author or in a member row appear only for profiles already cached; a
+  member who was never opened shows none.
+- `apps/desktop/src/screen.rs` still holds ~28 hardcoded English screen-share strings; the `ui` crate
+  is otherwise fully localised.
 
 ## 6.13 Code conventions
 
