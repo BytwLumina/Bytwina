@@ -13,17 +13,17 @@
       "layers": [
         {
           "fill": {
-            "solid": "srgb:0.69412,0.78039,0.95686,1.00000"
+            "solid": "srgb:0.50196,0.50196,0.50196,1.00000"
           },
-          "image-name": "02-upper-wave.svg",
-          "name": "02-upper-wave"
+          "image-name": "02-comet-tail.svg",
+          "name": "02-comet-tail"
         },
         {
           "fill": {
-            "solid": "srgb:0.81961,0.87843,1.00000,1.00000"
+            "solid": "srgb:0.50196,0.50196,0.50196,1.00000"
           },
-          "image-name": "03-lower-wave.svg",
-          "name": "03-lower-wave"
+          "image-name": "03-sparks.svg",
+          "name": "03-sparks"
         }
       ],
       "lighting": "individual",
@@ -40,10 +40,10 @@
       "layers": [
         {
           "fill": {
-            "solid": "srgb:0.35294,0.47451,0.85098,1.00000"
+            "solid": "srgb:0.50196,0.50196,0.50196,1.00000"
           },
-          "image-name": "01-bubble-body.svg",
-          "name": "01-bubble-body"
+          "image-name": "01-starburst.svg",
+          "name": "01-starburst"
         }
       ],
       "lighting": "individual",

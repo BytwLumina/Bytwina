@@ -2,6 +2,7 @@
 use egui::{Context, Image, TextureHandle};
 use image::ImageDecoder;
 use std::sync::OnceLock;
+use std::time::Instant;
 
 const ATLAS: &[u8] = include_bytes!("../../../assets/twemoji/atlas.png");
 const INDEX: &str = include_str!("../../../assets/twemoji/index.tsv");
@@ -84,7 +85,79 @@ fn decode_atlas() -> Result<egui::ColorImage, image::ImageError> {
 	Ok(image)
 }
 
-/// Decode once during application creation, outside the render callback.
+/// Start decoding the atlas off the UI thread. The texture is uploaded on the next frame that
+/// sees the finished decode, so startup no longer waits on a 5 MiB PNG.
+pub fn start(ctx: &Context) {
+	let id = egui::Id::unique("twemoji-pending");
+	if ctx.data(|d| d.get_temp::<std::sync::Arc<Pending>>(id).is_some()) || ready(ctx) {
+		return;
+	}
+	let pending = std::sync::Arc::new(Pending(std::sync::Mutex::new(None)));
+	let sink = pending.clone();
+	std::thread::Builder::new()
+		.name("bytwina-emoji-atlas".into())
+		.spawn(move || {
+			// Timed here so the record can separate PNG decode from the UI-thread upload.
+			let started = Instant::now();
+			let decoded = decode_atlas().ok();
+			let elapsed = started.elapsed().as_micros() as u64;
+			if let Ok(mut slot) = sink.0.lock() {
+				*slot = decoded.map(|image| (image, elapsed));
+			}
+		})
+		.ok();
+	ctx.data_mut(|data| data.insert_temp(id, pending));
+	ctx.request_repaint_after(std::time::Duration::from_millis(16));
+}
+
+/// The decoded pixels plus how long [`decode_atlas`] took, in microseconds.
+struct Pending(std::sync::Mutex<Option<(egui::ColorImage, u64)>>);
+
+/// One record per atlas load, so a slow start names its phase instead of the whole cost.
+fn record(decode_us: u64, upload_us: u64, index_us: u64, cells: usize) {
+	diagnostics::record_fields(
+		diagnostics::Category::Media,
+		diagnostics::Level::Info,
+		"emoji atlas",
+		&[
+			("decode_us", decode_us.into()),
+			("upload_us", upload_us.into()),
+			("index_us", index_us.into()),
+			("cells", cells.into()),
+		],
+	);
+}
+
+/// Upload a finished background decode. Cheap when there is nothing to do.
+pub fn poll(ctx: &Context) {
+	if ready(ctx) {
+		return;
+	}
+	let id = egui::Id::unique("twemoji-pending");
+	let Some(pending) = ctx.data(|d| d.get_temp::<std::sync::Arc<Pending>>(id)) else {
+		return;
+	};
+	let decoded = pending.0.lock().ok().and_then(|mut slot| slot.take());
+	if let Some((image, decode_us)) = decoded {
+		let upload = Instant::now();
+		let texture = ctx.load_texture("Twemoji 17.0.3", image, egui::TextureOptions::LINEAR);
+		let upload_us = upload.elapsed().as_micros() as u64;
+		ctx.data_mut(|data| {
+			data.insert_temp(egui::Id::unique("twemoji"), texture);
+			data.remove_temp::<std::sync::Arc<Pending>>(id);
+		});
+		// First `entries()` call parses the bundled index; time it here because it runs on
+		// the UI thread immediately after the upload.
+		let index = Instant::now();
+		let cells = entries().len();
+		let index_us = index.elapsed().as_micros() as u64;
+		record(decode_us, upload_us, index_us, cells);
+	} else {
+		ctx.request_repaint_after(std::time::Duration::from_millis(16));
+	}
+}
+
+/// Decode during application creation. Kept for demos and tests that want it up front.
 pub fn install(ctx: &Context) -> Result<(), image::ImageError> {
 	let texture = ctx.load_texture(
 		"Twemoji 17.0.3",

@@ -1583,7 +1583,8 @@ impl Desktop {
 		preferences: Result<local_store::AppPreferences, local_store::StoreError>,
 	) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
 		ui::fonts::install(&cc.egui_ctx);
-		ui::emoji::install(&cc.egui_ctx)?;
+		// Decodes off-thread; the atlas uploads on a later frame instead of blocking startup.
+		ui::emoji::start(&cc.egui_ctx);
 		ui::icons::install(&cc.egui_ctx);
 		#[cfg(feature = "demo")]
 		if demo {
@@ -5612,6 +5613,8 @@ impl eframe::App for Desktop {
 	fn raw_input_hook(&mut self, ctx: &egui::Context, raw_input: &mut egui::RawInput) {
 		// Before the pass begins, so the whole frame resolves System to the same theme.
 		self.sync_system_theme(ctx);
+		// Uploads the emoji atlas as soon as the background decode finishes.
+		ui::emoji::poll(ctx);
 		if self.maximize_after_show && self.window.is_visible() == Some(true) {
 			self.maximize_after_show = false;
 			self.window.set_maximized(true);

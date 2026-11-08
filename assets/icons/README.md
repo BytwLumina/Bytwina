@@ -26,8 +26,8 @@ legal disclaimer applies. The license file is staged in both packages as
 One repository-drawn glyph, `thread.svg` (four slanted round-capped bars on the same 256-unit
 grid), marks threads; it is rasterized with the Phosphor set and carries no upstream license.
 
-- `atlas.png`: 512×896 RGBA, 26,267 bytes after lossless `oxipng -o max --strip all`.
-  SHA-256 `eb0553105dd745e67b1c1e2249cdf0f037c56ea2f1d7b5af45ebbf38f240a8f2`.
+- `atlas.png`: 512×896 RGBA, 50,291 bytes after lossless `oxipng -o max --strip all`.
+  SHA-256 `b82147006e32676eeb37614390e77001754b86be1d297fb22e1e9b62783219d1`.
 - `index.tsv`: icon name, tab, zero-based cell; SHA-256
   `cc8a5f5cebe0bcb916e6a12c4dae58c6feabee0487b2ca3e8bb1a3f1c6f378de`.
 
@@ -53,7 +53,7 @@ The screen-share fullscreen glyph is unmodified Phosphor `corners-out-bold.svg`,
 same pinned 2.1.1 package on September 27, 2026.
 
 The `bytwina-mark` cell is our own artwork, not an upstream icon: it is the solid silhouette of
-the Bytwina chat-wave from `assets/brand/bytwina-mark.svg`, trimmed to its bounding box so it
+the Bytwina starburst trail from `assets/brand/bytwina-mark.svg`, trimmed to its bounding box so it
 matches Phosphor's glyph weight in the cell. It replaced the Discord brand mark that previously
 occupied cell 58; no third-party application logo is bundled any more. `tools/generate-icons.py`
 pins its SHA-256 like every upstream source and rasterizes it from the repository rather than a

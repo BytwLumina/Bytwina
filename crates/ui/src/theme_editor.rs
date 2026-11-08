@@ -1267,6 +1267,9 @@ fn map_palette(
 	base
 }
 
+const SECTION_CONTROLS_MIN_WIDTH: f32 = 260.0;
+const SECTION_DIAGRAM_MIN_WIDTH: f32 = 240.0;
+
 fn section_map(
 	ui: &mut egui::Ui,
 	texture: Option<&egui::TextureHandle>,
@@ -1278,7 +1281,11 @@ fn section_map(
 	let mut changed = false;
 	if ui.available_width() >= 620.0 {
 		ui.horizontal_top(|ui| {
-			let width = ui.available_width() * 0.55;
+			// The text column takes what the diagram leaves, so a narrower window keeps its
+			// labels readable. The diagram never exceeds 55% of the row.
+			let available = ui.available_width();
+			let width = (available - 12.0 - SECTION_CONTROLS_MIN_WIDTH)
+				.clamp(SECTION_DIAGRAM_MIN_WIDTH, available * 0.55);
 			ui.allocate_ui(egui::vec2(width, 0.0), |ui| {
 				section_diagram(ui, texture, selected, colors, fit, sections);
 			});

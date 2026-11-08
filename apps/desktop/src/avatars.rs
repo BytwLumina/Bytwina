@@ -1275,11 +1275,29 @@ async fn run(
 		{
 			if let Some((source, edge)) = ui::emoji::bundled_svg(&key) {
 				jobs.spawn(async move {
-					let image =
-						bounded_decode(DECODE_SLOTS.clone(), move || rasterize_emoji(source, edge))
-							.await
-							.ok()
-							.flatten();
+					let image = bounded_decode(DECODE_SLOTS.clone(), move || {
+						let started = std::time::Instant::now();
+						let image = rasterize_emoji(source, edge);
+						diagnostics::record_fields(
+							diagnostics::Category::Media,
+							diagnostics::Level::Debug,
+							"emoji rasterize",
+							&[
+								("edge", diagnostics::Value::from(edge)),
+								(
+									"micros",
+									diagnostics::Value::from(
+										u64::try_from(started.elapsed().as_micros())
+											.unwrap_or(u64::MAX),
+									),
+								),
+							],
+						);
+						image
+					})
+					.await
+					.ok()
+					.flatten();
 					// Bundled shapes are never written to disk.
 					let loaded = Loaded {
 						key,

@@ -366,10 +366,14 @@ impl MessagingUi {
 					// Reserve the action's width before laying out the status beside it.
 					ui.vertical(|ui| {
 						ui.spacing_mut().item_spacing.y = 2.0;
-						ui.label(
-							design::semibold(ui, format!("Bytwina {}", self.build.version), 17.0)
-								.color(colors.text_strong),
-						);
+						let version = format!("Bytwina {}", self.build.version);
+						ui.add(
+							egui::Label::new(
+								design::semibold(ui, &version, 17.0).color(colors.text_strong),
+							)
+							.truncate(),
+						)
+						.on_hover_text(&version);
 						ui.add(
 							egui::Label::new(
 								egui::RichText::new(&self.updates.status)
@@ -523,33 +527,29 @@ impl MessagingUi {
 					.is_some_and(|until| ui.input(|i| i.time) < until);
 				let mut copying = false;
 				let mut saving = false;
-				design::row(
+				let save_label = crate::i18n::translate("updates-update-settings-save-diagnostics");
+				let copy_label = crate::i18n::translate_if_key(if copied {
+					"updates-update-settings-copied"
+				} else {
+					"updates-update-settings-copy"
+				});
+				// Two buttons share this row; reserve both plus the gap so the description
+				// never runs underneath them (CONTROL_RESERVE only covers a single control).
+				let reserve = design::button_width(ui, &save_label)
+					+ design::button_width(ui, &copy_label)
+					+ 24.0;
+				design::row_with_reserve(
 					ui,
 					"updates-update-settings-issue-diagnostics",
 					Some(
 						"updates-update-settings-copy-system-and-client-environment-details-formatted-for-github-issue",
 					),
+					reserve,
 					|ui| {
-						if design::button(
-							ui,
-							&crate::i18n::translate("updates-update-settings-save-diagnostics"),
-							design::ButtonKind::Outline,
-						)
-						.clicked()
-						{
+						if design::button(ui, &save_label, design::ButtonKind::Outline).clicked() {
 							saving = true;
 						}
-						if design::button(
-							ui,
-							&crate::i18n::translate_if_key(if copied {
-								"updates-update-settings-copied"
-							} else {
-								"updates-update-settings-copy"
-							}),
-							design::ButtonKind::Outline,
-						)
-						.clicked()
-						{
+						if design::button(ui, &copy_label, design::ButtonKind::Outline).clicked() {
 							copying = true;
 						}
 					},

@@ -2092,9 +2092,9 @@ checksum = "af9673d8203fcb076b19dfd17e38b3d4ae9f44959416ea532ce72415a6020365"
 name = "extensions"
 version = "0.1.0"
 dependencies = [
+ "bytwina-extension-sdk",
  "serde",
  "serde_json",
- "bytwina-extension-sdk",
  "thiserror 2.0.20",
  "url",
  "wasmi",

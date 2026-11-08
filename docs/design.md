@@ -39,8 +39,8 @@ palette surfaces in both message and forum composers, independently of chat tran
 
 ## Brand mark and server rail
 
-The application mark is the Bytwina chat-wave (`assets/brand/`), not a third-party logo. Its
-silhouette is rasterized into the shared icon atlas as `bytwina-mark` and painted wherever the
+The application mark is the Bytwina comet-and-starburst (`assets/brand/`), not a third-party logo.
+Its silhouette is rasterized into the shared icon atlas as `bytwina-mark` and painted wherever the
 client identifies itself: the loading screen, the sign-in card and its button, the login header
 and the Direct Messages tile at the top of the server rail.
 

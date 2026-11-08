@@ -1297,10 +1297,23 @@ pub(crate) fn resize_handles(
 		(corner, corner)
 	};
 	let rect_at = |min: [f32; 2], max: [f32; 2]| egui::Rect::from_min_max(min.into(), max.into());
+	// The north edge starts below the caption strip on Windows: the strip belongs to the
+	// window drag region, and a resize handle over it steals the press.
+	let north_top = if cfg!(target_os = "windows") {
+		t + WINDOW_CAPTION_HEIGHT
+	} else {
+		t
+	};
 	[
+		// Corners that sit under the caption strip are sized from the strip's bottom edge so
+		// the whole top band stays a drag/caption surface.
 		(
-			rect_at([l, t], [l + corner, t + corner]),
-			D::NorthWest,
+			rect_at([l, north_top], [l + corner, north_top + corner]),
+			if cfg!(target_os = "windows") {
+				D::West
+			} else {
+				D::NorthWest
+			},
 			C::ResizeNwSe,
 		),
 		(
@@ -1314,7 +1327,7 @@ pub(crate) fn resize_handles(
 			C::ResizeNwSe,
 		),
 		(
-			rect_at([l + corner, t], [r - north_end, t + edge]),
+			rect_at([l + corner, north_top], [r - north_end, north_top + edge]),
 			D::North,
 			C::ResizeVertical,
 		),
@@ -1364,6 +1377,8 @@ pub fn window_resize_if(ctx: &egui::Context, active: bool) {
 	for (index, (handle, direction, cursor)) in
 		handles.filter(|(_, (handle, ..))| handle.is_positive())
 	{
+		// Foreground keeps the handles above the panels; the north edge starts below the
+		// caption strip so it never competes with the window drag region.
 		egui::Area::new(egui::Id::unique(("window-resize", index)))
 			.order(egui::Order::Foreground)
 			.fixed_pos(handle.min)
@@ -2730,11 +2745,27 @@ pub fn row<R>(
 	detail: Option<&str>,
 	control: impl FnOnce(&mut egui::Ui) -> R,
 ) -> R {
+	row_with_reserve(ui, title, detail, CONTROL_RESERVE, control)
+}
+
+/// A settings row whose controls are wider than the default column. Pass the measured width of
+/// every control plus its spacing: the text is narrowed by exactly that much, so the controls
+/// stay off the detail text instead of being painted over it.
+pub fn row_with_reserve<R>(
+	ui: &mut egui::Ui,
+	title: &str,
+	detail: Option<&str>,
+	reserve: f32,
+	control: impl FnOnce(&mut egui::Ui) -> R,
+) -> R {
 	let title = crate::i18n::translate_if_key(title);
 	let detail = detail.map(crate::i18n::translate_if_key);
 	let p = palette(ui);
 	let width = ui.available_width();
-	let text_width = (width * 0.55).max(120.0);
+	// The control column keeps a fixed share and the text takes everything left over, so a
+	// wider window widens the label instead of pinning it to a 55% band. A fixed split used
+	// to let a long detail run under the buttons.
+	let text_width = (width - reserve).max(120.0);
 	ui.horizontal(|ui| {
 		ui.spacing_mut().item_spacing.x = 12.0;
 		ui.allocate_ui_with_layout(
@@ -2755,6 +2786,20 @@ pub fn row<R>(
 	})
 	.inner
 }
+
+/// Width [`button`] will allocate for `label`, so a row can reserve the control column before
+/// laying the text out. Keeps the reserve tied to the same font and padding the button uses.
+pub fn button_width(ui: &egui::Ui, label: &str) -> f32 {
+	let galley = ui.painter().layout_no_wrap(
+		label.to_owned(),
+		FontId::new(14.0, medium_family(ui.ctx())),
+		Color32::WHITE,
+	);
+	(galley.size().x + 32.0).max(92.0)
+}
+
+/// Space a settings row keeps for its control column so the detail text cannot reach it.
+const CONTROL_RESERVE: f32 = 200.0;
 
 /// Quiet inline action for secondary verbs such as "Reset" or "Try again": muted text that
 /// brightens and underlines on hover instead of a full button.

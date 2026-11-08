@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <title>Bytwina sparks</title>
+  <desc>Trailing star and sparks of the Bytwina mark.</desc>
+  <path d="M 802 148 C 806 214 832 240 898 244 C 832 248 806 274 802 340 C 798 274 772 248 706 244 C 772 240 798 214 802 148 Z" fill="#808080"/>
+  <path d="M 300 694 C 302 730 316 744 352 746 C 316 748 302 762 300 798 C 298 762 284 748 248 746 C 284 744 298 730 300 694 Z" fill="#808080"/>
+  <path d="M 690 744 C 692 772 702 782 730 784 C 702 786 692 796 690 824 C 688 796 678 786 650 784 C 678 782 688 772 690 744 Z" fill="#808080" fill-opacity="0.85"/>
+  <path d="M 742 612 C 743 628 748 633 764 634 C 748 635 743 640 742 656 C 741 640 736 635 720 634 C 736 633 741 628 742 612 Z" fill="#808080" fill-opacity="0.6"/>
+</svg>

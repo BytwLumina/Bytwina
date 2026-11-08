@@ -155,7 +155,8 @@ impl Desktop {
 		self.app_settings.apply(&mut self.messaging);
 		self.messaging.share_game_activity = self.game_activity.enabled;
 		ctx.memory_mut(|m| *m = egui::Memory::default());
-		let _ = ui::emoji::install(ctx);
+		// Background decode; the atlas uploads once ready instead of blocking this transition.
+		ui::emoji::start(ctx);
 		ui::design::apply(ctx);
 		ctx.set_theme(self.appearance);
 		self.sync_system_theme(ctx);

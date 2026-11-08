@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <title>Bytwina comet tail</title>
+  <desc>Comet trail of the Bytwina mark.</desc>
+  <path d="M 196 858 C 236 762 312 646 432 552 C 494 504 544 470 578 450"
+        stroke="#808080" stroke-opacity="0.45" stroke-width="74" stroke-linecap="round" fill="none"/>
+  <path d="M 196 858 C 242 750 336 620 470 512"
+        stroke="#808080" stroke-opacity="0.7" stroke-width="30" stroke-linecap="round" fill="none"/>
+</svg>
