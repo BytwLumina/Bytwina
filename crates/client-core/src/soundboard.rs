@@ -91,10 +91,11 @@ impl VoiceStatuses {
 		match status {
 			Some(status) if !status.trim().is_empty() => {
 				let status: String = status.chars().take(MAX_STATUS_CHARS).collect();
-				if !self.rows.contains_key(&channel) && self.rows.len() >= MAX_STATUSES {
-					if let Some(oldest) = self.rows.keys().next().copied() {
-						self.rows.remove(&oldest);
-					}
+				if !self.rows.contains_key(&channel)
+					&& self.rows.len() >= MAX_STATUSES
+					&& let Some(oldest) = self.rows.keys().next().copied()
+				{
+					self.rows.remove(&oldest);
 				}
 				self.rows.insert(channel, status);
 			}

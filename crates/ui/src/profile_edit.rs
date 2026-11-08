@@ -569,26 +569,31 @@ fn form(
 		},
 	);
 	ui.add_space(8.0);
-	for (label, kind, slot) in [
-		(
-			"profile-edit-form-decoration",
-			model::CollectibleKind::Decoration,
-			&mut draft.decoration,
-		),
-		(
-			"profile-edit-form-nameplate",
-			model::CollectibleKind::Nameplate,
-			&mut draft.nameplate,
-		),
-		(
-			"profile-edit-form-profile-effect",
-			model::CollectibleKind::Effect,
-			&mut draft.effect,
-		),
-	] {
-		decor_row(ui, label, kind, slot, owned);
-		ui.add_space(6.0);
-	}
+	// Separate calls: the three selections are distinct fields borrowed mutably in turn.
+	decor_row(
+		ui,
+		"profile-edit-form-decoration",
+		model::CollectibleKind::Decoration,
+		&mut draft.decoration,
+		owned,
+	);
+	ui.add_space(6.0);
+	decor_row(
+		ui,
+		"profile-edit-form-nameplate",
+		model::CollectibleKind::Nameplate,
+		&mut draft.nameplate,
+		owned,
+	);
+	ui.add_space(6.0);
+	decor_row(
+		ui,
+		"profile-edit-form-profile-effect",
+		model::CollectibleKind::Effect,
+		&mut draft.effect,
+		owned,
+	);
+	ui.add_space(6.0);
 	design::row(
 		ui,
 		"profile-edit-form-profile-color",
