@@ -462,6 +462,53 @@ pub fn decode_frame(bytes: &[u8], sku: Id) -> Result<ProfileFrame, DecodeError> 
 	Ok(frame)
 }
 
+/// Owned-product list response ceiling (`GET /users/@me/collectibles-purchases`).
+pub const MAX_PURCHASES_WIRE: usize = 512 * 1024;
+
+#[derive(Deserialize)]
+struct PurchaseDto {
+	sku_id: Id,
+	#[serde(rename = "type")]
+	kind: u32,
+	#[serde(default)]
+	name: Option<String>,
+}
+
+/// Owned collectibles offered by the decoration picker. Unknown product types, bundles and
+/// malformed rows are dropped so one bad entry cannot hide the rest of the list.
+pub fn decode_purchases(bytes: &[u8]) -> Result<Vec<model::OwnedCollectible>, DecodeError> {
+	if bytes.len() > MAX_PURCHASES_WIRE {
+		return Err(DecodeError);
+	}
+	let rows: Vec<Lenient<PurchaseDto>> = crate::decode(bytes)?;
+	let mut owned = Vec::new();
+	let mut seen = std::collections::BTreeSet::new();
+	for row in rows {
+		let Some(row) = Lenient::value(Some(row)) else {
+			continue;
+		};
+		let Some(kind) = model::CollectibleKind::from_id(row.kind) else {
+			continue;
+		};
+		let Some(name) = row.name else {
+			continue;
+		};
+		let item = model::OwnedCollectible {
+			sku: row.sku_id,
+			kind,
+			name,
+		};
+		if !item.valid() || !seen.insert(item.sku) {
+			continue;
+		}
+		owned.push(item);
+		if owned.len() >= model::MAX_OWNED_COLLECTIBLES {
+			break;
+		}
+	}
+	Ok(owned)
+}
+
 #[cfg(test)]
 mod tests {
 	#[test]

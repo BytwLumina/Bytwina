@@ -35,7 +35,38 @@ pub fn encode_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, De
 	if let Some(avatar) = &changes.avatar {
 		fields.insert("avatar".into(), serde_json::json!(avatar));
 	}
+	if let Some(sku) = changes.avatar_decoration_sku {
+		fields.insert(
+			"avatar_decoration_sku_id".into(),
+			serde_json::json!(sku.map(|sku| sku.to_string())),
+		);
+	}
+	if let Some(sku) = changes.nameplate_sku {
+		fields.insert(
+			"nameplate_sku_id".into(),
+			serde_json::json!(sku.map(|sku| sku.to_string())),
+		);
+	}
 	Ok(serde_json::Value::Object(fields))
+}
+
+/// The `/users/@me/profile` group: banner and profile effect live on a different endpoint
+/// from the account fields, and both are premium-only.
+pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_json::Value> {
+	if !changes.valid() {
+		return None;
+	}
+	let mut fields = serde_json::Map::new();
+	if let Some(banner) = &changes.banner {
+		fields.insert("banner".into(), serde_json::json!(banner));
+	}
+	if let Some(sku) = changes.profile_effect_sku {
+		fields.insert(
+			"profile_effect_id".into(),
+			serde_json::json!(sku.map(|sku| sku.to_string())),
+		);
+	}
+	(!fields.is_empty()).then_some(serde_json::Value::Object(fields))
 }
 #[derive(Deserialize)]
 struct ProfileDto {

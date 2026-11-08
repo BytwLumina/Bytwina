@@ -4582,6 +4582,22 @@ impl Desktop {
 					pinned,
 					result: Ok(()),
 				},
+				Command::OwnedCollectibles { request } => Event::OwnedCollectibles {
+					request,
+					result: Ok(demo_collectibles()),
+				},
+				Command::Soundboard { request, .. } => Event::Soundboard {
+					request,
+					result: Ok(demo_soundboard()),
+				},
+				Command::SendSoundboardSound { request, .. } => Event::SoundboardSent {
+					request,
+					result: Ok(()),
+				},
+				Command::SetVoiceStatus { request, .. } => Event::VoiceStatusSaved {
+					request,
+					result: Ok(()),
+				},
 			};
 			self.state.apply(Envelope {
 				generation: self.state.generation,
@@ -5597,6 +5613,45 @@ fn effects_transparent() -> bool {
 	let (enabled, transparency, _) = ui::design::window_effects();
 	enabled && transparency > 0
 }
+#[cfg(feature = "demo")]
+fn demo_collectibles() -> Vec<model::OwnedCollectible> {
+	let mut rows = Vec::new();
+	for (sku, kind, name) in [
+		(
+			9001u64,
+			model::CollectibleKind::Decoration,
+			"Synthetic halo",
+		),
+		(9002, model::CollectibleKind::Effect, "Synthetic sparkle"),
+		(9003, model::CollectibleKind::Nameplate, "Synthetic dusk"),
+		(9004, model::CollectibleKind::Frame, "Synthetic frame"),
+	] {
+		rows.push(model::OwnedCollectible {
+			sku: model::Id(sku),
+			kind,
+			name: name.to_owned(),
+		});
+	}
+	rows
+}
+
+#[cfg(feature = "demo")]
+fn demo_soundboard() -> Vec<model::SoundboardSound> {
+	["Airhorn", "Bruh", "Quack"]
+		.into_iter()
+		.enumerate()
+		.map(|(index, name)| model::SoundboardSound {
+			id: model::Id(8000 + index as u64),
+			name: name.to_owned(),
+			volume: 0.8,
+			emoji_id: None,
+			emoji_name: None,
+			guild: None,
+			available: true,
+		})
+		.collect()
+}
+
 impl eframe::App for Desktop {
 	fn clear_color(&self, visuals: &egui::Visuals) -> [f32; 4] {
 		if self.window_transparent && effects_transparent() {

@@ -1440,3 +1440,22 @@ mod tests {
 		));
 	}
 }
+
+impl DiscordApi {
+	/// Set or clear a voice channel's status. Requires SET_VOICE_CHANNEL_STATUS, and
+	/// MANAGE_CHANNELS when the owner is not connected to that channel.
+	pub(super) async fn set_voice_status(
+		&self,
+		channel: Id,
+		status: Option<&str>,
+	) -> Result<(), Failure> {
+		if channel.0 == 0 || status.is_some_and(|status| status.chars().count() > 500) {
+			return Err(Failure::Protocol);
+		}
+		let path = format!("/channels/{channel}/voice-status");
+		let body = serde_json::json!({ "status": status });
+		self.request_limited(Method::PUT, &path, Some(body), 4096)
+			.await?;
+		Ok(())
+	}
+}

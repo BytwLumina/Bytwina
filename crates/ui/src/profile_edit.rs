@@ -11,6 +11,12 @@ struct Draft {
 	color: Option<u32>,
 	/// `Some(Some(uri))` uploads a new picture, `Some(None)` removes the current one.
 	avatar: Option<Option<String>>,
+	/// Same encoding as `avatar`, for the profile banner.
+	banner: Option<Option<String>>,
+	/// Chosen collectible SKUs; `None` means "unchanged" and `Some(None)` clears.
+	decoration: Option<Option<Id>>,
+	nameplate: Option<Option<Id>>,
+	effect: Option<Option<Id>>,
 }
 impl Draft {
 	fn from_profile(profile: &UserProfile) -> Self {
@@ -20,6 +26,10 @@ impl Draft {
 			pronouns: profile.pronouns.clone(),
 			color: profile.accent_color,
 			avatar: None,
+			banner: None,
+			decoration: None,
+			nameplate: None,
+			effect: None,
 		}
 	}
 	fn changes(&self, profile: &UserProfile) -> ProfileEdit {
@@ -34,6 +44,13 @@ impl Draft {
 				Some(None) if profile.user.avatar.is_none() => None,
 				other => other.clone(),
 			},
+			banner: match &self.banner {
+				Some(None) if profile.banner.is_none() => None,
+				other => other.clone(),
+			},
+			avatar_decoration_sku: self.decoration,
+			nameplate_sku: self.nameplate,
+			profile_effect_sku: self.effect,
 		}
 	}
 	fn rebase(&mut self, before: &Self, fresh: &Self) {

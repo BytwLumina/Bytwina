@@ -111,6 +111,24 @@ fn ends_profile(failure: Failure) -> bool {
 	failure.ends_session() && !matches!(failure, Failure::Capacity | Failure::CapacityAt(_))
 }
 
+impl DiscordApi {
+	/// Owned collectibles for the decoration picker. Unofficial normal-user route; an empty or
+	/// malformed answer leaves the picker empty rather than failing the profile.
+	pub(super) async fn load_owned_collectibles(
+		&self,
+	) -> Result<Vec<model::OwnedCollectible>, Failure> {
+		let bytes = self
+			.request_limited(
+				Method::GET,
+				"/users/@me/collectibles-purchases",
+				None,
+				collectibles::MAX_PURCHASES_WIRE,
+			)
+			.await?;
+		collectibles::decode_purchases(&bytes).map_err(|_| Failure::Protocol)
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;

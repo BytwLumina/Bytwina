@@ -4,6 +4,7 @@ pub mod archives;
 pub mod auth;
 pub mod captcha;
 pub mod channel_actions;
+pub mod collectibles;
 pub mod fingerprint;
 pub mod forum;
 pub mod game_mentions;
@@ -11,6 +12,7 @@ pub mod gifs;
 pub mod guild_creation;
 pub mod guild_folders;
 pub mod permissions;
+pub mod soundboard;
 pub mod stickers;
 pub use permissions::ChannelAccess;
 #[cfg(test)]
@@ -250,6 +252,28 @@ pub enum Command {
 	BadgeSettings {
 		request: u64,
 		settings: model::badges::BadgeSettings,
+	},
+	/// Load the collectibles this account owns, for the profile decoration picker.
+	OwnedCollectibles {
+		request: u64,
+	},
+	/// Load the shared and guild soundboard catalogs.
+	Soundboard {
+		guild: Option<Id>,
+		request: u64,
+	},
+	/// Play one soundboard sound in the connected voice channel.
+	SendSoundboardSound {
+		channel: Id,
+		sound: Id,
+		source_guild: Option<Id>,
+		request: u64,
+	},
+	/// Set or clear a voice channel status.
+	SetVoiceStatus {
+		channel: Id,
+		status: Option<String>,
+		request: u64,
 	},
 	StreamPreview {
 		guild: Id,
@@ -584,6 +608,27 @@ pub enum Event {
 		request: u64,
 		result: Result<model::badges::BadgeSettings, auth::Failure>,
 	},
+	OwnedCollectibles {
+		request: u64,
+		result: Result<Vec<model::OwnedCollectible>, auth::Failure>,
+	},
+	Soundboard {
+		request: u64,
+		result: Result<Vec<model::SoundboardSound>, auth::Failure>,
+	},
+	SoundboardSent {
+		request: u64,
+		result: Result<(), auth::Failure>,
+	},
+	VoiceStatusSaved {
+		request: u64,
+		result: Result<(), auth::Failure>,
+	},
+	/// Gateway-reported voice channel status; `None` clears it.
+	VoiceStatus {
+		channel: Id,
+		status: Option<String>,
+	},
 	ProfileEdited {
 		user: Id,
 		request: u64,
@@ -745,6 +790,9 @@ pub struct ReadingCursor {
 pub struct State {
 	/// The signed-in account's Discord `premium_type`; 0 until READY reports one.
 	pub premium_type: u8,
+	pub collectibles: collectibles::Picker,
+	pub soundboard: soundboard::Soundboard,
+	pub voice_statuses: soundboard::VoiceStatuses,
 	pub stickers: stickers::Stickers,
 	pub interactions: interactions::Interactions,
 	pub application_commands: application_commands::Catalog,
@@ -992,6 +1040,9 @@ impl Default for State {
 	fn default() -> Self {
 		Self {
 			premium_type: 0,
+			collectibles: Default::default(),
+			soundboard: Default::default(),
+			voice_statuses: Default::default(),
 			stickers: Default::default(),
 			interactions: Default::default(),
 			application_commands: Default::default(),
@@ -3143,6 +3194,28 @@ impl State {
 			}
 			Event::BadgeSettings { request, result } => {
 				self.apply_badge_settings(request, result);
+				Ok(())
+			}
+			Event::OwnedCollectibles { request, result } => {
+				self.collectibles.finish(request, result);
+				Ok(())
+			}
+			Event::Soundboard { request, result } => {
+				self.soundboard.finish(request, result);
+				Ok(())
+			}
+			Event::SoundboardSent { request, result } => {
+				self.soundboard.sent(request, result);
+				Ok(())
+			}
+			Event::VoiceStatusSaved { result, .. } => {
+				if let Err(failure) = result {
+					self.status = failure.label();
+				}
+				Ok(())
+			}
+			Event::VoiceStatus { channel, status } => {
+				self.voice_statuses.set(channel, status);
 				Ok(())
 			}
 

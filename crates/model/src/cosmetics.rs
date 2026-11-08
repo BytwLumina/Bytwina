@@ -462,6 +462,52 @@ impl ProfileFrame {
 	}
 }
 
+/// Most owned collectibles offered in one picker page.
+pub const MAX_OWNED_COLLECTIBLES: usize = 256;
+/// Longest accepted collectible product name.
+pub const MAX_COLLECTIBLE_NAME: usize = 100;
+
+/// The collectible categories a profile can equip. The ids are the service's product types.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum CollectibleKind {
+	#[default]
+	Decoration,
+	Effect,
+	Nameplate,
+	Frame,
+}
+impl CollectibleKind {
+	pub fn from_id(id: u32) -> Option<Self> {
+		match id {
+			0 => Some(Self::Decoration),
+			1 => Some(Self::Effect),
+			2 => Some(Self::Nameplate),
+			3 => Some(Self::Frame),
+			_ => None,
+		}
+	}
+}
+
+/// One owned product offered by the decoration picker. Display-only and never persisted.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OwnedCollectible {
+	pub sku: Id,
+	pub kind: CollectibleKind,
+	pub name: String,
+}
+impl OwnedCollectible {
+	pub fn valid(&self) -> bool {
+		self.sku.0 != 0
+			&& !self.name.trim().is_empty()
+			&& self.name.len() <= MAX_COLLECTIBLE_NAME * 4
+			&& self.name.chars().count() <= MAX_COLLECTIBLE_NAME
+			&& !self.name.chars().any(char::is_control)
+	}
+	pub fn heap_bytes(&self) -> usize {
+		self.name.capacity()
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;

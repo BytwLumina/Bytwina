@@ -47,7 +47,8 @@ impl DiscordApi {
 		}
 		if let Some(changes) = &changes {
 			let body = profile::encode_edit(changes).map_err(|_| Failure::Protocol)?;
-			if changes != &ProfileEdit::default() {
+			let has_account_fields = body.as_object().is_some_and(|fields| !fields.is_empty());
+			if has_account_fields {
 				// One explicitly requested write, without retries. Account responses may
 				// contain tokens; ignore those fields and clear the owned response buffer.
 				let bytes = zeroize::Zeroizing::new(
@@ -67,6 +68,24 @@ impl DiscordApi {
 				if saved.id != user || saved.bot {
 					return Err(Failure::Protocol);
 				}
+			}
+			// Banner and profile effect are profile metadata, not account fields, and the
+			// service answers with the metadata object rather than a user object.
+			if let Some(metadata) = profile::encode_profile_metadata(changes) {
+				let bytes = zeroize::Zeroizing::new(
+					self.request_limited(
+						Method::PATCH,
+						"/users/@me/profile",
+						Some(metadata),
+						profile::MAX_PROFILE_WIRE,
+					)
+					.await?,
+				);
+				let _: serde_json::Value = discord_protocol::decode(&bytes).map_err(|_| {
+					Failure::ProtocolAt(
+						"Profile save could not be confirmed; reload before retrying",
+					)
+				})?;
 			}
 		}
 		let path = format!(
@@ -204,6 +223,7 @@ mod tests {
 				pronouns: Some(String::new()),
 				accent_color: Some(None),
 				avatar: None,
+				..Default::default()
 			};
 			let server = async {
 				respond(
@@ -242,6 +262,7 @@ mod tests {
 				pronouns: Some("they/them".into()),
 				accent_color: Some(Some(0x123456)),
 				avatar: None,
+				..Default::default()
 			};
 			let server = async {
 				respond(&listener, PATCH, Some(json!({"global_name":"New name","bio":"","pronouns":"they/them","accent_color":0x123456})), 200, USER).await;

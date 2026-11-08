@@ -28,6 +28,7 @@ mod server_integrations;
 mod server_invites;
 mod server_roles;
 mod server_settings;
+mod soundboard;
 pub mod spotify;
 pub mod upload;
 mod user_actions;
@@ -1512,6 +1513,33 @@ impl DiscordApi {
 				result: self.edit_profile(user, changes).await,
 			},
 			Command::CancelProfile => Event::Failure(Failure::Protocol),
+			Command::OwnedCollectibles { request } => Event::OwnedCollectibles {
+				request,
+				result: self.load_owned_collectibles().await,
+			},
+			Command::Soundboard { guild, request } => Event::Soundboard {
+				request,
+				result: self.load_soundboard(guild).await,
+			},
+			Command::SendSoundboardSound {
+				channel,
+				sound,
+				source_guild,
+				request,
+			} => Event::SoundboardSent {
+				request,
+				result: self
+					.send_soundboard_sound(channel, sound, source_guild)
+					.await,
+			},
+			Command::SetVoiceStatus {
+				channel,
+				status,
+				request,
+			} => Event::VoiceStatusSaved {
+				request,
+				result: self.set_voice_status(channel, status.as_deref()).await,
+			},
 			Command::MemberSearch(_) | Command::Voice(_) | Command::Members { .. } => {
 				Event::Failure(Failure::Protocol)
 			}

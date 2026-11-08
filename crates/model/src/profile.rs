@@ -18,6 +18,14 @@ pub struct ProfileEdit {
 	pub accent_color: Option<Option<u32>>,
 	/// New picture as a PNG data URI; nested `None` removes the current picture.
 	pub avatar: Option<Option<String>>,
+	/// New banner as a PNG data URI; nested `None` removes it. Premium accounts only.
+	pub banner: Option<Option<String>>,
+	/// Equipped avatar decoration SKU; nested `None` clears it.
+	pub avatar_decoration_sku: Option<Option<Id>>,
+	/// Equipped nameplate SKU; nested `None` clears it.
+	pub nameplate_sku: Option<Option<Id>>,
+	/// Equipped profile effect SKU; nested `None` clears it. Premium accounts only.
+	pub profile_effect_sku: Option<Option<Id>>,
 }
 impl ProfileEdit {
 	fn text_bytes(&self) -> usize {
@@ -27,7 +35,9 @@ impl ProfileEdit {
 			+ bytes(&self.pronouns)
 	}
 	pub fn bytes(&self) -> usize {
-		self.text_bytes() + self.avatar.as_ref().map_or(0, bytes)
+		self.text_bytes()
+			+ self.avatar.as_ref().map_or(0, bytes)
+			+ self.banner.as_ref().map_or(0, bytes)
 	}
 	pub fn valid(&self) -> bool {
 		fn text(value: &str, max: usize, multiline: bool) -> bool {
@@ -42,6 +52,19 @@ impl ProfileEdit {
 				.avatar
 				.as_ref()
 				.is_none_or(|avatar| avatar.as_deref().is_none_or(valid_avatar_uri))
+			&& self
+				.banner
+				.as_ref()
+				.is_none_or(|banner| banner.as_deref().is_none_or(valid_avatar_uri))
+			&& self
+				.avatar_decoration_sku
+				.is_none_or(|sku| sku.is_none_or(|sku| sku.0 != 0))
+			&& self
+				.nameplate_sku
+				.is_none_or(|sku| sku.is_none_or(|sku| sku.0 != 0))
+			&& self
+				.profile_effect_sku
+				.is_none_or(|sku| sku.is_none_or(|sku| sku.0 != 0))
 			&& self.global_name.as_ref().is_none_or(|name| {
 				name.as_ref().is_none_or(|name| {
 					!name.trim().is_empty() && text(name, MAX_PROFILE_NAME_CHARS, false)
@@ -85,6 +108,7 @@ mod edit_tests {
 			pronouns: Some("🦀".repeat(MAX_PROFILE_PRONOUNS_CHARS)),
 			accent_color: Some(Some(0xff_ffff)),
 			avatar: Some(Some("data:image/png;base64,iVBORw0KGgo=".into())),
+			..Default::default()
 		};
 		assert!(edit.valid());
 		edit.avatar = Some(Some("data:image/jpeg;base64,/9j/".into()));
