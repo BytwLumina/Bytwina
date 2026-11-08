@@ -288,7 +288,7 @@ Tokens: `RADIUS = 16`, `PAD = 20.0`, `BUTTON_HEIGHT = 38.0`, `TITLE_BAR_HEIGHT =
 `DEFAULT_PRIMARY_RGB = 0x1a72e8`, `MAX_CUSTOM_FONT_BYTES = 32 MiB`,
 `DEFAULT_IDLE_TIMEOUT_SECS = 600`.
 
-i18n: 14 languages (`i18n::Language::ALL`) backed by `crates/ui/locales/<tag>/main.ftl`; `en-US` is
+i18n: 15 languages (`i18n::Language::ALL`) backed by `crates/ui/locales/<tag>/main.ftl`; `en-US` is
 ~5 000 strings. Adding a string means adding it to **every** locale or it falls back to English.
 
 ### `crates/discord-voice` — media (25k, 33 modules)
