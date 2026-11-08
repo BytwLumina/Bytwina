@@ -661,6 +661,16 @@ impl Avatars {
 			None
 		}
 	}
+	/// Queue a custom emoji's artwork without rendering it, so a picker can prefetch the whole
+	/// list instead of only the rows the scroll area happens to lay out.
+	pub(crate) fn warm_emoji(&mut self, id: model::Id, demo: bool) {
+		let key = format!("emoji-{id}");
+		if let Some(entry) = self.emoji_textures.get_mut(&key) {
+			entry.0 = Instant::now();
+		} else if !demo {
+			self.request(key);
+		}
+	}
 	pub(crate) fn custom_image(
 		&mut self,
 		_ctx: &egui::Context,

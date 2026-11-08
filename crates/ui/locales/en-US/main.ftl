@@ -4993,3 +4993,44 @@ new-message-hint = Add friends to start a direct message or a group.
 new-message-no-people-found = No one matches that search.
 new-message-create = Create Message
 new-message-cancel = Cancel
+
+attachments-viewer-zoom-in = Zoom in
+# Context: viewer
+attachments-viewer-more = More
+# Context: viewer
+attachments-viewer-copy-media-link = Copy Media Link
+# Context: viewer
+attachments-viewer-view-details = View Details
+# Context: viewer
+attachments-viewer-filename = Filename
+# Context: viewer
+attachments-viewer-size = Size
+# Context: viewer
+attachments-viewer-copy-attachment-id = Copy Attachment ID
+# Context: viewer
+
+## Composer notification and timestamp shortcuts
+mention-shortcut-silent = @silent — send without push notifications
+mention-shortcut-time = @time — choose a timestamp
+message-silent-indicator = Silent
+message-silent-hint = Push and desktop notifications are suppressed. Mention badges still apply.
+timestamp-picker-title = Insert timestamp
+timestamp-picker-date = Date (YYYY-MM-DD)
+timestamp-picker-clock = Time (HH:MM:SS)
+timestamp-picker-offset = UTC offset (±HH:MM)
+timestamp-picker-offset-hint = Starts at your current local offset. Adjust for another time zone or daylight saving period.
+timestamp-picker-format = Display format
+timestamp-picker-invalid = Enter a valid date, time and UTC offset.
+timestamp-picker-rejected = The draft changed or the timestamp will not fit. Cancel and try again.
+timestamp-picker-cancel = Cancel
+timestamp-picker-insert = Insert
+timestamp-style-default = Default date and time
+timestamp-style-t = Short time
+timestamp-style-long-time = Time with seconds
+timestamp-style-d = Short date
+timestamp-style-long-date = Long date
+timestamp-style-f = Date and time
+timestamp-style-full = Full date and time
+timestamp-style-relative = Relative time
+timestamp-style-short-date-time = Short date and time
+timestamp-style-short-date-seconds = Short date and time with seconds

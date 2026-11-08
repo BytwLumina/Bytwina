@@ -40,7 +40,11 @@ pub struct TimelineView {
 	/// A private command response the reader dismissed this frame.
 	pub(super) dismiss_ephemeral: Option<Id>,
 	pub(super) extension_actions: std::sync::Arc<Vec<crate::extensions_ui::MenuAction>>,
-	pub(super) extension_request: Option<(crate::extensions_ui::MenuAction, String)>,
+	pub(super) extension_request: Option<(
+		crate::extensions_ui::MenuAction,
+		String,
+		crate::extensions_ui::MessageTarget,
+	)>,
 	pub(super) user_action: Option<crate::user_menu::Action>,
 	pub(super) restore_pending: Option<String>,
 	/// A failed own row the reader dismissed this frame.
@@ -336,6 +340,7 @@ fn layout_key(message: &Message) -> u64 {
 	message.author.kind.hash(&mut key);
 	message.author.webhook.hash(&mut key);
 	message.edited.hash(&mut key);
+	(message.flags & (1 << 12) != 0).hash(&mut key);
 	message.reply_to.hash(&mut key);
 	if let Some(interaction) = &message.interaction {
 		interaction.user.id.hash(&mut key);
@@ -1643,6 +1648,8 @@ fn deleted_message_actions(popup: egui::Popup<'_>, action: &mut Option<DeletedLo
 		}
 	});
 }
+/// Fills a message's action menu, including plugin message actions, and records the chosen
+/// plugin action with the message it applies to.
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn message_actions(
 	popup: egui::Popup<'_>,
@@ -1650,7 +1657,11 @@ fn message_actions(
 		&Message,
 		Option<&str>,
 		&[crate::extensions_ui::MenuAction],
-		&mut Option<(crate::extensions_ui::MenuAction, String)>,
+		&mut Option<(
+			crate::extensions_ui::MenuAction,
+			String,
+			crate::extensions_ui::MessageTarget,
+		)>,
 	),
 	actions: (bool, bool, bool, bool),
 	selection: (
@@ -1681,8 +1692,15 @@ fn message_actions(
 				|ui| {
 					for action in extension_actions {
 						if ui.button(&action.label).clicked() {
-							*extension_request =
-								Some((action.clone(), message.display_text().into_owned()));
+							*extension_request = Some((
+								action.clone(),
+								message.display_text().into_owned(),
+								crate::extensions_ui::MessageTarget {
+									channel: message.channel,
+									message: message.id,
+									author: message.author.id,
+								},
+							));
 							ui.close();
 						}
 					}
@@ -3633,6 +3651,10 @@ impl TimelineView {
 												&mut self.threads_request,
 											),
 										);
+									}
+									// Retained wire flags also cover cached history; notification targeting stays session-only.
+									if message.flags & (1 << 12) != 0 {
+										crate::timestamp_picker::silent_indicator(ui);
 									}
 									let body = egui::Frame::NONE
 										.inner_margin(egui::Margin {
@@ -6453,6 +6475,26 @@ mod tests {
 			assert!(visible.contains("secret one") && !visible.contains("secret two"));
 			assert_eq!(view.revealed[&message.id].text, 1);
 			assert!(!view.revealed[&message.id].media);
+			// Notification metadata changes must not conceal already revealed content.
+			message.flags |= 1 << 12;
+			message.suppress_notifications = true;
+			state.timeline.insert(message.clone(), true, false).unwrap();
+			state.revision += 1;
+			let labels = render(&mut view, &mut state, vec![]);
+			assert!(labels.iter().any(|(text, _)| text.contains("secret one")));
+			assert_eq!(view.revealed[&message.id].text, 1);
+			// Cached history keeps the wire flag but omits session notification targeting.
+			message.suppress_notifications = false;
+			state.timeline.insert(message.clone(), true, false).unwrap();
+			state.revision += 1;
+			let labels = render(&mut view, &mut state, vec![]);
+			assert!(
+				labels
+					.iter()
+					.any(|(text, _)| text == &crate::i18n::translate("message-silent-indicator"))
+			);
+			assert!(labels.iter().any(|(text, _)| text.contains("secret one")));
+			assert_eq!(view.revealed[&message.id].text, 1);
 			// Like Discord, there is no re-hide control; start the next case concealed.
 			view.revealed.clear();
 			render(&mut view, &mut state, vec![]);
@@ -9723,9 +9765,8 @@ mod tests {
 			.insert(message.id, Revealed::new(&message, u32::MAX, true));
 		view.viewing = Some((message.id, Id(7)));
 		render(&mut view, &mut state, &mut images); // Modal sizing pass precedes visible paint.
-		let shown = render(&mut view, &mut state, &mut images);
-		assert!(shown.contains("SPOILER_hidden.png"));
-		assert!(shown.contains("Open in browser"));
+		render(&mut view, &mut state, &mut images);
+		assert!(view.viewing.is_some());
 		let requests = images.take_requests();
 		assert!(!requests.is_empty() && requests.iter().all(|key| key.starts_with("media:")));
 		assert!(requests.iter().any(|key| key.contains(":320x120:")));

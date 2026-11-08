@@ -4873,3 +4873,42 @@ new-message-hint = Thêm bạn bè để bắt đầu tin nhắn trực tiếp h
 new-message-no-people-found = Không ai phù hợp với tìm kiếm đó.
 new-message-create = Tạo tin nhắn
 new-message-cancel = Hủy bỏ
+
+# Context: viewer
+attachments-viewer-zoom-in = Phóng to
+# Context: viewer
+attachments-viewer-more = Thêm
+# Context: viewer
+attachments-viewer-copy-media-link = Sao chép liên kết tệp
+# Context: viewer
+attachments-viewer-view-details = Xem chi tiết
+# Context: viewer
+attachments-viewer-filename = Tên tệp
+# Context: viewer
+attachments-viewer-size = Kích thước
+# Context: viewer
+attachments-viewer-copy-attachment-id = Sao chép ID tệp đính kèm
+mention-shortcut-silent = Gửi im lặng
+mention-shortcut-time = Chèn mốc thời gian
+message-silent-indicator = Im lặng
+message-silent-hint = Tin nhắn này được gửi mà không phát thông báo
+timestamp-picker-title = Chèn mốc thời gian
+timestamp-picker-date = Ngày
+timestamp-picker-clock = Giờ
+timestamp-picker-offset = Múi giờ
+timestamp-picker-offset-hint = Lệch so với UTC, tính bằng phút
+timestamp-picker-format = Kiểu hiển thị
+timestamp-picker-invalid = Ngày hoặc giờ không hợp lệ
+timestamp-picker-rejected = Mốc thời gian nằm ngoài phạm vi cho phép
+timestamp-picker-cancel = Huỷ
+timestamp-picker-insert = Chèn
+timestamp-style-default = Mặc định
+timestamp-style-t = Giờ ngắn
+timestamp-style-long-time = Giờ đầy đủ
+timestamp-style-d = Ngày ngắn
+timestamp-style-long-date = Ngày đầy đủ
+timestamp-style-f = Ngày và giờ
+timestamp-style-full = Ngày và giờ đầy đủ
+timestamp-style-relative = Thời gian tương đối
+timestamp-style-short-date-time = Ngày và giờ ngắn
+timestamp-style-short-date-seconds = Ngày và giờ ngắn kèm giây

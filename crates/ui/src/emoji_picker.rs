@@ -35,13 +35,24 @@ pub(crate) fn insert(
 	remaining: usize,
 	editing: bool,
 ) -> Option<usize> {
+	let limit = composer_limit(draft, editing);
+	insert_with_limit(draft, text, range, remaining, limit)
+}
+
+pub(crate) fn insert_with_limit(
+	draft: &mut String,
+	text: &str,
+	range: Option<egui::text::CCursorRange>,
+	remaining: usize,
+	limit: usize,
+) -> Option<usize> {
 	let count = draft.chars().count();
 	let (start, end) = range.map_or((count, count), |range| {
 		let range = range.as_sorted_char_range();
 		(range.start.0.min(count), range.end.0.min(count))
 	});
 	let inserted = text.chars().count();
-	if count - (end - start) + inserted > composer_limit(draft, editing) {
+	if count - (end - start) + inserted > limit {
 		return None;
 	}
 	let byte_start = draft
@@ -1246,7 +1257,15 @@ impl Picker {
 											let search_id = ui.scope_id().with("picker-search");
 											// New Areas have an invisible sizing pass before they can take focus.
 											// Request before TextEdit runs so the first typed character is retained.
-											if self.focus
+											// The click that opened the picker landed outside the field and would
+											// take the focus straight back, so wait for it to finish.
+											let clicking = ui.input(|input| {
+												input.pointer.any_pressed()
+													|| input.pointer.any_released()
+											});
+											if self.focus && clicking {
+												ui.ctx().request_repaint();
+											} else if self.focus
 												&& !ui.is_sizing_pass() && ui.ctx().memory(
 												|memory| memory.allows_interaction(ui.layer_id()),
 											) {
@@ -1521,6 +1540,13 @@ impl Picker {
 										&[]
 									};
 									let count = custom.len() + unicode.len();
+									// Prefetch the whole filtered list: `show_rows` only lays out
+									// visible rows, so without this the artwork loads on scroll.
+									for index in 0..custom.len() {
+										if let Some((_, emoji)) = custom.get(state, index) {
+											avatars.warm_emoji(emoji.id, demo);
+										}
+									}
 									if count == 0 {
 										let text = crate::i18n::translate_if_key(if searching {
 											"emoji-picker-popup-no-matching-emoji"
@@ -1863,11 +1889,20 @@ impl Picker {
 						&& gif_trigger.is_none_or(|trigger| !trigger.rect.contains(pos))
 				})
 		});
-		self.open = !clicked_outside && selected.is_none();
+		// Shift keeps the popout open for another emoji or reaction, like Discord.
+		let keep = matches!(selected, Some(Pick::Insert(_) | Pick::React(..)))
+			&& ui.input(|i| i.modifiers.shift);
+		self.open = !clicked_outside && (selected.is_none() || keep);
 		if !self.open {
 			self.close_gifs(state, commands);
 		}
-		if selected.is_some() {
+		if keep {
+			self.focus = true;
+		} else if selected.is_some() {
+			if !self.query.is_empty() {
+				self.query.clear();
+				self.filter();
+			}
 			trigger.request_focus();
 		}
 		selected
@@ -3346,7 +3381,7 @@ mod tests {
 	}
 
 	#[test]
-	fn server_grid_only_requests_visible_images_and_resets_on_navigation() {
+	fn server_grid_prefetches_images_and_resets_on_navigation() {
 		let mut state = State {
 			guilds: vec![model::Guild {
 				default_message_notifications: None,
@@ -3422,9 +3457,11 @@ mod tests {
 		}
 		let requests = avatars.take_requests();
 		assert!(!requests.is_empty());
+		// The picker prefetches the filtered list so artwork is ready before it scrolls into
+		// view; the request queue still caps a single frame.
 		assert!(
-			requests.len() < 100,
-			"offscreen emoji must not queue image requests"
+			requests.len() <= 128,
+			"prefetch must respect the per-frame request queue"
 		);
 		picker.query = "old query".into();
 		let mut output = ctx.run_ui(
