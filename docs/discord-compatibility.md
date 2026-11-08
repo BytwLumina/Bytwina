@@ -1,5 +1,23 @@
 # Discord compatibility — checked 2026-09-10
 
+## Profile banner, decorations, soundboard and voice status — November 8, 2026
+
+These surfaces use normal-account routes that the community documents but this client has **not**
+verified against a live session:
+
+- `PATCH /users/@me/profile` with `banner` (PNG data URI) and `profile_effect_id`. Premium only,
+  according to the documentation. Account fields keep going to `PATCH /users/@me`.
+- `PATCH /users/@me` with `avatar_decoration_sku_id` and `nameplate_sku_id`; a nested `null` clears.
+- `GET /users/@me/collectibles-purchases` for the owned list the picker shows.
+- `GET /soundboard-default-sounds`, `GET /guilds/{id}/soundboard-sounds` and
+  `POST /channels/{id}/send-soundboard-sound`.
+- `PUT /channels/{id}/voice-status` with a status of at most 500 characters.
+
+Every response is decoded into a bounded model type that drops unknown product types, malformed
+rows and oversized payloads instead of failing the whole list. Treat the behaviour as **unverified**
+until an owner-session run confirms each route; the client never retries these writes.
+
+
 ## Game mentions (October 14, 2026)
 
 The native composer offers `@game`, a searchable game catalog and application references
