@@ -75,6 +75,8 @@ impl Soundboard {
 #[derive(Default)]
 pub struct VoiceStatuses {
 	rows: BTreeMap<Id, String>,
+	/// Set when a status write settles, so the editor knows to close.
+	pub saved: Option<(u64, Option<&'static str>)>,
 }
 impl VoiceStatuses {
 	pub fn get(&self, channel: Id) -> Option<&str> {
@@ -98,6 +100,14 @@ impl VoiceStatuses {
 	}
 	pub fn clear(&mut self) {
 		self.rows.clear();
+		self.saved = None;
+	}
+	/// Record the outcome of a status write for the editor that asked.
+	pub fn settled(&mut self, request: u64, result: Result<(), crate::auth::Failure>) {
+		self.saved = Some((request, result.err().map(|failure| failure.label())));
+	}
+	pub fn take_settled(&mut self) -> Option<(u64, Option<&'static str>)> {
+		self.saved.take()
 	}
 	pub fn valid_status(status: &str) -> bool {
 		status.chars().count() <= MAX_STATUS_CHARS && !status.chars().any(char::is_control)

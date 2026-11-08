@@ -3202,6 +3202,23 @@ impl MessagingUi {
 			_ => None,
 		};
 		let bar = ui.max_rect();
+		// The channel status sits above the controls, centred, and the row shifts down.
+		let status = crate::soundboard_ui::SoundboardUi::channel_line(state, channel);
+		if let Some(status) = status {
+			let line = ui.painter().layout_no_wrap(
+				status.to_owned(),
+				egui::FontId::proportional(12.0),
+				STAGE_MUTED,
+			);
+			let max = (bar.width() - 4.0 * STAGE_MARGIN).max(40.0);
+			if line.size().x <= max {
+				ui.painter().galley(
+					egui::pos2(bar.center().x - line.size().x * 0.5, bar.top()),
+					line,
+					STAGE_MUTED,
+				);
+			}
+		}
 		// A narrow stage sheds secondary controls (view toggles, device chevrons, then
 		// share/more) before anything overlaps; mute, camera and hang-up always stay.
 		let actions = 2.0 * 48.0;
@@ -3221,12 +3238,14 @@ impl MessagingUi {
 			2.0 * 48.0
 		};
 		let actions_shown = room >= media + BAR_GAP + actions + BAR_GAP + HANG_UP;
+		let soundboard = room >= media + BAR_GAP + LAUNCHER + BAR_GAP + HANG_UP;
 		let width = media
 			+ BAR_GAP + if actions_shown {
 			actions + BAR_GAP
 		} else {
 			0.0
-		} + HANG_UP;
+		} + if soundboard { LAUNCHER + BAR_GAP } else { 0.0 }
+			+ HANG_UP;
 		let left = (bar.center().x - width * 0.5)
 			.min(bar.right() - STAGE_MARGIN - side - BAR_GAP - width)
 			.max(bar.left() + STAGE_MARGIN);
@@ -3354,6 +3373,19 @@ impl MessagingUi {
 					});
 			});
 		}
+		let mut soundboard_clicked = None;
+		if soundboard {
+			let response = control(
+				&mut row,
+				crate::icons::Icon::Soundboard,
+				LAUNCHER,
+				true,
+				STAGE_TEXT,
+				"soundboard-ui-title",
+				"soundboard-ui-launcher-hint",
+			);
+			soundboard_clicked = Some(response);
+		}
 		// While a watched share is enlarged, the red action stops watching, as in Discord.
 		let hang_up = {
 			let (rect, response) =
@@ -3395,6 +3427,10 @@ impl MessagingUi {
 				)
 			})
 		};
+		if let Some(response) = soundboard_clicked {
+			self.soundboard
+				.launcher(&response, ui.ctx(), state, channel, commands);
+		}
 		if hang_up.clicked() {
 			if watched.is_some() {
 				stop_watching = true;
@@ -4170,6 +4206,7 @@ const MIN_FOCUS: f32 = 80.0;
 const CONTROL_HEIGHT: f32 = 48.0;
 const HANG_UP: f32 = 64.0;
 const BAR_GAP: f32 = 12.0;
+const LAUNCHER: f32 = 48.0;
 
 /// Green ring like Discord's speaking indicator; the accessible label still names the state.
 /// Which stage tile is enlarged; cleared automatically when it stops showing video.

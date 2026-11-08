@@ -3208,10 +3208,11 @@ impl State {
 				self.soundboard.sent(request, result);
 				Ok(())
 			}
-			Event::VoiceStatusSaved { result, .. } => {
+			Event::VoiceStatusSaved { request, result } => {
 				if let Err(failure) = result {
 					self.status = failure.label();
 				}
+				self.voice_statuses.settled(request, result);
 				Ok(())
 			}
 			Event::VoiceStatus { channel, status } => {
