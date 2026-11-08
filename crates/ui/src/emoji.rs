@@ -144,7 +144,7 @@ pub fn poll(ctx: &Context) {
 		let upload_us = upload.elapsed().as_micros() as u64;
 		ctx.data_mut(|data| {
 			data.insert_temp(egui::Id::unique("twemoji"), texture);
-			data.remove_temp::<std::sync::Arc<Pending>>(id);
+			data.remove::<std::sync::Arc<Pending>>(id);
 		});
 		// First `entries()` call parses the bundled index; time it here because it runs on
 		// the UI thread immediately after the upload.
