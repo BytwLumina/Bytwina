@@ -111,6 +111,7 @@ pub fn start(ctx: &Context) {
 }
 
 /// The decoded pixels plus how long [`decode_atlas`] took, in microseconds.
+#[derive(Default)]
 struct Pending(std::sync::Mutex<Option<(egui::ColorImage, u64)>>);
 
 /// One record per atlas load, so a slow start names its phase instead of the whole cost.
