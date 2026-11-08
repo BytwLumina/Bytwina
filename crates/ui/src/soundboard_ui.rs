@@ -1,5 +1,5 @@
 //! Soundboard picker and voice channel status editor. Session-only; nothing is persisted.
-use crate::{design, icons};
+use crate::design;
 use client_core::{Command, State};
 use model::Id;
 
@@ -51,11 +51,11 @@ impl SoundboardUi {
 					&& !state.soundboard.busy
 					&& state.soundboard.error.is_none()
 				{
+					let guild = state.channel(channel).and_then(|c| c.guild);
 					let request = state.soundboard.request.wrapping_add(1);
-					commands.push(Command::Soundboard {
-						guild: state.channel(channel).and_then(|c| c.guild),
-						request,
-					});
+					// Marked busy here so a second frame cannot queue the same load again.
+					state.soundboard.begin(request);
+					commands.push(Command::Soundboard { guild, request });
 				}
 			}
 		}
@@ -63,7 +63,7 @@ impl SoundboardUi {
 			return;
 		}
 		let anchor = response.rect;
-		let mut closed = false;
+		let mut sent = None;
 		egui::Area::new(response.id.with("soundboard-popup"))
 			.order(egui::Order::Foreground)
 			.fixed_pos(egui::pos2(
@@ -75,11 +75,14 @@ impl SoundboardUi {
 				egui::Frame::popup(ui.style()).show(ui, |ui| {
 					ui.set_width(POPUP_WIDTH);
 					ui.set_max_height(POPUP_HEIGHT);
-					closed = self.contents(ui, state, channel, commands);
+					sent = self.contents(ui, state, channel, commands);
 				});
 			});
-		if closed {
-			self.close();
+		if let Some(sound) = sent {
+			// Marked here, where the state is mutable, so the tile disables immediately. The
+			// request id is the one the popup put on the command.
+			let request = state.soundboard.send_request.wrapping_add(1);
+			state.soundboard.begin_send(sound, request);
 		}
 	}
 
@@ -89,8 +92,9 @@ impl SoundboardUi {
 		state: &State,
 		channel: Id,
 		commands: &mut Vec<Command>,
-	) -> bool {
+	) -> Option<Id> {
 		let mut closed = false;
+		let mut send = None;
 		let colors = design::palette(ui);
 		ui.horizontal(|ui| {
 			ui.label(
@@ -122,18 +126,18 @@ impl SoundboardUi {
 								.color(colors.muted),
 						);
 					});
-					return closed;
+					return None;
 				}
 				if let Some(error) = state.soundboard.error {
 					ui.label(egui::RichText::new(error).color(colors.danger));
-					return closed;
+					return None;
 				}
 				if state.soundboard.sounds.is_empty() {
 					ui.label(
 						egui::RichText::new(crate::i18n::translate("soundboard-ui-empty"))
 							.color(colors.muted),
 					);
-					return closed;
+					return None;
 				}
 				for sound in state.soundboard.matches() {
 					let sending = state.soundboard.sending == Some(sound.id);
@@ -160,6 +164,7 @@ impl SoundboardUi {
 						))
 						.clicked()
 					{
+						send = Some(sound.id);
 						commands.push(Command::SendSoundboardSound {
 							channel,
 							sound: sound.id,
@@ -172,7 +177,10 @@ impl SoundboardUi {
 			});
 		ui.separator();
 		self.status_section(ui, state, channel, commands);
-		closed
+		if closed {
+			self.close();
+		}
+		send
 	}
 
 	fn status_section(
@@ -267,12 +275,10 @@ impl SoundboardUi {
 		});
 	}
 
-	/// The line shown under a voice channel in the sidebar, if this channel has a status.
+	/// The status text shown above the call controls, if this channel has one.
 	pub(super) fn channel_line(state: &State, channel: Id) -> Option<&str> {
 		state.voice_statuses.get(channel)
 	}
-
-	pub(super) const ICON: icons::Icon = icons::Icon::Soundboard;
 }
 
 const POPUP_WIDTH: f32 = 288.0;

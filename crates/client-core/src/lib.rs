@@ -3209,7 +3209,7 @@ impl State {
 				Ok(())
 			}
 			Event::VoiceStatusSaved { request, result } => {
-				if let Err(failure) = result {
+				if let Err(failure) = &result {
 					self.status = failure.label();
 				}
 				self.voice_statuses.settled(request, result);

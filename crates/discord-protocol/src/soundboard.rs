@@ -23,8 +23,24 @@ struct SoundDto {
 }
 
 #[derive(Deserialize)]
-struct GuildList {
-	items: Vec<SoundDto>,
+#[serde(untagged)]
+enum LenientRow {
+	Row(SoundDto),
+	Invalid(serde::de::IgnoredAny),
+}
+impl LenientRow {
+	fn into_value(self) -> Option<SoundDto> {
+		match self {
+			Self::Row(row) => Some(row),
+			Self::Invalid(_) => None,
+		}
+	}
+}
+
+#[derive(Deserialize)]
+struct LenientGuildList {
+	#[serde(default)]
+	items: Vec<LenientRow>,
 }
 
 fn convert(dto: SoundDto, guild: Option<Id>) -> Option<SoundboardSound> {
@@ -63,8 +79,13 @@ pub fn decode_list(bytes: &[u8], guild: Option<Id>) -> Result<Vec<SoundboardSoun
 	if bytes.len() > MAX_SOUNDBOARD_WIRE {
 		return Err(DecodeError);
 	}
-	let rows: Vec<SoundDto> = crate::decode(bytes)?;
-	Ok(collect(rows, guild))
+	let rows: Vec<LenientRow> = crate::decode(bytes)?;
+	Ok(collect(
+		rows.into_iter()
+			.filter_map(LenientRow::into_value)
+			.collect(),
+		guild,
+	))
 }
 
 /// `GET /guilds/{id}/soundboard-sounds` answers with `{ "items": [...] }`.
@@ -72,8 +93,14 @@ pub fn decode_guild_list(bytes: &[u8], guild: Id) -> Result<Vec<SoundboardSound>
 	if bytes.len() > MAX_SOUNDBOARD_WIRE {
 		return Err(DecodeError);
 	}
-	let list: GuildList = crate::decode(bytes)?;
-	Ok(collect(list.items, Some(guild)))
+	let list: LenientGuildList = crate::decode(bytes)?;
+	Ok(collect(
+		list.items
+			.into_iter()
+			.filter_map(LenientRow::into_value)
+			.collect(),
+		Some(guild),
+	))
 }
 
 #[cfg(test)]

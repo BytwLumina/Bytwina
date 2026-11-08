@@ -3203,13 +3203,13 @@ impl MessagingUi {
 		};
 		let bar = ui.max_rect();
 		// The channel status sits above the controls, centred, and the row shifts down.
-		let status = crate::soundboard_ui::SoundboardUi::channel_line(state, channel);
+		// Owned so the later command dispatch can borrow the state mutably.
+		let status =
+			crate::soundboard_ui::SoundboardUi::channel_line(state, channel).map(str::to_owned);
 		if let Some(status) = status {
-			let line = ui.painter().layout_no_wrap(
-				status.to_owned(),
-				egui::FontId::proportional(12.0),
-				STAGE_MUTED,
-			);
+			let line =
+				ui.painter()
+					.layout_no_wrap(status, egui::FontId::proportional(12.0), STAGE_MUTED);
 			let max = (bar.width() - 4.0 * STAGE_MARGIN).max(40.0);
 			if line.size().x <= max {
 				ui.painter().galley(

@@ -1,6 +1,6 @@
 //! Owned collectibles offered by the profile decoration picker. Bounded and session-only.
 use crate::auth::Failure;
-use model::{Id, OwnedCollectible};
+use model::OwnedCollectible;
 
 #[derive(Default)]
 pub struct Picker {
@@ -8,8 +8,6 @@ pub struct Picker {
 	pub request: u64,
 	pub busy: bool,
 	pub error: Option<&'static str>,
-	/// The category tab the owner last opened.
-	pub tab: model::CollectibleKind,
 }
 impl Picker {
 	pub fn bytes(&self) -> usize {
@@ -40,12 +38,5 @@ impl Picker {
 		self.owned.clear();
 		self.busy = false;
 		self.error = None;
-	}
-	/// Products of one category, in service order.
-	pub fn of(&self, kind: model::CollectibleKind) -> impl Iterator<Item = &OwnedCollectible> {
-		self.owned.iter().filter(move |item| item.kind == kind)
-	}
-	pub fn contains(&self, sku: Id) -> bool {
-		self.owned.iter().any(|item| item.sku == sku)
 	}
 }

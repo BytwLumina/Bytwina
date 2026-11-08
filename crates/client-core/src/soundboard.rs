@@ -57,6 +57,11 @@ impl Soundboard {
 		self.sending = None;
 		self.error = None;
 	}
+	/// Mark a sound as in flight; the tile disables until the answer settles.
+	pub fn begin_send(&mut self, sound: Id, request: u64) {
+		self.send_request = request;
+		self.sending = Some(sound);
+	}
 	/// Usable sounds matching the query, defaults first then the guild's own.
 	pub fn matches(&self) -> Vec<&SoundboardSound> {
 		let query = self.query.trim().to_lowercase();
