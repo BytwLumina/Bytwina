@@ -308,7 +308,7 @@ impl MessagingUi {
 					ui.painter(),
 					crate::icons::Icon::Bytwina,
 					badge.shrink(10.0),
-					colors.accent,
+					design::brand(),
 				);
 				ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
 					if self.updates.ready {

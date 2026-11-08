@@ -274,6 +274,10 @@ pub const DEFAULT_PRIMARY_COLOR: [u8; 3] = [
 	(DEFAULT_PRIMARY_RGB >> 8) as u8,
 	DEFAULT_PRIMARY_RGB as u8,
 ];
+/// The brand mark keeps its own colour so a themed accent or a name style never repaints it.
+pub fn brand() -> Color32 {
+	PRIMARY
+}
 const PRIMARY: Color32 = Color32::from_rgb(
 	DEFAULT_PRIMARY_COLOR[0],
 	DEFAULT_PRIMARY_COLOR[1],

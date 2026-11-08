@@ -296,11 +296,12 @@ impl MessagingUi {
 					radius,
 					colors.raised.lerp_to_gamma(colors.accent, lit),
 				);
+				// Fixed brand colour: the mark must not follow the accent or name style.
 				crate::icons::paint(
 					ui.painter(),
 					crate::icons::Icon::Bytwina,
 					rect.shrink(9.0),
-					colors.text.lerp_to_gamma(colors.accent_text, lit),
+					design::brand(),
 				);
 				rail_indicator(ui, response.id, rect, home, hovered, false);
 				let (friends, messages) = state.home_request_parts();
