@@ -636,6 +636,7 @@ mod tests {
 					event: Event::Ready {
 						permissions: model::permissions::Snapshot::default(),
 						user: model::User {
+							flags: model::AccountFlags::default(),
 							id: model::Id(1),
 							name: "Synthetic".into(),
 							avatar: None,

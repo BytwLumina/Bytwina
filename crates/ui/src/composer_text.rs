@@ -449,6 +449,7 @@ mod tests {
 
 	fn users() -> Vec<User> {
 		vec![User {
+			flags: model::AccountFlags::default(),
 			id: model::Id(42),
 			name: "Zoë".into(),
 			avatar: None,

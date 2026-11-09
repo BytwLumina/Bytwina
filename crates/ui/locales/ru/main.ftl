@@ -372,7 +372,6 @@ categories-paint-shelf-rule-media-loaded-posts = Медиа · загружен�
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Голосовой канал сервера
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Канал трибуны · не реализовано
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Текстовый канал
 # Context: paint_shelf_rule
@@ -4891,3 +4890,44 @@ new-message-hint = Добавьте друзей, чтобы начать лич
 new-message-no-people-found = Никто не найден.
 new-message-create = Создать сообщение
 new-message-cancel = Отмена
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Каналы
+events-tab-events = События
+events-banner-open-events = Открыть вкладку событий
+events-empty = Нет запланированных событий
+events-no-guild = Откройте сервер, чтобы увидеть его события
+events-interest = Я заинтересован
+events-interested = Заинтересован
+events-panel-expired = Сессия истекла; войдите снова, чтобы загрузить события.
+events-panel-challenged = Discord запросил подтверждение; пройдите его в Discord.
+events-panel-forbidden = Discord не разрешает этой учётной записи читать эти события.
+events-panel-rate-limited = Discord ограничивает эту учётную запись; повторите попытку чуть позже.
+events-panel-network = Соединение не удалось; события не загружены.
+events-panel-unknown = Discord не подтвердил изменение; проверьте событие перед повтором.
+events-panel-unavailable = Не удалось загрузить события.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Канал-сцена
+events-stage-not-live = Нет активной сцены
+events-stage-speakers = Спикеры
+events-stage-no-speakers = На сцене никого нет
+events-stage-audience = Зрители
+events-stage-no-audience = В зале никого нет
+events-stage-asked-to-speak = Просил слово
+events-stage-make-speaker = Сделать спикером
+events-stage-move-to-audience = Перевести в зал
+events-stage-raise-hand = Поднять руку
+events-stage-lower-hand = Опустить руку
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = участников
+events-show-subscribers = Кто идёт
+events-hide-subscribers = Скрыть список
+events-no-subscribers = Никто ещё не подписан
+events-stage-topic = Тема сцены
+events-stage-start = Запустить сцену
+events-stage-end = Завершить сцену
+
+# The cover of a scheduled event.
+events-cover = Обложка

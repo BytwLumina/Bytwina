@@ -1352,6 +1352,7 @@ impl State {
 						(!self.user_actions.requests.contains_key(&user)).then(|| {
 							(
 								model::User {
+									flags: model::AccountFlags::default(),
 									id: user,
 									name: "Unknown user".into(),
 									avatar: None,
@@ -2856,6 +2857,7 @@ mod tests {
 	/// Synthetic authenticated state for user-action tests.
 	fn state() -> State {
 		let user = |id| model::User {
+			flags: model::AccountFlags::default(),
 			primary_guild: None,
 			cosmetics: None,
 			id: Id(id),

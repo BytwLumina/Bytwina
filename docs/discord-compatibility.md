@@ -1,5 +1,52 @@
 # Discord compatibility — checked 2026-09-10
 
+## Guild scheduled events and stage channels — November 9, 2026
+
+The event object, the stage instance and every route below are **documented** at
+`docs.discord.food/resources/guild-scheduled-event` and `docs.discord.food/resources/stage-instance`.
+The client reads them, answers an RSVP and keeps the panel live; it does not create events.
+
+Read and RSVP:
+
+- `GET /guilds/{guild_id}/scheduled-events` — the guild's events, with `user_count`.
+- `GET /guilds/{guild_id}/scheduled-events/{event_id}/users` — one page of subscribers.
+- `PUT /guilds/{guild_id}/scheduled-events/{event_id}/users/@me` with `{"interested": bool}` — this
+  account's own RSVP. No permission is needed for a normal account.
+
+Stage and voice state:
+
+- `PATCH /guilds/{guild_id}/voice-states/{user_id}` is **documented** (it is not an unofficial
+  route). It carries `channel_id`, `suppress` and `request_to_speak_timestamp`. A member raises the
+  hand with `request_to_speak_timestamp`; a host promotes or demotes with `suppress`. Moving another
+  member needs **Mute Members**, so the client checks that permission before sending the write.
+- `POST /channels/{channel_id}/stage-instances` with `topic` starts a stage; `DELETE
+  /channels/{channel_id}/stage-instances` ends it. Both need **Manage Channels**, and the client
+  checks that permission before sending either write. The stage topic is capped at 100 characters.
+
+Gateway, which keeps the panel current without polling:
+
+- `GUILD_SCHEDULED_EVENT_CREATE`, `GUILD_SCHEDULED_EVENT_UPDATE`, `GUILD_SCHEDULED_EVENT_DELETE`
+- `GUILD_SCHEDULED_EVENT_USER_ADD`, `GUILD_SCHEDULED_EVENT_USER_REMOVE`
+- `STAGE_INSTANCE_CREATE`, `STAGE_INSTANCE_UPDATE`, `STAGE_INSTANCE_DELETE`
+
+What the client does not do:
+
+- It never creates, edits or cancels a scheduled event. Discord requires the `CREATE_EVENTS`
+  permission for that, and the client does not ask for it. It reads events and answers its own
+  RSVP only.
+- It does not decide who the host is. Discord does not name the host in the payloads this client
+  reads, so the host controls are offered to members with **Mute Members** and **Manage Channels**
+  instead.
+- Stage recurrence rules, recurrence exceptions and per-exception overrides are decoded away: the
+  panel shows the event itself, not its schedule.
+
+Everything is session memory. Nothing is written to the local store, so the SQLite schema stays at
+29 and a restart reads the events again.
+
+The behaviour is **unverified** until an owner-session run confirms each route: this client has
+never talked to the service with these endpoints. The panel refuses a payload it cannot bound
+instead of guessing.
+
 ## Profile banner, decorations, soundboard and voice status — November 8, 2026
 
 These surfaces use normal-account routes that the community documents but this client has **not**

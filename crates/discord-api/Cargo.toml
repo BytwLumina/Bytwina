@@ -12,6 +12,7 @@ discord-protocol.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+time = { workspace = true, features = ["formatting"] }
 tokio.workspace = true
 zeroize.workspace = true
 futures-util.workspace = true

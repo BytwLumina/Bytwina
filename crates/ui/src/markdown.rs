@@ -1812,6 +1812,7 @@ impl Formatted {
 						});
 						if response.clicked() || response.contains_pointer() {
 							let opened = user.cloned().unwrap_or(model::User {
+								flags: model::AccountFlags::default(),
 								id,
 								name: format!("User {id}"),
 								avatar: None,
@@ -5155,6 +5156,7 @@ mod tests {
 		let mut profile = crate::profiles::ProfileSession::default();
 		let mut opening = None;
 		let users = vec![model::User {
+			flags: model::AccountFlags::default(),
 			id: Id(42),
 			name: "Synthetic Robin".into(),
 			avatar: None,

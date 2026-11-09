@@ -30,6 +30,7 @@ mod server_roles;
 mod server_settings;
 mod soundboard;
 pub mod spotify;
+mod stage;
 pub mod upload;
 mod user_actions;
 use client_core::{
@@ -1087,6 +1088,117 @@ impl DiscordApi {
 					parent,
 					request,
 					result,
+				}
+			}
+			Command::ScheduledEvents { guild, request } => {
+				let result = self.scheduled_events(guild).await;
+				match result {
+					Ok(events) => {
+						Event::ScheduledEvent(client_core::stage::Event::Snapshot { guild, events })
+					}
+					Err(failure) => Event::ScheduledEvent(client_core::stage::Event::Failed {
+						guild,
+						request,
+						error: stage::failure_key(failure),
+					}),
+				}
+			}
+			Command::ScheduledEventInterest {
+				guild,
+				event,
+				interested,
+				request,
+			} => {
+				let result = self.set_event_interest(guild, event, interested).await;
+				Event::ScheduledEvent(client_core::stage::Event::Interest {
+					guild,
+					event,
+					interested,
+					request,
+					result: result.map_err(stage::failure_key),
+				})
+			}
+			Command::StageRequestToSpeak {
+				guild,
+				channel,
+				user,
+				asking,
+				request,
+			} => {
+				let result = self.request_to_speak(guild, channel, user, asking).await;
+				Event::ScheduledEvent(client_core::stage::Event::Action {
+					guild,
+					request,
+					error: result.err().map(stage::failure_key),
+				})
+			}
+			Command::StageModerate {
+				guild,
+				channel,
+				user,
+				speaker,
+				request,
+			} => {
+				let result = self.moderate_stage(guild, channel, user, speaker).await;
+				Event::ScheduledEvent(client_core::stage::Event::Action {
+					guild,
+					request,
+					error: result.err().map(stage::failure_key),
+				})
+			}
+			Command::ScheduledEventSubscribers {
+				guild,
+				event,
+				request,
+			} => {
+				let result = self.event_subscribers(guild, event).await;
+				match result {
+					Ok(members) => Event::ScheduledEvent(client_core::stage::Event::Subscribers {
+						guild,
+						event,
+						members,
+					}),
+					Err(failure) => Event::ScheduledEvent(client_core::stage::Event::Failed {
+						guild,
+						request,
+						error: stage::failure_key(failure),
+					}),
+				}
+			}
+			Command::StageInstanceCreate {
+				guild,
+				channel,
+				topic,
+				request,
+			} => {
+				let result = self.create_stage_instance(channel, &topic).await;
+				match result {
+					Ok(stage) => {
+						Event::ScheduledEvent(client_core::stage::Event::Stage { guild, stage })
+					}
+					Err(failure) => Event::ScheduledEvent(client_core::stage::Event::Failed {
+						guild,
+						request,
+						error: stage::failure_key(failure),
+					}),
+				}
+			}
+			Command::StageInstanceDelete {
+				guild,
+				channel,
+				request,
+			} => {
+				let result = self.delete_stage_instance(channel).await;
+				match result {
+					Ok(()) => Event::ScheduledEvent(client_core::stage::Event::StageEnded {
+						guild,
+						stage: channel,
+					}),
+					Err(failure) => Event::ScheduledEvent(client_core::stage::Event::Failed {
+						guild,
+						request,
+						error: stage::failure_key(failure),
+					}),
 				}
 			}
 			Command::Archives {

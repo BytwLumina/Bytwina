@@ -373,7 +373,6 @@ categories-paint-shelf-rule-media-loaded-posts = 媒体 · 已加载帖子
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = 服务器语音频道
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = 舞台频道 · 尚未实现
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = 文字频道
 # Context: paint_shelf_rule
@@ -4986,3 +4985,44 @@ new-message-hint = 添加好友以开始私信或群组。
 new-message-no-people-found = 没有匹配的结果。
 new-message-create = 创建消息
 new-message-cancel = 取消
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = 频道
+events-tab-events = 活动
+events-banner-open-events = 打开活动标签页
+events-empty = 暂无计划中的活动
+events-no-guild = 打开服务器即可查看其活动
+events-interest = 我感兴趣
+events-interested = 已感兴趣
+events-panel-expired = 会话已过期，请重新登录以加载活动。
+events-panel-challenged = Discord 要求进行验证，请在 Discord 中完成。
+events-panel-forbidden = Discord 不允许此账号读取这些活动。
+events-panel-rate-limited = Discord 正在限制此账号，请稍后再试。
+events-panel-network = 连接失败，未能加载活动。
+events-panel-unknown = Discord 未确认此更改，请检查活动后再重试。
+events-panel-unavailable = 无法加载活动。
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = 舞台频道
+events-stage-not-live = 没有正在进行的舞台
+events-stage-speakers = 演讲者
+events-stage-no-speakers = 舞台上没有人
+events-stage-audience = 观众
+events-stage-no-audience = 观众席没有人
+events-stage-asked-to-speak = 已申请发言
+events-stage-make-speaker = 设为演讲者
+events-stage-move-to-audience = 移至观众席
+events-stage-raise-hand = 举手
+events-stage-lower-hand = 放下手
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = 感兴趣
+events-show-subscribers = 谁会参加
+events-hide-subscribers = 隐藏列表
+events-no-subscribers = 还没有人订阅
+events-stage-topic = 舞台主题
+events-stage-start = 开始舞台
+events-stage-end = 结束舞台
+
+# The cover of a scheduled event.
+events-cover = 封面图片

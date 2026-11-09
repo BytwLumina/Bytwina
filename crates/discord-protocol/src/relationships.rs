@@ -111,6 +111,7 @@ impl Snapshot {
 				} else {
 					(
 						model::User {
+							flags: model::AccountFlags::default(),
 							id: r.id,
 							name: "Unknown user".into(),
 							avatar: None,

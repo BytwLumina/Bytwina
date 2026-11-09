@@ -567,7 +567,7 @@ fn kind_label(kind: u8) -> &'static str {
 		3 => "categories-paint-shelf-rule-group-direct-message",
 		5 => "categories-paint-shelf-rule-announcement-channel",
 		10..=12 => "categories-paint-shelf-rule-thread",
-		13 => "categories-paint-shelf-rule-stage-channel-not-implemented",
+		13 => "categories-paint-shelf-rule-stage-channel",
 		14 => "categories-paint-shelf-rule-directory-not-implemented",
 		15 => "categories-paint-shelf-rule-forum-loaded-posts",
 		16 => "categories-paint-shelf-rule-media-loaded-posts",
@@ -671,7 +671,7 @@ impl MessagingUi {
 			let mut rows = Vec::with_capacity(channel_rows.len() + state.voice.roster.len());
 			for row in channel_rows {
 				let channel = match &row {
-					Row::Channel(channel, _, _) if channel.kind == 2 => Some(channel.id),
+					Row::Channel(channel, _, _) if voice_lane(channel.kind) => Some(channel.id),
 					_ => None,
 				};
 				rows.push(row);
@@ -845,7 +845,7 @@ impl MessagingUi {
 								&& !nested && !state.channel_action_pending()
 								&& state.can_manage_channel(channel.id);
 							let active = state.selected == Some(channel.id);
-							if channel.kind == 2 {
+							if voice_lane(channel.kind) {
 								let response = ui
 									.push_id(slot, |ui| {
 										self.voice_channel_button(

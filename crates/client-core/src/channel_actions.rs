@@ -1252,6 +1252,7 @@ mod tests {
 			demo: true,
 			gateway_connected: true,
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				id: Id(1),

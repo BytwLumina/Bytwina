@@ -372,7 +372,6 @@ categories-paint-shelf-rule-media-loaded-posts = メディア · 読み込まれ
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = サーバー音声チャネル
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = ステージチャンネル・未実装
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = テキストチャンネル
 # Context: paint_shelf_rule
@@ -4871,3 +4870,44 @@ new-message-hint = フレンドを追加して、DMまたはグループを開�
 new-message-no-people-found = 一致する相手はいません。
 new-message-create = メッセージを作成
 new-message-cancel = キャンセル
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = チャンネル
+events-tab-events = イベント
+events-banner-open-events = イベントタブを開く
+events-empty = 予定されているイベントはありません
+events-no-guild = サーバーを開くとイベントが表示されます
+events-interest = 参加します
+events-interested = 参加予定
+events-panel-expired = セッションの有効期限が切れました。再度サインインしてイベントを読み込んでください。
+events-panel-challenged = Discord が確認を要求しました。Discord で完了させてください。
+events-panel-forbidden = このアカウントではこれらのイベントを読み取れません。
+events-panel-rate-limited = Discord がこのアカウントを制限しています。しばらくしてから再試行してください。
+events-panel-network = 接続に失敗しました。イベントを読み込めませんでした。
+events-panel-unknown = Discord が変更を確認しませんでした。再試行する前にイベントを確認してください。
+events-panel-unavailable = イベントを読み込めませんでした。
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = ステージチャンネル
+events-stage-not-live = ライブステージはありません
+events-stage-speakers = 登壇者
+events-stage-no-speakers = ステージにいる人はいません
+events-stage-audience = 観客
+events-stage-no-audience = 観客はいません
+events-stage-asked-to-speak = 発言希望
+events-stage-make-speaker = 登壇者に招待
+events-stage-move-to-audience = 観客席へ移動
+events-stage-raise-hand = 手を上げる
+events-stage-lower-hand = 手を下げる
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = 参加予定
+events-show-subscribers = Who's going 参加者
+events-hide-subscribers = リストを隠す
+events-no-subscribers = まだ誰も参加登録していません
+events-stage-topic = ステージのトピック
+events-stage-start = ステージを開始
+events-stage-end = ステージを終了
+
+# The cover of a scheduled event.
+events-cover = カバー画像

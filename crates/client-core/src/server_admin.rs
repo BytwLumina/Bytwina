@@ -1182,6 +1182,7 @@ mod sticker_tests {
 
 	fn user(id: u64, name: &str) -> model::User {
 		model::User {
+			flags: model::AccountFlags::default(),
 			primary_guild: None,
 			cosmetics: None,
 			id: Id(id),

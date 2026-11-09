@@ -3608,6 +3608,13 @@ impl TimelineView {
 														state.demo,
 													);
 												}
+												// Public account badges come from the author's
+												// own flags.
+												crate::public_badges::badge_row(
+													ui,
+													&message.author.flags,
+													14.0,
+												);
 												if avatar_hot || author.hovered() {
 													let line = author.rect.bottom() - 1.0;
 													ui.painter().hline(
@@ -6188,6 +6195,7 @@ mod tests {
 			id: Id(id),
 			channel: Id(20),
 			author: model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(2),
 				name: "Robin".into(),
 				avatar: None,
@@ -6970,6 +6978,7 @@ mod tests {
 		// A mention names its author instead of the raw token.
 		message.content = "Hi <@9>".into();
 		message.mentions = vec![model::User {
+			flags: model::AccountFlags::default(),
 			id: Id(9),
 			name: "Synthetic".into(),
 			avatar: None,
@@ -7669,6 +7678,7 @@ mod tests {
 			auth: client_core::auth::AuthState::Authenticated,
 			gateway_connected: true,
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(999),
 				name: "Synthetic".into(),
 				avatar: None,
@@ -9311,6 +9321,7 @@ mod tests {
 			id: Id(1),
 			channel: Id(2),
 			author: model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(3),
 				name: "Synthetic".into(),
 				avatar: None,
@@ -9373,6 +9384,7 @@ mod tests {
 		});
 		// Channel names are shown only with view and read permission.
 		state.user = Some(model::User {
+			flags: model::AccountFlags::default(),
 			id: Id(9),
 			name: "Synthetic viewer".into(),
 			avatar: None,
@@ -9487,6 +9499,7 @@ mod tests {
 			id: Id(1),
 			channel: Id(2),
 			author: model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(3),
 				name: "Synthetic".into(),
 				avatar: None,
@@ -9589,6 +9602,7 @@ mod tests {
 			id: Id(1),
 			channel: Id(2),
 			author: model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(3),
 				name: "Synthetic".into(),
 				avatar: None,

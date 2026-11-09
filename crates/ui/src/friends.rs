@@ -955,17 +955,24 @@ fn header_tab(
 		);
 	}
 	let left = rect.left() + 10.0;
-	painter.galley_with_override_text_color(
-		egui::pos2(left, rect.center().y - galley.size().y / 2.0),
-		galley.clone(),
-		text,
+	// The badge owns the right end of the pill. The title is clipped before that slot, so a
+	// long or measured-differently word can never run under the count.
+	let badge_left = rect.right() - badge_width - 4.0;
+	let title_clip = egui::Rect::from_min_max(
+		egui::pos2(rect.left(), rect.top()),
+		egui::pos2(badge_left.max(left), rect.bottom()),
 	);
+	ui.painter()
+		.with_clip_rect(title_clip)
+		.galley_with_override_text_color(
+			egui::pos2(left, rect.center().y - galley.size().y / 2.0),
+			galley.clone(),
+			text,
+		);
 	if let Some(badge) = badge {
+		// The count sits in the reserved slot at the right end of the pill.
 		let pill = egui::Rect::from_center_size(
-			egui::pos2(
-				left + galley.size().x + 6.0 + badge_width / 2.0 - 3.0,
-				rect.center().y,
-			),
+			egui::pos2(rect.right() - badge_width / 2.0 - 2.0, rect.center().y),
 			vec2(badge.size().x.max(8.0) + 8.0, 16.0),
 		);
 		painter.rect_filled(pill, 8, colors.badge_fill());

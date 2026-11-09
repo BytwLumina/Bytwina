@@ -372,7 +372,6 @@ categories-paint-shelf-rule-media-loaded-posts = Medya · yüklenen gönderiler
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Sunucu ses kanalı
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Sahne kanalı · uygulanmadı
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Metin kanalı
 # Context: paint_shelf_rule
@@ -4874,3 +4873,44 @@ new-message-hint = Bir doğrudan mesaj veya grup başlatmak için arkadaş ekley
 new-message-no-people-found = Bu aramayla eşleşen kimse yok.
 new-message-create = Mesaj Oluştur
 new-message-cancel = İptal
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Kanallar
+events-tab-events = Etkinlikler
+events-banner-open-events = Etkinlikler sekmesini aç
+events-empty = Planlanmış etkinlik yok
+events-no-guild = Etkinliklerini görmek için bir sunucu aç
+events-interest = İlgileniyorum
+events-interested = İlgileniyor
+events-panel-expired = Oturumun süresi doldu; etkinlikleri yüklemek için yeniden oturum aç.
+events-panel-challenged = Discord doğrulama istedi; doğrulamayı Discord'da tamamla.
+events-panel-forbidden = Discord bu hesabın bu etkinlikleri okumasına izin vermiyor.
+events-panel-rate-limited = Discord bu hesabı hız sınırına takıldı; birazdan tekrar dene.
+events-panel-network = Bağlantı başarısız oldu; etkinlikler yüklenmedi.
+events-panel-unknown = Discord değişikliği onaylamadı; yeniden denemeden önce etkinliği kontrol et.
+events-panel-unavailable = Etkinlikler yüklenemedi.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Sahne kanalı
+events-stage-not-live = Canlı sahne yok
+events-stage-speakers = Konuşmacılar
+events-stage-no-speakers = Sahnede kimse yok
+events-stage-audience = Seyirci
+events-stage-no-audience = Seyirci yok
+events-stage-asked-to-speak = Konuşmak istedi
+events-stage-make-speaker = Konuşmacı yap
+events-stage-move-to-audience = Seyirciye taşı
+events-stage-raise-hand = Elini kaldır
+events-stage-lower-hand = Elini indir
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = ilgili
+events-show-subscribers = Kimler katılıyor
+events-hide-subscribers = Listeyi gizle
+events-no-subscribers = Henüz kimse kaydolmadı
+events-stage-topic = Sahne konusu
+events-stage-start = Sahneyi başlat
+events-stage-end = Sahneyi bitir
+
+# The cover of a scheduled event.
+events-cover = Kapak görseli

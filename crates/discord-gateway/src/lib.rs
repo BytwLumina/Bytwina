@@ -1972,6 +1972,33 @@ async fn run_recoverable(
 											emit(Event::Typing(client_core::typing::Signal { channel:typing.channel_id,user:typing.user_id,timestamp:typing.timestamp }))?;
 										}
 									}
+									"GUILD_SCHEDULED_EVENT_CREATE" | "GUILD_SCHEDULED_EVENT_UPDATE" => {
+										// A malformed event update must not stop the connection.
+										if let Ok(event)=discord_protocol::stage::scheduled_event(packet.d.get().as_bytes()) {
+											emit(Event::ScheduledEvent(client_core::stage::Event::Upsert { guild:event.guild_id,event }))?;
+										}
+									}
+									"GUILD_SCHEDULED_EVENT_DELETE" => {
+										if let Ok((guild,event))=discord_protocol::stage::scheduled_event_delete(packet.d.get().as_bytes()) {
+											emit(Event::ScheduledEvent(client_core::stage::Event::Remove { guild,event }))?;
+										}
+									}
+									"GUILD_SCHEDULED_EVENT_USER_ADD" | "GUILD_SCHEDULED_EVENT_USER_REMOVE" => {
+										if let Ok((guild,event,member))=discord_protocol::stage::scheduled_event_user(packet.d.get().as_bytes()) {
+											let subscribed=packet.t.as_deref()==Some("GUILD_SCHEDULED_EVENT_USER_ADD");
+											emit(Event::ScheduledEvent(client_core::stage::Event::Subscriber { guild,event,member,subscribed }))?;
+										}
+									}
+									"STAGE_INSTANCE_CREATE" | "STAGE_INSTANCE_UPDATE" => {
+										if let Ok(stage)=discord_protocol::stage::stage_instance(packet.d.get().as_bytes()) {
+											emit(Event::ScheduledEvent(client_core::stage::Event::Stage { guild:stage.guild_id,stage }))?;
+										}
+									}
+									"STAGE_INSTANCE_DELETE" => {
+										if let Ok((guild,stage))=discord_protocol::stage::stage_instance_delete(packet.d.get().as_bytes()) {
+											emit(Event::ScheduledEvent(client_core::stage::Event::StageEnded { guild,stage }))?;
+										}
+									}
 									"CHANNEL_RECIPIENT_ADD" => {let d:RecipientAdded=decode(packet.d.get().as_bytes()).map_err(|_|Failure::Protocol)?;shared_presence.add_recipient(d.user.id);emit(Event::RecipientAdded {channel:d.channel_id,user:d.user.into_model()})?;}
 									"CHANNEL_RECIPIENT_REMOVE" => {let d:RecipientRemoved=decode(packet.d.get().as_bytes()).map_err(|_|Failure::Protocol)?;if owner_id==Some(d.user.id) {calls.allowed.remove(&d.channel_id);}emit(Event::RecipientRemoved {channel:d.channel_id,user:d.user.id})?;}
 									"USER_NOTE_UPDATE" => {

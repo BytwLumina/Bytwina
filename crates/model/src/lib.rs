@@ -36,6 +36,10 @@ pub use reading_preferences::ReadingPreferences;
 mod cache_preferences;
 pub use cache_preferences::*;
 pub mod badges;
+pub mod public_badges;
+pub use public_badges::AccountFlags;
+pub mod stage;
+pub use stage::*;
 mod cosmetics;
 pub use cosmetics::*;
 mod profile;
@@ -121,6 +125,9 @@ pub struct User {
 	/// Service-supplied avatar decoration and nameplate; display-only, never persisted.
 	#[serde(default, skip)]
 	pub cosmetics: Option<Box<Cosmetics>>,
+	/// Service-supplied public account flags; the source of the badges shown beside a name.
+	#[serde(default)]
+	pub flags: AccountFlags,
 }
 impl User {
 	pub fn account_label(&self) -> Option<&'static str> {
@@ -262,6 +269,7 @@ impl SavedAccount {
 	/// Avatar lookups and name rows reuse the ordinary user widgets.
 	pub fn user(&self) -> User {
 		User {
+			flags: crate::AccountFlags::default(),
 			kind: AccountKind::Human,
 			webhook: false,
 			id: self.id,
@@ -1102,6 +1110,7 @@ mod roster_identity_tests {
 
 	fn user(name: &str) -> User {
 		User {
+			flags: crate::AccountFlags::default(),
 			id: Id(2),
 			name: name.into(),
 			avatar: None,

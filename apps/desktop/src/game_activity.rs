@@ -982,6 +982,7 @@ mod tests {
 
 	fn user() -> User {
 		User {
+			flags: model::AccountFlags::default(),
 			primary_guild: None,
 			cosmetics: None,
 			id: model::Id(1),

@@ -371,7 +371,6 @@ categories-paint-shelf-rule-media-loaded-posts = Mídia · postagens carregadas
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Canal de voz do servidor
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Canal de palco · não implementado
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Canal de texto
 # Context: paint_shelf_rule
@@ -4888,3 +4887,44 @@ new-message-hint = Adicione amigos para iniciar uma mensagem direta ou um grupo.
 new-message-no-people-found = Ninguém corresponde a essa pesquisa.
 new-message-create = Criar mensagem
 new-message-cancel = Cancelar
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Canais
+events-tab-events = Eventos
+events-banner-open-events = Abrir a aba de eventos
+events-empty = Nenhum evento agendado
+events-no-guild = Abra um servidor para ver os eventos dele
+events-interest = Estou interessado
+events-interested = Interessado
+events-panel-expired = A sessão expirou; entre novamente para carregar os eventos.
+events-panel-challenged = O Discord pediu uma verificação; conclua-a no Discord.
+events-panel-forbidden = O Discord não permite que esta conta leia estes eventos.
+events-panel-rate-limited = O Discord está limitando esta conta; tente novamente em instantes.
+events-panel-network = A conexão falhou; os eventos não foram carregados.
+events-panel-unknown = O Discord não confirmou a alteração; verifique o evento antes de tentar de novo.
+events-panel-unavailable = Não foi possível carregar os eventos.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Canal de palco
+events-stage-not-live = Nenhum palco ao vivo
+events-stage-speakers = Palestrantes
+events-stage-no-speakers = Ninguém está no palco
+events-stage-audience = Plateia
+events-stage-no-audience = Ninguém está na plateia
+events-stage-asked-to-speak = Pediu a palavra
+events-stage-make-speaker = Tornar palestrante
+events-stage-move-to-audience = Mover para a plateia
+events-stage-raise-hand = Levantar a mão
+events-stage-lower-hand = Baixar a mão
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = interessados
+events-show-subscribers = Quem vai participating
+events-hide-subscribers = Ocultar a lista
+events-no-subscribers = Ninguém se inscreveu ainda
+events-stage-topic = Tema do palco
+events-stage-start = Iniciar palco
+events-stage-end = Encerrar palco
+
+# The cover of a scheduled event.
+events-cover = Imagem de capa

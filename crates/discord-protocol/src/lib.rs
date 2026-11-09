@@ -39,6 +39,7 @@ pub mod server_settings;
 pub mod settings_update;
 pub mod soundboard;
 pub mod spotify;
+pub mod stage;
 pub mod stickers;
 pub mod stream;
 pub mod thread_members;
@@ -156,7 +157,17 @@ impl UserDto {
 			self.collectibles,
 			self.display_name_styles,
 		);
+		// The public flags drive the badges shown beside a name; the private flags only
+		// add what the service already exposes publicly.
+		let flags = model::AccountFlags::new(
+			self.public_flags | self.flags,
+			match self.premium_type {
+				model::Patch::Value(tier) => tier,
+				model::Patch::Absent | model::Patch::Null => 0,
+			},
+		);
 		User {
+			flags,
 			kind: if self.bot && (self.public_flags | self.flags) & (1 << 16) != 0 {
 				model::AccountKind::VerifiedBot
 			} else if self.bot {
@@ -2218,6 +2229,9 @@ pub struct VoiceStateDto {
 	pub deaf: bool,
 	#[serde(default, deserialize_with = "lossy::null_default")]
 	pub suppress: bool,
+	/// A stage member asked to speak; the service stamps the moment.
+	#[serde(default)]
+	pub request_to_speak_timestamp: Option<crate::Timestamp>,
 	#[serde(default, deserialize_with = "lossy::null_default")]
 	pub self_video: bool,
 	#[serde(default, deserialize_with = "lossy::null_default")]

@@ -373,7 +373,6 @@ categories-paint-shelf-rule-media-loaded-posts = 媒體 · 已載入貼文
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = 伺服器語音頻道
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = 舞台頻道 · 尚未實作
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = 文字頻道
 # Context: paint_shelf_rule
@@ -4986,3 +4985,44 @@ new-message-hint = 新增好友以開始私訊或群組。
 new-message-no-people-found = 沒有符合的結果。
 new-message-create = 建立訊息
 new-message-cancel = 取消
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = 頻道
+events-tab-events = 活動
+events-banner-open-events = 開啟活動分頁
+events-empty = 沒有排定的活動
+events-no-guild = 開啟伺服器即可查看其活動
+events-interest = 我有興趣
+events-interested = 已感興趣
+events-panel-expired = 工作階段已過期，請重新登入以載入活動。
+events-panel-challenged = Discord 要求驗證，請在 Discord 中完成。
+events-panel-forbidden = Discord 不允許此帳號讀取這些活動。
+events-panel-rate-limited = Discord 正在限制此帳號，請稍後再試。
+events-panel-network = 連線失敗，未能載入活動。
+events-panel-unknown = Discord 未確認此變更，請先檢查活動再重試。
+events-panel-unavailable = 無法載入活動。
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = 舞台頻道
+events-stage-not-live = 沒有正在進行的舞台
+events-stage-speakers = 講者
+events-stage-no-speakers = 舞台上沒有人
+events-stage-audience = 觀眾
+events-stage-no-audience = 觀眾席沒有人
+events-stage-asked-to-speak = 已申請發言
+events-stage-make-speaker = 設為講者
+events-stage-move-to-audience = 移至觀眾席
+events-stage-raise-hand = 舉手
+events-stage-lower-hand = 放下手
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = 感興趣
+events-show-subscribers = 誰會參加
+events-hide-subscribers = 隱藏列表
+events-no-subscribers = 還沒有人訂閱
+events-stage-topic = 舞台主題
+events-stage-start = 開始舞台
+events-stage-end = 結束舞台
+
+# The cover of a scheduled event.
+events-cover = 封面圖片

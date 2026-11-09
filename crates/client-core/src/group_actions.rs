@@ -434,6 +434,7 @@ mod tests {
 			generation: state.generation,
 			event: CoreEvent::Ready {
 				user: model::User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(1),

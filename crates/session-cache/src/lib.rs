@@ -1357,6 +1357,7 @@ mod tests {
 			id: Id(id),
 			channel: Id(1),
 			author: model::User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				avatar: None,

@@ -82,6 +82,11 @@ enum Candidate {
 		image_fallback: bool,
 		server: String,
 	},
+	/// A sticker is sent as its own message, so picking it never edits the draft text.
+	Sticker {
+		sticker: model::Sticker,
+		server: String,
+	},
 }
 
 pub(crate) fn user_mention_token(user: Id) -> String {
@@ -101,6 +106,7 @@ impl Candidate {
 			Candidate::Role { id, .. }
 			| Candidate::Channel { id, .. }
 			| Candidate::Custom { id, .. } => *id,
+			Candidate::Sticker { sticker, .. } => sticker.id,
 			Candidate::Mass { .. } | Candidate::Unicode { .. } => Id(0),
 		}
 	}
@@ -136,10 +142,23 @@ impl Candidate {
 				}
 				format!("<{}:{name}:{id}> ", if *animated { "a" } else { "" })
 			}
+			// A sticker cannot be written into the draft; the pick sends it directly.
+			Candidate::Sticker { .. } => String::new(),
 		}
 	}
 }
 impl Pick {
+	/// A sticker pick sends the sticker instead of editing the draft.
+	pub(crate) fn sticker(&self) -> Option<&model::Sticker> {
+		match &self.candidate {
+			Candidate::Sticker { sticker, .. } => Some(sticker),
+			_ => None,
+		}
+	}
+	/// The typed token this pick replaces, so a sent sticker can clear it.
+	pub(crate) fn range(&self) -> Range<usize> {
+		self.range.clone()
+	}
 	pub(crate) fn time_range(&self) -> Option<Range<usize>> {
 		matches!(self.candidate, Candidate::Time).then(|| self.range.clone())
 	}
@@ -427,6 +446,10 @@ fn query(draft: &str, cursor: usize) -> Option<(Range<usize>, &str, Kind)> {
 	Some((start..end, query, kind))
 }
 pub fn insert(draft: &mut String, pick: Pick, editing: bool, remaining: usize) -> Option<usize> {
+	// Stickers travel as their own message; the draft keeps the typed text.
+	if matches!(&pick.candidate, Candidate::Sticker { .. }) {
+		return None;
+	}
 	let replaced = draft.get(pick.range.clone())?;
 	if matches!(&pick.candidate, Candidate::Timestamp { expected, fingerprint, .. } if replaced != expected || crate::timestamp_picker::fingerprint(draft) != *fingerprint)
 	{
@@ -494,6 +517,10 @@ fn push_emoji(out: &mut Vec<Ranked>, key: (u8, u8, u64), candidate: impl FnOnce(
 	}
 }
 impl Menu {
+	/// Closes the list until the composer text changes again, like picking a row.
+	pub fn dismiss(&mut self) {
+		self.dismissed = true;
+	}
 	/// Whether [`Self::keys`] accepts Tab, so the composer must keep it from focus navigation.
 	pub fn claims_tab(&self) -> bool {
 		!self.dismissed
@@ -718,6 +745,47 @@ impl Menu {
 						push_emoji(&mut out, (rank, 1, index as u64), || Candidate::Unicode {
 							text,
 							code,
+						});
+					}
+				}
+				// Discord lists matching stickers in the same `:` list; picking one sends
+				// the sticker instead of writing text.
+				let mut seen = std::collections::HashSet::new();
+				let mut matching: Vec<(&model::Sticker, String)> = Vec::new();
+				let guilds = state.guilds.iter().filter_map(|guild| {
+					let stickers = guild
+						.stickers
+						.as_deref()
+						.filter(|stickers| !stickers.is_empty())?;
+					Some((stickers, guild.name.chars().take(120).collect::<String>()))
+				});
+				let packs = state.stickers.packs.iter().map(|pack| {
+					(
+						pack.stickers.as_slice(),
+						pack.name.chars().take(120).collect(),
+					)
+				});
+				let recents = [(
+					state.stickers.recent.as_slice(),
+					String::from("Recently Used"),
+				)];
+				for (list, server) in recents.into_iter().chain(guilds).chain(packs).take(64) {
+					for sticker in list {
+						if matching.len() >= 512 {
+							break;
+						}
+						if sticker.available && seen.insert(sticker.id) {
+							matching.push((sticker, server.clone()));
+						}
+					}
+				}
+				for (sticker, server) in matching {
+					let rank = rank(&query, &sticker.name, sticker.id)
+						.or_else(|| rank(&query, &sticker.tags, sticker.id));
+					if let Some(rank) = rank {
+						push_emoji(&mut out, (rank, 2, sticker.id.0), || Candidate::Sticker {
+							sticker: sticker.clone(),
+							server,
 						});
 					}
 				}
@@ -971,6 +1039,7 @@ fn row(
 	let text_left = icon.right() + 10.0;
 	let source = match candidate {
 		Candidate::Custom { server, .. } => Some(server.as_str()),
+		Candidate::Sticker { server, .. } => Some(server.as_str()),
 		Candidate::Role { .. } => Some("Role"),
 		_ => None,
 	};
@@ -1053,6 +1122,11 @@ fn row(
 			}
 			format!(":{name}:")
 		}
+		Candidate::Sticker { sticker, .. } => {
+			let mut child = ui.new_child(egui::UiBuilder::new().max_rect(icon));
+			avatars.sticker_image(&mut child, sticker, egui::Vec2::splat(24.0), demo);
+			sticker.name.clone()
+		}
 	};
 	let font = egui::FontId::new(15.0, crate::design::medium_family(ui.ctx()));
 	let galley = ui.painter().layout_no_wrap(
@@ -1108,6 +1182,11 @@ fn row(
 				Candidate::Channel { name, .. } => name.clone(),
 				Candidate::Unicode { code, .. } => (*code).to_owned(),
 				Candidate::Custom { name, server, .. } => format!("{name} from {server}"),
+				Candidate::Sticker {
+					sticker, server, ..
+				} => {
+					format!("{}, sticker from {server}", sticker.name)
+				}
 			},
 		)
 	});
@@ -1915,6 +1994,7 @@ mod tests {
 
 	fn user(id: u64, name: &str) -> User {
 		User {
+			flags: model::AccountFlags::default(),
 			id: Id(id),
 			name: name.into(),
 			avatar: None,
@@ -2151,6 +2231,45 @@ mod tests {
 				code: ":thumbsup:"
 			}
 		)));
+	}
+
+	#[test]
+	fn sticker_shortcode_sends_instead_of_editing_the_draft() {
+		let mut state = test_support::demo_state();
+		let (channel, guild) = state
+			.channels
+			.iter()
+			.find_map(|c| c.guild.map(|guild| (c.id, guild)))
+			.expect("demo needs a guild channel");
+		let index = state
+			.guilds
+			.iter()
+			.position(|g| g.id == guild)
+			.expect("guild mirror");
+		state.guilds[index].stickers = Some(vec![model::Sticker {
+			id: Id(4242),
+			name: "party_blob".into(),
+			description: String::new(),
+			tags: "dance party".into(),
+			format_type: 1,
+			guild_id: Some(guild),
+			pack_id: None,
+			available: true,
+		}]);
+		let mut menu = Menu::default();
+		menu.refresh(&state, channel, ":party_blob", Some(11), &[]);
+		let pick = (0..menu.candidates.len())
+			.filter_map(|at| menu.pick(at))
+			.find(|pick| pick.sticker().is_some())
+			.expect("the guild sticker joins `:` suggestions");
+		assert_eq!(pick.sticker().map(|sticker| sticker.id), Some(Id(4242)));
+		let mut draft = String::from(":party_blob");
+		assert_eq!(
+			insert(&mut draft, pick, false, 1000),
+			None,
+			"a sticker pick must not write text"
+		);
+		assert_eq!(draft, ":party_blob", "the typed draft stays untouched");
 	}
 }
 

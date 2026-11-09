@@ -1332,6 +1332,7 @@ mod tests {
 			auth: AuthState::Authenticated,
 			gateway_connected: true,
 			user: Some(User {
+				flags: model::AccountFlags::default(),
 				id: Id(1),
 				name: "Owner".into(),
 				avatar: None,
@@ -1567,6 +1568,7 @@ mod tests {
 				auth: AuthState::Authenticated,
 				gateway_connected: true,
 				user: Some(User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(1),
@@ -1728,6 +1730,7 @@ mod tests {
 			oversized.member = Some(Member {
 				roles: vec![],
 				user: User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(2),
@@ -1846,6 +1849,7 @@ mod tests {
 				auth: AuthState::Authenticated,
 				gateway_connected: true,
 				user: Some(User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(1),
@@ -2005,6 +2009,7 @@ mod tests {
 			auth: AuthState::Authenticated,
 			gateway_connected: true,
 			user: Some(User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				id: Id(1),
@@ -2023,6 +2028,7 @@ mod tests {
 				position: 0,
 				kind: 1,
 				recipients: vec![User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(3),
@@ -2296,6 +2302,7 @@ mod tests {
 				auth: AuthState::Authenticated,
 				gateway_connected: true,
 				user: Some(User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(1),
@@ -2314,6 +2321,7 @@ mod tests {
 					position: 0,
 					kind: 1,
 					recipients: vec![User {
+						flags: model::AccountFlags::default(),
 						primary_guild: None,
 						cosmetics: None,
 						id: Id(3),

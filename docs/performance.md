@@ -4,6 +4,20 @@ Recent synthetic/offline measurements are workload-specific. They do not establi
 performance, universal device results or application-wide memory bounds. The raw PR screenshot,
 log and per-run evidence archive has been removed; the summaries below retain the useful results.
 
+## Guild events panel and stage panel — November 9, 2026
+
+The events panel is a list, not a store, so its memory ceiling is explicit in the model:
+
+- 64 scheduled events and 64 stage instances per guild, 256 KiB of event text per guild.
+- 100 subscribers per event, 2048 voice presences across every channel of the session.
+- A guild's event list is read once per visit and replaced by the next read; the panel never
+  accumulates history. The subscriber list of one event is read only when the user opens it.
+- The stage panel draws the members of the open channel only. It reads no avatar, no banner and no
+  cover image, so opening a stage channel adds no media work to the frame.
+
+The panel is drawn from state the client core already holds, so a repaint costs one list walk per
+frame; nothing is parsed, decoded or measured while painting.
+
 ## Window drags on Windows — November 5, 2026
 
 Review follow-up: the measurements below describe the original `1f664628` implementation.

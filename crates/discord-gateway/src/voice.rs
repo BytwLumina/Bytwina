@@ -252,6 +252,7 @@ impl Calls {
 					mute: false,
 					deaf: false,
 					suppress: false,
+					request_to_speak_timestamp: None,
 					self_video: false,
 					self_stream: false,
 				},
@@ -966,6 +967,19 @@ impl Calls {
 			video: participant.video,
 			streaming: participant.streaming,
 		}))?;
+		// The stage panel needs the stage state of every member, not only the ones the
+		// voice roster keeps.
+		if let Some(channel) = state.channel_id
+			&& let Some(guild) = state.guild_id
+		{
+			emit(Event::ScheduledEvent(client_core::stage::Event::Presence {
+				guild,
+				channel,
+				user: state.user_id,
+				suppress: state.suppress,
+				request_to_speak: state.request_to_speak_timestamp.is_some(),
+			}))?;
+		}
 		if own && self.active.is_some() && !matches_active {
 			self.active = None;
 			self.active_guild = None;

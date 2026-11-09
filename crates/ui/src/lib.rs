@@ -80,9 +80,11 @@ mod pending;
 mod post_menu;
 mod preload;
 mod profiles;
+mod public_badges;
 mod slash_builtin;
 mod slash_commands;
 mod soundboard_ui;
+mod stage;
 mod stickers;
 mod timestamp_picker;
 /// Synthetic global profile used exclusively by the desktop's offline command adapter.
@@ -292,6 +294,8 @@ pub struct MessagingUi {
 	last_channel_recorded: Option<Id>,
 	join_server: join_server::JoinDialog,
 	folder_ui: guild_folders::FolderUi,
+	/// The guild events tab and banner.
+	events: stage::EventsUi,
 	rail_cache: notifications::RailCache,
 	composer_layout: composer_text::Layout,
 	channel_cache: categories::Cache,
@@ -1901,6 +1905,13 @@ impl MessagingUi {
 													state.demo,
 												);
 											}
+											// Public account badges come from the user's own
+											// flags, so every member shows them.
+											crate::public_badges::badge_row(
+												ui,
+												&member.user.flags,
+												14.0,
+											);
 											if let Some(tag) = server_tag {
 												profiles::server_tag(
 													ui,
@@ -2162,7 +2173,17 @@ impl MessagingUi {
 				if let Some(command) = state.request_sidebar_forum_posts(self.guild) {
 					commands.push(command);
 				}
-				let select = self.channel_list(ui, state);
+				if let Some(guild) = self.guild {
+					// The banner and the tab row belong to the guild, not to the channel list.
+					self.events.banner(ui, state, guild, language);
+					self.events.tabs(ui, language);
+				}
+				let select = if self.guild.is_some() && self.events.tab() == stage::Tab::Events {
+					self.events.panel(ui, state, self.guild, language, commands);
+					None
+				} else {
+					self.channel_list(ui, state)
+				};
 				if let Some((guild, channel, user)) = self.stream_preview_request.take()
 					&& let Some(command) = state.request_stream_preview(guild, channel, user)
 				{
@@ -3819,9 +3840,25 @@ impl MessagingUi {
                             edit_state.store(ctx, composer_id);
                             mention_changed = true;
                         }
-                        if let Some(pick) = mention_pick
-                            && let Some(cursor) = self.timestamp_picker.accept(draft, pick, timestamp_target, remaining)
-                        {
+                        if let Some(pick) = mention_pick {
+                            let sticker = pick.sticker().cloned();
+                            if let Some(sticker) = sticker {
+                                // Discord sends a picked sticker as its own message and never
+                                // writes anything into the draft.
+                                if editing_here {
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker";
+                                } else if self.upload_busy {
+                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker";
+                                } else if let Some(command) = state.prepare_sticker_send(&sticker) {
+                                    // The sent sticker replaces the typed `:` token.
+                                    draft.replace_range(pick.range(), "");
+                                    self.timeline.follow_latest(state);
+                                    commands.push(command);
+                                }
+                                self.mention_menu.dismiss();
+                            } else if let Some(cursor) =
+                                self.timestamp_picker.accept(draft, pick, timestamp_target, remaining)
+                            {
                             let mut edit_state =
                                 egui::text_edit::TextEditState::load(ctx, composer_id).unwrap_or_default();
                             edit_state
@@ -3831,6 +3868,7 @@ impl MessagingUi {
                                 )));
                             edit_state.store(ctx, composer_id);
                             mention_changed = true;
+                            }
                         }
 						if mention_enabled
 							&& let Some(cursor) = cursor
@@ -3952,8 +3990,24 @@ impl MessagingUi {
                         self.mention_menu
                             .refresh(state, channel, draft, mention_cursor, &mention_users);
                         if let Some(pick) = self.mention_menu.show(ui, composer_anchor, &mut self.avatars, demo)
-                            && let Some(cursor) = self.timestamp_picker.accept(draft, pick, timestamp_target, remaining)
                         {
+                            let sticker = pick.sticker().cloned();
+                            if let Some(sticker) = sticker {
+                                // A sticker pick sends the sticker; the draft text is untouched.
+                                if editing_here {
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker";
+                                } else if self.upload_busy {
+                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker";
+                                } else if let Some(command) = state.prepare_sticker_send(&sticker) {
+                                    // The sent sticker replaces the typed `:` token.
+                                    draft.replace_range(pick.range(), "");
+                                    self.timeline.follow_latest(state);
+                                    commands.push(command);
+                                }
+                                self.mention_menu.dismiss();
+                            } else if let Some(cursor) =
+                                self.timestamp_picker.accept(draft, pick, timestamp_target, remaining)
+                            {
                             output
                                 .state
                                 .cursor
@@ -3963,6 +4017,7 @@ impl MessagingUi {
                             output.state.clone().store(ctx, composer_id);
                             output.response.request_focus();
                             mention_changed = true;
+                            }
                         }
                         #[cfg(not(feature = "demo"))]
                         let slash_preview = false;
@@ -5360,6 +5415,22 @@ impl MessagingUi {
 						if let Some(command) = state.request_author_members(&author_lookup) {
 							commands.push(command);
 						}
+						// A stage channel shows the live stage above its conversation.
+						let stage_channel = state
+							.selected
+							.and_then(|id| state.channel(id))
+							.filter(|channel| channel.kind == 13)
+							.map(|channel| (channel.id, channel.guild));
+						if let Some((channel, guild)) = stage_channel {
+							self.events.stage_panel(
+								ui,
+								state,
+								channel,
+								guild,
+								self.language,
+								commands,
+							);
+						}
 						self.timeline.show_with_scroll(
 							ui,
 							state,
@@ -6658,6 +6729,7 @@ mod composer_tests {
 
 	fn edit_state() -> State {
 		let user = model::User {
+			flags: model::AccountFlags::default(),
 			id: Id(1),
 			name: "Alex".into(),
 			avatar: None,
@@ -8724,6 +8796,7 @@ mod composer_tests {
 					.map(|id| {
 						Some(model::MemberSlot::Person(model::Member {
 							user: model::User {
+								flags: model::AccountFlags::default(),
 								id: Id(id),
 								name: format!("Synthetic {id}"),
 								avatar: None,
@@ -8876,6 +8949,7 @@ mod composer_tests {
 			demo: true,
 			selected: Some(Id(1)),
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(1),
 				name: "You".into(),
 				avatar: None,
@@ -8914,6 +8988,7 @@ mod composer_tests {
 					.map(|id| {
 						Some(model::MemberSlot::Person(model::Member {
 							user: model::User {
+								flags: model::AccountFlags::default(),
 								id: Id(id),
 								name: format!("Synthetic {id}"),
 								avatar: None,
@@ -9274,6 +9349,7 @@ mod composer_tests {
 	fn profile_uses_open_conversation_not_browsed_sidebar_server() {
 		for guild in [None, Some(Id(10))] {
 			let user = model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(2),
 				name: "Synthetic".into(),
 				avatar: None,

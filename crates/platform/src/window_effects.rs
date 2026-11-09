@@ -23,6 +23,22 @@ pub struct Blur {
 	window: Arc<Window>,
 }
 
+/// Keeps the border of an undecorated window resizable.
+///
+/// Windows drops the resize frame from a window without decorations, so a drag on the
+/// border moves the window instead of resizing it. The app paints its own caption, so the
+/// frame is restored while the caption stays hidden.
+#[cfg(target_os = "windows")]
+pub fn keep_resize_border(window: &Window) -> Result<(), String> {
+	dwm::keep_resize_border(window)
+}
+
+/// Other platforms keep their system decorations, so there is nothing to restore.
+#[cfg(not(target_os = "windows"))]
+pub fn keep_resize_border(_window: &Window) -> Result<(), String> {
+	Ok(())
+}
+
 impl Blur {
 	/// Initialize once on the window thread, before rendering starts.
 	pub fn new(window: Arc<Window>) -> Self {

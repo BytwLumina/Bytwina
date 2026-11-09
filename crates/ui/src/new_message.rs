@@ -225,6 +225,7 @@ mod tests {
 		};
 		let people: Vec<model::User> = (0..2)
 			.map(|index| model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(20 + index),
 				name: format!("Friend {index}"),
 				avatar: None,

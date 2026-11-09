@@ -3508,16 +3508,20 @@ fn card_view(
 		});
 		let (icon_badges, text_badges): (Vec<_>, Vec<_>) =
 			shown.iter().partition(|b| b.icon_key().is_some());
+		// Public account badges come from the account's own flags, not the badge catalog.
+		let public_badges = model::public_badges::badges(&user.flags);
 		// The account can reach its hidden badges even when none are shown.
 		let manage_badges = own_card
 			&& icon_badges.is_empty()
 			&& catalog.is_some_and(|c| c.owned().next().is_some());
 		// The full profile lists badges inline after the username instead.
 		// With a status bubble in its place, the popout lists badges under the name instead.
-		if (!icon_badges.is_empty() || manage_badges) && !full && thought.is_none() {
+		if (!icon_badges.is_empty() || !public_badges.is_empty() || manage_badges)
+			&& !full && thought.is_none()
+		{
 			const BADGE: f32 = 22.0;
 			let right = banner.right() - PAD;
-			let count = icon_badges.len().max(1) as f32;
+			let count = (icon_badges.len() + public_badges.len()).max(1) as f32;
 			let width = (count * BADGE + (count - 1.0) * 4.0 + 12.0)
 				.min(right - avatar_rect.right() - 12.0);
 			let pill = Rect::from_min_max(
@@ -3541,6 +3545,9 @@ fn card_view(
 									badge_click =
 										Some((response.rect.left_bottom(), badge.number()));
 								}
+							}
+							for kind in &public_badges {
+								crate::public_badges::badge_icon(ui, *kind, BADGE);
 							}
 							if manage_badges {
 								let response = icons::button(
@@ -3718,6 +3725,9 @@ fn card_view(
 											Some((response.rect.left_bottom(), badge.number()));
 									}
 								}
+								for kind in &public_badges {
+									crate::public_badges::badge_icon(ui, *kind, 22.0);
+								}
 								if manage_badges {
 									let response = icons::button(
 										ui,
@@ -3739,7 +3749,11 @@ fn card_view(
 								)
 								.truncate(),
 							);
-							if thought.is_some() && (!icon_badges.is_empty() || manage_badges) {
+							if thought.is_some()
+								&& (!icon_badges.is_empty()
+									|| !public_badges.is_empty()
+									|| manage_badges)
+							{
 								ui.horizontal_wrapped(|ui| {
 									ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
 									for badge in &icon_badges {
@@ -3750,6 +3764,9 @@ fn card_view(
 											badge_click =
 												Some((response.rect.left_bottom(), badge.number()));
 										}
+									}
+									for kind in &public_badges {
+										crate::public_badges::badge_icon(ui, *kind, 20.0);
 									}
 									if manage_badges {
 										let response = icons::button(
@@ -4593,7 +4610,7 @@ pub fn synthetic(user: &User, guild: Option<Id>) -> model::UserProfile {
             .unwrap_or_default(),
 		mutual_friends: guild
 			.map(|_| {
-				vec![User {
+				vec![User { flags: model::AccountFlags::default(),
 					id: Id(42),
 					name: "Mutual friend".into(),
 					avatar: None,

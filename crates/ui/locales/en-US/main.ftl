@@ -372,7 +372,6 @@ categories-paint-shelf-rule-media-loaded-posts = Media · loaded posts
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Server voice channel
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Stage channel · not implemented
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Text channel
 # Context: paint_shelf_rule
@@ -5324,3 +5323,75 @@ lib-status-edit-kept-wait-for-your-current-message-and-connection-and-enter-none
 lib-status-this-view-has-no-message-box-so-the-mention-was-not-added = This view has no message box, so the mention was not added.
 
 extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed = Result discarded because the conversation or draft changed.
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Channels
+events-tab-events = Events
+events-banner-open-events = Open the events tab
+events-empty = No scheduled events
+events-no-guild = Open a server to see its events
+events-interest = I'm interested
+events-interested = Interested
+events-panel-expired = The session expired; sign in again to load events.
+events-panel-challenged = Discord asked for verification; complete it in Discord.
+events-panel-forbidden = Discord does not allow this account to read these events.
+events-panel-rate-limited = Discord is rate limiting this account; try again shortly.
+events-panel-network = The connection failed; the events were not loaded.
+events-panel-unknown = Discord did not confirm the change; check the event before retrying.
+events-panel-unavailable = The events could not be loaded.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Stage channel
+events-stage-not-live = No stage is live
+events-stage-speakers = Speakers
+events-stage-no-speakers = No one is on the stage
+events-stage-audience = Audience
+events-stage-no-audience = Nobody is in the audience
+events-stage-asked-to-speak = Asked to speak
+events-stage-make-speaker = Make speaker
+events-stage-move-to-audience = Move to audience
+events-stage-raise-hand = Raise hand
+events-stage-lower-hand = Lower hand
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = going
+events-show-subscribers = Who is going
+events-hide-subscribers = Hide the list
+events-no-subscribers = Nobody has subscribed yet
+events-stage-topic = Stage topic
+events-stage-start = Start stage
+events-stage-end = End stage
+
+# The cover of a scheduled event.
+events-cover = Cover image
+
+public-badge-staff = Discord Employee
+public-badge-partner = Partnered Server Owner
+public-badge-hypesquad = HypeSquad Events Member
+public-badge-bug-hunter-1 = Bug Hunter Level 1
+public-badge-house-bravery = House Bravery Member
+public-badge-house-brilliance = House Brilliance Member
+public-badge-house-balance = House Balance Member
+public-badge-early-supporter = Early Nitro Supporter
+public-badge-bug-hunter-2 = Bug Hunter Level 2
+public-badge-verified-bot = Verified Bot
+public-badge-verified-developer = Early Verified Bot Developer
+public-badge-certified-moderator = Moderator Programs Alumni
+public-badge-active-developer = Active Developer
+public-badge-nitro = Nitro Subscriber
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Discord Employee
+public-badge-partner = Partnered Server Owner
+public-badge-hypesquad = HypeSquad Events Member
+public-badge-bug-hunter-1 = Bug Hunter Level 1
+public-badge-house-bravery = House Bravery Member
+public-badge-house-brilliance = House Brilliance Member
+public-badge-house-balance = House Balance Member
+public-badge-early-supporter = Early Nitro Supporter
+public-badge-bug-hunter-2 = Bug Hunter Level 2
+public-badge-verified-bot = Verified Bot
+public-badge-verified-developer = Early Verified Bot Developer
+public-badge-certified-moderator = Moderator Programs Alumni
+public-badge-active-developer = Active Developer
+public-badge-nitro = Nitro Subscriber

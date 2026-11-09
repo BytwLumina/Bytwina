@@ -13,6 +13,7 @@ pub mod guild_creation;
 pub mod guild_folders;
 pub mod permissions;
 pub mod soundboard;
+pub mod stage;
 pub mod stickers;
 pub use permissions::ChannelAccess;
 #[cfg(test)]
@@ -170,6 +171,54 @@ pub enum Command {
 		parent: Id,
 		guild: Id,
 		offset: usize,
+		request: u64,
+	},
+	/// Read one guild's scheduled events.
+	ScheduledEvents {
+		guild: Id,
+		request: u64,
+	},
+	/// Set or clear this account's interest in one scheduled event.
+	ScheduledEventInterest {
+		guild: Id,
+		event: Id,
+		interested: bool,
+		request: u64,
+	},
+	/// Ask to speak in a stage channel, or take the hand back.
+	StageRequestToSpeak {
+		guild: Id,
+		channel: Id,
+		/// The member asking; always this account.
+		user: Id,
+		asking: bool,
+		request: u64,
+	},
+	/// A host moves one member between the stage and the audience.
+	StageModerate {
+		guild: Id,
+		channel: Id,
+		user: Id,
+		speaker: bool,
+		request: u64,
+	},
+	/// Read the members subscribed to one scheduled event.
+	ScheduledEventSubscribers {
+		guild: Id,
+		event: Id,
+		request: u64,
+	},
+	/// A host starts a stage in one stage channel.
+	StageInstanceCreate {
+		guild: Id,
+		channel: Id,
+		topic: String,
+		request: u64,
+	},
+	/// A host ends the stage of one stage channel.
+	StageInstanceDelete {
+		guild: Id,
+		channel: Id,
 		request: u64,
 	},
 	Archives {
@@ -575,6 +624,8 @@ pub enum Event {
 		request: u64,
 		result: Result<model::forum::Page, auth::Failure>,
 	},
+	/// A guild's scheduled events and live stages.
+	ScheduledEvent(stage::Event),
 	Search {
 		channel: Id,
 		request: u64,
@@ -818,6 +869,8 @@ pub struct State {
 	pub posts: forum::Posts,
 	/// The forum on screen, for its once-per-visit acknowledgement and card boundary.
 	pub forum_visit: Option<forum::Visit>,
+	/// The guilds' scheduled events and live stages; session memory only.
+	pub events: stage::Events,
 	pub archived_thread: Option<Id>,
 	pub thread_starter: thread_starter::Starter,
 	pub thread_previews: thread_previews::Previews,
@@ -1065,6 +1118,7 @@ impl Default for State {
 			posting: forum::Posting::default(),
 			posts: forum::Posts::default(),
 			forum_visit: None,
+			events: Default::default(),
 			archived_thread: None,
 			thread_starter: Default::default(),
 			thread_previews: Default::default(),
@@ -2737,6 +2791,10 @@ impl State {
 			self.local_game_activity = Default::default();
 			self.invalidate_messaging_permissions(None);
 			self.interrupt_own_profile();
+		}
+		if let Event::ScheduledEvent(event) = &envelope.event {
+			self.events.apply(event.clone());
+			return;
 		}
 		if let Event::Typing(signal) = &envelope.event {
 			self.observe_typing_at(
@@ -5924,6 +5982,7 @@ mod tests {
 				Event::Ready {
 					permissions: model::permissions::Snapshot::default(),
 					user: User {
+						flags: model::AccountFlags::default(),
 						primary_guild: None,
 						cosmetics: None,
 						id: Id(1),
@@ -6268,6 +6327,7 @@ mod tests {
 			id: Id(id),
 			channel: Id(1),
 			author: User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				id: Id(2),
@@ -6346,6 +6406,7 @@ mod tests {
 			Event::RecipientAdded {
 				channel: Id(1),
 				user: User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(3),
@@ -6690,6 +6751,7 @@ mod tests {
 				Event::Ready {
 					permissions: model::permissions::Snapshot::default(),
 					user: User {
+						flags: model::AccountFlags::default(),
 						primary_guild: None,
 						cosmetics: None,
 						id: Id(2),

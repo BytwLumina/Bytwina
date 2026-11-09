@@ -2389,6 +2389,11 @@ impl Desktop {
 			use winit::platform::windows::{CornerPreference, WindowExtWindows as _};
 			window.set_corner_preference(CornerPreference::Round);
 			align_undecorated_surface(&window);
+			// Without the thick frame Windows turns a border drag into a caption drag, so the
+			// window would move instead of resize.
+			if let Err(error) = platform::window_effects::keep_resize_border(&window) {
+				eprintln!("Window resize border: {error}");
+			}
 		}
 		// The GPU surface and X11 visual are selected at startup. Opaque launches
 		// keep the same native/compositor path as builds without window effects.
@@ -6971,6 +6976,10 @@ impl eframe::App for Desktop {
 		if self.window.is_decorated() != self.messaging.hide_title_bar {
 			self.window.set_decorations(self.messaging.hide_title_bar);
 			align_undecorated_surface(&self.window);
+			// The thick frame does not survive the decoration change on its own.
+			if let Err(error) = platform::window_effects::keep_resize_border(&self.window) {
+				eprintln!("Window resize border: {error}");
+			}
 		}
 		#[cfg(target_os = "macos")]
 		if let Err(error) =

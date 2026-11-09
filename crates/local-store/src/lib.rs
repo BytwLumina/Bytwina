@@ -1362,6 +1362,7 @@ impl LocalStore {
 				id: parse(row.get(0)?)?,
 				channel,
 				author: User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: parse(row.get(1)?)?,
@@ -3309,6 +3310,7 @@ mod tests {
 		assert!(messages[0].mentions.is_empty());
 		assert_eq!(store.load_drafts(Id(1)).unwrap()[&Id(2)], "kept draft");
 		messages[0].mentions = vec![User {
+			flags: model::AccountFlags::default(),
 			primary_guild: None,
 			cosmetics: None,
 			id: Id(5),
@@ -3515,6 +3517,7 @@ mod tests {
 				id: Id(100),
 				channel: Id(channel),
 				author: User {
+					flags: model::AccountFlags::default(),
 					primary_guild: None,
 					cosmetics: None,
 					id: Id(1),

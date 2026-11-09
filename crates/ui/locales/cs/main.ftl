@@ -371,7 +371,6 @@ categories-paint-shelf-rule-media-loaded-posts = Média · načtené příspěvk
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Hlasový kanál serveru
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Pódium · není implementováno
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Textový kanál
 # Context: paint_shelf_rule
@@ -4977,3 +4976,44 @@ new-message-hint = Přidejte přátele a začněte přímou zprávu nebo skupinu
 new-message-no-people-found = Nikdo neodpovídá hledání.
 new-message-create = Vytvořit zprávu
 new-message-cancel = Zrušit
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Kanály
+events-tab-events = Události
+events-banner-open-events = Otevřít kartu událostí
+events-empty = Žádné naplánované události
+events-no-guild = Otevřete server a uvidíte jeho události
+events-interest = Zajímá mě
+events-interested = Zajímá mě
+events-panel-expired = Relace vypršela; znovu se přihlaste, aby se načetly události.
+events-panel-challenged = Discord vyžádal ověření; dokončete ho v Discordu.
+events-panel-forbidden = Discord nedovoluje tomuto účtu číst tyto události.
+events-panel-rate-limited = Discord omezuje tento účet; zkuste to znovu za chvíli.
+events-panel-network = Připojení selhalo; události se nenačetly.
+events-panel-unknown = Discord nepotvrdil změnu; před opakováním zkontrolujte událost.
+events-panel-unavailable = Události se nepodařilo načíst.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Kanál scény
+events-stage-not-live = Živá scéna není
+events-stage-speakers = Řečníci
+events-stage-no-speakers = Na scéně nikdo není
+events-stage-audience = Diváci
+events-stage-no-audience = V sále nikdo není
+events-stage-asked-to-speak = Chtěl mluvit
+events-stage-make-speaker = Pozvat na scénu
+events-stage-move-to-audience = Přesunout do sálu
+events-stage-raise-hand = Zvednout ruku
+events-stage-lower-hand = Položit ruku
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = zájemců
+events-show-subscribers = Kdo přijde
+events-hide-subscribers = Skrýt seznam
+events-no-subscribers = Zatím se nikdo nepřihlásil
+events-stage-topic = Téma scény
+events-stage-start = Zahájit scénu
+events-stage-end = Ukončit scénu
+
+# The cover of a scheduled event.
+events-cover = Obrázek na titulku

@@ -248,6 +248,7 @@ mod tests {
 	fn state() -> State {
 		State {
 			user: Some(User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				id: Id(1),
@@ -295,6 +296,7 @@ mod tests {
 			id: Id(100),
 			channel: Id(channel),
 			author: User {
+				flags: model::AccountFlags::default(),
 				primary_guild: None,
 				cosmetics: None,
 				id: Id(user),

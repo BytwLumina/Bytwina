@@ -371,7 +371,6 @@ categories-paint-shelf-rule-media-loaded-posts = Media · załadowane posty
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Kanał głosowy serwera
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Kanał sceniczny · nie zaimplementowany
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Kanał tekstowy
 # Context: paint_shelf_rule
@@ -4890,3 +4889,44 @@ new-message-hint = Dodaj znajomych, aby rozpocząć wiadomość prywatną lub gr
 new-message-no-people-found = Nikt nie pasuje do tego wyszukiwania.
 new-message-create = Utwórz wiadomość
 new-message-cancel = Anuluj
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Kanały
+events-tab-events = Wydarzenia
+events-banner-open-events = Otwórz kartę wydarzeń
+events-empty = Brak zaplanowanych wydarzeń
+events-no-guild = Otwórz serwer, aby zobaczyć jego wydarzenia
+events-interest = Jestem zainteresowany
+events-interested = Zainteresowany
+events-panel-expired = Sesja wygasła; zaloguj się ponownie, aby wczytać wydarzenia.
+events-panel-challenged = Discord poprosił o weryfikację; ukończ ją w Discordzie.
+events-panel-forbidden = Discord nie pozwala temu kontu czytać tych wydarzeń.
+events-panel-rate-limited = Discord ogranicza to konto; spróbuj ponownie za chwilę.
+events-panel-network = Połączenie nie powiodło się; wydarzeń nie wczytano.
+events-panel-unknown = Discord nie potwierdził zmiany; sprawdź wydarzenie przed ponowieniem.
+events-panel-unavailable = Nie udało się wczytać wydarzeń.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Kanał sceny
+events-stage-not-live = Nie ma aktywnej sceny
+events-stage-speakers = Prelegenci
+events-stage-no-speakers = Nikt nie jest na scenie
+events-stage-audience = Publiczność
+events-stage-no-audience = Nikt nie jest na widowni
+events-stage-asked-to-speak = Poprosił o głos
+events-stage-make-speaker = Wprowadź na scenę
+events-stage-move-to-audience = Przenieś do publiczności
+events-stage-raise-hand = Podnieś rękę
+events-stage-lower-hand = Opuść rękę
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = zainteresowani
+events-show-subscribers = Kto idzie
+events-hide-subscribers = Ukryj listę
+events-no-subscribers = Nikt jeszcze się nie zapisał
+events-stage-topic = Temat sceny
+events-stage-start = Rozpocznij scenę
+events-stage-end = Zakończ scenę
+
+# The cover of a scheduled event.
+events-cover = Obrazek na okładce

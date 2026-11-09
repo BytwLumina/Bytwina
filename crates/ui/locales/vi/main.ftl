@@ -317,7 +317,7 @@ attachments-show-status-dismiss = Bỏ qua
 # Context: viewer
 attachments-viewer-a-download-is-already-active = Tải xuống đã hoạt động
 # Context: viewer
-attachments-viewer-cancel = Hủy bỏ
+attachments-viewer-cancel = Hủy
 # Context: viewer
 attachments-viewer-downloads-are-disabled-for-synthetic-attachments = Tải xuống bị vô hiệu hóa đối với các tệp đính kèm tổng hợp
 # Context: viewer
@@ -349,7 +349,7 @@ categories-category-header-channels = kênh
 # Context: category_header
 categories-category-header-collapse = Thu gọn
 # Context: category_header
-categories-category-header-collapsed = sụp đổ
+categories-category-header-collapsed = thu gọn
 # Context: category_header
 categories-category-header-expand = Mở rộng
 # Context: category_header
@@ -373,7 +373,6 @@ categories-paint-shelf-rule-media-loaded-posts = Phương tiện · bài viết 
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-server-voice-channel = Kênh thoại máy chủ
 # Context: paint_shelf_rule
-categories-paint-shelf-rule-stage-channel-not-implemented = Kênh sân khấu · chưa được triển khai
 # Context: paint_shelf_rule
 categories-paint-shelf-rule-text-channel = Kênh văn bản
 # Context: paint_shelf_rule
@@ -403,7 +402,7 @@ message-request-title = Yêu cầu tin nhắn
 
 ## crates/ui/src/channel_menu.rs
 # Context: context
-channel-menu-context-add-to-favorites = Thêm vào mục yêu thích
+channel-menu-context-add-to-favorites = Thêm vào yêu thích
 # Context: context
 channel-menu-context-copy-channel-id = Sao chép ID kênh
 # Context: context
@@ -423,13 +422,13 @@ channel-menu-context-invite-to-channel = Mời vào kênh
 # Context: context
 channel-menu-context-mark-as-read = Đánh dấu là đã đọc
 # Context: context
-channel-menu-context-mute-channel = Tắt tiếng kênh
+channel-menu-context-mute-channel = Tắt tiếng
 # Context: context
 channel-menu-context-notification-settings = Cài đặt thông báo
 # Context: context
-channel-menu-context-remove-from-favorites = Xóa khỏi mục yêu thích
+channel-menu-context-remove-from-favorites = Xóa khỏi yêu thích
 # Context: context
-channel-menu-context-unmute-channel = Bật tiếng kênh
+channel-menu-context-unmute-channel = Bật tiếng
 # Context: context
 channel-menu-context-until-i-turn-it-back-on = Cho đến khi tôi bật lại
 # Context: show
@@ -493,7 +492,7 @@ channel-menu-report-capacity-use-server-default = Sử dụng máy chủ mặc �
 # Context: show
 channel-menu-show-at-the-top-of-this-server-uses-server-permissions = Ở đầu máy chủ này · sử dụng quyền của máy chủ
 # Context: show
-channel-menu-show-cancel = Hủy bỏ
+channel-menu-show-cancel = Hủy
 # Context: show
 channel-menu-show-channel-settings-could-not-be-loaded = Không thể tải cài đặt kênh.
 # Context: show
@@ -517,7 +516,7 @@ channel-menu-show-retry = Thử lại
 # Context: show
 channel-menu-show-you-no-longer-have-permission-to-manage-this-channel = Bạn không còn có quyền quản lý kênh này nữa.
 # Context: sidebar_context
-channel-menu-sidebar-context-hide-muted-channels = Ẩn các kênh bị tắt tiếng
+channel-menu-sidebar-context-hide-muted-channels = Ẩn kênh bị tắt tiếng
 # Context: sidebar_context
 channel-menu-sidebar-context-invite-to-server = Mời vào máy chủ
 
@@ -717,7 +716,7 @@ components-show-media-reveal-spoiler-attachment = Tiết lộ tệp đính kèm 
 # Context: show
 contact-editor-show-add-something-to-remember = Thêm một điều gì đó để nhớ…
 # Context: show
-contact-editor-show-cancel = Hủy bỏ
+contact-editor-show-cancel = Hủy
 # Context: show
 contact-editor-show-connection-refreshed-reload-the-saved-note-before-saving-your-draft = Đã làm mới kết nối. Tải lại ghi chú đã lưu trước khi lưu; bản nháp của bạn được giữ lại.
 # Context: show
@@ -763,7 +762,7 @@ design-save-bar-reset = Đặt lại
 # Context: header
 dialog-header-close-dialog-esc = Đóng hộp thoại (Esc)
 # Context: module
-dialog-module-cancel = Hủy bỏ
+dialog-module-cancel = Hủy
 # Context: module
 dialog-module-delete = Xóa bỏ
 # Context: module
@@ -943,7 +942,7 @@ extensions-ui-consent-modal-allow-this-extension-to = Cho phép tiện ích mở
 # Context: consent_modal
 extensions-ui-consent-modal-by = qua
 # Context: consent_modal
-extensions-ui-consent-modal-cancel = Hủy bỏ
+extensions-ui-consent-modal-cancel = Hủy
 # Context: consent_modal
 extensions-ui-consent-modal-disabling-removes-the-extension-and-its-local-data-re-enabling = Việc tắt sẽ xóa tiện ích mở rộng và dữ liệu cục bộ của nó. Kích hoạt lại bắt đầu mới.
 # Context: consent_modal
@@ -1227,7 +1226,7 @@ forum-settings-slowmode-seconds = giây
 # Context: tag_editor
 forum-settings-tag-editor-add-tag = Thêm thẻ
 # Context: tag_editor
-forum-settings-tag-editor-cancel = Hủy bỏ
+forum-settings-tag-editor-cancel = Hủy
 # Context: tag_editor
 forum-settings-tag-editor-create-tag = Tạo thẻ
 # Context: tag_editor
@@ -1327,7 +1326,7 @@ forwarding-show-add-an-optional-message = Thêm một tin nhắn tùy chọn…
 # Context: show
 forwarding-show-attachment-or-embedded-content = Tệp đính kèm hoặc nội dung được nhúng
 # Context: show
-forwarding-show-cancel = Hủy bỏ
+forwarding-show-cancel = Hủy
 # Context: show
 forwarding-show-conversation = Cuộc hội thoại
 # Context: show
@@ -1385,7 +1384,7 @@ group-menu-menu-unmute-conversation = Bật tiếng cuộc trò chuyện
 # Context: menu
 group-menu-menu-unpin-dm = Bỏ ghim DM
 # Context: show
-group-menu-show-cancel = Hủy bỏ
+group-menu-show-cancel = Hủy
 # Context: show
 group-menu-show-change-group-icon = Thay đổi biểu tượng nhóm
 # Context: show
@@ -1407,9 +1406,9 @@ group-menu-show-you-will-need-an-invitation-to-rejoin = Bạn sẽ cần một l
 
 ## crates/ui/src/guild_folders.rs
 # Context: server_folders
-guild-folders-server-folders-cancel = Hủy bỏ
+guild-folders-server-folders-cancel = Hủy
 # Context: server_folders
-guild-folders-server-folders-collapsed = sụp đổ
+guild-folders-server-folders-collapsed = thu gọn
 # Context: server_folders
 guild-folders-server-folders-colour = Màu sắc
 # Context: server_folders
@@ -1421,15 +1420,15 @@ guild-folders-server-folders-folder-name-and-color = Tên thư mục và màu s�
 # Context: server_folders
 guild-folders-server-folders-folder-settings = Cài đặt thư mục
 # Context: server_folders
-guild-folders-server-folders-group-with-server = Nhóm với máy chủ
+guild-folders-server-folders-group-with-server = Nhóm cùng máy chủ
 # Context: server_folders
 guild-folders-server-folders-move-down = Di chuyển xuống
 # Context: server_folders
-guild-folders-server-folders-move-outside-folders = Di chuyển các thư mục bên ngoài
+guild-folders-server-folders-move-outside-folders = Di chuyển ra ngoài thư mục
 # Context: server_folders
 guild-folders-server-folders-move-up = Di chuyển lên
 # Context: server_folders
-guild-folders-server-folders-name-this-folder-and-pick-the-colour-shown-on-the = Đặt tên cho thư mục này và chọn màu hiển thị trên đường ray máy chủ.
+guild-folders-server-folders-name-this-folder-and-pick-the-colour-shown-on-the = Đặt tên cho thư mục này và chọn màu hiển thị trên thanh máy chủ.
 # Context: server_folders
 guild-folders-server-folders-refresh-folders-from-discord = Làm mới thư mục từ Discord
 # Context: server_folders
@@ -1443,7 +1442,7 @@ guild-folders-server-folders-sync = Đồng bộ hóa…
 # Context: server_folders
 guild-folders-server-folders-syncing-server-folders-with-discord = Đồng bộ hóa thư mục máy chủ với Discord
 # Context: server_folders
-guild-folders-server-folders-ungroup-servers = Tách nhóm máy chủ
+guild-folders-server-folders-ungroup-servers = Bỏ nhóm máy chủ
 
 ## crates/ui/src/invites.rs
 # Context: show
@@ -1539,7 +1538,7 @@ join-server-customize-upload-server-icon = Biểu tượng máy chủ tải lên
 # Context: show_join
 join-server-show-join-back = Quay lại
 # Context: show_join
-join-server-show-join-cancel = Hủy bỏ
+join-server-show-join-cancel = Hủy
 # Context: show_join
 join-server-show-join-enter-an-invite-below-to-join-an-existing-server = Nhập lời mời bên dưới để tham gia máy chủ hiện có.
 # Context: show_join
@@ -1605,7 +1604,7 @@ lib-ime-updates-text-drop-files-to-attach = Thả tập tin để đính kèm
 # Context: ime_updates_text
 lib-ime-updates-text-editing-message = Chỉnh sửa tin nhắn
 # Context: ime_updates_text
-lib-ime-updates-text-editing-this-message-is-unavailable-your-text-is-kept-until = Chỉnh sửa tin nhắn này không có sẵn. Văn bản của bạn được giữ cho đến khi bạn hủy bỏ.
+lib-ime-updates-text-editing-this-message-is-unavailable-your-text-is-kept-until = Không thể chỉnh sửa tin nhắn này. Nội dung của bạn được giữ cho đến khi bạn hủy.
 # Context: ime_updates_text
 lib-ime-updates-text-message-unavailable-unsent-edit = Không có tin nhắn · chỉnh sửa chưa gửi
 # Context: ime_updates_text
@@ -1686,7 +1685,7 @@ main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord = Ng
 # Context: sign_in_screen
 main-sign-in-screen-bytwina = Bytwina
 # Context: ui
-main-ui-cancel = Hủy bỏ
+main-ui-cancel = Hủy
 # Context: ui
 main-ui-discord-com-temporary-login-window-passwords-and-2fa-never-leave = discord.com · cửa sổ đăng nhập tạm thời · mật khẩu và 2FA không bao giờ rời khỏi trang
 # Context: ui
@@ -1696,7 +1695,7 @@ main-ui-sign-in-to-discord = Đăng nhập vào Discord
 
 ## crates/ui/src/markdown.rs
 # Context: confirm_external_link
-markdown-confirm-external-link-cancel = Hủy bỏ
+markdown-confirm-external-link-cancel = Hủy
 # Context: confirm_external_link
 markdown-confirm-external-link-open-external-link = Mở liên kết bên ngoài?
 # Context: confirm_external_link
@@ -1999,7 +1998,7 @@ post-menu-noun-post = Bài đăng
 # Context: noun
 post-menu-noun-thread = Chủ đề
 # Context: show
-post-menu-show-cancel = Hủy bỏ
+post-menu-show-cancel = Hủy
 # Context: show
 post-menu-show-delete = Xóa bỏ
 # Context: show
@@ -2051,7 +2050,7 @@ profile-edit-preview-change-profile-picture = Thay đổi ảnh hồ sơ
 # Context: preview
 profile-edit-preview-preview = Xem trước
 # Context: show
-profile-edit-show-cancel = Hủy bỏ
+profile-edit-show-cancel = Hủy
 # Context: show
 profile-edit-show-check-character-limits-and-remove-control-characters-a-display-name = Kiểm tra giới hạn ký tự và loại bỏ các ký tự điều khiển. Tên hiển thị không thể chỉ chứa khoảng trắng.
 # Context: show
@@ -2089,7 +2088,7 @@ profiles-activity-verb-listening-to = Đang nghe
 # Context: activity_verb
 profiles-activity-verb-playing = Đang chơi
 # Context: activity_verb
-profiles-activity-verb-streaming = Truyền phát
+profiles-activity-verb-streaming = Đang Stream
 # Context: activity_verb
 profiles-activity-verb-watching = Đang xem
 # Context: more_menu
@@ -2286,7 +2285,7 @@ screen-body-show-cursor = Hiển thị con trỏ
 # Context: body
 screen-body-your-call-microphone-keeps-its-current-settings = Micrô cuộc gọi của bạn sẽ giữ nguyên cài đặt hiện tại.
 # Context: show
-screen-show-cancel = Hủy bỏ
+screen-show-cancel = Hủy
 # Context: show
 screen-show-choose-what-people-in-this-call-can-see = Chọn những gì mọi người trong cuộc gọi này có thể nhìn thấy.
 # Context: show
@@ -2312,7 +2311,7 @@ search-filters-show-bot = bot
 # Context: show
 search-filters-show-bot-2 = Bot
 # Context: show
-search-filters-show-cancel = Hủy bỏ
+search-filters-show-cancel = Hủy
 # Context: show
 search-filters-show-choose-author-type = Chọn loại tác giả
 # Context: show
@@ -2474,7 +2473,7 @@ server-admin-dialog-30-days = 30 ngày
 # Context: dialog
 server-admin-dialog-7-days = 7 ngày
 # Context: dialog
-server-admin-dialog-cancel = Hủy bỏ
+server-admin-dialog-cancel = Hủy
 # Context: dialog
 server-admin-dialog-delete-emoji = Xóa biểu tượng cảm xúc
 # Context: dialog
@@ -2502,7 +2501,7 @@ server-admin-emojis-animated = Hoạt ảnh
 # Context: emojis
 server-admin-emojis-animated-emoji = Biểu tượng cảm xúc hoạt hình
 # Context: emojis
-server-admin-emojis-cancel = Hủy bỏ
+server-admin-emojis-cancel = Hủy
 # Context: emojis
 server-admin-emojis-delete-emoji = Xóa biểu tượng cảm xúc
 # Context: emojis
@@ -2822,7 +2821,7 @@ server-integrations-copy-button-copied = Đã sao chép!
 # Context: copy_button
 server-integrations-copy-button-copy-webhook-url = Sao chép URL Webhook
 # Context: editor
-server-integrations-editor-cancel = Hủy bỏ
+server-integrations-editor-cancel = Hủy
 # Context: editor
 server-integrations-editor-channel = Kênh
 # Context: editor
@@ -2948,7 +2947,7 @@ server-invite-picker-your-invite-link-expires-in = Liên kết mời của bạn
 # Context: picker
 server-invite-picker-your-invite-link-never-expires = Liên kết mời của bạn không bao giờ hết hạn.
 # Context: settings
-server-invite-settings-cancel = Hủy bỏ
+server-invite-settings-cancel = Hủy
 # Context: settings
 server-invite-settings-expire-after = Hết hạn sau
 # Context: settings
@@ -3010,9 +3009,9 @@ server-menu-header-create-invite = Tạo lời mời
 # Context: header
 server-menu-header-reconnect-to-manage-this-server = Kết nối lại để quản lý máy chủ này.
 # Context: header
-server-menu-header-server-menu = Trình đơn máy chủ
+server-menu-header-server-menu = Menu máy chủ
 # Context: leave_item
-server-menu-leave-item-leave-server = Rời khỏi máy chủ
+server-menu-leave-item-leave-server = Rời máy chủ
 # Context: read_item
 server-menu-read-item-mark-as-read = Đánh dấu là đã đọc
 # Context: all_read_item
@@ -3020,21 +3019,21 @@ server-menu-all-read-item-mark-all-as-read = Đánh dấu tất cả là đã đ
 # Context: settings_item
 server-menu-settings-item-server-settings = Cài đặt máy chủ
 # Context: show
-server-menu-show-are-you-sure-you-want-to-leave = Bạn có chắc chắn muốn rời đi không
+server-menu-show-are-you-sure-you-want-to-leave = Bạn có chắc muốn rời
 # Context: show
-server-menu-show-cancel = Hủy bỏ
+server-menu-show-cancel = Hủy
 # Context: show
 server-menu-show-close = Đóng
 # Context: show
-server-menu-show-leave-server = Rời khỏi máy chủ?
+server-menu-show-leave-server = Rời máy chủ?
 # Context: show
-server-menu-show-leave-server-2 = Rời khỏi máy chủ
+server-menu-show-leave-server-2 = Rời máy chủ
 # Context: show
 server-menu-show-leaving = Rời đi…
 # Context: show
 server-menu-show-offline-preview-no-server-changes = Xem trước ngoại tuyến · không có thay đổi máy chủ
 # Context: show
-server-menu-show-you-will-not-be-able-to-rejoin-this-server-unless = Bạn sẽ không thể tham gia lại máy chủ này trừ khi bạn được mời lại.
+server-menu-show-you-will-not-be-able-to-rejoin-this-server-unless = Bạn sẽ không thể vào lại máy chủ này trừ khi được mời lại.
 
 ## crates/ui/src/server_roles.rs
 # Context: display
@@ -3159,7 +3158,7 @@ server-settings-channel-picker-unavailable-channel = Kênh không khả dụng
 # Context: delete_dialog
 server-settings-delete-dialog-are-you-sure-you-want-to-delete = Bạn có chắc chắn muốn xóa
 # Context: delete_dialog
-server-settings-delete-dialog-cancel = Hủy bỏ
+server-settings-delete-dialog-cancel = Hủy
 # Context: delete_dialog
 server-settings-delete-dialog-delete = Xóa bỏ
 # Context: delete_dialog
@@ -3293,7 +3292,7 @@ server-settings-timeout-picker-minutes = phút
 
 ## crates/ui/src/server_stickers.rs
 # Context: dialog
-server-stickers-dialog-cancel = Hủy bỏ
+server-stickers-dialog-cancel = Hủy
 # Context: dialog
 server-stickers-dialog-delete-sticker = Xóa nhãn dán
 # Context: dialog
@@ -3309,7 +3308,7 @@ server-stickers-show-add-custom-stickers-for-members-to-use-in-this-server = Th�
 # Context: show
 server-stickers-show-by = qua
 # Context: show
-server-stickers-show-cancel = Hủy bỏ
+server-stickers-show-cancel = Hủy
 # Context: show
 server-stickers-show-delete-sticker = Xóa nhãn dán
 # Context: show
@@ -3568,6 +3567,11 @@ settings-image-cache-clear-description = Xóa những hình ảnh đã tải xu�
 settings-image-cache-retention = Xóa hình ảnh không sử dụng sau
 # Context: image_cache_settings
 settings-image-cache-retention-description = Hình ảnh được lưu trong bộ nhớ đệm không hiển thị lại trong thời gian dài sẽ bị xóa khỏi đĩa.
+settings-image-cache-days =
+    { $count ->
+        [one] { $count } ngày
+       *[other] { $count } ngày
+    }
 # Context: image_cache_settings
 
 ## crates/ui/src/slash_commands.rs
@@ -3672,7 +3676,7 @@ theme-editor-description-the-area-around-the-message-box = Khu vực xung quanh 
 # Context: description
 theme-editor-description-the-conversation-timeline = Dòng thời gian trò chuyện
 # Context: description
-theme-editor-description-the-left-server-rail = Đường ray máy chủ bên trái
+theme-editor-description-the-left-server-rail = Thanh máy chủ bên trái
 # Context: description
 theme-editor-description-the-member-and-search-pane-on-the-right = Khung thành viên và tìm kiếm ở bên phải
 # Context: description
@@ -3828,7 +3832,7 @@ theme-editor-toolbar-working = Đang làm việc…
 
 ## crates/ui/src/thread_create.rs
 # Context: show
-thread-create-show-cancel = Hủy bỏ
+thread-create-show-cancel = Hủy
 # Context: show
 thread-create-show-create = Tạo
 # Context: show
@@ -3881,6 +3885,11 @@ timeline-message-actions-view-reactions = Xem phản ứng
 timeline-present-control-jump-to-present = Chuyển đến trình bày
 # Context: present_control
 timeline-present-control-new-messages-below-jump-to-present = Tin nhắn mới bên dưới · nhảy tới trình bày
+timeline-present-control-new-messages =
+    { $count ->
+        [one] { $count } tin nhắn mới
+       *[other] { $count } tin nhắn mới
+    }
 # Context: present_control
 # Context: show_system
 timeline-show-system-open-this-channels-threads = Mở chủ đề của kênh này
@@ -3926,6 +3935,16 @@ timeline-show-with-scroll-you-cannot-view-this-conversation = Bạn không thể
 timeline-starter-row-thread-started-from-this-message = Chủ đề bắt đầu từ tin nhắn này
 # Context: unread_banner
 timeline-unread-banner-unread-messages = Tin nhắn chưa đọc
+timeline-unread-banner-new-since =
+    { $count ->
+        [one] { $count } tin nhắn mới kể từ { $time }
+       *[other] { $count } tin nhắn mới kể từ { $time }
+    }
+timeline-unread-banner-new-since-more =
+    { $count ->
+        [one] { $count }+ tin nhắn mới kể từ { $time }
+       *[other] { $count }+ tin nhắn mới kể từ { $time }
+    }
 # Context: unread_banner
 timeline-unread-banner-mark-as-read = Đánh dấu là đã đọc
 # Context: unread_banner
@@ -4059,7 +4078,7 @@ user-menu-contents-unpin-dm = Bỏ ghim DM
 
 ## crates/ui/src/verification.rs
 # Context: show
-verification-show-cancel = Hủy bỏ
+verification-show-cancel = Hủy
 # Context: show
 verification-show-complete-the-check-to-join-this-server = Hoàn tất việc kiểm tra để tham gia máy chủ này.
 # Context: show
@@ -4083,7 +4102,7 @@ verification-show-verify = Xác minh
 # Context: show_player
 video-show-player-a-download-is-already-active = Tải xuống đã hoạt động
 # Context: show_player
-video-show-player-cancel = Hủy bỏ
+video-show-player-cancel = Hủy
 # Context: show_player
 video-show-player-downloads-are-disabled-for-synthetic-attachments = Tải xuống bị vô hiệu hóa đối với các tệp đính kèm tổng hợp
 # Context: show_player
@@ -4143,7 +4162,7 @@ voice-live-badge-live = TRỰC TIẾP
 # Context: live_badge
 voice-live-badge-live-2 = Trực tiếp
 # Context: live_badge
-voice-live-badge-streaming = Truyền phát
+voice-live-badge-streaming = STREAM
 # Context: microphone_preview_controls
 voice-microphone-preview-controls-hear-yourself-through-your-selected-speakers-use-headphones-to-avoid = Hãy lắng nghe chính mình thông qua các diễn giả đã chọn. Sử dụng tai nghe để tránh phản hồi.
 # Context: microphone_preview_controls
@@ -4181,7 +4200,7 @@ voice-stream-audio-controls-stream-volume = Âm lượng phát trực tuyến
 # Context: stream_tile
 voice-stream-tile-stream-audio = Truyền phát âm thanh
 # Context: stream_tile
-voice-stream-tile-stream-muted = Luồng bị tắt tiếng
+voice-stream-tile-stream-muted = Stream bị tắt tiếng
 # Context: voice_audio_controls
 voice-voice-audio-controls-microphone = Micrô
 # Context: voice_audio_controls
@@ -4274,7 +4293,7 @@ voice-voice-processing-controls-applies-to-calls-and-your-local-microphone-test 
 # Context: voice_processing_controls
 voice-voice-processing-controls-automatic-gain-control = Kiểm soát độ lợi tự động
 # Context: voice_processing_controls
-voice-voice-processing-controls-echo-cancellation = Hủy bỏ tiếng vang
+voice-voice-processing-controls-echo-cancellation = Khử tiếng vang
 # Context: voice_processing_controls
 voice-voice-processing-controls-hold-your-configured-shortcut-when-you-want-to-speak = Giữ phím tắt đã định cấu hình của bạn khi bạn muốn nói.
 # Context: voice_processing_controls
@@ -4326,7 +4345,7 @@ voice-voice-settings-popup-input = Đầu vào
 voice-voice-settings-popup-output = Đầu ra
 
 ## Audited indirect UI labels
-audio-control-cancel = Hủy bỏ
+audio-control-cancel = Hủy
 audio-control-pause = Tạm dừng
 audio-control-replay = Phát lại
 audio-control-retry = Thử lại
@@ -4502,7 +4521,7 @@ public-upload-add = Thêm vào bản nháp
 public-upload-copy = Sao chép liên kết
 public-upload-close = Đóng
 public-upload-cancel-upload = Hủy tải lên
-public-upload-cancel = Hủy bỏ
+public-upload-cancel = Hủy
 public-upload-draft-full = Bản nháp đã đầy; sao chép liên kết công khai trước khi đóng
 public-upload-leave = Rời khỏi sẽ hủy tải lên công khai và hủy liên kết của hộp thoại. Các tệp đã tải lên có thể vẫn còn trên máy chủ lưu trữ tệp; sao chép liên kết trước khi tiếp tục.
 public-upload-error-cancelled = Đã hủy tải lên công khai; byte nhận được có thể vẫn còn trên máy chủ tệp
@@ -4622,6 +4641,11 @@ settings-preload-on-hover-description = Tải cuộc trò chuyện, hồ sơ ho�
 settings-auto-idle = Đi nhàn rỗi khi đi xa
 settings-auto-idle-description = Hiển thị ở trạng thái Không hoạt động sau khoảng thời gian bên dưới mà không cần nhập bàn phím hoặc chuột hoặc ngay lập tức khi bạn khóa máy tính. Không phải trong các cuộc gọi thoại.
 settings-idle-after = Nhàn rỗi sau
+settings-idle-after-minutes =
+    { $count ->
+        [one] { $count } phút
+       *[other] { $count } phút
+    }
 
 profiles-board = Bảng
 profiles-board-unavailable = Bảng của hồ sơ này không có sẵn.
@@ -4872,7 +4896,7 @@ new-message-search = Tìm kiếm
 new-message-hint = Thêm bạn bè để bắt đầu tin nhắn trực tiếp hoặc một nhóm.
 new-message-no-people-found = Không ai phù hợp với tìm kiếm đó.
 new-message-create = Tạo tin nhắn
-new-message-cancel = Hủy bỏ
+new-message-cancel = Hủy
 
 # Context: viewer
 attachments-viewer-zoom-in = Phóng to
@@ -5041,24 +5065,24 @@ voice-fullscreen-exit-fullscreen = Thoát toàn màn hình
 voice-fullscreen-exit-fullscreen-esc = Thoát toàn màn hình (Esc)
 voice-fullscreen-control-fullscreen = Toàn màn hình
 voice-fullscreen-control-view-this-screen-share-in-fullscreen = Xem màn hình đang chia sẻ này ở chế độ toàn màn hình
-voice-stream-preview-popup-stream-preview = Xem trước luồng phát
-voice-stream-preview-popup-streaming-now = Đang phát trực tiếp
+voice-stream-preview-popup-stream-preview = Xem trước Stream
+voice-stream-preview-popup-streaming-now = Đang Stream
 voice-stream-preview-popup-preview-hidden-or-unavailable = Bản xem trước đang ẩn hoặc không khả dụng
 voice-stream-preview-popup-watching = Đang xem
-voice-stream-preview-popup-already-watching-this-stream = Bạn đang xem luồng phát này rồi
-voice-stream-preview-popup-join-this-voice-channel-before-watching = Hãy tham gia kênh thoại này trước khi xem
-voice-stream-preview-popup-this-stream-is-no-longer-live = Luồng phát này đã kết thúc
-voice-stream-preview-popup-could-not-join-this-streams-voice-channel = Không thể tham gia kênh thoại của luồng phát này
+voice-stream-preview-popup-already-watching-this-stream = Bạn đang xem Stream này rồi
+voice-stream-preview-popup-join-this-voice-channel-before-watching = Hãy tham gia kênh thoại này trước khi xem Stream
+voice-stream-preview-popup-this-stream-is-no-longer-live = Stream này đã kết thúc
+voice-stream-preview-popup-could-not-join-this-streams-voice-channel = Không thể tham gia kênh thoại của Stream này
 voice-stream-preview-popup-leave-the-current-call-before-watching-this-stream = Hãy rời cuộc gọi hiện tại trước khi xem luồng phát này
-voice-stream-preview-popup-this-stream-is-not-available-in-the-connected-voice-channel = Luồng phát này không khả dụng trong kênh thoại đang kết nối
+voice-stream-preview-popup-this-stream-is-not-available-in-the-connected-voice-channel = Stream này không khả dụng trong kênh thoại đang kết nối
 voice-tile-your-screen-local-preview = Màn hình của bạn · xem trước cục bộ
 voice-tile-screen-share-you-are-watching = Màn hình bạn đang xem
 voice-tile-click-or-press-escape-to-return-to-the-grid = Nhấp hoặc nhấn Escape để quay lại lưới
 voice-tile-click-to-enlarge = Nhấp để phóng to
-voice-watch-stream-watch-stream = Xem luồng phát
+voice-watch-stream-watch-stream = Xem Stream
 voice-screen-tile-your-screen = Màn hình của bạn
 voice-stream-tile-participant = Người tham gia
-voice-stream-tile-connecting-to-the-stream = Đang kết nối tới luồng phát…
+voice-stream-tile-connecting-to-the-stream = Đang kết nối tới Stream…
 voice-stream-tile-users-screen = Màn hình của { $name }
 voice-stream-overlay-controls-stop-watching = Ngừng xem
 voice-stream-overlay-controls-stream-audio = Âm thanh luồng phát
@@ -5296,3 +5320,75 @@ lib-status-edit-kept-wait-for-your-current-message-and-connection-and-enter-none
 lib-status-this-view-has-no-message-box-so-the-mention-was-not-added = Màn hình này không có ô tin nhắn nên không thêm được lượt nhắc.
 
 extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed = Đã bỏ kết quả vì cuộc trò chuyện hoặc bản nháp đã thay đổi.
+
+# Guild scheduled events and the stage panel.
+events-tab-channels = Kênh
+events-tab-events = Sự kiện
+events-banner-open-events = Mở tab sự kiện
+events-empty = Không có sự kiện nào đã lên lịch
+events-no-guild = Mở một máy chủ để xem sự kiện của nó
+events-interest = Tôi quan tâm
+events-interested = Đã quan tâm
+events-panel-expired = Phiên đăng nhập đã hết hạn; đăng nhập lại để tải sự kiện.
+events-panel-challenged = Discord yêu cầu xác minh; hãy hoàn tất trong Discord.
+events-panel-forbidden = Discord không cho phép tài khoản này đọc các sự kiện đó.
+events-panel-rate-limited = Discord đang giới hạn tài khoản này; hãy thử lại sau.
+events-panel-network = Kết nối thất bại; sự kiện chưa được tải.
+events-panel-unknown = Discord không xác nhận thay đổi; hãy kiểm tra sự kiện trước khi thử lại.
+events-panel-unavailable = Không thể tải sự kiện.
+
+# Guild scheduled events and the stage panel.
+categories-paint-shelf-rule-stage-channel = Kênh sân khấu
+events-stage-not-live = Không có sân khấu trực tiếp
+events-stage-speakers = Diễn giả
+events-stage-no-speakers = Không có ai trên sân khấu
+events-stage-audience = Khán giả
+events-stage-no-audience = Không có khán giả
+events-stage-asked-to-speak = Đã xin phát biểu
+events-stage-make-speaker = Mời lên sân khấu
+events-stage-move-to-audience = Chuyển xuống khán giả
+events-stage-raise-hand = Giơ tay
+events-stage-lower-hand = Hạ tay
+
+# Scheduled event subscribers and the host controls of a stage.
+events-going-label = quan tâm
+events-show-subscribers = Ai sẽ tham dự
+events-hide-subscribers = Ẩn danh sách
+events-no-subscribers = Chưa ai đăng ký
+events-stage-topic = Chủ đề sân khấu
+events-stage-start = Bắt đầu sân khấu
+events-stage-end = Kết thúc sân khấu
+
+# The cover of a scheduled event.
+events-cover = Ảnh bìa
+
+public-badge-staff = Nhân viên Discord
+public-badge-partner = Chủ sở hữu máy chủ đối tác
+public-badge-hypesquad = Thành viên HypeSquad Events
+public-badge-bug-hunter-1 = Bug Hunter Mức 1
+public-badge-house-bravery = Thành viên House Bravery
+public-badge-house-brilliance = Thành viên House Brilliance
+public-badge-house-balance = Thành viên House Balance
+public-badge-early-supporter = Người ủng hộ Nitro sớm
+public-badge-bug-hunter-2 = Bug Hunter Mức 2
+public-badge-verified-bot = Bot đã xác minh
+public-badge-verified-developer = Nhà phát triển bot xác minh sớm
+public-badge-certified-moderator = Cựu thành viên chương trình điều hành
+public-badge-active-developer = Nhà phát triển đang hoạt động
+public-badge-nitro = Người đăng ký Nitro
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Nhân viên Discord
+public-badge-partner = Chủ sở hữu máy chủ đối tác
+public-badge-hypesquad = Thành viên HypeSquad Events
+public-badge-bug-hunter-1 = Bug Hunter Mức 1
+public-badge-house-bravery = Thành viên House Bravery
+public-badge-house-brilliance = Thành viên House Brilliance
+public-badge-house-balance = Thành viên House Balance
+public-badge-early-supporter = Người ủng hộ Nitro sớm
+public-badge-bug-hunter-2 = Bug Hunter Mức 2
+public-badge-verified-bot = Bot đã xác minh
+public-badge-verified-developer = Nhà phát triển bot xác minh sớm
+public-badge-certified-moderator = Cựu thành viên chương trình điều hành
+public-badge-active-developer = Nhà phát triển đang hoạt động
+public-badge-nitro = Người đăng ký Nitro

@@ -337,6 +337,7 @@ mod tests {
 			id,
 			channel,
 			author: User {
+				flags: model::AccountFlags::default(),
 				id: Id(9),
 				name: "Synthetic".into(),
 				avatar: None,
