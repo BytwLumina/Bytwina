@@ -204,7 +204,9 @@ impl crate::State {
 				call.phase,
 				crate::voice::Phase::Connected | crate::voice::Phase::Waiting
 			) && self.soundboard.sending.is_none()
-			&& self.permission(channel, p::VIEW_CHANNEL | p::CONNECT | p::USE_SOUNDBOARD)
+			// Speak carries the sound; without it the service would refuse after the popup
+			// already showed a send in flight.
+			&& self.permission(channel, p::VIEW_CHANNEL | p::CONNECT | p::SPEAK | p::USE_SOUNDBOARD)
 				== Some(true)
 			&& (sound.guild.is_none()
 				|| sound.guild == target.guild
