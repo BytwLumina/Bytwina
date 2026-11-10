@@ -1,41 +1,40 @@
 [1m[92m   Compiling[0m proc-macro2 v1.0.107
-[1m[92m   Compiling[0m quote v1.0.47
 [1m[92m   Compiling[0m unicode-ident v1.0.26
+[1m[92m   Compiling[0m quote v1.0.47
 [1m[92m   Compiling[0m serde_core v1.0.229
 [1m[92m   Compiling[0m serde v1.0.229
 [1m[92m   Compiling[0m zeroize v1.9.0
 [1m[92m   Compiling[0m thiserror v2.0.20
 [1m[92m   Compiling[0m zmij v1.0.23
 [1m[92m   Compiling[0m serde_json v1.0.151
-[1m[92m   Compiling[0m itoa v1.0.18
-[1m[92m   Compiling[0m memchr v2.8.3
 [1m[92m   Compiling[0m syn v3.0.6
+[1m[92m   Compiling[0m memchr v2.8.3
+[1m[92m   Compiling[0m itoa v1.0.18
 [1m[92m   Compiling[0m serde_derive v1.0.229
 [1m[92m   Compiling[0m thiserror-impl v2.0.20
 [1m[92m   Compiling[0m model v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/model)
-[1m[91merror[E0631][0m[1m: type mismatch in function arguments[0m
-   [1m[94m--> [0mcrates/model/src/public_badges.rs:175:20
-    [1m[94m|[0m
-[1m[94m124[0m [1m[94m|[0m     fn order(self) -> u8 {
-    [1m[94m|[0m     [1m[94m--------------------[0m [1m[94mfound signature defined here[0m
+[1m[92m   Compiling[0m session-cache v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/session-cache)
+[1m[92m   Compiling[0m client-core v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/client-core)
+[1m[91merror[E0004][0m[1m: non-exhaustive patterns: `Event::ScheduledEvent(_)` not covered[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:2964:22
+     [1m[94m|[0m
+[1m[94m2964[0m [1m[94m|[0m         let result = match envelope.event {
+     [1m[94m|[0m                            [1m[91m^^^^^^^^^^^^^^[0m [1m[91mpattern `Event::ScheduledEvent(_)` not covered[0m
+     [1m[94m|[0m
+[1m[92mnote[0m: `Event` defined here
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:531:10
+     [1m[94m|[0m
+[1m[94m 531[0m [1m[94m|[0m pub enum Event {
+     [1m[94m|[0m          [1m[92m^^^^^[0m
 [1m[94m...[0m
-[1m[94m175[0m [1m[94m|[0m     shown.sort_by_key(Kind::order);
-    [1m[94m|[0m           [1m[94m-----------[0m [1m[91m^^^^^^^^^^^[0m [1m[91mexpected due to this[0m
-    [1m[94m|[0m           [1m[94m|[0m
-    [1m[94m|[0m           [1m[94mrequired by a bound introduced by this call[0m
-    [1m[94m|[0m
-    [1m[94m= [0m[1mnote[0m: expected function signature `[1m[35mfor<'a> [0mfn([1m[35m&'a [0mpublic_badges::Kind) -> [1m[35m_[0m`
-               found function signature `fn(public_badges::Kind) -> [1m[35m_[0m`
-[1m[92mnote[0m: required by a bound in `slice::<impl [T]>::sort_by_key`
-   [1m[94m--> [0m/rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/slice.rs:247:4
-[1m[96mhelp[0m: consider wrapping the function in a closure
-    [1m[94m|[0m
-[1m[94m175[0m [1m[94m| [0m    shown.sort_by_key([92m|arg0: &public_badges::Kind| [0mKind::order[92m(*arg0)[0m);
-    [1m[94m|[0m                       [92m++++++++++++++++++++++++++++[0m            [92m+++++++[0m
-[1m[96mhelp[0m: consider adjusting the signature so it borrows its argument
-    [1m[94m|[0m
-[1m[94m124[0m [1m[94m| [0m    fn order([92m&[0mself) -> u8 {
-    [1m[94m|[0m              [92m+[0m
+[1m[94m 628[0m [1m[94m|[0m     ScheduledEvent(stage::Event),
+     [1m[94m|[0m     [1m[94m--------------[0m [1m[94mnot covered[0m
+     [1m[94m= [0m[1mnote[0m: the matched value is of type `Event`
+[1m[96mhelp[0m: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+     [1m[94m|[0m
+[1m[94m4243[0m [92m~ [0m            }[92m,[0m
+[1m[94m4244[0m [92m~             Event::ScheduledEvent(_) => todo!()[0m
+     [1m[94m|[0m
 
-[1mFor more information about this error, try `rustc --explain E0631`.[0m
-[1m[91merror[0m: could not compile `model` (lib) due to 1 previous error
+[1mFor more information about this error, try `rustc --explain E0004`.[0m
+[1m[91merror[0m: could not compile `client-core` (lib) due to 1 previous error
