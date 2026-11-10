@@ -177,10 +177,17 @@ impl MessagingUi {
 										);
 									});
 									if let Some(preview) = &row.preview {
+										// Service text is untrusted: control characters are stripped
+										// before it reaches layout, and spoilers stay masked.
+										let text: String = preview
+											.content
+											.chars()
+											.map(|c| if c.is_control() { ' ' } else { c })
+											.take(512)
+											.collect();
 										ui.add(
 											egui::Label::new(
-												RichText::new(preview.content.clone())
-													.color(colors.text),
+												RichText::new(text).color(colors.text),
 											)
 											.truncate(),
 										);

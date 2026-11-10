@@ -21,6 +21,7 @@ fn reason(failure: Failure) -> &'static str {
 	}
 }
 
+/// RFC 3339 only: the service rejects local times, and a past date is still a valid reminder.
 fn due(due_at: Option<i64>) -> Result<Option<String>, Failure> {
 	let Some(due_at) = due_at else {
 		return Ok(None);
