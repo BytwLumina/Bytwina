@@ -90,6 +90,35 @@ verified against a live session:
   `POST /channels/{id}/send-soundboard-sound`.
 - `PUT /channels/{id}/voice-status` with a status of at most 500 characters.
 
+Sending a soundboard sound needs **Speak** and **Use Soundboard** (bits 21 and 42), plus **Use
+External Sounds** (45) when the sound belongs to another server; the client checks all three before
+the popup enables Send. Clips are fetched whole from `https://cdn.discordapp.com/soundboard-sounds/{id}`
+(the documented file location) and played on the local cue output, so a preview never leaves the
+device; `VOICE_CHANNEL_EFFECT_SEND` plays the same way for sounds other members trigger.
+
+## Saved messages and reminders — November 10, 2026
+
+Normal-account routes from `docs.discord.food/resources/user`, **unverified** against a live session:
+
+- `GET /users/@me/saved-messages` answers `{ "results": [...] }`, not a bare array.
+- `PUT /users/@me/saved-messages/{channel_id}/{message_id}` with `{"due_at": ISO8601 | null}` returns
+  one saved message; this client sends only `due_at`, so fields it does not mention stay as they are.
+- `DELETE /users/@me/saved-messages/{channel_id}/{message_id}` answers 204.
+
+The service caps 200 saved messages without a reminder; this client also caps the whole list at 500.
+`message: null` is kept as a removable row rather than treated as a deleted message. Re-storing an
+existing reminder to change its date is not sent, because repeated-`PUT` semantics are not documented;
+the menu only offers reminders for messages that are not saved yet.
+
+## Discoverable servers — November 10, 2026
+
+`GET /discoverable-guilds?limit=24&offset=N&categories=ID` (from `docs.discord.food/resources/discovery`)
+lists verified and partnered servers only, with `{ guilds, total, limit, offset }`. Category ids come
+from `GET /discovery/categories?primary_only=true`; id `0` is a real category. The page filter searches
+only the loaded page — `/discoverable-guilds/search` has no documented response envelope, so it is not
+called. Joining uses the server's `vanity_url_code` through the existing invite preview; a guild id is
+never treated as an invite code. **Unverified** until an owner-session run confirms each route.
+
 Every response is decoded into a bounded model type that drops unknown product types, malformed
 rows and oversized payloads instead of failing the whole list. Treat the behaviour as **unverified**
 until an owner-session run confirms each route; the client never retries these writes.
