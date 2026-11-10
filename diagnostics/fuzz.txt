@@ -7,21 +7,93 @@
 [1m[92m   Compiling[0m zeroize v1.9.0
 [1m[92m   Compiling[0m zmij v1.0.23
 [1m[92m   Compiling[0m serde_json v1.0.151
-[1m[92m   Compiling[0m itoa v1.0.18
 [1m[92m   Compiling[0m memchr v2.8.3
+[1m[92m   Compiling[0m itoa v1.0.18
 [1m[92m   Compiling[0m syn v3.0.6
 [1m[92m   Compiling[0m serde_derive v1.0.229
 [1m[92m   Compiling[0m thiserror-impl v2.0.20
 [1m[92m   Compiling[0m model v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/model)
 [1m[92m   Compiling[0m session-cache v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/session-cache)
 [1m[92m   Compiling[0m client-core v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/client-core)
-[1m[91merror[0m[1m: lifetime may not live long enough[0m
-   [1m[94m--> [0mcrates/client-core/src/replies.rs:268:11
-    [1m[94m|[0m
-[1m[94m179[0m [1m[94m|[0m         &mut self,
-    [1m[94m|[0m         [1m[94m-[0m [1m[94mlet's call the lifetime of this reference `'1`[0m
-[1m[94m...[0m
-[1m[94m268[0m [1m[94m|[0m             return Err(self.status.as_str());
-    [1m[94m|[0m                    [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mreturning this value requires that `'1` must outlive `'static`[0m
+[1m[92m   Compiling[0m test-support v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/test-support)
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+  [1m[94m--> [0mcrates/test-support/src/message_links.rs:92:17
+   [1m[94m|[0m
+[1m[94m92[0m [1m[94m|[0m     state.status = "Offline message-link fixture · no account or network access";
+   [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+   [1m[94m|[0m     [1m[94m|[0m
+   [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+   [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+   [1m[94m|[0m
+[1m[94m92[0m [1m[94m| [0m    state.status = "Offline message-link fixture · no account or network access"[92m.into()[0m;
+   [1m[94m|[0m                                                                                 [92m+++++++[0m
 
-[1m[91merror[0m: could not compile `client-core` (lib) due to 1 previous error
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/test-support/src/lib.rs:729:17
+    [1m[94m|[0m
+[1m[94m729[0m [1m[94m|[0m     state.status = "Offline fixture · no network access";
+    [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m     [1m[94m|[0m
+    [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+    [1m[94m|[0m
+[1m[94m729[0m [1m[94m| [0m    state.status = "Offline fixture · no network access"[92m.into()[0m;
+    [1m[94m|[0m                                                         [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/test-support/src/lib.rs:755:17
+    [1m[94m|[0m
+[1m[94m755[0m [1m[94m|[0m     state.status = "Offline notification fixture · no network or OS alerts";
+    [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m     [1m[94m|[0m
+    [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+    [1m[94m|[0m
+[1m[94m755[0m [1m[94m| [0m    state.status = "Offline notification fixture · no network or OS alerts"[92m.into()[0m;
+    [1m[94m|[0m                                                                            [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/test-support/src/lib.rs:848:17
+    [1m[94m|[0m
+[1m[94m848[0m [1m[94m|[0m     state.status = "Offline voice fixture · no microphone or network access";
+    [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m     [1m[94m|[0m
+    [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+    [1m[94m|[0m
+[1m[94m848[0m [1m[94m| [0m    state.status = "Offline voice fixture · no microphone or network access"[92m.into()[0m;
+    [1m[94m|[0m                                                                             [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/test-support/src/lib.rs:884:17
+    [1m[94m|[0m
+[1m[94m884[0m [1m[94m|[0m     state.status = "Offline call fixture · no microphone or network access";
+    [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m     [1m[94m|[0m
+    [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+    [1m[94m|[0m
+[1m[94m884[0m [1m[94m| [0m    state.status = "Offline call fixture · no microphone or network access"[92m.into()[0m;
+    [1m[94m|[0m                                                                            [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/test-support/src/lib.rs:900:17
+    [1m[94m|[0m
+[1m[94m900[0m [1m[94m|[0m     state.status = "Offline call fixture · no microphone or network access";
+    [1m[94m|[0m     [1m[94m------------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m     [1m[94m|[0m
+    [1m[94m|[0m     [1m[94mexpected due to the type of this binding[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `client_core::Status`
+    [1m[94m|[0m
+[1m[94m900[0m [1m[94m| [0m    state.status = "Offline call fixture · no microphone or network access"[92m.into()[0m;
+    [1m[94m|[0m                                                                            [92m+++++++[0m
+
+[1mFor more information about this error, try `rustc --explain E0308`.[0m
+[1m[91merror[0m: could not compile `test-support` (lib) due to 6 previous errors
+[1m[33mwarning[0m: build failed, waiting for other jobs to finish...
