@@ -6,7 +6,8 @@ use model::{Channel, Guild, Id, Message, MessagePatch, Patch, User, permissions 
 use std::hash::{Hash, Hasher};
 
 fn user() -> User {
-	User { flags: model::AccountFlags::default(),
+	User {
+		flags: model::AccountFlags::default(),
 		webhook: false,
 		kind: Default::default(),
 		id: Id(2),
