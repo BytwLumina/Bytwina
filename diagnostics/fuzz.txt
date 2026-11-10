@@ -1,44 +1,120 @@
-[1m[92m   Compiling[0m proc-macro2 v1.0.107
-[1m[92m   Compiling[0m quote v1.0.47
-[1m[92m   Compiling[0m unicode-ident v1.0.26
-[1m[92m   Compiling[0m serde_core v1.0.229
-[1m[92m   Compiling[0m serde v1.0.229
-[1m[92m   Compiling[0m zeroize v1.9.0
-[1m[92m   Compiling[0m thiserror v2.0.20
-[1m[92m   Compiling[0m zmij v1.0.23
-[1m[92m   Compiling[0m serde_json v1.0.151
-[1m[92m   Compiling[0m memchr v2.8.3
-[1m[92m   Compiling[0m itoa v1.0.18
-[1m[92m   Compiling[0m syn v3.0.6
-[1m[92m   Compiling[0m serde_derive v1.0.229
-[1m[92m   Compiling[0m thiserror-impl v2.0.20
-[1m[92m   Compiling[0m model v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/model)
-[1m[92m   Compiling[0m session-cache v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/session-cache)
-[1m[92m   Compiling[0m client-core v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/client-core)
-[1m[91merror[E0425][0m[1m: cannot find type `Status` in this scope[0m
-   [1m[94m--> [0mcrates/client-core/src/lib.rs:992:14
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/client-core/src/reactions.rs:487:8
     [1m[94m|[0m
-[1m[94m421[0m [1m[94m|[0m pub struct Startup {
-    [1m[94m|[0m [1m[94m------------------[0m [1m[94msimilarly named struct `Startup` defined here[0m
-[1m[94m...[0m
-[1m[94m992[0m [1m[94m|[0m     pub status: Status,
-    [1m[94m|[0m                 [1m[91m^^^^^^[0m
+[1m[94m487[0m [1m[94m|[0m [1m[94m...[0m                   "Reaction counts could not be refreshed; reload the conversation to retry"
+    [1m[94m|[0m                       [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
     [1m[94m|[0m
-[1m[96mhelp[0m: a struct with a similar name exists
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
     [1m[94m|[0m
-[1m[94m992[0m [91m- [0m    pub status: [91mStatus[0m,
-[1m[94m992[0m [92m+ [0m    pub status: [92mStartup[0m,
-    [1m[94m|[0m
-[1m[96mhelp[0m: consider importing one of these items
-    [1m[94m|[0m
-[1m[94m 23[0m [92m+ use crate::game_mentions::Status;[0m
-    [1m[94m|[0m
-[1m[94m 23[0m [92m+ use crate::quests::Status;[0m
-    [1m[94m|[0m
-[1m[94m 23[0m [92m+ use crate::stage::Status;[0m
-    [1m[94m|[0m
-[1m[94m 23[0m [92m+ use crate::status::Status;[0m
-    [1m[94m|[0m
+[1m[94m487[0m [1m[94m| [0m                            "Reaction counts could not be refreshed; reload the conversation to retry"[92m.into()[0m
+    [1m[94m|[0m                                                                                                       [92m+++++++[0m
 
-[1mFor more information about this error, try `rustc --explain E0425`.[0m
-[1m[91merror[0m: could not compile `client-core` (lib) due to 1 previous error
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/client-core/src/reactions.rs:489:8
+    [1m[94m|[0m
+[1m[94m489[0m [1m[94m|[0m [1m[94m...[0m                   "Reactions unavailable; use Reload reactions to retry"
+    [1m[94m|[0m                       [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+    [1m[94m|[0m
+[1m[94m489[0m [1m[94m| [0m                            "Reactions unavailable; use Reload reactions to retry"[92m.into()[0m
+    [1m[94m|[0m                                                                                   [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/client-core/src/replies.rs:268:15
+    [1m[94m|[0m
+[1m[94m268[0m [1m[94m|[0m             return Err(self.status);
+    [1m[94m|[0m                    [1m[94m---[0m [1m[91m^^^^^^^^^^^[0m [1m[91mexpected `&str`, found `Status`[0m
+    [1m[94m|[0m                    [1m[94m|[0m
+    [1m[94m|[0m                    [1m[94marguments to this enum variant are incorrect[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: the type constructed contains `status::Status` due to the type of the argument passed
+   [1m[94m--> [0mcrates/client-core/src/replies.rs:268:11
+    [1m[94m|[0m
+[1m[94m268[0m [1m[94m|[0m             return Err(self.status);
+    [1m[94m|[0m                    [1m[96m^^^^[0m[1m[94m-----------[0m[1m[96m^[0m
+    [1m[94m|[0m                        [1m[94m|[0m
+    [1m[94m|[0m                        [1m[94mthis argument influences the type of `Err`[0m
+[1m[92mnote[0m: tuple variant defined here
+   [1m[94m--> [0m/rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/result.rs:566:4
+[1m[96mhelp[0m: consider borrowing here
+    [1m[94m|[0m
+[1m[94m268[0m [1m[94m| [0m            return Err([92m&[0mself.status);
+    [1m[94m|[0m                        [92m+[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0mcrates/client-core/src/replies.rs:304:15
+    [1m[94m|[0m
+[1m[94m304[0m [1m[94m|[0m             return Err(self.status);
+    [1m[94m|[0m                    [1m[94m---[0m [1m[91m^^^^^^^^^^^[0m [1m[91mexpected `&str`, found `Status`[0m
+    [1m[94m|[0m                    [1m[94m|[0m
+    [1m[94m|[0m                    [1m[94marguments to this enum variant are incorrect[0m
+    [1m[94m|[0m
+[1m[96mhelp[0m: the type constructed contains `status::Status` due to the type of the argument passed
+   [1m[94m--> [0mcrates/client-core/src/replies.rs:304:11
+    [1m[94m|[0m
+[1m[94m304[0m [1m[94m|[0m             return Err(self.status);
+    [1m[94m|[0m                    [1m[96m^^^^[0m[1m[94m-----------[0m[1m[96m^[0m
+    [1m[94m|[0m                        [1m[94m|[0m
+    [1m[94m|[0m                        [1m[94mthis argument influences the type of `Err`[0m
+[1m[92mnote[0m: tuple variant defined here
+   [1m[94m--> [0m/rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/result.rs:566:4
+[1m[96mhelp[0m: consider borrowing here
+    [1m[94m|[0m
+[1m[94m304[0m [1m[94m| [0m            return Err([92m&[0mself.status);
+    [1m[94m|[0m                        [92m+[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:1224:12
+     [1m[94m|[0m
+[1m[94m1224[0m [1m[94m|[0m             status: "Disconnected",
+     [1m[94m|[0m                     [1m[91m^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m1224[0m [1m[94m| [0m            status: "Disconnected"[92m.into()[0m,
+     [1m[94m|[0m                                   [92m+++++++[0m
+
+[1m[91merror[E0282][0m[1m: type annotations needed for `Option<_>`[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:1660:7
+     [1m[94m|[0m
+[1m[94m1660[0m [1m[94m|[0m         let mut blocked = None;
+     [1m[94m|[0m             [1m[91m^^^^^^^^^^^[0m
+[1m[94m...[0m
+[1m[94m1668[0m [1m[94m|[0m                     self.status = status.into();
+     [1m[94m|[0m                                   [1m[94m------[0m [1m[94mtype must be known at this point[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: consider giving `blocked` an explicit type, where the placeholder `_` is specified
+     [1m[94m|[0m
+[1m[94m1660[0m [1m[94m| [0m        let mut blocked[92m: Option<T>[0m = None;
+     [1m[94m|[0m                        [92m+++++++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:2656:20
+     [1m[94m|[0m
+[1m[94m2656[0m [1m[94m|[0m                     self.status = "Call status could not refresh;  reopen the DM to retry"
+     [1m[94m|[0m                     [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                     [1m[94m|[0m
+     [1m[94m|[0m                     [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m2656[0m [1m[94m| [0m                    self.status = "Call status could not refresh;  reopen the DM to retry"[92m.into()[0m
+     [1m[94m|[0m                                                                                           [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:2680:24
+     [1m[94m|[0m
+[1m[94m2680[0m [1m[94m|[0m                 _ => self.status = "Call control was not sent. Local mute/hangup still applies",
+     [1m[94m|[0m                      [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                      [1m[94m|[0m
+     [1m[94m|[0m                      [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m2680[0m [1m[94m| [0m                _ => self.status = "Call control was not sent. Local mute/hangup still applies"[92m.into()[0m,
+     [1m[94m|[0m                                                                                                [92m+++++++[0m
+
+[1mSome errors have detailed explanations: E0282, E0308.[0m
+[1mFor more information about an error, try `rustc --explain E0282`.[0m
+[1m[91merror[0m: could not compile `client-core` (lib) due to 10 previous errors
