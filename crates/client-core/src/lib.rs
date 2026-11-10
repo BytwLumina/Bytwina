@@ -1700,7 +1700,7 @@ impl State {
 					return Some(NavStep { command: None });
 				}
 				Apply::Rejected(status) => {
-					blocked = Some(status);
+					blocked = Some(status.into());
 					if back {
 						self.trail.drop_back();
 					} else {
