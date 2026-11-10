@@ -522,6 +522,62 @@ mod tests {
 	}
 
 	#[test]
+	fn every_added_string_renders_with_its_arguments() {
+		// Fluent reports a missing or malformed variable when a message is formatted, so each
+		// key added for the soundboard, saved list, discovery and emoji is rendered here.
+		let cases: [&str; 16] = [
+			"emoji-picker-category-all",
+			"emoji-picker-category-smileys",
+			"emoji-picker-tone-default",
+			"emoji-picker-tone-dark",
+			"discovery-title",
+			"discovery-all",
+			"discovery-previous",
+			"discovery-join",
+			"saved-messages",
+			"saved-messages-remove",
+			"saved-messages-open",
+			"message-menu-remind-me",
+			"message-menu-remind-tomorrow",
+			"soundboard-ui-preview",
+			"soundboard-ui-send",
+			"categories-paint-shelf-rule-directory",
+		];
+		let arguments: [(&str, &[(&str, &str)]); 6] = [
+			("discovery-online", &[("count", "12")]),
+			("discovery-members", &[("count", "400")]),
+			("discovery-total", &[("count", "3"), ("total", "24")]),
+			("saved-messages-reminder", &[("when", "today")]),
+			("new-message-too-many", &[("limit", "9")]),
+			(
+				"soundboard-ui-effect",
+				&[("user", "kai"), ("sound", "Airhorn")],
+			),
+		];
+		for language in Language::ALL {
+			set_current(language);
+			for key in cases {
+				let text = translate(key);
+				assert!(
+					!text.starts_with("Unknown localization key"),
+					"{language:?} {key}"
+				);
+			}
+			for (key, values) in arguments {
+				let text = translate_args(key, values);
+				assert!(
+					!text.contains('{') && !text.starts_with("Unknown"),
+					"{language:?} {key}: {text}"
+				);
+			}
+			for count in [0, 1, 2] {
+				let text = translate_count("saved-messages-count", count, &[]);
+				assert!(!text.contains('{'), "{language:?} count {count}: {text}");
+			}
+		}
+	}
+
+	#[test]
 	fn missing_keys_fall_back_to_english() {
 		set_current(Language::German);
 		assert_eq!(translate("settings-chat-box"), "Chatfenster");

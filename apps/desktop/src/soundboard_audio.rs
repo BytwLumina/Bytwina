@@ -100,6 +100,16 @@ impl Player {
 		self.settled.pop_front()
 	}
 
+	/// The request on the output now, if any.
+	pub fn playing(&self) -> Option<u64> {
+		self.playing.as_ref().map(|playback| playback.request)
+	}
+
+	/// Whether a clip is playing or waiting behind it.
+	pub fn busy(&self) -> bool {
+		self.playing.is_some() || !self.queue.is_empty()
+	}
+
 	/// Whether a request already ended, so its preview shows `Ended` instead of replaying.
 	pub fn settled(&self, request: u64) -> bool {
 		self.settled.iter().any(|(settled, _)| *settled == request)

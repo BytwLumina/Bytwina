@@ -1726,20 +1726,21 @@ impl Desktop {
 				.as_ref()
 				.is_some_and(|preview| preview.request == request)
 			{
-				match result {
-					Ok(bytes) if self.soundboard_audio.enqueue_owned(request, volume, bytes) => {
-						self.state.soundboard.preview_progress(
-							request,
-							client_core::soundboard::PreviewState::Loading,
-						)
-					}
-					_ => self.state.soundboard.preview_progress(
-						request,
+				// A guard on `Ok` would leave the arm non-exhaustive; branch inside it instead.
+				let queued = match result {
+					Ok(bytes) => self.soundboard_audio.enqueue_owned(request, volume, bytes),
+					Err(_) => false,
+				};
+				self.state.soundboard.preview_progress(
+					request,
+					if queued {
+						client_core::soundboard::PreviewState::Loading
+					} else {
 						client_core::soundboard::PreviewState::Failed(
 							"soundboard-ui-playback-failed",
-						),
-					),
-				}
+						)
+					},
+				);
 			}
 		}
 		if let Some((request, key)) = failure {
