@@ -492,18 +492,20 @@ impl MessagingUi {
 		let marks = channel_marks::trailing(access);
 		let elapsed_width = if elapsed.is_some() { 64.0 } else { 0.0 };
 		let badge_width = if count > 0 { 34.0 } else { 0.0 };
-		let name = ui.painter().layout(
+		// One elided line: a long name ends in an ellipsis instead of wrapping under the row.
+		let name_width = (row.width() - 40.0 - elapsed_width - badge_width - marks).max(10.0);
+		let mut name_job = egui::text::LayoutJob::simple_singleline(
 			channel.name.clone(),
 			egui::FontId::new(15.0, design::medium_family(ui.ctx())),
 			text_color,
-			(row.width() - 40.0 - elapsed_width - badge_width - marks).max(10.0),
 		);
+		name_job.wrap.max_width = name_width;
+		name_job.wrap.max_rows = 1;
+		name_job.wrap.break_anywhere = true;
+		let name = ui.painter().layout_job(name_job);
 		let name_rect = egui::Rect::from_min_size(
 			egui::pos2(row.left() + 34.0, row.center().y - name.size().y * 0.5),
-			egui::vec2(
-				row.width() - 40.0 - elapsed_width - badge_width - marks,
-				name.size().y,
-			),
+			egui::vec2(name_width, name.size().y),
 		);
 		ui.painter()
 			.with_clip_rect(name_rect)
@@ -4990,12 +4992,19 @@ fn elapsed_label(call: &client_core::voice::Call) -> Option<String> {
 		.or(call.connected_at)?
 		.elapsed()
 		.as_secs();
-	Some(format!(
-		"{:02}:{:02}:{:02}",
-		seconds / 3600,
-		seconds / 60 % 60,
-		seconds % 60
-	))
+	// Discord drops the hour until the call reaches one: "1:05", then "59:59", then "01:00:00".
+	Some(if seconds < 600 {
+		format!("{:01}:{:02}", seconds / 60, seconds % 60)
+	} else if seconds < 3600 {
+		format!("{:02}:{:02}", seconds / 60, seconds % 60)
+	} else {
+		format!(
+			"{:02}:{:02}:{:02}",
+			seconds / 3600,
+			seconds / 60 % 60,
+			seconds % 60
+		)
+	})
 }
 
 fn status_icon(ui: &mut egui::Ui, icon: crate::icons::Icon, color: egui::Color32, label: &str) {
@@ -5983,6 +5992,15 @@ mod tests {
 		call.connected_at = Some(std::time::Instant::now() - std::time::Duration::from_secs(3663));
 		call.phase = Phase::Waiting;
 		assert_eq!(elapsed_label(call).as_deref(), Some("01:01:03"));
+		// Under an hour the label drops the hour field, keeping two digits from ten minutes on.
+		for (seconds, expected) in [(65, "1:05"), (599, "9:59"), (3599, "59:59")] {
+			call.connected_at =
+				Some(std::time::Instant::now() - std::time::Duration::from_secs(seconds));
+			assert_eq!(elapsed_label(call).as_deref(), Some(expected), "{seconds}s");
+		}
+		call.connected_at = Some(std::time::Instant::now() - std::time::Duration::from_secs(3600));
+		assert_eq!(elapsed_label(call).as_deref(), Some("01:00:00"));
+		call.connected_at = Some(std::time::Instant::now() - std::time::Duration::from_secs(3663));
 		call.channel_started_at =
 			Some(std::time::Instant::now() - std::time::Duration::from_secs(7540));
 		assert_eq!(elapsed_label(call).as_deref(), Some("02:05:40"));
