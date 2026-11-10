@@ -993,7 +993,7 @@ impl State {
 	}
 	pub fn prepare_pin(&mut self, channel: Id, message: Id, pinned: bool) -> Option<Command> {
 		if !self.can_pin(channel, message) {
-			self.status = "This message cannot be pinned with the current access";
+			self.status = "This message cannot be pinned with the current access".into();
 			return None;
 		}
 		let request = self.optimistic_pin(channel, message, pinned)?;
@@ -1009,7 +1009,7 @@ impl State {
 			|| content.trim().is_empty()
 			|| content.chars().count() > self.content_limit()
 		{
-			self.status = "This message cannot be edited with the current access";
+			self.status = "This message cannot be edited with the current access".into();
 			return None;
 		}
 		let request = self.optimistic_edit(channel, message, &content)?;
@@ -1022,7 +1022,7 @@ impl State {
 	}
 	pub fn prepare_delete(&mut self, channel: Id, message: Id) -> Option<Command> {
 		if !self.can_delete(channel, message) {
-			self.status = "This message cannot be deleted with the current access";
+			self.status = "This message cannot be deleted with the current access".into();
 			return None;
 		}
 		Some(Command::Delete { channel, message })
@@ -1053,9 +1053,9 @@ impl State {
 				Freshness::Unavailable
 			};
 			self.status = if self.can_view(channel) {
-				"Message history is unavailable with the current permissions"
+				"Message history is unavailable with the current permissions".into()
 			} else {
-				"Channel permissions are unavailable or access was revoked"
+				"Channel permissions are unavailable or access was revoked".into()
 			};
 			self.revision += 1;
 		}

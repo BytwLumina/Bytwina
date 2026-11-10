@@ -901,7 +901,7 @@ impl State {
 		{
 			const STATUS: &str = "Choose between two and nine friends for a group message";
 			self.user_actions.status = Some(STATUS);
-			self.status = STATUS;
+			self.status = STATUS.into();
 			return None;
 		}
 		people.sort_unstable_by_key(|user| user.0);
@@ -911,7 +911,7 @@ impl State {
 		let command = self.request_user_action(Action::CreateGroup { recipients: people })?;
 		self.user_actions.group_origin = Some((self.selected, self.request));
 		self.user_actions.created_group = None;
-		self.status = "Creating group message…";
+		self.status = "Creating group message…".into();
 		Some(command)
 	}
 	fn existing_group(&self, people: &[Id]) -> Option<Id> {
@@ -946,7 +946,7 @@ impl State {
 		let command = self.request_user_action(Action::OpenDm(user))?;
 		self.user_actions.dm_origin = Some((self.selected, self.request, friend_only));
 		self.user_actions.opened_dm = None;
-		self.status = "Opening direct message…";
+		self.status = "Opening direct message…".into();
 		Some(command)
 	}
 	/// Consume one confirmed DM target without overriding navigation made during the request.
@@ -981,7 +981,7 @@ impl State {
 			const STATUS: &str =
 				"Finish pending messages and leave the call before closing this DM";
 			self.user_actions.status = Some(STATUS);
-			self.status = STATUS;
+			self.status = STATUS.into();
 			return None;
 		}
 		self.request_user_action(Action::CloseDm(channel))
@@ -1023,7 +1023,7 @@ impl State {
 		if !self.demo && (self.auth != AuthState::Authenticated || !self.gateway_connected) {
 			const STATUS: &str = "User actions unavailable while disconnected";
 			self.user_actions.status = Some(STATUS);
-			self.status = STATUS;
+			self.status = STATUS.into();
 			return None;
 		}
 		self.user_actions.sequence = self.user_actions.sequence.wrapping_add(1);
@@ -1146,7 +1146,7 @@ impl State {
 				if self.channel(id).is_some() && self.user_actions.dm_origin.is_some() {
 					self.user_actions.opened_dm = Some((id, user));
 					self.user_actions.status = None;
-					self.status = "Direct message opened";
+					self.status = "Direct message opened".into();
 				}
 			}
 			Event::GroupCreated {
@@ -1202,7 +1202,7 @@ impl State {
 				if self.channel(id).is_some() && self.user_actions.group_origin.is_some() {
 					self.user_actions.created_group = Some(id);
 					self.user_actions.status = None;
-					self.status = "Group message opened";
+					self.status = "Group message opened".into();
 				}
 			}
 			Event::NoteChanged { user, text } => {
@@ -1718,7 +1718,7 @@ impl State {
 				}
 				if let Err(failure) = result {
 					if failure.ends_session() {
-						self.status = failure.label();
+						self.status = failure.label().into();
 						self.fail(failure);
 					}
 					return Ok(());

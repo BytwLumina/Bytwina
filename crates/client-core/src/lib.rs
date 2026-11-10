@@ -989,7 +989,7 @@ pub struct State {
 	pub resident: resident::Windows,
 	pub preload: preload::Preload,
 	pub freshness: Freshness,
-	pub status: status::Status,
+	pub status: Status,
 	/// User-copyable cause of the last session failure, cleared by the next READY.
 	pub failure_detail: Option<Box<str>>,
 	pub drafts: BTreeMap<Id, String>,
@@ -1979,7 +1979,7 @@ impl State {
 			self.timeline.clear();
 			self.cancel_history();
 			self.freshness = Freshness::Unavailable;
-			self.status = "Conversation no longer available in navigation";
+			self.status = "Conversation no longer available in navigation".into();
 			return self.clear_search();
 		};
 		if !self.can_read_history(channel) {
@@ -1991,7 +1991,7 @@ impl State {
 			} else {
 				Freshness::Unavailable
 			};
-			self.status = "Message history is unavailable with the current permissions";
+			self.status = "Message history is unavailable with the current permissions".into();
 			return self.clear_search();
 		}
 		if self.search.as_ref().is_some_and(|s| s.loading)
@@ -2059,7 +2059,7 @@ impl State {
 		let channel = self.selected?;
 		let message = self.timeline.get(target)?;
 		if message.channel != channel || message.ephemeral || !self.accepts_reply_source(message) {
-			self.status = "This message is unavailable for replies";
+			self.status = "This message is unavailable for replies".into();
 			return None;
 		}
 		let mut reply = Reply::to(target);
@@ -2095,11 +2095,12 @@ impl State {
 	) -> Option<Command> {
 		let channel = self.selected?;
 		if !self.can_send(channel) || (!filenames.is_empty() && !self.can_attach(channel)) {
-			self.status = "Sending is unavailable with the current connection or permissions";
+			self.status =
+				"Sending is unavailable with the current connection or permissions".into();
 			return None;
 		}
 		if filenames.len() > MAX_ATTACHMENTS {
-			self.status = "Attach up to 10 files per message";
+			self.status = "Attach up to 10 files per message".into();
 			return None;
 		}
 		if filenames.iter().any(|name| {
@@ -2110,7 +2111,7 @@ impl State {
 					.chars()
 					.any(|c| c.is_control() || matches!(c, '/' | '\\' | ':'))
 		}) {
-			self.status = "Attachment filename is invalid or too long";
+			self.status = "Attachment filename is invalid or too long".into();
 			return None;
 		}
 		let content = if let Some(content) = explicit_content {
@@ -2135,7 +2136,7 @@ impl State {
 				+ sticker.map_or(0, Sticker::heap_bytes)
 				+ 32 > MAX_DRAFT_BYTES
 		{
-			self.status = "Send exceeds the session input budget";
+			self.status = "Send exceeds the session input budget".into();
 			return None;
 		}
 		let content = content.to_owned();
@@ -2222,7 +2223,7 @@ impl State {
 		if !self.pending.iter().any(|p| p.delivery == Delivery::Sending) {
 			self.send_throttle_seen = false;
 		}
-		self.status = failure;
+		self.status = failure.into();
 		true
 	}
 	/// Deleted targets must not come back through Restore or a returned send.
@@ -2592,7 +2593,7 @@ impl State {
 				},
 			};
 			let _ = self.apply_reactions(event);
-			self.status = "Work queue full; reaction action was not sent";
+			self.status = "Work queue full;  reaction action was not sent".into();
 			return;
 		}
 		if let Command::JoinInvite { request, .. } = command {
@@ -2651,7 +2652,7 @@ impl State {
 					message: "Recipient ringing was not sent; the work queue is full",
 				}),
 				voice::Command::Sync { .. } => {
-					self.status = "Call status could not refresh; reopen the DM to retry"
+					self.status = "Call status could not refresh;  reopen the DM to retry"
 				}
 				voice::Command::Join {
 					channel, request, ..
@@ -2672,10 +2673,10 @@ impl State {
 						&& call.request == request
 					{
 						call.camera = false;
-						self.status = "Camera control was not sent; camera is off locally";
+						self.status = "Camera control was not sent. Camera is off locally".into();
 					}
 				}
-				_ => self.status = "Call control was not sent; local mute/hangup still applies",
+				_ => self.status = "Call control was not sent. Local mute/hangup still applies",
 			}
 			return;
 		}
@@ -2719,7 +2720,7 @@ impl State {
 				return;
 			}
 			self.cancel_history();
-			self.status = "Work queue full; action was not sent";
+			self.status = "Work queue full;  action was not sent".into();
 			self.freshness = Freshness::Stale;
 			return;
 		}
@@ -2738,7 +2739,7 @@ impl State {
 			});
 			return;
 		}
-		self.status = "Work queue full; action was not sent";
+		self.status = "Work queue full;  action was not sent".into();
 		self.freshness = Freshness::Stale;
 	}
 	/// Apply an incoming event envelope to update local state and reconciliation caches.
@@ -2762,7 +2763,7 @@ impl State {
 			if startup.bytes() > model::account::MAX_BYTES {
 				self.cancel_history();
 				self.auth = auth::AuthState::Failed;
-				self.status = "Account startup exceeds safe capacity";
+				self.status = "Account startup exceeds safe capacity".into();
 				return;
 			}
 			let PreparedStartup {
@@ -3331,7 +3332,7 @@ impl State {
 			}
 			Event::VoiceStatusSaved { request, result } => {
 				if let Err(failure) = &result {
-					self.status = failure.label();
+					self.status = failure.label().into();
 				}
 				self.voice_statuses.settled(request, result);
 				Ok(())
@@ -3615,7 +3616,7 @@ impl State {
 						self.timeline.clear();
 						self.freshness = Freshness::Unavailable;
 						self.cancel_history();
-						self.status = "Conversation unavailable; account removed";
+						self.status = "Conversation unavailable;  account removed".into();
 					}
 					return;
 				}
@@ -3737,7 +3738,8 @@ impl State {
 				{
 					self.cancel_history();
 					self.auth = auth::AuthState::Failed;
-					self.status = "Different account rejected; log out before switching accounts";
+					self.status =
+						"Different account rejected. Log out before switching accounts".into();
 					return;
 				}
 				let permission_state = match prepared_permissions.map(Ok).unwrap_or_else(|| {
@@ -3826,9 +3828,9 @@ impl State {
 				self.auth = auth::AuthState::Authenticated;
 				self.gateway_connected = true;
 				self.status = if unavailable {
-					"Conversation no longer available in navigation"
+					"Conversation no longer available in navigation".into()
 				} else {
-					""
+					status::Status::default()
 				};
 				Ok(())
 			}
@@ -3918,7 +3920,7 @@ impl State {
 				if r.is_ok() && jump {
 					self.search_target = self.timeline.iter().next().map(|m| m.id);
 					if self.search_target.is_none() {
-						self.status = "No messages returned after this boundary; use Jump to present to reload";
+						self.status = "No messages returned after this boundary;  use Jump to present to reload".into();
 					}
 				}
 				if r.is_ok() {
@@ -3974,7 +3976,7 @@ impl State {
 					self.invalidate_members();
 					self.timeline.clear();
 					self.freshness = Freshness::Unavailable;
-					self.status = "Channel unavailable or permission denied";
+					self.status = "Channel unavailable or permission denied".into();
 				} else {
 					self.fail(failure);
 				}
@@ -4205,7 +4207,7 @@ impl State {
 						if f.ends_session() {
 							self.fail(f);
 						} else {
-							self.status = f.label();
+							self.status = f.label().into();
 						}
 					}
 				}
@@ -4269,7 +4271,7 @@ impl State {
 					self.freshness = Freshness::Stale;
 				}
 				// Retry notifications must not invalidate a REST reload started during the outage.
-				self.status = "Reconnecting…";
+				self.status = "Reconnecting…".into();
 				Ok(())
 			}
 			Event::Resumed => {
@@ -4277,7 +4279,7 @@ impl State {
 				self.gateway_connected = true;
 				self.cancel_history();
 				self.freshness = Freshness::Stale;
-				self.status = "";
+				self.status = "".into();
 				Ok(())
 			}
 			Event::Resync | Event::PermissionsChanged => {
@@ -4306,7 +4308,7 @@ impl State {
 				self.timeline.clear();
 				self.freshness = Freshness::Stale;
 				self.cancel_history();
-				self.status = "";
+				self.status = "".into();
 				Ok(())
 			}
 			Event::Unavailable(channel) | Event::ThreadRemoved { id: channel, .. } => {
@@ -4318,7 +4320,7 @@ impl State {
 						.map(|c| c.id),
 				);
 				self.remove_channels(&removed);
-				self.status = "Channel unavailable or permission denied";
+				self.status = "Channel unavailable or permission denied".into();
 				Ok(())
 			}
 		};
@@ -4468,7 +4470,7 @@ impl State {
 			self.timeline.clear();
 			self.freshness = Freshness::Unavailable;
 			self.cancel_history();
-			self.status = "Conversation no longer available in navigation";
+			self.status = "Conversation no longer available in navigation".into();
 		}
 	}
 	fn confirm(&mut self, message: &Message) {
@@ -4490,7 +4492,7 @@ impl State {
 	}
 	fn fail(&mut self, failure: auth::Failure) {
 		self.typing.clear_all();
-		self.status = failure.label();
+		self.status = failure.label().into();
 		match failure {
 			auth::Failure::Expired => self.auth = auth::AuthState::Expired,
 			auth::Failure::Challenged => self.auth = auth::AuthState::Challenged,

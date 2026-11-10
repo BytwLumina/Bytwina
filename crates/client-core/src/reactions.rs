@@ -359,7 +359,7 @@ impl State {
 		let reactions = self.timeline.get(message)?.reactions.as_ref()?;
 		let existing = reactions.iter().find(|r| r.emoji.same(&emoji));
 		if existing.is_none() && reactions.len() >= model::MAX_REACTIONS {
-			self.status = "Reaction limit reached";
+			self.status = "Reaction limit reached".into();
 			return None;
 		}
 		let add = existing.is_none_or(|r| !r.me);
@@ -531,7 +531,7 @@ impl State {
 							self.timeline.set_reactions(message, Some(before))?;
 						}
 						self.revision += 1;
-						self.status = failure.label();
+						self.status = failure.label().into();
 						if failure.ends_session() {
 							self.fail(failure);
 						}

@@ -658,7 +658,7 @@ impl State {
 			}
 			Err(failure) => {
 				if matches!(action, Some(Action::Voice { .. })) {
-					self.status = failure.label();
+					self.status = failure.label().into();
 				}
 				if matches!(action, Some(Action::AuditLog(_))) && failure == Failure::Forbidden {
 					self.server_admin.revoke_audit_access();
@@ -913,7 +913,7 @@ impl State {
 				}
 			}
 			Outcome::VoiceUpdated(user) => {
-				self.status = "Voice moderation request accepted";
+				self.status = "Voice moderation request accepted".into();
 				if self.demo
 					&& let Some(Action::Voice {
 						channel, change, ..

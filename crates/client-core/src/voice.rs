@@ -580,7 +580,7 @@ impl ClientState {
 			self.voice.dm_participants(channel).to_vec()
 		};
 		if participants.len() >= MAX_PARTICIPANTS {
-			self.status = "Voice channel exceeds the 64 participant limit";
+			self.status = "Voice channel exceeds the 64 participant limit".into();
 			return None;
 		}
 		let own = participants
@@ -779,7 +779,7 @@ impl ClientState {
 					.as_ref()
 					.is_some_and(|call| call.channel == channel && call.request == request)
 				{
-					self.status = message;
+					self.status = message.into();
 					self.voice.ring_error = Some((channel, request, message));
 				}
 			}
@@ -794,7 +794,7 @@ impl ClientState {
 					self.voice.active = None;
 					self.voice.outgoing = None;
 					self.voice.departed = Some((channel, request));
-					self.status = "This device's call session was replaced";
+					self.status = "This device's call session was replaced".into();
 				}
 			}
 			Event::Departed { channel, request } => {
@@ -1098,7 +1098,7 @@ impl ClientState {
 					}
 					if call.participants.len() >= MAX_PARTICIPANTS {
 						self.disconnect_voice("Voice channel exceeds the 64 participant limit");
-						self.status = "Voice channel exceeds the 64 participant limit";
+						self.status = "Voice channel exceeds the 64 participant limit".into();
 						return;
 					}
 					call.participants.push(Participant {
@@ -1173,7 +1173,7 @@ impl ClientState {
 				message,
 			} => {
 				if request == 0 || self.voice.active.is_none() {
-					self.status = message;
+					self.status = message.into();
 				}
 				if let Some(call) = &mut self.voice.active
 					&& call.channel == channel
@@ -1218,7 +1218,7 @@ impl ClientState {
 				> MAX_ROSTER_BYTES
 		{
 			self.disconnect_voice("Voice roster exceeds safe capacity; reconnect to refresh");
-			self.status = "Voice roster exceeds safe capacity; reconnect to refresh";
+			self.status = "Voice roster exceeds safe capacity;  reconnect to refresh".into();
 			return false;
 		}
 		self.voice.roster.push(entry);

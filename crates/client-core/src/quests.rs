@@ -93,7 +93,7 @@ impl Quests {
 	/// Starts a read of the list.
 	pub fn begin(&mut self, request: u64) {
 		self.request = Some(request);
-		self.status = Status::Loading;
+		self.status = Status::Loading.into();
 	}
 	/// Records the single action in flight. A second quest waits until this one settles.
 	pub fn begin_action(&mut self, quest: Id, request: u64) -> bool {
@@ -117,11 +117,11 @@ impl Quests {
 							list.quests.truncate(model::quests::MAX_QUESTS);
 						}
 						self.list = list;
-						self.status = Status::Ready;
+						self.status = Status::Ready.into();
 						self.error = None;
 					}
 					Err(error) => {
-						self.status = Status::Unavailable;
+						self.status = Status::Unavailable.into();
 						self.error = Some(error);
 					}
 				}

@@ -29,7 +29,8 @@ impl State {
 			|| self.draft_bytes() + count * (note.len() + 128 + size_of::<Pending>())
 				> crate::MAX_DRAFT_BYTES
 		{
-			self.status = "Forward unavailable: check destinations, connection and message limits";
+			self.status =
+				"Forward unavailable: check destinations, connection and message limits".into();
 			return Vec::new();
 		}
 		let source = self.timeline.get(message).unwrap().channel;

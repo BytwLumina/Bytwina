@@ -41,7 +41,7 @@ impl Update {
 			self.avatar = newer.avatar;
 		}
 		if !matches!(newer.status, Patch::Absent) {
-			self.status = newer.status;
+			self.status = newer.status.into();
 		}
 		if !matches!(newer.custom_status, Patch::Absent) {
 			self.custom_status = newer.custom_status;

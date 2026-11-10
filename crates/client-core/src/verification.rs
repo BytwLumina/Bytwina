@@ -107,7 +107,7 @@ impl State {
 				reply,
 				challenge,
 			});
-			self.status = "Verify to send this message";
+			self.status = "Verify to send this message".into();
 		} else if let Some(p) = self
 			.pending
 			.iter_mut()
@@ -115,7 +115,8 @@ impl State {
 		{
 			p.delivery = Delivery::Rejected;
 			self.status =
-				"Discord requires verification for this message; retry it after the current check";
+				"Discord requires verification for this message;  retry it after the current check"
+					.into();
 		}
 	}
 	/// Builds the one explicit resend that carries the user's solution.

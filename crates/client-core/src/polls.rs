@@ -73,7 +73,7 @@ impl State {
 	pub fn prepare_poll(&mut self, message: Option<Id>, action: Action) -> Option<crate::Command> {
 		let channel = self.selected?;
 		if self.polls.pending.is_some() {
-			self.status = "Wait for the current poll action";
+			self.status = "Wait for the current poll action".into();
 			return None;
 		}
 		let valid = match &action {
@@ -114,7 +114,8 @@ impl State {
 			}
 		};
 		if !valid {
-			self.status = "Poll action is unavailable with the current permissions or poll state";
+			self.status =
+				"Poll action is unavailable with the current permissions or poll state".into();
 			return None;
 		}
 		self.polls.sequence = self.polls.sequence.wrapping_add(1);
@@ -190,7 +191,7 @@ impl State {
 								"Poll action failed. Check permissions and refresh the conversation."
 							},
 						);
-						self.status = self.polls.error.unwrap();
+						self.status = self.polls.error.unwrap().into();
 					}
 				}
 			}

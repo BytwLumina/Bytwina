@@ -264,7 +264,7 @@ impl State {
 				.resident_timeline(channel)
 				.is_some_and(|timeline| timeline.is_deleted(message))
 		{
-			self.status = "This message was deleted";
+			self.status = "This message was deleted".into();
 			return Err(self.status);
 		}
 		if !self.gateway_connected
@@ -280,7 +280,7 @@ impl State {
 		// saved-reading-cursor request. Selection alone never sends or joins voice.
 		self.select_chat_link_channel(channel, message)?;
 		if self.timeline.is_deleted(message) {
-			self.status = "This message was deleted";
+			self.status = "This message was deleted".into();
 			// A window that could not be restored as loaded still needs its recent page.
 			if self.freshness != Freshness::Fresh && self.gateway_connected {
 				return Ok(Some(self.history(None)));
@@ -300,7 +300,7 @@ impl State {
 			return Ok(None);
 		}
 		if !self.gateway_connected {
-			self.status = "Message links are unavailable while disconnected";
+			self.status = "Message links are unavailable while disconnected".into();
 			return Err(self.status);
 		}
 		Ok(self.open_target_window(message))
@@ -388,7 +388,7 @@ impl State {
 		{
 			self.search_target = None;
 			self.restore_scroll = false;
-			self.status = "This message was deleted";
+			self.status = "This message was deleted".into();
 		}
 	}
 
@@ -400,7 +400,7 @@ impl State {
 		if self.timeline.is_deleted(target) {
 			self.search_target = None;
 			self.restore_scroll = false;
-			self.status = "This message was deleted";
+			self.status = "This message was deleted".into();
 		} else if !self
 			.timeline
 			.get(target)
@@ -409,7 +409,7 @@ impl State {
 			// Retain the cue for the timeline to mark this detached window as
 			// browsing, but report the outcome even without a UI consuming it.
 			self.status =
-				"Message was not returned; it may have been removed or become unavailable";
+				"Message was not returned;  it may have been removed or become unavailable".into();
 		}
 	}
 

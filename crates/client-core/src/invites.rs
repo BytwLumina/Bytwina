@@ -75,7 +75,7 @@ impl State {
 			&& self.invite_join.challenge.is_none()
 		{
 			self.invite_join.challenge = Some((Instant::now(), challenge));
-			self.status = "Verify to join this server";
+			self.status = "Verify to join this server".into();
 		}
 	}
 	pub fn request_invite(&mut self, code: String) -> Option<Command> {
@@ -311,9 +311,13 @@ impl State {
 		self.invite_join.challenge = None;
 		self.invite_join.result = Some(result);
 		self.status = match result {
-			Ok(model::JoinedTarget::Guild(_)) => "Invite accepted · waiting for server access",
-			Ok(model::JoinedTarget::Channel(_)) => "Invite accepted · opening group conversation",
-			Err(f) => f.label(),
+			Ok(model::JoinedTarget::Guild(_)) => {
+				"Invite accepted · waiting for server access".into()
+			}
+			Ok(model::JoinedTarget::Channel(_)) => {
+				"Invite accepted · opening group conversation".into()
+			}
+			Err(f) => f.into(),
 		};
 		if let Ok(target) = result {
 			if let model::JoinedTarget::Guild(guild) = target {

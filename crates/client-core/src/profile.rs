@@ -504,7 +504,8 @@ impl State {
 				self.cancel_history();
 				self.timeline.clear_window_preserving_deletions();
 				self.freshness = model::Freshness::Stale;
-				self.status = "Profile updated; use Reload history to refresh this conversation";
+				self.status =
+					"Profile updated;  use Reload history to refresh this conversation".into();
 				break;
 			}
 		}

@@ -392,7 +392,7 @@ impl State {
 						}
 						if outcome == Outcome::Approved {
 							self.onboarding.flow = None;
-							self.status = "You're in · welcome to the server";
+							self.status = "You're in · welcome to the server".into();
 						}
 					}
 					Err(failure) => {
