@@ -4603,6 +4603,14 @@ impl Desktop {
 					request,
 					result: Ok(()),
 				},
+				// The offline fixture has no guild events or stage channels to answer for.
+				Command::ScheduledEvents { .. }
+				| Command::ScheduledEventInterest { .. }
+				| Command::ScheduledEventSubscribers { .. }
+				| Command::StageRequestToSpeak { .. }
+				| Command::StageModerate { .. }
+				| Command::StageInstanceCreate { .. }
+				| Command::StageInstanceDelete { .. } => return,
 			};
 			self.state.apply(Envelope {
 				generation: self.state.generation,
