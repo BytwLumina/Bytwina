@@ -144,7 +144,7 @@ primary UI is not Electron and not a WebView; webviews exist only for login and 
 | Async | Tokio multi-thread runtime |
 | HTTP | `reqwest` 0.13.5, rustls, no cookie jar, no redirects |
 | WebSocket | `tokio-tungstenite` 0.30 |
-| DB | SQLite bundled via `rusqlite` 0.40.2 |
+| DB | SQLite bundled via `rusqlite` 0.41.1 |
 | Secrets | OS keyring (`keyring` 4.2), zeroize in memory |
 | Audio/video | Opus, DAVE/E2EE, Media Foundation (Windows), screen share |
 | Licence | Dual MIT OR Apache-2.0, `publish = false` |
