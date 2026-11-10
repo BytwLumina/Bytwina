@@ -260,6 +260,11 @@ impl CueGate {
 	pub(crate) fn finished(&self) -> bool {
 		self.finished.load(Ordering::Acquire)
 	}
+	/// Tests only: mark the cue drained without opening a device.
+	#[cfg(test)]
+	pub(crate) fn finish_test(&self) {
+		self.finished.store(true, Ordering::Release);
+	}
 	pub(crate) fn cancelled(&self) -> bool {
 		self.generation.load(Ordering::Acquire) != self.request
 	}

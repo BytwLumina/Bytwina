@@ -149,6 +149,7 @@ pub fn gain(volume: f32) -> f32 {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::time::Duration;
 
 	fn clip(request: u64) -> Clip {
 		Clip {
@@ -163,6 +164,29 @@ mod tests {
 		assert_eq!(gain(-1.0), 0.0);
 		assert_eq!(gain(2.0), 1.0);
 		assert_eq!(gain(0.25), 0.25);
+	}
+
+	#[test]
+	fn a_finished_or_expired_clip_settles_once_and_opens_the_queue() {
+		let mut player = Player::default();
+		player.playing = Some(Playback {
+			request: 4,
+			_stream: None,
+			gate: CueGate::new(Arc::new(AtomicU64::new(1)), 1),
+			deadline: Instant::now() + Duration::from_secs(30),
+		});
+		assert!(player.take_settled().is_none());
+		player.playing.as_ref().unwrap().gate.finish_test();
+		assert_eq!(player.take_settled(), Some((4, "")));
+		assert!(player.settled(4));
+		assert!(player.take_settled().is_none());
+		player.playing = Some(Playback {
+			request: 5,
+			_stream: None,
+			gate: CueGate::new(Arc::new(AtomicU64::new(1)), 1),
+			deadline: Instant::now(),
+		});
+		assert_eq!(player.take_settled(), Some((5, "")));
 	}
 
 	#[test]
