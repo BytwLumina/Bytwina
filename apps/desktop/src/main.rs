@@ -1772,7 +1772,8 @@ impl Desktop {
 			.name("bytwina-soundboard-fetch".into())
 			.spawn(move || {
 				let bytes: Result<Vec<u8>, &'static str> = if demo {
-					Ok(client_core_soundboard_fixture().to_vec())
+					// The offline preview plays the bundled tone instead of fetching one.
+					Ok(SOUNDBOARD_FIXTURE.to_vec())
 				} else {
 					runtime.block_on(crate::audio::download_clip(
 						url,
@@ -1798,6 +1799,10 @@ impl Desktop {
 
 /// The request id reserved for remote effects; preview requests count up from one.
 const EFFECT_REQUEST: u64 = 0;
+
+/// The bundled clip the offline preview plays; never fetched.
+const SOUNDBOARD_FIXTURE: &[u8] =
+	include_bytes!("../../../apps/desktop/tests/fixtures/audio-tone.mp3");
 
 /// What the fetch thread hands back to the render thread through egui temp data.
 type DownloadedClip = (u64, Result<Vec<u8>, &'static str>);
