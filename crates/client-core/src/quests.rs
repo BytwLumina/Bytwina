@@ -58,8 +58,6 @@ pub struct Quests {
 	request: Option<u64>,
 	/// The enrolment or claim in flight, with the quest it belongs to.
 	action: Option<(Id, u64)>,
-	/// Listed quests updated by the gateway during the current REST request.
-	updated: std::collections::BTreeSet<Id>,
 }
 
 impl Quests {

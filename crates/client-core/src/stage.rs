@@ -107,14 +107,6 @@ pub enum Event {
 	},
 }
 
-#[derive(Clone, Copy)]
-enum StageAction {
-	Speak { channel: Id, user: Id, asking: bool },
-	Moderate,
-	Create { channel: Id },
-	End { stage: Id },
-}
-
 /// One guild's known events.
 #[derive(Default)]
 struct Guild {

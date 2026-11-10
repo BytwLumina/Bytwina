@@ -31,7 +31,7 @@ impl DiscordApi {
 		category: Option<u32>,
 		offset: u32,
 	) -> Result<model::discovery::Page, Failure> {
-		if offset % PAGE_SIZE != 0 || offset > 0xFFFF {
+		if !offset.is_multiple_of(PAGE_SIZE) || offset > 0xFFFF {
 			return Err(Failure::Protocol);
 		}
 		let categories = self.discovery_categories().await.unwrap_or_default();

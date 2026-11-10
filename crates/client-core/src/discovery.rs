@@ -32,6 +32,8 @@ pub struct Discovery {
 	/// The query this page belongs to; a page for another filter is not shown under this one.
 	loaded: Option<(Option<u32>, u32)>,
 	category: Option<u32>,
+	/// The page the service was asked for, which its answer echoes.
+	offset: u32,
 	loading: bool,
 	request: u64,
 	error: Option<&'static str>,
@@ -105,6 +107,7 @@ impl Discovery {
 		self.loading = true;
 		self.request = request;
 		self.category = category;
+		self.offset = offset;
 		self.error = None;
 	}
 	pub fn apply(&mut self, event: Event) {
@@ -124,7 +127,7 @@ impl Discovery {
 					categories = previous.categories.clone();
 				}
 				page.categories = categories;
-				self.loaded = Some((self.category, page.offset));
+				self.loaded = Some((self.category, self.offset));
 				self.page = Some(page);
 				self.error = None;
 			}
@@ -146,7 +149,7 @@ impl crate::State {
 		category: Option<u32>,
 		offset: u32,
 	) -> Option<crate::Command> {
-		if offset % PAGE_SIZE != 0 {
+		if !offset.is_multiple_of(PAGE_SIZE) {
 			return None;
 		}
 		if self.discovery.loaded == Some((category, offset)) && !self.discovery.loading {

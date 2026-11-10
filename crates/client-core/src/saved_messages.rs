@@ -91,7 +91,7 @@ impl SavedMessages {
 	pub fn saved(&self, channel: Id, message: Id) -> Option<&SavedMessage> {
 		self.rows.get(&(channel, message))
 	}
-	pub fn next(&mut self) -> u64 {
+	pub fn next_request(&mut self) -> u64 {
 		self.request = self.request.wrapping_add(1);
 		self.request
 	}
@@ -290,7 +290,7 @@ impl crate::State {
 		if self.saved_messages.loading() {
 			return None;
 		}
-		let request = self.saved_messages.next();
+		let request = self.saved_messages.next_request();
 		self.saved_messages.begin_list(request);
 		Some(crate::Command::SavedMessages(Command::Load { request }))
 	}
