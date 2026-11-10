@@ -63,6 +63,7 @@ mod view_revisions;
 pub mod voice;
 use model::*;
 use session_cache::Timeline;
+pub use status::Status;
 use std::collections::{BTreeMap, BTreeSet};
 use trail::Place;
 
