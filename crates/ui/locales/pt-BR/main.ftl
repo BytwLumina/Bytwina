@@ -5008,3 +5008,4 @@ saved-messages-count = { $count ->
    *[other] { $count } mensagens salvas
     }
 saved-messages-full = As mensagens salvas estão cheias. Remova uma antes de salvar outra.
+new-message-too-many = Além de você, um grupo pode começar com no máximo { $limit } outras pessoas.

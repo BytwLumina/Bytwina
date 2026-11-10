@@ -5016,3 +5016,4 @@ saved-messages-count = { $count ->
    *[other] { $count } gespeicherte Nachrichten
     }
 saved-messages-full = Gespeicherte Nachrichten sind voll. Entferne eine, bevor du eine weitere speicherst.
+new-message-too-many = Neben dir kann eine Gruppe mit höchstens { $limit } weiteren Personen starten.

@@ -5501,3 +5501,4 @@ saved-messages-count = { $count ->
    *[other] { $count } tin nhắn đã lưu
     }
 saved-messages-full = Tin nhắn đã lưu đã đầy. Xoá bớt một tin trước khi lưu tin mới.
+new-message-too-many = Ngoài cậu, nhóm chỉ bắt đầu với tối đa { $limit } người khác.

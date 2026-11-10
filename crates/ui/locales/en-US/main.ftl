@@ -5504,3 +5504,4 @@ saved-messages-count = { $count ->
    *[other] { $count } saved messages
     }
 saved-messages-full = Saved messages are full. Remove one before saving another.
+new-message-too-many = { $limit } other people is the most a group can start with.

@@ -5008,3 +5008,4 @@ saved-messages-count = { $count ->
    *[other] { $count } messages enregistrés
     }
 saved-messages-full = Les messages enregistrés sont pleins. Retirez-en un avant d'en enregistrer un autre.
+new-message-too-many = Outre vous, un groupe peut commencer avec { $limit } personnes au maximum.

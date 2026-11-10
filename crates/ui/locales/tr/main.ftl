@@ -4994,3 +4994,4 @@ saved-messages-count = { $count ->
    *[other] { $count } kaydedilmiş mesaj
     }
 saved-messages-full = Kaydedilen mesajlar dolu. Yenisini kaydetmeden önce birini kaldır.
+new-message-too-many = Senin dışında bir grup en fazla { $limit } kişiyle başlayabilir.

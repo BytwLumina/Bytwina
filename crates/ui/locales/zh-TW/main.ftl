@@ -5106,3 +5106,4 @@ saved-messages-count = { $count ->
    *[other] 已儲存 { $count } 則訊息
     }
 saved-messages-full = 已儲存的訊息已滿，請先移除一則再儲存。
+new-message-too-many = 除你以外，群組最多可由 { $limit } 人開始。

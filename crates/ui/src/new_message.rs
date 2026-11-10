@@ -144,7 +144,7 @@ impl NewMessageUi {
 									if response.clicked() {
 										if selected {
 											self.selected.retain(|user| *user != id);
-										} else {
+										} else if self.selected.len() < MAX_GROUP_RECIPIENTS {
 											self.selected.push(id);
 										}
 									}
@@ -154,8 +154,20 @@ impl NewMessageUi {
 					d.footer(|ui| {
 						let ready = !self.selected.is_empty()
 							&& !pending && (state.demo || state.gateway_connected);
+						// The core's own ceiling decides when the button turns off.
+						let over = self.selected.len() > MAX_GROUP_RECIPIENTS;
+						if over {
+							ui.label(
+								egui::RichText::new(crate::i18n::translate_args(
+									"new-message-too-many",
+									&[("limit", &MAX_GROUP_RECIPIENTS.to_string())],
+								))
+								.color(design::palette(ui).danger)
+								.small(),
+							);
+						}
 						create = ui
-							.add_enabled_ui(ready, |ui| {
+							.add_enabled_ui(ready && !over, |ui| {
 								dialog::action(ui, "new-message-create", dialog::Action::Primary)
 							})
 							.inner

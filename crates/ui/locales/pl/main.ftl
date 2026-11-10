@@ -5010,3 +5010,4 @@ saved-messages-count = { $count ->
    *[other] Zapisane wiadomości: { $count }
     }
 saved-messages-full = Zapisane wiadomości są pełne. Usuń jedną przed zapisaniem kolejnej.
+new-message-too-many = Poza tobą grupa może zacząć z maksymalnie { $limit } osobami.

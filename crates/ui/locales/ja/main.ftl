@@ -4991,3 +4991,4 @@ saved-messages-count = { $count ->
    *[other] 保存済みメッセージ { $count } 件
     }
 saved-messages-full = 保存済みメッセージがいっぱいです。保存する前に 1 件削除してください。
+new-message-too-many = 自分以外に最大 { $limit } 人まで一緒にグループを始められます。

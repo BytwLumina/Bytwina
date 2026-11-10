@@ -5097,3 +5097,4 @@ saved-messages-count = { $count ->
    *[other] Uložené zprávy: { $count }
     }
 saved-messages-full = Uložené zprávy jsou plné. Před uložením další jednu odeber.
+new-message-too-many = Kromě tebe může skupina začít nejvýše s { $limit } lidmi.
