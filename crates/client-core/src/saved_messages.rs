@@ -101,10 +101,14 @@ impl SavedMessages {
 		self.list_epoch = self.write_epoch;
 		self.list_error = None;
 	}
-	pub fn begin_write(&mut self, request: u64, channel: Id, message: Id) {
+	pub fn begin_write(&mut self, request: u64, channel: Id, message: Id) -> bool {
+		if self.pending.is_some() {
+			return false;
+		}
 		self.request = request;
 		self.pending = Some((request, (channel, message)));
 		self.error = None;
+		true
 	}
 	pub fn apply(&mut self, event: Event) {
 		match event {
@@ -217,7 +221,7 @@ mod tests {
 	fn a_list_started_before_a_write_cannot_replace_it() {
 		let mut saved = SavedMessages::default();
 		saved.begin_list(1);
-		saved.begin_write(2, Id(1), Id(2));
+		assert!(saved.begin_write(2, Id(1), Id(2)));
 		saved.apply(Event::Saved {
 			channel: Id(1),
 			message: Id(2),
@@ -241,7 +245,7 @@ mod tests {
 	#[test]
 	fn a_stale_answer_leaves_the_write_free_and_keeps_its_error() {
 		let mut saved = SavedMessages::default();
-		saved.begin_write(7, Id(1), Id(2));
+		assert!(saved.begin_write(7, Id(1), Id(2)));
 		saved.apply(Event::Saved {
 			channel: Id(1),
 			message: Id(2),
@@ -272,7 +276,7 @@ mod tests {
 			result: Ok(vec![gone]),
 		});
 		assert!(saved.saved(Id(1), Id(5)).is_some());
-		saved.begin_write(2, Id(1), Id(5));
+		assert!(saved.begin_write(2, Id(1), Id(5)));
 		saved.apply(Event::Removed {
 			request: 2,
 			result: Ok((Id(1), Id(5))),
@@ -308,8 +312,10 @@ impl crate::State {
 		{
 			return None;
 		}
-		let request = self.saved_messages.next();
-		self.saved_messages.begin_write(request, channel, message);
+		let request = self.saved_messages.request.wrapping_add(1);
+		if !self.saved_messages.begin_write(request, channel, message) {
+			return None;
+		}
 		Some(crate::Command::SavedMessages(Command::Save {
 			channel,
 			message,
@@ -322,8 +328,10 @@ impl crate::State {
 		if self.saved_messages.busy() || self.saved_messages.saved(channel, message).is_none() {
 			return None;
 		}
-		let request = self.saved_messages.next();
-		self.saved_messages.begin_write(request, channel, message);
+		let request = self.saved_messages.request.wrapping_add(1);
+		if !self.saved_messages.begin_write(request, channel, message) {
+			return None;
+		}
 		Some(crate::Command::SavedMessages(Command::Remove {
 			channel,
 			message,
