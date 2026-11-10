@@ -42,6 +42,18 @@ impl MessagingUi {
 						design::semibold(ui, language.text("saved-messages"), 20.0)
 							.color(colors.text_strong),
 					);
+					if !state.saved_messages.is_empty() {
+						let count = state.saved_messages.len();
+						ui.label(
+							RichText::new(i18n::translate_count(
+								"saved-messages-count",
+								count,
+								&[],
+							))
+							.color(colors.muted)
+							.small(),
+						);
+					}
 					ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
 						if ui.button(language.text("saved-messages-refresh")).clicked() {
 							reload = true;
@@ -53,6 +65,9 @@ impl MessagingUi {
 						.color(colors.muted)
 						.small(),
 				);
+				if let Some(error) = state.saved_messages.error() {
+					ui.label(RichText::new(i18n::translate_if_key(error)).color(colors.danger));
+				}
 				if let Some(error) = state.saved_messages.error() {
 					ui.label(RichText::new(i18n::translate_if_key(error)).color(colors.danger));
 				}

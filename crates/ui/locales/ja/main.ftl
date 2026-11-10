@@ -4984,3 +4984,10 @@ emoji-picker-tone-dark = 暗い
 page-discovery = サーバーを探す
 emoji-picker-category-all = すべて
 discovery-total = このページの { $total } 件中 { $count } 件が一致
+soundboard-ui-effect = { $user } が { $sound } を再生しました
+soundboard-ui-effect-unknown = サウンド
+saved-messages-count = { $count ->
+    [one] 保存済みメッセージ 1 件
+   *[other] 保存済みメッセージ { $count } 件
+    }
+saved-messages-full = 保存済みメッセージがいっぱいです。保存する前に 1 件削除してください。

@@ -182,86 +182,6 @@ impl VoiceStatuses {
 	}
 }
 
-/// Most remote effects remembered at once; the oldest is dropped.
-const MAX_EFFECTS: usize = 8;
-
-/// A soundboard effect someone else played in the channel this device is listening to.
-#[derive(Clone, Debug)]
-pub struct Effect {
-	pub channel: Id,
-	pub user: Id,
-	pub name: String,
-	pub emoji: Option<model::ReactionEmoji>,
-	pub at: std::time::Instant,
-	/// The queued preview's request, so one row is never played twice.
-	pub playback: u64,
-}
-
-/// The short-lived trail of remote effects, plus the one clip queued for local output.
-#[derive(Default)]
-pub struct Effects {
-	rows: Vec<Effect>,
-	pending: Option<(Id, std::time::Instant, Preview)>,
-	request: u64,
-	/// The newest row already queued for playback, so a frame cannot queue it twice.
-	played: Option<(Id, u64)>,
-}
-impl Effects {
-	/// Rows new enough to animate, newest first.
-	pub fn recent(&self, now: std::time::Instant) -> impl Iterator<Item = &Effect> {
-		self.rows
-			.iter()
-			.rev()
-			.take_while(move |row| now.saturating_duration_since(row.at) < EFFECT_TTL)
-	}
-	/// Record an effect and queue its clip. `known` supplies the catalog name when loaded.
-	pub fn push(
-		&mut self,
-		effect: model::VoiceEffect,
-		known: Option<&SoundboardSound>,
-		now: std::time::Instant,
-	) {
-		if !effect.valid() {
-			return;
-		}
-		self.request = self.request.wrapping_add(1);
-		let playback = Preview {
-			sound: effect.sound,
-			volume: effect.volume,
-			request: self.request,
-			state: PreviewState::Loading,
-		};
-		if self.rows.len() >= MAX_EFFECTS {
-			self.rows.remove(0);
-		}
-		self.rows.push(Effect {
-			channel: effect.channel,
-			user: effect.user,
-			name: known.map_or_else(String::new, |sound| sound.name.clone()),
-			emoji: effect.emoji,
-			at: now,
-			playback: playback.request,
-		});
-		self.pending = Some((effect.channel, now, playback));
-		self.played = None;
-	}
-	pub fn take_pending(&mut self, channel: Id, now: std::time::Instant) -> Option<Preview> {
-		self.pending
-			.take()
-			.filter(|(target, at, _)| {
-				*target == channel && now.saturating_duration_since(*at) < EFFECT_TTL
-			})
-			.map(|(_, _, preview)| preview)
-	}
-	pub fn clear(&mut self) {
-		self.rows.clear();
-		self.pending = None;
-	}
-}
-
-/// How long a remote effect stays on screen.
-pub const EFFECT_TTL: std::time::Duration = std::time::Duration::from_secs(6);
-
 impl crate::State {
 	pub fn can_send_soundboard(&self, channel: Id, sound: &SoundboardSound) -> bool {
 		use model::permissions as p;
@@ -360,30 +280,5 @@ mod tests {
 		board.clear();
 		board.finish(3, Ok(vec![sound(4, None)]));
 		assert!(board.sounds.is_empty());
-	}
-	#[test]
-	fn effects_are_one_shot_scoped_fresh_and_use_the_wire_volume_once() {
-		let now = std::time::Instant::now();
-		let effect = model::VoiceEffect {
-			channel: Id(1),
-			user: Id(2),
-			sound: Id(3),
-			volume: 0.5,
-			emoji: None,
-		};
-		let mut effects = Effects::default();
-		effects.push(effect.clone(), Some(&sound(3, None)), now);
-		assert_eq!(effects.take_pending(Id(1), now).unwrap().volume, 0.5);
-		assert!(effects.take_pending(Id(1), now).is_none());
-		effects.push(effect.clone(), None, now);
-		assert!(effects.take_pending(Id(9), now).is_none());
-		effects.push(effect.clone(), None, now);
-		assert!(effects.take_pending(Id(1), now + EFFECT_TTL).is_none());
-		for _ in 0..20 {
-			effects.push(effect.clone(), None, now);
-		}
-		assert_eq!(effects.recent(now).count(), MAX_EFFECTS);
-		effects.clear();
-		assert!(effects.take_pending(Id(1), now).is_none());
 	}
 }

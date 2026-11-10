@@ -30,6 +30,31 @@ impl SoundboardUi {
 		self.open && self.channel == Some(channel)
 	}
 
+	/// The latest remote effect on this channel, with who played it. Drawn above the controls.
+	pub(super) fn effects_line(state: &State, channel: Id) -> Option<String> {
+		let now = std::time::Instant::now();
+		let row = state
+			.voice_effects
+			.recent(now)
+			.find(|row| row.channel == channel)?;
+		let who = state
+			.voice
+			.roster
+			.iter()
+			.find(|entry| entry.participant.user == row.user)
+			.and_then(|entry| entry.member.as_ref())
+			.map_or_else(|| row.user.to_string(), |member| member.user.name.clone());
+		let name = if row.name.is_empty() {
+			i18n::translate("soundboard-ui-effect-unknown")
+		} else {
+			row.name.clone()
+		};
+		Some(i18n::translate_args(
+			"soundboard-ui-effect",
+			&[("user", &who), ("sound", &name)],
+		))
+	}
+
 	/// The launcher button beside the call controls, plus its popup.
 	pub(super) fn launcher(
 		&mut self,

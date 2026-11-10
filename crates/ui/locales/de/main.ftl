@@ -5009,3 +5009,10 @@ emoji-picker-tone-dark = Dunkel
 page-discovery = Server entdecken
 emoji-picker-category-all = Alle
 discovery-total = { $count } von { $total } Servern dieser Seite passen
+soundboard-ui-effect = { $user } hat { $sound } abgespielt
+soundboard-ui-effect-unknown = einen Sound
+saved-messages-count = { $count ->
+    [one] 1 gespeicherte Nachricht
+   *[other] { $count } gespeicherte Nachrichten
+    }
+saved-messages-full = Gespeicherte Nachrichten sind voll. Entferne eine, bevor du eine weitere speicherst.

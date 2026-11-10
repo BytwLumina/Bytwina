@@ -4987,3 +4987,10 @@ emoji-picker-tone-dark = Koyu
 page-discovery = Sunucuları keşfet
 emoji-picker-category-all = Tümü
 discovery-total = Bu sayfadaki { $total } sunucudan { $count } tanesi uyuyor
+soundboard-ui-effect = { $user } { $sound } çaldı
+soundboard-ui-effect-unknown = bir ses
+saved-messages-count = { $count ->
+    [one] 1 kaydedilmiş mesaj
+   *[other] { $count } kaydedilmiş mesaj
+    }
+saved-messages-full = Kaydedilen mesajlar dolu. Yenisini kaydetmeden önce birini kaldır.

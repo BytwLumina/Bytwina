@@ -5004,3 +5004,10 @@ emoji-picker-tone-dark = Тёмный
 page-discovery = Найти серверы
 emoji-picker-category-all = Все
 discovery-total = Совпадает страниц: { $count } из { $total }
+soundboard-ui-effect = { $user } включил { $sound }
+soundboard-ui-effect-unknown = звук
+saved-messages-count = { $count ->
+    [one] Сохранено сообщений: 1
+   *[other] Сохранено сообщений: { $count }
+    }
+saved-messages-full = Сохранённые сообщения заполнены. Удалите одно, прежде чем сохранять новое.

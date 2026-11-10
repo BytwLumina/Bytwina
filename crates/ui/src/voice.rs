@@ -3317,9 +3317,18 @@ impl MessagingUi {
 		let bar = ui.max_rect();
 		// The channel status sits above the controls, centred, and the row shifts down.
 		// Owned so the later command dispatch can borrow the state mutably.
-		let status =
-			crate::soundboard_ui::SoundboardUi::channel_line(state, channel).map(str::to_owned);
+		// A sound someone just played is louder news than the channel's own status.
+		let status = match (
+			crate::soundboard_ui::SoundboardUi::effects_line(state, channel),
+			crate::soundboard_ui::SoundboardUi::channel_line(state, channel),
+		) {
+			(Some(effect), _) => Some(effect),
+			(None, status) => status.map(str::to_owned),
+		};
 		if let Some(status) = status {
+			// Rows expire on a timer; repaint while one is still on screen.
+			ui.ctx()
+				.request_repaint_after(std::time::Duration::from_millis(250));
 			let line =
 				ui.painter()
 					.layout_no_wrap(status, egui::FontId::proportional(12.0), STAGE_MUTED);

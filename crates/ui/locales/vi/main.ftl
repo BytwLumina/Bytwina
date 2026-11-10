@@ -5494,3 +5494,10 @@ emoji-picker-tone-dark = Sẫm
 page-discovery = Khám phá máy chủ
 emoji-picker-category-all = Tất cả
 discovery-total = { $count } / { $total } máy chủ trên trang này khớp bộ lọc
+soundboard-ui-effect = { $user } vừa phát { $sound }
+soundboard-ui-effect-unknown = một âm thanh
+saved-messages-count = { $count ->
+    [one] 1 tin nhắn đã lưu
+   *[other] { $count } tin nhắn đã lưu
+    }
+saved-messages-full = Tin nhắn đã lưu đã đầy. Xoá bớt một tin trước khi lưu tin mới.

@@ -1052,6 +1052,8 @@ struct Desktop {
 	demo_saved: Vec<model::saved_messages::SavedMessage>,
 	/// The volume of the remote effect downloading now.
 	voice_effect_volume: f32,
+	/// The effect row already handed to the player.
+	voice_effect_played: Option<u64>,
 	video: video::Video,
 	/// Synthetic stream/camera textures the demo view borrows by id.
 	_demo_textures: Vec<egui::TextureHandle>,
@@ -1688,13 +1690,16 @@ impl Desktop {
 			.active
 			.as_ref()
 			.is_some_and(|call| !call.deafened && !call.server_deafened);
-		if listening
-			&& !self.soundboard_audio.busy()
+		if let Some((row, fresh)) = self
+			.state
+			.voice_effects
+			.unplayed(self.voice_effect_played, now)
+			&& listening
+			&& fresh && !self.soundboard_audio.busy()
 			&& self.state.soundboard.preview.is_none()
-			&& let Some(row) = self.state.voice_effects.unplayed(now).cloned()
 			&& let Ok(url) = soundboard_audio::clip_url(row.sound)
 		{
-			self.state.voice_effects.mark_played(&row);
+			self.voice_effect_played = Some(row.request);
 			self.voice_effect_volume = row.volume;
 			self.fetch_soundboard(url, EFFECT_REQUEST, ctx, demo);
 		}
@@ -2654,6 +2659,7 @@ impl Desktop {
 			soundboard_requested: Vec::new(),
 			demo_saved: Vec::new(),
 			voice_effect_volume: 1.0,
+			voice_effect_played: None,
 			video: video::Video::default(),
 			_demo_textures: demo_textures,
 			demo_video_autoplay: if std::env::args().any(|arg| arg == "--demo-video-paused") {

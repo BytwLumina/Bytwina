@@ -5090,3 +5090,10 @@ emoji-picker-tone-dark = Tmavý
 page-discovery = Objevuj servery
 emoji-picker-category-all = Vše
 discovery-total = Odpovídá { $count } z { $total } serverů na této stránce
+soundboard-ui-effect = { $user } přehrál { $sound }
+soundboard-ui-effect-unknown = zvuk
+saved-messages-count = { $count ->
+    [one] 1 uložená zpráva
+   *[other] Uložené zprávy: { $count }
+    }
+saved-messages-full = Uložené zprávy jsou plné. Před uložením další jednu odeber.

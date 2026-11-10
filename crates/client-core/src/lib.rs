@@ -6,6 +6,7 @@ pub mod captcha;
 pub mod channel_actions;
 pub mod collectibles;
 pub mod discovery;
+pub mod effects;
 pub mod fingerprint;
 pub mod forum;
 pub mod game_mentions;
@@ -875,7 +876,7 @@ pub struct State {
 	pub soundboard: soundboard::Soundboard,
 	pub voice_statuses: soundboard::VoiceStatuses,
 	/// Remote soundboard effects heard in the connected channel; session memory only.
-	pub voice_effects: soundboard::Effects,
+	pub voice_effects: effects::Effects,
 	pub stickers: stickers::Stickers,
 	pub interactions: interactions::Interactions,
 	pub application_commands: application_commands::Catalog,
@@ -3345,10 +3346,13 @@ impl State {
 						&& !call.deafened && !call.server_deafened
 						&& matches!(call.phase, voice::Phase::Connected | voice::Phase::Waiting)
 				});
-				if listening && effect.valid() {
-					let known = self.soundboard.find(effect.sound).cloned();
+				if listening {
+					let name = self
+						.soundboard
+						.find(effect.sound)
+						.map_or_else(String::new, |sound| sound.name.clone());
 					self.voice_effects
-						.push(effect, known.as_ref(), std::time::Instant::now());
+						.push(&effect, name, std::time::Instant::now());
 				}
 				Ok(())
 			}

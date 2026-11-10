@@ -5497,3 +5497,10 @@ emoji-picker-tone-dark = Dark
 page-discovery = Discover servers
 emoji-picker-category-all = All
 discovery-total = { $count } of { $total } servers on this page match
+soundboard-ui-effect = { $user } played { $sound }
+soundboard-ui-effect-unknown = a sound
+saved-messages-count = { $count ->
+    [one] 1 saved message
+   *[other] { $count } saved messages
+    }
+saved-messages-full = Saved messages are full. Remove one before saving another.

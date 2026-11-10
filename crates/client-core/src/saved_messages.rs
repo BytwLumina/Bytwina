@@ -312,6 +312,23 @@ impl crate::State {
 		{
 			return None;
 		}
+		// Two separate ceilings: plain bookmarks, and everything including reminders.
+		if self.saved_messages.saved(channel, message).is_none() {
+			if due_at.is_none()
+				&& self
+					.saved_messages
+					.rows()
+					.filter(|row| row.due_at.is_none())
+					.count() >= model::saved_messages::MAX_BOOKMARKS
+			{
+				self.saved_messages.error = Some("saved-messages-full");
+				return None;
+			}
+			if self.saved_messages.len() >= model::saved_messages::MAX_SAVED_MESSAGES {
+				self.saved_messages.error = Some("saved-messages-full");
+				return None;
+			}
+		}
 		let request = self.saved_messages.request.wrapping_add(1);
 		if !self.saved_messages.begin_write(request, channel, message) {
 			return None;

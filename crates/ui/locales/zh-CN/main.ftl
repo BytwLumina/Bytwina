@@ -5099,3 +5099,10 @@ emoji-picker-tone-dark = 深色
 page-discovery = 探索服务器
 emoji-picker-category-all = 全部
 discovery-total = 此页 { $total } 个服务器中有 { $count } 个符合
+soundboard-ui-effect = { $user } 播放了 { $sound }
+soundboard-ui-effect-unknown = 音效
+saved-messages-count = { $count ->
+    [one] 已保存 1 条消息
+   *[other] 已保存 { $count } 条消息
+    }
+saved-messages-full = 已保存的消息已满，请先移除一条再保存。
