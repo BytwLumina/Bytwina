@@ -485,8 +485,9 @@ impl State {
 							.is_some_and(|m| m.reactions.is_some())
 						{
 							"Reaction counts could not be refreshed; reload the conversation to retry"
+								.into()
 						} else {
-							"Reactions unavailable; use Reload reactions to retry"
+							"Reactions unavailable; use Reload reactions to retry".into()
 						};
 						if failure == Failure::Forbidden {
 							self.apply(crate::Envelope {

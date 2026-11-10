@@ -1221,7 +1221,7 @@ impl Default for State {
 			resident: resident::Windows::default(),
 			preload: Default::default(),
 			freshness: Freshness::Stale,
-			status: "Disconnected",
+			status: "Disconnected".into(),
 			failure_detail: None,
 			drafts: BTreeMap::new(),
 			pending: vec![],
@@ -1665,7 +1665,7 @@ impl State {
 				self.trail.peek_forward()
 			}) else {
 				if let Some(status) = blocked {
-					self.status = status.into();
+					self.status = status;
 				}
 				return None;
 			};
@@ -2653,7 +2653,7 @@ impl State {
 					message: "Recipient ringing was not sent; the work queue is full",
 				}),
 				voice::Command::Sync { .. } => {
-					self.status = "Call status could not refresh;  reopen the DM to retry"
+					self.status = "Call status could not refresh; reopen the DM to retry".into()
 				}
 				voice::Command::Join {
 					channel, request, ..
@@ -2677,7 +2677,10 @@ impl State {
 						self.status = "Camera control was not sent. Camera is off locally".into();
 					}
 				}
-				_ => self.status = "Call control was not sent. Local mute/hangup still applies",
+				_ => {
+					self.status =
+						"Call control was not sent. Local mute/hangup still applies".into()
+				}
 			}
 			return;
 		}

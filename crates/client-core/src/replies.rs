@@ -265,7 +265,7 @@ impl State {
 				.is_some_and(|timeline| timeline.is_deleted(message))
 		{
 			self.status = "This message was deleted".into();
-			return Err(self.status);
+			return Err(self.status.as_str());
 		}
 		if !self.gateway_connected
 			&& (self.selected == Some(channel)
@@ -301,7 +301,7 @@ impl State {
 		}
 		if !self.gateway_connected {
 			self.status = "Message links are unavailable while disconnected".into();
-			return Err(self.status);
+			return Err(self.status.as_str());
 		}
 		Ok(self.open_target_window(message))
 	}

@@ -106,9 +106,9 @@ impl State {
 	pub fn prepare_sticker_send(&mut self, sticker: &Sticker) -> Option<Command> {
 		if !self.can_send_sticker(sticker) {
 			self.status = if self.sticker_requires_nitro(sticker) {
-				"Nitro is required to use this sticker outside its server"
+				"Nitro is required to use this sticker outside its server".into()
 			} else {
-				"This sticker is unavailable in this conversation"
+				"This sticker is unavailable in this conversation".into()
 			};
 			return None;
 		}
