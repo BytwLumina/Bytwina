@@ -262,6 +262,20 @@ mod tests {
 		assert_eq!(board.preview.as_ref().unwrap().state, PreviewState::Playing);
 	}
 	#[test]
+	fn sending_needs_a_joined_voice_channel_and_an_available_sound() {
+		let mut state = crate::State::default();
+		let sound = sound(3, None);
+		state.soundboard.sounds.push(sound.clone());
+		// Not in a call: nothing to send into.
+		assert!(!state.can_send_soundboard(Id(1), &sound));
+		assert!(state.send_soundboard(Id(1), Id(3)).is_none());
+		// An unavailable sound is refused even when the catalog still lists it.
+		let mut hidden = sound;
+		hidden.available = false;
+		assert!(!state.can_send_soundboard(Id(1), &hidden));
+	}
+
+	#[test]
 	fn catalog_switch_and_clear_reject_stale_results() {
 		let mut board = Soundboard::default();
 		board.begin(Some(Id(10)), 1);
