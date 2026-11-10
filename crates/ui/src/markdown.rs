@@ -1597,7 +1597,12 @@ impl Formatted {
 				ui.spacing_mut().item_spacing = egui::Vec2::ZERO;
 				ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
 				let reserve = |ui: &mut egui::Ui| {
-					if let Some(height) = line {
+					// A zero-width allocation does not meet egui's current row, so egui restarts
+					// the row at this height. On an already taller row (a heading) that shrank it
+					// and a chip wrapping below rose into the heading's first words.
+					if let Some(height) = line
+						&& ui.cursor().height() < height
+					{
 						ui.allocate_space(egui::vec2(0.0, height));
 					}
 				};
