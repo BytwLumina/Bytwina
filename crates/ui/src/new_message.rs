@@ -212,6 +212,7 @@ mod tests {
 		let mut state = State {
 			demo: true,
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(1),
 				name: "Signed in".into(),
 				avatar: None,

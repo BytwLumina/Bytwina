@@ -2085,6 +2085,7 @@ mod tests {
 	fn unsupported_channel_opens_confirmation_by_keyboard_without_selecting() {
 		let mut state = State {
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(2),
 				name: "Synthetic".into(),
 				avatar: None,
@@ -2254,6 +2255,7 @@ mod tests {
 		);
 		let mut state = State {
 			user: Some(model::User {
+				flags: model::AccountFlags::default(),
 				id: Id(2),
 				name: "Synthetic member".into(),
 				avatar: None,

@@ -172,7 +172,7 @@ pub fn badges(flags: &AccountFlags) -> Vec<Kind> {
 	if flags.premium_type > 0 {
 		shown.push(Kind::Nitro);
 	}
-	shown.sort_by_key(Kind::order);
+	shown.sort_by_key(|kind| kind.order());
 	shown.truncate(MAX_PUBLIC_BADGES);
 	shown
 }
