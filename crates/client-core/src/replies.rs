@@ -132,6 +132,12 @@ impl LinkResolution {
 }
 
 impl State {
+	/// Show one short status and return the same static text, which the caller reports.
+	fn note_status(&mut self, text: &'static str) -> &'static str {
+		self.status = text.into();
+		text
+	}
+
 	pub fn reply_target(&self) -> Option<Id> {
 		self.reply.map(Reply::target)
 	}
@@ -264,8 +270,7 @@ impl State {
 				.resident_timeline(channel)
 				.is_some_and(|timeline| timeline.is_deleted(message))
 		{
-			self.status = "This message was deleted".into();
-			return Err(self.status.as_str());
+			return Err(self.note_status("This message was deleted"));
 		}
 		if !self.gateway_connected
 			&& (self.selected == Some(channel)
@@ -300,8 +305,7 @@ impl State {
 			return Ok(None);
 		}
 		if !self.gateway_connected {
-			self.status = "Message links are unavailable while disconnected".into();
-			return Err(self.status.as_str());
+			return Err(self.note_status("Message links are unavailable while disconnected"));
 		}
 		Ok(self.open_target_window(message))
 	}
