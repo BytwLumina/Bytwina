@@ -1,120 +1,120 @@
-#4488	NEW    cov: 5216 ft: 22694 corp: 613/54Kb lim: 112 exec/s: 187 rss: 388Mb L: 92/112 MS: 2 CrossOver-PersAutoDict- DE: "\000\000\000\000"-
-#4495	REDUCE cov: 5216 ft: 22694 corp: 613/54Kb lim: 112 exec/s: 187 rss: 388Mb L: 58/112 MS: 2 ShuffleBytes-EraseBytes-
-#4551	NEW    cov: 5216 ft: 22705 corp: 614/54Kb lim: 112 exec/s: 189 rss: 388Mb L: 104/112 MS: 1 ChangeASCIIInt-
-#4570	NEW    cov: 5216 ft: 22706 corp: 615/54Kb lim: 112 exec/s: 190 rss: 388Mb L: 112/112 MS: 4 ChangeBit-CopyPart-ChangeBit-ShuffleBytes-
-#4577	REDUCE cov: 5216 ft: 22706 corp: 615/54Kb lim: 112 exec/s: 190 rss: 388Mb L: 105/112 MS: 2 PersAutoDict-EraseBytes- DE: "\377\377"-
-#4583	REDUCE cov: 5216 ft: 22706 corp: 615/54Kb lim: 112 exec/s: 190 rss: 388Mb L: 93/112 MS: 1 CrossOver-
-#4588	NEW    cov: 5218 ft: 22708 corp: 616/55Kb lim: 112 exec/s: 191 rss: 388Mb L: 112/112 MS: 5 CMP-ChangeBit-ShuffleBytes-ChangeByte-PersAutoDict- DE: "\007\000\000\000\000\000\000\000"-"\030\000\000\000\000\000\000\000"-
-#4604	REDUCE cov: 5218 ft: 22708 corp: 616/55Kb lim: 112 exec/s: 191 rss: 388Mb L: 81/112 MS: 1 EraseBytes-
-#4626	NEW    cov: 5218 ft: 22710 corp: 617/55Kb lim: 112 exec/s: 192 rss: 388Mb L: 104/112 MS: 2 PersAutoDict-InsertRepeatedBytes- DE: "\004\000\000\000\000\000\000\000"-
-#4628	REDUCE cov: 5218 ft: 22710 corp: 617/55Kb lim: 112 exec/s: 192 rss: 388Mb L: 105/112 MS: 2 ShuffleBytes-CrossOver-
-#4631	NEW    cov: 5218 ft: 22711 corp: 618/55Kb lim: 112 exec/s: 192 rss: 388Mb L: 91/112 MS: 3 CopyPart-CopyPart-CopyPart-
-#4666	NEW    cov: 5218 ft: 22712 corp: 619/55Kb lim: 112 exec/s: 194 rss: 388Mb L: 111/112 MS: 5 InsertRepeatedBytes-InsertRepeatedBytes-EraseBytes-CrossOver-InsertRepeatedBytes-
-#4675	NEW    cov: 5218 ft: 22714 corp: 620/55Kb lim: 112 exec/s: 194 rss: 388Mb L: 107/112 MS: 4 CopyPart-ChangeBit-InsertByte-CopyPart-
-#4698	NEW    cov: 5218 ft: 22724 corp: 621/55Kb lim: 112 exec/s: 187 rss: 388Mb L: 112/112 MS: 3 CopyPart-ShuffleBytes-ChangeByte-
-#4707	NEW    cov: 5218 ft: 22725 corp: 622/55Kb lim: 112 exec/s: 188 rss: 388Mb L: 85/112 MS: 4 ShuffleBytes-ShuffleBytes-InsertRepeatedBytes-CrossOver-
-#4756	NEW    cov: 5218 ft: 22727 corp: 623/55Kb lim: 112 exec/s: 190 rss: 388Mb L: 77/112 MS: 4 ChangeASCIIInt-ChangeBinInt-PersAutoDict-InsertRepeatedBytes- DE: "\377\377\377\377\377\377\377\027"-
-#4768	NEW    cov: 5218 ft: 22728 corp: 624/55Kb lim: 112 exec/s: 190 rss: 388Mb L: 96/112 MS: 2 ChangeASCIIInt-ChangeByte-
-#4791	NEW    cov: 5218 ft: 22729 corp: 625/55Kb lim: 112 exec/s: 191 rss: 388Mb L: 112/112 MS: 3 ChangeASCIIInt-CopyPart-CopyPart-
-#4807	NEW    cov: 5218 ft: 22731 corp: 626/55Kb lim: 112 exec/s: 192 rss: 388Mb L: 112/112 MS: 1 InsertRepeatedBytes-
-#4839	NEW    cov: 5218 ft: 22736 corp: 627/56Kb lim: 112 exec/s: 186 rss: 388Mb L: 88/112 MS: 2 PersAutoDict-CrossOver- DE: "\012\000\000\000\000\000\000\000"-
-#4900	NEW    cov: 5218 ft: 22737 corp: 628/56Kb lim: 112 exec/s: 188 rss: 388Mb L: 110/112 MS: 1 CopyPart-
-#4961	REDUCE cov: 5218 ft: 22737 corp: 628/56Kb lim: 112 exec/s: 190 rss: 388Mb L: 40/112 MS: 1 EraseBytes-
-#4992	NEW    cov: 5218 ft: 22755 corp: 629/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 106/112 MS: 1 ShuffleBytes-
-#4993	NEW    cov: 5218 ft: 22756 corp: 630/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 111/112 MS: 1 ChangeBit-
-#4994	REDUCE cov: 5218 ft: 22756 corp: 630/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 52/112 MS: 1 EraseBytes-
-#4995	REDUCE cov: 5218 ft: 22756 corp: 630/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 98/112 MS: 1 CrossOver-
-#5002	REDUCE cov: 5218 ft: 22756 corp: 630/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 68/112 MS: 2 EraseBytes-EraseBytes-
-#5004	NEW    cov: 5218 ft: 22759 corp: 631/56Kb lim: 112 exec/s: 192 rss: 388Mb L: 106/112 MS: 2 PersAutoDict-InsertRepeatedBytes- DE: "\012\000\000\000\000\000\000\000"-
-#5024	NEW    cov: 5218 ft: 22762 corp: 632/56Kb lim: 112 exec/s: 193 rss: 388Mb L: 112/112 MS: 5 CrossOver-EraseBytes-InsertByte-CopyPart-CopyPart-
-#5068	NEW    cov: 5218 ft: 22765 corp: 633/56Kb lim: 112 exec/s: 194 rss: 388Mb L: 112/112 MS: 4 ChangeBit-EraseBytes-InsertByte-InsertRepeatedBytes-
-#5070	NEW    cov: 5218 ft: 22768 corp: 634/56Kb lim: 112 exec/s: 195 rss: 388Mb L: 112/112 MS: 2 CopyPart-ShuffleBytes-
-#5079	NEW    cov: 5218 ft: 22807 corp: 635/56Kb lim: 112 exec/s: 195 rss: 388Mb L: 71/112 MS: 4 ChangeBit-CrossOver-CrossOver-InsertRepeatedBytes-
-#5111	REDUCE cov: 5218 ft: 22814 corp: 636/56Kb lim: 112 exec/s: 196 rss: 388Mb L: 105/112 MS: 2 InsertByte-CrossOver-
-#5130	REDUCE cov: 5218 ft: 22815 corp: 637/56Kb lim: 112 exec/s: 190 rss: 388Mb L: 68/112 MS: 4 PersAutoDict-CMP-CopyPart-InsertRepeatedBytes- DE: "\010\000\000\000\000\000\000\000"-"\377\377\377\377\377\377\001\020"-
-#5236	REDUCE cov: 5218 ft: 22815 corp: 637/56Kb lim: 112 exec/s: 193 rss: 388Mb L: 70/112 MS: 1 EraseBytes-
-#5252	NEW    cov: 5218 ft: 22817 corp: 638/57Kb lim: 112 exec/s: 194 rss: 388Mb L: 106/112 MS: 1 InsertRepeatedBytes-
-#5268	REDUCE cov: 5218 ft: 22818 corp: 639/57Kb lim: 112 exec/s: 195 rss: 388Mb L: 100/112 MS: 1 InsertRepeatedBytes-
-#5270	NEW    cov: 5218 ft: 22820 corp: 640/57Kb lim: 112 exec/s: 195 rss: 388Mb L: 104/112 MS: 2 ChangeBit-CopyPart-
-#5272	NEW    cov: 5218 ft: 22821 corp: 641/57Kb lim: 112 exec/s: 195 rss: 388Mb L: 112/112 MS: 2 CMP-CopyPart- DE: "\340\377\377\377\377\377\377\377"-
-#5289	NEW    cov: 5218 ft: 22823 corp: 642/57Kb lim: 112 exec/s: 195 rss: 388Mb L: 71/112 MS: 2 InsertRepeatedBytes-PersAutoDict- DE: "\340\377\377\377\377\377\377\377"-
-#5309	NEW    cov: 5218 ft: 22824 corp: 643/57Kb lim: 112 exec/s: 196 rss: 388Mb L: 81/112 MS: 5 PersAutoDict-CopyPart-CrossOver-EraseBytes-CMP- DE: "\340\377\377\377\377\377\377\377"-"\001\000\000\000\000\000\000\001"-
-#5358	NEW    cov: 5218 ft: 22827 corp: 644/57Kb lim: 112 exec/s: 191 rss: 388Mb L: 111/112 MS: 4 PersAutoDict-CMP-ChangeByte-ChangeByte- DE: "\004\000\000\000\000\000\000\000"-"\000\000\000\000"-
-#5359	NEW    cov: 5218 ft: 22828 corp: 645/57Kb lim: 112 exec/s: 191 rss: 388Mb L: 112/112 MS: 1 CopyPart-
-#5376	NEW    cov: 5218 ft: 22829 corp: 646/57Kb lim: 112 exec/s: 192 rss: 388Mb L: 110/112 MS: 2 ChangeByte-InsertByte-
-#5400	NEW    cov: 5218 ft: 22839 corp: 647/57Kb lim: 112 exec/s: 192 rss: 388Mb L: 112/112 MS: 4 CrossOver-ChangeBinInt-ShuffleBytes-InsertByte-
-#5417	NEW    cov: 5218 ft: 22840 corp: 648/58Kb lim: 112 exec/s: 193 rss: 388Mb L: 108/112 MS: 2 InsertByte-InsertByte-
-#5428	REDUCE cov: 5218 ft: 22840 corp: 648/58Kb lim: 112 exec/s: 193 rss: 388Mb L: 57/112 MS: 1 EraseBytes-
-#5431	NEW    cov: 5218 ft: 22841 corp: 649/58Kb lim: 112 exec/s: 193 rss: 388Mb L: 112/112 MS: 3 ChangeASCIIInt-ShuffleBytes-ChangeBinInt-
-#5455	NEW    cov: 5218 ft: 22844 corp: 650/58Kb lim: 112 exec/s: 194 rss: 388Mb L: 99/112 MS: 4 InsertRepeatedBytes-InsertByte-ChangeBinInt-CrossOver-
-#5461	NEW    cov: 5218 ft: 22862 corp: 651/58Kb lim: 112 exec/s: 195 rss: 388Mb L: 104/112 MS: 1 ChangeBit-
-#5475	NEW    cov: 5218 ft: 22922 corp: 652/58Kb lim: 112 exec/s: 195 rss: 388Mb L: 95/112 MS: 4 ShuffleBytes-CrossOver-CMP-InsertRepeatedBytes- DE: "\377\377\377\377\377\377\377\007"-
-#5482	NEW    cov: 5218 ft: 22928 corp: 653/58Kb lim: 112 exec/s: 195 rss: 388Mb L: 108/112 MS: 2 CopyPart-CrossOver-
-#5498	NEW    cov: 5218 ft: 22932 corp: 654/58Kb lim: 112 exec/s: 196 rss: 388Mb L: 59/112 MS: 1 InsertRepeatedBytes-
-#5539	REDUCE cov: 5218 ft: 22932 corp: 654/58Kb lim: 112 exec/s: 197 rss: 388Mb L: 36/112 MS: 1 EraseBytes-
-#5545	REDUCE cov: 5218 ft: 22932 corp: 654/58Kb lim: 112 exec/s: 198 rss: 388Mb L: 103/112 MS: 1 EraseBytes-
-#5547	REDUCE cov: 5218 ft: 22933 corp: 655/58Kb lim: 112 exec/s: 198 rss: 388Mb L: 96/112 MS: 2 ChangeBinInt-CopyPart-
-#5548	REDUCE cov: 5218 ft: 22933 corp: 655/58Kb lim: 112 exec/s: 198 rss: 388Mb L: 65/112 MS: 1 EraseBytes-
-#5567	REDUCE cov: 5218 ft: 22933 corp: 655/58Kb lim: 112 exec/s: 191 rss: 388Mb L: 84/112 MS: 4 ShuffleBytes-ChangeBinInt-ChangeBinInt-EraseBytes-
-#5623	REDUCE cov: 5218 ft: 22935 corp: 656/58Kb lim: 112 exec/s: 193 rss: 388Mb L: 57/112 MS: 1 ChangeBit-
-#5628	NEW    cov: 5218 ft: 22947 corp: 657/58Kb lim: 112 exec/s: 194 rss: 388Mb L: 112/112 MS: 5 ChangeBinInt-CopyPart-ChangeBinInt-ChangeBinInt-InsertRepeatedBytes-
-#5687	NEW    cov: 5218 ft: 22950 corp: 658/58Kb lim: 112 exec/s: 196 rss: 388Mb L: 111/112 MS: 4 CrossOver-PersAutoDict-ShuffleBytes-CopyPart- DE: "\000\000\000\000"-
-#5700	NEW    cov: 5218 ft: 22952 corp: 659/59Kb lim: 112 exec/s: 196 rss: 388Mb L: 102/112 MS: 3 InsertRepeatedBytes-InsertByte-ChangeBit-
-#5707	REDUCE cov: 5218 ft: 22965 corp: 660/59Kb lim: 112 exec/s: 196 rss: 388Mb L: 102/112 MS: 2 ChangeByte-PersAutoDict- DE: "\001\000"-
-#5717	REDUCE cov: 5218 ft: 22965 corp: 660/59Kb lim: 112 exec/s: 197 rss: 388Mb L: 86/112 MS: 5 InsertByte-ChangeBinInt-ChangeASCIIInt-InsertRepeatedBytes-EraseBytes-
-#5744	NEW    cov: 5218 ft: 22990 corp: 661/59Kb lim: 112 exec/s: 198 rss: 388Mb L: 105/112 MS: 2 ChangeByte-InsertByte-
-#5752	NEW    cov: 5220 ft: 22992 corp: 662/59Kb lim: 112 exec/s: 198 rss: 388Mb L: 80/112 MS: 3 ChangeByte-PersAutoDict-PersAutoDict- DE: "\003\000\000\000\000\000\000\000"-"\001\000\000\000\000\000\001\365"-
-#5754	REDUCE cov: 5220 ft: 22992 corp: 662/59Kb lim: 112 exec/s: 198 rss: 388Mb L: 89/112 MS: 2 ChangeBinInt-EraseBytes-
-#5758	NEW    cov: 5220 ft: 22994 corp: 663/59Kb lim: 112 exec/s: 198 rss: 388Mb L: 87/112 MS: 4 InsertByte-ChangeBit-CopyPart-InsertByte-
-#5790	NEW    cov: 5221 ft: 23039 corp: 664/59Kb lim: 112 exec/s: 199 rss: 388Mb L: 112/112 MS: 2 ChangeBit-CopyPart-
-#5802	REDUCE cov: 5221 ft: 23052 corp: 665/59Kb lim: 112 exec/s: 193 rss: 388Mb L: 59/112 MS: 2 ChangeByte-PersAutoDict- DE: "\014\000\000\000\000\000\000\000"-
-#5828	NEW    cov: 5221 ft: 23053 corp: 666/59Kb lim: 112 exec/s: 194 rss: 388Mb L: 99/112 MS: 1 InsertRepeatedBytes-
-#5833	REDUCE cov: 5221 ft: 23053 corp: 666/59Kb lim: 112 exec/s: 194 rss: 388Mb L: 89/112 MS: 5 PersAutoDict-ChangeByte-InsertRepeatedBytes-ChangeBit-EraseBytes- DE: "\001\000\000\000\000\000\001\365"-
-#5834	NEW    cov: 5221 ft: 23055 corp: 667/59Kb lim: 112 exec/s: 194 rss: 388Mb L: 97/112 MS: 1 InsertRepeatedBytes-
-#5873	NEW    cov: 5221 ft: 23060 corp: 668/59Kb lim: 112 exec/s: 195 rss: 388Mb L: 106/112 MS: 4 CopyPart-InsertRepeatedBytes-PersAutoDict-ChangeByte- DE: "\014\000\000\000\000\000\000\000"-
-#5875	NEW    cov: 5221 ft: 23070 corp: 669/59Kb lim: 112 exec/s: 195 rss: 388Mb L: 109/112 MS: 2 CopyPart-InsertByte-
-#5886	REDUCE cov: 5221 ft: 23070 corp: 669/59Kb lim: 112 exec/s: 196 rss: 388Mb L: 60/112 MS: 1 EraseBytes-
-#5893	REDUCE cov: 5221 ft: 23070 corp: 669/59Kb lim: 112 exec/s: 196 rss: 388Mb L: 59/112 MS: 2 ChangeASCIIInt-CrossOver-
-#5909	NEW    cov: 5221 ft: 23071 corp: 670/59Kb lim: 112 exec/s: 196 rss: 388Mb L: 111/112 MS: 1 InsertRepeatedBytes-
-#5916	NEW    cov: 5221 ft: 23081 corp: 671/60Kb lim: 112 exec/s: 197 rss: 388Mb L: 110/112 MS: 2 CrossOver-InsertRepeatedBytes-
-#5917	NEW    cov: 5221 ft: 23082 corp: 672/60Kb lim: 112 exec/s: 197 rss: 388Mb L: 90/112 MS: 1 InsertRepeatedBytes-
-#5931	REDUCE cov: 5222 ft: 23083 corp: 673/60Kb lim: 112 exec/s: 197 rss: 388Mb L: 79/112 MS: 4 ChangeByte-InsertByte-ChangeBit-InsertRepeatedBytes-
-#5944	NEW    cov: 5222 ft: 23085 corp: 674/60Kb lim: 112 exec/s: 198 rss: 388Mb L: 47/112 MS: 3 PersAutoDict-EraseBytes-ChangeASCIIInt- DE: "2333333\003"-
-#5980	REDUCE cov: 5222 ft: 23085 corp: 674/60Kb lim: 112 exec/s: 199 rss: 388Mb L: 88/112 MS: 1 EraseBytes-
-#6000	NEW    cov: 5222 ft: 23086 corp: 675/60Kb lim: 112 exec/s: 200 rss: 388Mb L: 112/112 MS: 5 ShuffleBytes-CMP-ChangeBinInt-ChangeByte-PersAutoDict- DE: "\001\000\000\000\000\000\000\000"-"\014\000\000\000\000\000\000\000"-
-#6003	NEW    cov: 5222 ft: 23087 corp: 676/60Kb lim: 112 exec/s: 200 rss: 388Mb L: 78/112 MS: 3 EraseBytes-ChangeBit-InsertByte-
-#6008	DONE   cov: 5222 ft: 23087 corp: 676/60Kb lim: 112 exec/s: 193 rss: 388Mb
-###### Recommended dictionary. ######
-"\377\377\377\377\377\377\377\002" # Uses: 30
-"\012\000\000\000\000\000\000\000" # Uses: 33
-"\377\377\377\377\377\377\377\027" # Uses: 30
-"\001\000" # Uses: 29
-"\003\000\000\000\000\000\000\000" # Uses: 21
-"\001\000\000\000" # Uses: 29
-"\377\377" # Uses: 21
-"\000\000" # Uses: 23
-"\377\377\377\377" # Uses: 24
-"\004\000\000\000\000\000\000\000" # Uses: 20
-"\377\377\377\377\377\377\377\377" # Uses: 21
-"\000\000\000\000" # Uses: 24
-"2333333\003" # Uses: 16
-"\030\000\000\000\000\000\000\000" # Uses: 23
-"\001\000\000\000\000\000\000\035" # Uses: 20
-"\001\000\000\000\000\000\000\003" # Uses: 21
-"\000\000\000\000\000\000\000\000" # Uses: 28
-"\231\231\231\231\231\231\231\001" # Uses: 9
-"^t\321E\027]t\001" # Uses: 10
-"\000\000\000\000\000\000\000\007" # Uses: 12
-"\010\000\000\000\000\000\000\000" # Uses: 12
-"\201\000\000\000\000\000\000\023" # Uses: 4
-"\000\000{\3273\3472\000" # Uses: 5
-"\001\000\000\000\000\000\001\365" # Uses: 7
-"\014\000\000\000\000\000\000\000" # Uses: 7
-"\007\000\000\000\000\000\000\000" # Uses: 4
-"\377\377\377\377\377\377\001\020" # Uses: 5
-"\340\377\377\377\377\377\377\377" # Uses: 2
-"\001\000\000\000\000\000\000\001" # Uses: 3
-"\377\377\377\377\377\377\377\007" # Uses: 3
-"\001\000\000\000\000\000\000\000" # Uses: 0
-###### End of recommended dictionary. ######
-Done 6008 runs in 31 second(s)
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:3921:21
+     [1m[94m|[0m
+[1m[94m3921[0m [1m[94m|[0m                         self.status = "No messages returned after this boundary; use Jump to present to reload";
+     [1m[94m|[0m                         [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                         [1m[94m|[0m
+     [1m[94m|[0m                         [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m3921[0m [1m[94m| [0m                        self.status = "No messages returned after this boundary; use Jump to present to reload"[92m.into()[0m;
+     [1m[94m|[0m                                                                                                                [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:3977:20
+     [1m[94m|[0m
+[1m[94m3977[0m [1m[94m|[0m                     self.status = "Channel unavailable or permission denied";
+     [1m[94m|[0m                     [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                     [1m[94m|[0m
+     [1m[94m|[0m                     [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m3977[0m [1m[94m| [0m                    self.status = "Channel unavailable or permission denied"[92m.into()[0m;
+     [1m[94m|[0m                                                                             [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4208:22
+     [1m[94m|[0m
+[1m[94m4208[0m [1m[94m|[0m [1m[94m...[0m                   self.status = f.label();
+     [1m[94m|[0m                       [1m[94m-----------[0m   [1m[91m^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                       [1m[94m|[0m
+     [1m[94m|[0m                       [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4208[0m [1m[94m| [0m                            self.status = f.label()[92m.into()[0m;
+     [1m[94m|[0m                                                    [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4272:19
+     [1m[94m|[0m
+[1m[94m4272[0m [1m[94m|[0m                 self.status = "Reconnecting…";
+     [1m[94m|[0m                 [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                 [1m[94m|[0m
+     [1m[94m|[0m                 [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4272[0m [1m[94m| [0m                self.status = "Reconnecting…"[92m.into()[0m;
+     [1m[94m|[0m                                              [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4280:19
+     [1m[94m|[0m
+[1m[94m4280[0m [1m[94m|[0m                 self.status = "";
+     [1m[94m|[0m                 [1m[94m-----------[0m   [1m[91m^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                 [1m[94m|[0m
+     [1m[94m|[0m                 [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4280[0m [1m[94m| [0m                self.status = ""[92m.into()[0m;
+     [1m[94m|[0m                                 [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4309:19
+     [1m[94m|[0m
+[1m[94m4309[0m [1m[94m|[0m                 self.status = "";
+     [1m[94m|[0m                 [1m[94m-----------[0m   [1m[91m^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                 [1m[94m|[0m
+     [1m[94m|[0m                 [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4309[0m [1m[94m| [0m                self.status = ""[92m.into()[0m;
+     [1m[94m|[0m                                 [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4321:19
+     [1m[94m|[0m
+[1m[94m4321[0m [1m[94m|[0m                 self.status = "Channel unavailable or permission denied";
+     [1m[94m|[0m                 [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m                 [1m[94m|[0m
+     [1m[94m|[0m                 [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4321[0m [1m[94m| [0m                self.status = "Channel unavailable or permission denied"[92m.into()[0m;
+     [1m[94m|[0m                                                                         [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4471:18
+     [1m[94m|[0m
+[1m[94m4471[0m [1m[94m|[0m             self.status = "Conversation no longer available in navigation";
+     [1m[94m|[0m             [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m             [1m[94m|[0m
+     [1m[94m|[0m             [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4471[0m [1m[94m| [0m            self.status = "Conversation no longer available in navigation"[92m.into()[0m;
+     [1m[94m|[0m                                                                           [92m+++++++[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+    [1m[94m--> [0mcrates/client-core/src/lib.rs:4493:17
+     [1m[94m|[0m
+[1m[94m4493[0m [1m[94m|[0m         self.status = failure.label();
+     [1m[94m|[0m         [1m[94m-----------[0m   [1m[91m^^^^^^^^^^^^^^^[0m [1m[91mexpected `Status`, found `&str`[0m
+     [1m[94m|[0m         [1m[94m|[0m
+     [1m[94m|[0m         [1m[94mexpected due to the type of this binding[0m
+     [1m[94m|[0m
+[1m[96mhelp[0m: call `Into::into` on this expression to convert `&'static str` into `status::Status`
+     [1m[94m|[0m
+[1m[94m4493[0m [1m[94m| [0m        self.status = failure.label()[92m.into()[0m;
+     [1m[94m|[0m                                      [92m+++++++[0m
+
+[1mSome errors have detailed explanations: E0282, E0308.[0m
+[1mFor more information about an error, try `rustc --explain E0282`.[0m
+[1m[91merror[0m: could not compile `client-core` (lib) due to 82 previous errors
