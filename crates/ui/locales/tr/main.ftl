@@ -4995,3 +4995,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Kaydedilen mesajlar dolu. Yenisini kaydetmeden önce birini kaldır.
 new-message-too-many = Senin dışında bir grup en fazla { $limit } kişiyle başlayabilir.
+extensions-ui-capability-guildfolders = Hesabın sunucu klasörlerini ve sırasını okur

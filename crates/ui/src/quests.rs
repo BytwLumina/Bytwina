@@ -72,9 +72,10 @@ impl MessagingUi {
 					&& let Some(when) = local_time::discord_timestamp(until, b'f')
 				{
 					ui.label(
-						RichText::new(
-							language.text_with_args("quests-blocked", &[("when", when.as_str())]),
-						)
+						RichText::new(crate::i18n::translate_args(
+							"quests-blocked",
+							&[("when", when.as_str())],
+						))
 						.color(colors.warning)
 						.small(),
 					);
@@ -190,7 +191,7 @@ impl MessagingUi {
 									}
 									if let Some(reward) = row.reward.clone() {
 										ui.label(
-											RichText::new(language.text_with_args(
+											RichText::new(crate::i18n::translate_args(
 												"quests-reward",
 												&[("reward", reward.as_str())],
 											))
@@ -203,7 +204,7 @@ impl MessagingUi {
 											local_time::discord_timestamp(expires, b'f')
 									{
 										ui.label(
-											RichText::new(language.text_with_args(
+											RichText::new(crate::i18n::translate_args(
 												"quests-expires",
 												&[("when", when.as_str())],
 											))

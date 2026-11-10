@@ -165,7 +165,7 @@ impl MessagingUi {
 														local_time::discord_timestamp(due, b'f')
 												{
 													ui.label(
-														RichText::new(language.text_with_args(
+														RichText::new(crate::i18n::translate_args(
 															"saved-messages-reminder",
 															&[("when", when.as_str())],
 														))

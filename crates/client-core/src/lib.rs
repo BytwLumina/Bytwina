@@ -18,6 +18,7 @@ pub mod quests;
 pub mod saved_messages;
 pub mod soundboard;
 pub mod stage;
+pub mod status;
 pub mod stickers;
 pub use permissions::ChannelAccess;
 #[cfg(test)]
@@ -988,7 +989,7 @@ pub struct State {
 	pub resident: resident::Windows,
 	pub preload: preload::Preload,
 	pub freshness: Freshness,
-	pub status: &'static str,
+	pub status: status::Status,
 	/// User-copyable cause of the last session failure, cleared by the next READY.
 	pub failure_detail: Option<Box<str>>,
 	pub drafts: BTreeMap<Id, String>,
@@ -1458,7 +1459,7 @@ impl State {
 			}
 			Apply::AlreadyHere => None,
 			Apply::Rejected(status) => {
-				self.status = status;
+				self.status = status.into();
 				None
 			}
 		}
@@ -1663,7 +1664,7 @@ impl State {
 				self.trail.peek_forward()
 			}) else {
 				if let Some(status) = blocked {
-					self.status = status;
+					self.status = status.into();
 				}
 				return None;
 			};
@@ -3748,7 +3749,7 @@ impl State {
 					Err(status) => {
 						self.cancel_history();
 						self.auth = auth::AuthState::Failed;
-						self.status = status;
+						self.status = status.into();
 						return;
 					}
 				};
@@ -4340,7 +4341,7 @@ impl State {
 		}
 		if let Err(status) = result {
 			self.clear_cached_history();
-			self.status = status;
+			self.status = status.into();
 			self.freshness = Freshness::Stale;
 			self.timeline.clear();
 			self.cancel_history();

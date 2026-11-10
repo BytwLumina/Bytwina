@@ -553,7 +553,7 @@ impl State {
 			},
 		};
 		self.server_actions.status = Some((action.guild(), status));
-		self.status = status;
+		self.status = status.into();
 		Ok(())
 	}
 	fn remove_server(&mut self, guild: Id) {

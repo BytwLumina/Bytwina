@@ -609,7 +609,7 @@ impl State {
 			(false, false) => "Verification expired; send the friend request again.",
 		};
 		self.user_actions.status = Some(status);
-		self.status = status;
+		self.status = status.into();
 	}
 	/// Builds the one explicit retry that resumes a solved account challenge.
 	pub fn resume_account_challenge(

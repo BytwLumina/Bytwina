@@ -3636,12 +3636,7 @@ impl TimelineView {
 													.unwrap_or_default();
 												for badge in &author_badges {
 													crate::badges::badge_icon(
-														ui,
-														&mut self.avatars,
-														badge,
-														None,
-														14.0,
-														state.demo,
+														ui, avatars, badge, None, 14.0, state.demo,
 													);
 												}
 												// Public account badges come from the author's

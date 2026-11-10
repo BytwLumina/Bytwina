@@ -5012,3 +5012,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Сохранённые сообщения заполнены. Удалите одно, прежде чем сохранять новое.
 new-message-too-many = Кроме вас, в группе может быть не больше { $limit } человек.
+extensions-ui-capability-guildfolders = Читать папки серверов аккаунта и их порядок

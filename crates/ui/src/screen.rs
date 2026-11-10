@@ -21,7 +21,7 @@ pub struct ScreenUi {
 	pub refresh_requested: bool,
 	pub request: Option<Request>,
 	pub busy: bool,
-	pub status: &'static str,
+	pub status: client_core::status::Status,
 	/// Locale key of an active capture problem; translated where it is shown.
 	pub capture_status: Option<&'static str>,
 	pub supported: bool,
@@ -344,7 +344,7 @@ impl ScreenUi {
 					ui.set_width(ui.available_width());
 					ui.add(
 						egui::Label::new(
-							egui::RichText::new(self.status)
+							egui::RichText::new(self.status.as_str())
 								.size(12.0)
 								.color(colors.muted),
 						)

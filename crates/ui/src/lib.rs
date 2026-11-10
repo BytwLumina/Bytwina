@@ -4765,7 +4765,7 @@ impl MessagingUi {
 			match state.open_chat_link(link.guild, link.channel, link.message) {
 				Ok(Some(command)) => commands.push(command),
 				Ok(None) => {}
-				Err(message) => state.status = message,
+				Err(message) => state.status = message.into(),
 			}
 		}
 		markdown::confirm_external_link(

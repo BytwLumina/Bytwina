@@ -164,7 +164,7 @@ impl State {
 		{
 			p.delivery = Delivery::Rejected;
 		}
-		self.status = status;
+		self.status = status.into();
 	}
 }
 

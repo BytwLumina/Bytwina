@@ -1457,7 +1457,7 @@ impl crate::MessagingUi {
 					.iter()
 					.any(|command| command.name == name)
 			{
-				state.status = &crate::i18n::translate(
+				state.status = crate::i18n::translate(
 					"slash-commands-status-choose-a-command-from-the-list-before-running-it",
 				);
 				self.slash_commands.dismissed = false;
@@ -1477,7 +1477,7 @@ impl crate::MessagingUi {
 			}
 			Err(error) => {
 				self.slash_commands.error = Some(error);
-				state.status = error;
+				state.status = error.into();
 			}
 		}
 		true

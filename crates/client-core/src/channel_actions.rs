@@ -695,7 +695,7 @@ impl State {
 			&& let Err(status) = self.confirm_guild_hides_muted(guild, *hide)
 		{
 			self.channel_actions.status = Some((channel, status, false));
-			self.status = status;
+			self.status = status.into();
 			return None;
 		}
 		self.channel_actions.sequence = self.channel_actions.sequence.wrapping_add(1);
@@ -979,7 +979,7 @@ impl State {
 					failure.label()
 				};
 				self.channel_actions.status = Some((channel, status, false));
-				self.status = status;
+				self.status = status.into();
 				return Ok(());
 			}
 			Ok(Outcome::Post {
@@ -1054,7 +1054,7 @@ impl State {
 							)
 						}) {
 						self.channel_actions.status = Some((channel, status, false));
-						self.status = status;
+						self.status = status.into();
 						return Ok(());
 					}
 					self.channel_actions.post_owner = details.owner.map(|owner| (channel, owner));
@@ -1220,7 +1220,7 @@ impl State {
 					.and_then(|_| self.confirm_channel_mute_timer(channel, muted, mute_until))
 				{
 					self.channel_actions.status = Some((channel, status, false));
-					self.status = status;
+					self.status = status.into();
 					return Ok(());
 				}
 				"Notification settings updated"
@@ -1228,7 +1228,7 @@ impl State {
 			Ok(Outcome::HideMuted(hide)) => {
 				if let Err(status) = self.confirm_guild_hides_muted(guild, hide) {
 					self.channel_actions.status = Some((channel, status, false));
-					self.status = status;
+					self.status = status.into();
 					return Ok(());
 				}
 				if hide {
@@ -1239,7 +1239,7 @@ impl State {
 			}
 		};
 		self.channel_actions.status = Some((channel, status, true));
-		self.status = status;
+		self.status = status.into();
 		Ok(())
 	}
 }

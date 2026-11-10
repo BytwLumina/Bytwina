@@ -5098,3 +5098,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Uložené zprávy jsou plné. Před uložením další jednu odeber.
 new-message-too-many = Kromě tebe může skupina začít nejvýše s { $limit } lidmi.
+extensions-ui-capability-guildfolders = Čte složky serverů účtu a jejich pořadí

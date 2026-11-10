@@ -6938,7 +6938,7 @@ impl eframe::App for Desktop {
 					&ctx,
 					self.state.demo,
 				) {
-				self.state.status = error;
+				self.state.status = error.into();
 			}
 			if let Some(request) = self.messaging.attachment_paste_requested.take()
 				&& let Some(channel) = self.state.selected
@@ -6968,7 +6968,7 @@ impl eframe::App for Desktop {
 					&ctx,
 					self.window.clone(),
 				) {
-				self.state.status = error;
+				self.state.status = error.into();
 			}
 			if std::mem::take(&mut self.messaging.downloads().dismiss_requested) {
 				self.downloads.dismiss();
@@ -6986,7 +6986,7 @@ impl eframe::App for Desktop {
 					&ctx,
 					self.window.clone(),
 				) {
-				self.state.status = error;
+				self.state.status = error.into();
 			}
 			if let Some(attachment) = self.messaging.downloads().copy_request.take()
 				&& !self.state.demo
@@ -6995,7 +6995,7 @@ impl eframe::App for Desktop {
 					self.downloads
 						.start_copy(attachment, self.runtime.handle(), &ctx)
 			{
-				self.state.status = error;
+				self.state.status = error.into();
 			}
 			if let Some(attachment) = self.messaging.downloads().request.take()
 				&& !self.state.demo
@@ -7006,7 +7006,7 @@ impl eframe::App for Desktop {
 					&ctx,
 					self.window.clone(),
 				) {
-				self.state.status = error;
+				self.state.status = error.into();
 			}
 
 			if let Some(scope) = self.messaging.take_profile_picture_request() {
@@ -7247,7 +7247,7 @@ impl eframe::App for Desktop {
 			platform::window::set_native_title_bar(&self.window, self.messaging.hide_title_bar)
 		{
 			self.messaging.hide_title_bar = false;
-			self.state.status = error;
+			self.state.status = error.into();
 		}
 		if !self.messaging.hide_title_bar {
 			frame.set_traffic_lights_position(&ctx, egui::Rangef::new(0.0, title_bar_height), 12.0);

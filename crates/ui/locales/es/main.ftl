@@ -5012,3 +5012,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Los mensajes guardados están llenos. Quita uno antes de guardar otro.
 new-message-too-many = Además de ti, un grupo puede empezar con { $limit } personas como máximo.
+extensions-ui-capability-guildfolders = Leer las carpetas de servidores de la cuenta y su orden

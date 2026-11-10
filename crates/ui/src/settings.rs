@@ -137,6 +137,7 @@ impl Page {
 	fn matches(self, query: &str, language: Language) -> bool {
 		let keywords = match self {
 			Self::Account => "my account profile logout",
+			Self::Discovery => "discover servers directory browse verified partnered join",
 			Self::Profile => "profile edit display name about me bio pronouns color colour",
 			Self::General => {
 				"general windows macos linux login menu bar startup autostart automatically open minimized minimize close tray background title bar caption window buttons decorations borderless tiling graphics gpu adapter render discrete integrated hardware acceleration performance battery vrr variable refresh rate steady refresh rate g-sync gsync freesync adaptive sync flicker flickering steady frame rate fps vsync"

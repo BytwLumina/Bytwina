@@ -5107,3 +5107,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = 已保存的消息已满，请先移除一条再保存。
 new-message-too-many = 除你以外，群组最多可由 { $limit } 人开始。
+extensions-ui-capability-guildfolders = 读取账号的服务器文件夹与排序

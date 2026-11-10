@@ -259,7 +259,7 @@ impl State {
 		let result = self.open_chat_link(Some(guild), channel, Some(message));
 		self.search = view;
 		result.unwrap_or_else(|status| {
-			self.status = status;
+			self.status = status.into();
 			None
 		})
 	}

@@ -6,8 +6,11 @@
 use crate::auth::Failure;
 use model::{
 	Id,
-	discovery::{Category, Guild, MAX_CATEGORIES, PAGE_SIZE, Page},
+	discovery::{Category, Guild, MAX_CATEGORIES, Page},
 };
+
+/// Rows per page; the service caps this at 48.
+pub use model::discovery::PAGE_SIZE;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {

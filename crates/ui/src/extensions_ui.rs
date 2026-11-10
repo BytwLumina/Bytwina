@@ -2807,6 +2807,7 @@ fn capability_key(capability: Capability) -> &'static str {
 		Capability::VoiceControl => "extensions-ui-capability-voicecontrol",
 		Capability::AppEvents => "extensions-ui-capability-appevents",
 		Capability::DeletedMessages => "extensions-ui-capability-deletedmessages",
+		Capability::GuildFolders => "extensions-ui-capability-guildfolders",
 	}
 }
 

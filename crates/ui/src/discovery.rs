@@ -3,7 +3,7 @@
 use crate::{MessagingUi, design, i18n};
 use client_core::{Command, State, discovery::PAGE_SIZE};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Action {
 	Reload(Option<u32>, u32),
 	Preview(u64),
@@ -155,11 +155,11 @@ impl MessagingUi {
 											ui.label(
 												egui::RichText::new(format!(
 													"{} · {}",
-													language.text_with_args(
+													crate::i18n::translate_args(
 														"discovery-members",
 														&[("count", &members)]
 													),
-													language.text_with_args(
+													crate::i18n::translate_args(
 														"discovery-online",
 														&[("count", &online)]
 													)
@@ -194,7 +194,6 @@ impl MessagingUi {
 														.clicked()
 													{
 														action = Some(Action::Preview(
-															guild.id,
 															guild
 																.vanity_url_code
 																.clone()
@@ -233,7 +232,7 @@ impl MessagingUi {
 						let (matched, total) = state.discovery.matched();
 						let (matched, total) = (matched.to_string(), total.to_string());
 						ui.label(
-							egui::RichText::new(language.text_with_args(
+							egui::RichText::new(crate::i18n::translate_args(
 								"discovery-total",
 								&[("count", &matched), ("total", &total)],
 							))
@@ -249,7 +248,7 @@ impl MessagingUi {
 					commands.push(command);
 				}
 			}
-			Some(Action::Preview(_, code)) if !code.is_empty() => {
+			Some(Action::Preview(code)) if !code.is_empty() => {
 				// Only the service-supplied vanity code may enter the invite flow.
 				self.join_server.open_with(state.generation, code);
 			}

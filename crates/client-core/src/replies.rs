@@ -375,7 +375,7 @@ impl State {
 		match self.open_chat_link(Some(guild), channel, message) {
 			Ok(command) => command,
 			Err(status) => {
-				self.status = status;
+				self.status = status.into();
 				None
 			}
 		}

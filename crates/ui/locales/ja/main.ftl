@@ -4992,3 +4992,4 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = 保存済みメッセージがいっぱいです。保存する前に 1 件削除してください。
 new-message-too-many = 自分以外に最大 { $limit } 人まで一緒にグループを始められます。
+extensions-ui-capability-guildfolders = アカウントのサーバーフォルダーと並び順を読み取る

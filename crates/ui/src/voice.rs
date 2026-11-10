@@ -796,14 +796,16 @@ impl MessagingUi {
 						egui::Spinner::new().color(colors.muted),
 					);
 				} else {
+					// The translated fallback outlives the painter call that borrows it.
+					let unavailable = crate::i18n::translate(
+						"voice-stream-preview-popup-preview-hidden-or-unavailable",
+					);
 					ui.painter().text(
 						rect.center(),
 						egui::Align2::CENTER_CENTER,
-						preview.and_then(|preview| preview.error).unwrap_or(
-							&crate::i18n::translate(
-								"voice-stream-preview-popup-preview-hidden-or-unavailable",
-							),
-						),
+						preview
+							.and_then(|preview| preview.error)
+							.unwrap_or(unavailable.as_str()),
 						egui::FontId::proportional(13.0),
 						colors.muted,
 					);
@@ -879,7 +881,8 @@ impl MessagingUi {
 		if !live {
 			self.stream_preview_watch = None;
 			state.status =
-				crate::i18n::translate("voice-stream-preview-popup-this-stream-is-no-longer-live");
+				crate::i18n::translate("voice-stream-preview-popup-this-stream-is-no-longer-live")
+					.into();
 			return;
 		}
 		match state
@@ -3682,7 +3685,7 @@ impl MessagingUi {
 					.unwrap_or(if self.screen.status.is_empty() {
 						label
 					} else {
-						self.screen.status
+						self.screen.status.as_str()
 					})
 			} else {
 				"voice-screen-share-control-screen-sharing-requires-a-connected-call-and-video-permission-on-a-supported-desktop"

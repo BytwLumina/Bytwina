@@ -326,11 +326,11 @@ impl crate::MessagingUi {
 	) {
 		if self.user_direct.is_some() {
 			state.status =
-				&crate::i18n::translate("user-direct-status-wait-for-the-current-direct-message");
+				crate::i18n::translate("user-direct-status-wait-for-the-current-direct-message");
 			return;
 		}
 		if matches!(intent, Intent::Call) && (state.demo || !self.voice_available) {
-			state.status = &crate::i18n::translate("user-direct-status-calls-are-unavailable");
+			state.status = crate::i18n::translate("user-direct-status-calls-are-unavailable");
 			return;
 		}
 		if !state.can_open_user_dm(&user)
@@ -341,7 +341,7 @@ impl crate::MessagingUi {
 			|| !self.server_settings.navigate_away(state)
 		{
 			self.profile.finish_message(user.id, false);
-			state.status = &crate::i18n::translate(
+			state.status = crate::i18n::translate(
 				"user-direct-status-this-direct-message-action-is-unavailable-your-message-was-kept",
 			);
 			return;
@@ -419,7 +419,7 @@ impl crate::MessagingUi {
 			}
 			Intent::Call => {
 				if let Some(reason) = self.call_unavailable(state, channel) {
-					state.status = reason;
+					state.status = reason.into();
 				} else {
 					self.profile.close();
 					self.request_call(state, channel, true, commands);

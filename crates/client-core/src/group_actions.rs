@@ -263,7 +263,7 @@ impl State {
 			}
 		};
 		self.group_actions.status = Some((channel, status));
-		self.status = status;
+		self.status = status.into();
 		Ok(())
 	}
 }

@@ -35,7 +35,8 @@ pub(super) struct ForwardDialog {
 	/// At most ten nonce strings: one forward and optional note per destination.
 	sent: Vec<(Id, String)>,
 	focus: bool,
-	error: Option<&'static str>,
+	/// Why the last attempt sent nothing; the text is copied so it outlives the state borrow.
+	error: Option<Box<str>>,
 }
 impl ForwardDialog {
 	pub fn open(&mut self, state: &State, message: Id) {
@@ -239,7 +240,7 @@ impl ForwardDialog {
 							.desired_width(f32::INFINITY),
 					)
 				});
-				if let Some(error) = self.error {
+				if let Some(error) = &self.error {
 					design::notice(ui, design::Level::Error, error);
 				}
 				if submitted {
@@ -297,7 +298,10 @@ impl ForwardDialog {
 		});
 		if submit {
 			let outgoing = state.prepare_forward(message, &self.targets, &self.note);
-			self.error = outgoing.is_empty().then_some(state.status);
+			self.error = outgoing.is_empty().then(|| {
+				let text = state.status.as_str();
+				Box::<str>::from(text)
+			});
 			for command in &outgoing {
 				if let Command::Forward { channel, nonce, .. }
 				| Command::Send { channel, nonce, .. } = command

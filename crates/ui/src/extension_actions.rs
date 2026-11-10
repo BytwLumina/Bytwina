@@ -308,7 +308,7 @@ impl MessagingUi {
 					.collect::<Result<Vec<_>, _>>()?;
 				let outgoing = state.prepare_forward(id(&message_id)?, &targets, &note);
 				if outgoing.is_empty() {
-					return Err(state.status.into());
+					return Err(state.status.to_string());
 				}
 				commands.extend(outgoing);
 				return Ok(());
