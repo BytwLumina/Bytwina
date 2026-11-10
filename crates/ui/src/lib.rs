@@ -60,6 +60,7 @@ pub fn debug_channel_creation(state: client_core::State) {
 	channel_menu::debug_creation(state);
 }
 mod channel_pill;
+mod discovery;
 mod formatting;
 mod forum;
 mod forum_settings;
@@ -81,6 +82,8 @@ mod post_menu;
 mod preload;
 mod profiles;
 mod public_badges;
+mod quests;
+mod saved_messages;
 mod slash_builtin;
 mod slash_commands;
 mod soundboard_ui;
@@ -303,6 +306,11 @@ pub struct MessagingUi {
 	search: search::SearchUi,
 	settings: settings::Settings,
 	soundboard: soundboard_ui::SoundboardUi,
+	/// Session flags for the home pages that read remote lists on first visit.
+	pub(crate) saved_requested: bool,
+	pub(crate) saved_requested_generation: Option<u64>,
+	pub(crate) discovery_requested: bool,
+	pub(crate) discovery_requested_generation: Option<u64>,
 	server_settings: server_settings::Editor,
 	server_icon_sequence: u64,
 	server_emoji_sequence: u64,
@@ -5606,6 +5614,15 @@ impl MessagingUi {
 			&& let Some(command) = state.prepare_pin(channel, message, pinned)
 		{
 			commands.push(command);
+		}
+		if let Some((channel, message, due_at)) = self.timeline.saved_request.take() {
+			let command = match due_at {
+				None => state.remove_saved_message(channel, message),
+				Some(due_at) => state.save_message(channel, message, due_at),
+			};
+			if let Some(command) = command {
+				commands.push(command);
+			}
 		}
 		if let Some(channel) = state.pins_changed.take()
 			&& self.search.open

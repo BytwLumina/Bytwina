@@ -56,7 +56,7 @@ impl Sounds {
 						}
 						let finished = Arc::new(AtomicBool::new(false));
 						match open(
-							sound,
+							bundled(sound),
 							volume,
 							generation.clone(),
 							request,
@@ -121,8 +121,9 @@ impl Drop for Sounds {
 	}
 }
 
-fn samples(sound: Sound, rate: u32, current: &impl Fn() -> bool) -> Result<Vec<[f32; 2]>, ()> {
-	let bytes: &[u8] = match sound {
+/// The bundled cue bytes. Kept beside the decoder so both callers share one bound.
+fn bundled(sound: Sound) -> &'static [u8] {
+	match sound {
 		Sound::Message => include_bytes!("../../../assets/sounds/discord/message.mp3"),
 		Sound::CurrentChannel => {
 			include_bytes!("../../../assets/sounds/discord/current-channel.mp3")
@@ -145,61 +146,147 @@ fn samples(sound: Sound, rate: u32, current: &impl Fn() -> bool) -> Result<Vec<[
 		Sound::PttStart => include_bytes!("../../../assets/sounds/discord/ptt-start.mp3"),
 		Sound::PttStop => include_bytes!("../../../assets/sounds/discord/ptt-stop.mp3"),
 		Sound::ViewerJoin => include_bytes!("../../../assets/sounds/discord/viewer-join.mp3"),
-	};
-	if bytes.len() > 128 * 1024 || !(8000..=192000).contains(&rate) {
+	}
+}
+
+/// Decode one short cue. Bundled cues are tiny; a soundboard clip may reach the service's 512 KiB.
+pub(crate) const MAX_CUE_BYTES: usize = 512 * 1024;
+
+fn append_pcm(
+	pcm: &mut Vec<f32>,
+	spec: &mut Option<(usize, u32)>,
+	chunk: &[f32],
+	channels: usize,
+	rate: u32,
+) -> Result<(), &'static str> {
+	if !(1..=2).contains(&channels)
+		|| !(8000..=96000).contains(&rate)
+		|| spec.is_some_and(|spec| spec != (channels, rate))
+		|| !chunk.len().is_multiple_of(channels)
+		|| chunk.len() > (rate as usize * channels * 6).saturating_sub(pcm.len())
+	{
+		return Err("Invalid or oversized audio cue");
+	}
+	*spec = Some((channels, rate));
+	pcm.extend(chunk.iter().map(|sample| {
+		if sample.is_finite() {
+			sample.clamp(-1.0, 1.0)
+		} else {
+			0.0
+		}
+	}));
+	Ok(())
+}
+
+fn samples(bytes: &[u8], rate: u32, current: &impl Fn() -> bool) -> Result<Vec<[f32; 2]>, ()> {
+	if !current()
+		|| bytes.is_empty()
+		|| bytes.len() > MAX_CUE_BYTES
+		|| !(8000..=192000).contains(&rate)
+	{
 		return Err(());
 	}
 	let mut pcm = Vec::new();
-	let mut source_rate = 0;
+	let mut spec = None;
 	crate::audio::decode_stream(
-		Box::new(Cursor::new(bytes)),
+		Box::new(Cursor::new(bytes.to_vec())),
 		current,
-		&mut |chunk, channels, rate, _| {
-			if channels != 2
-				|| !matches!(rate, 44100 | 48000)
-				|| (source_rate != 0 && source_rate != rate)
-				|| pcm.len() + chunk.len() > rate as usize * 2 * 6
-			{
-				return Err("Invalid bundled notification sound");
-			}
-			source_rate = rate;
-			pcm.extend(chunk.iter().map(|sample| {
-				if sample.is_finite() {
-					sample.clamp(-1.0, 1.0)
-				} else {
-					0.0
-				}
-			}));
-			Ok(())
-		},
+		&mut |chunk, channels, rate, _| append_pcm(&mut pcm, &mut spec, chunk, channels, rate),
 	)
 	.map_err(|_| ())?;
 	if !current() || pcm.is_empty() {
 		return Err(());
 	}
-	let frames = pcm.len() / 2;
+	let (channels, source_rate) = spec.ok_or(())?;
+	let frames = pcm.len() / channels;
+	let count = (frames as u64 * u64::from(rate)).div_ceil(u64::from(source_rate)) as usize;
+	let mut stereo = Vec::with_capacity(count);
 	// ponytail: linear rate conversion; use a band-limited resampler if quality measurements require it.
-	Ok((0..(frames * rate as usize).div_ceil(source_rate as usize))
-		.map(|frame| {
-			let position = frame as f64 * f64::from(source_rate) / f64::from(rate);
-			let index = (position as usize).min(frames - 1);
-			let next = (index + 1).min(frames - 1);
-			std::array::from_fn(|channel| {
-				let a = pcm[index * 2 + channel];
-				let b = pcm[next * 2 + channel];
-				a + (b - a) * (position - index as f64) as f32
-			})
-		})
-		.collect())
+	for frame in 0..count {
+		if frame % 1024 == 0 && !current() {
+			return Err(());
+		}
+		let position = frame as f64 * f64::from(source_rate) / f64::from(rate);
+		let index = (position as usize).min(frames - 1);
+		let next = (index + 1).min(frames - 1);
+		stereo.push(std::array::from_fn(|channel| {
+			let channel = channel.min(channels - 1);
+			let a = pcm[index * channels + channel];
+			let b = pcm[next * channels + channel];
+			a + (b - a) * (position - index as f64) as f32
+		}));
+	}
+	if !current() {
+		return Err(());
+	}
+	Ok(stereo)
 }
+/// Play one decoded cue on the default output. Bundled cues share one gate; a clip borrowed by
+/// the attachment player passes its own, so replacing either never cuts the other off.
+pub(crate) fn play_bytes(
+	bytes: &[u8],
+	volume: f32,
+	gate: &CueGate,
+) -> Result<(cpal::Stream, Duration), ()> {
+	open(
+		bytes,
+		gain_percent(volume),
+		gate.generation.clone(),
+		gate.request,
+		gate.status.clone(),
+		gate.finished.clone(),
+	)
+}
+/// The identity of one cue on the output, owned by whoever started it.
+pub(crate) struct CueGate {
+	generation: Arc<AtomicU64>,
+	request: u64,
+	status: Arc<AtomicU8>,
+	finished: Arc<AtomicBool>,
+}
+impl CueGate {
+	pub(crate) fn new(generation: Arc<AtomicU64>, request: u64) -> Self {
+		Self {
+			generation,
+			request,
+			status: Arc::new(AtomicU8::new(1)),
+			finished: Arc::new(AtomicBool::new(false)),
+		}
+	}
+	/// 1 while playing, 2 when the device failed, 0 once the final buffer drained.
+	pub(crate) fn status(&self) -> u8 {
+		self.status.load(Ordering::Acquire)
+	}
+	pub(crate) fn finished(&self) -> bool {
+		self.finished.load(Ordering::Acquire)
+	}
+	pub(crate) fn cancelled(&self) -> bool {
+		self.generation.load(Ordering::Acquire) != self.request
+	}
+}
+fn gain_percent(volume: f32) -> u8 {
+	if volume.is_finite() {
+		(volume.clamp(0.0, 1.0) * 100.0).round() as u8
+	} else {
+		0
+	}
+}
+/// Open bounded cue playback. Status is 1 while active, 2 on device failure; the caller marks 0
+/// after draining. Bundled cues pass the shared gate; a borrowed clip passes its own.
 fn open(
-	sound: Sound,
+	bytes: &[u8],
 	volume: u8,
 	generation: Arc<AtomicU64>,
 	request: u64,
 	status: Arc<AtomicU8>,
 	finished: Arc<AtomicBool>,
 ) -> Result<(cpal::Stream, Duration), ()> {
+	if generation.load(Ordering::Acquire) != request
+		|| bytes.is_empty()
+		|| bytes.len() > MAX_CUE_BYTES
+	{
+		return Err(());
+	}
 	let device = cpal::default_host().default_output_device().ok_or(())?;
 	let supported = platform::audio::output_config(
 		&device,
@@ -207,7 +294,10 @@ fn open(
 	)
 	.map_err(|_| ())?;
 	let config = supported.config();
-	let samples = samples(sound, config.sample_rate, &|| {
+	if config.channels == 0 {
+		return Err(());
+	}
+	let samples = samples(bytes, config.sample_rate, &|| {
 		generation.load(Ordering::Acquire) == request
 	})?;
 	let duration = Duration::from_secs_f64(samples.len() as f64 / f64::from(config.sample_rate));
@@ -323,6 +413,106 @@ fn callback<T: cpal::SizedSample + cpal::FromSample<f32>>(
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	fn wav(rate: u32, channels: u16, frames: u32) -> Vec<u8> {
+		let size = frames * u32::from(channels) * 2;
+		let mut bytes = b"RIFF".to_vec();
+		bytes.extend_from_slice(&(36 + size).to_le_bytes());
+		bytes.extend_from_slice(b"WAVEfmt \x10\0\0\0\x01\0");
+		bytes.extend_from_slice(&channels.to_le_bytes());
+		bytes.extend_from_slice(&rate.to_le_bytes());
+		bytes.extend_from_slice(&(rate * u32::from(channels) * 2).to_le_bytes());
+		bytes.extend_from_slice(&(channels * 2).to_le_bytes());
+		bytes.extend_from_slice(b"\x10\0data");
+		bytes.extend_from_slice(&size.to_le_bytes());
+		for _ in 0..frames {
+			for channel in 0..channels {
+				bytes.extend_from_slice(
+					&if channel == 0 { 8192i16 } else { -16384i16 }.to_le_bytes(),
+				);
+			}
+		}
+		bytes
+	}
+
+	#[test]
+	fn mono_and_stereo_sources_resample_across_rate_boundaries() {
+		for rate in [8000, 24000, 44100, 48000, 96000] {
+			for channels in [1, 2] {
+				for output in [8000, 192000] {
+					let pcm = samples(&wav(rate, channels, 128), output, &|| true).unwrap();
+					assert_eq!(pcm.len(), (128 * output as usize).div_ceil(rate as usize));
+					let expected = if channels == 1 {
+						[0.25, 0.25]
+					} else {
+						[0.25, -0.5]
+					};
+					assert!(pcm.iter().all(|frame| *frame == expected));
+				}
+			}
+		}
+		for bytes in [
+			include_bytes!("../tests/fixtures/audio-tone.mp3").as_slice(),
+			include_bytes!("../tests/fixtures/voice-message.ogg").as_slice(),
+		] {
+			let pcm = samples(bytes, 48000, &|| true).unwrap();
+			assert!(!pcm.is_empty() && pcm.len() <= 48000 * 6);
+			assert!(pcm.iter().all(|frame| frame[0] == frame[1]));
+			assert!(pcm.iter().any(|frame| frame[0].abs() > 0.01));
+		}
+		for rate in [7999, 96001] {
+			assert!(samples(&wav(rate, 1, 128), 48000, &|| true).is_err());
+		}
+		for rate in [7999, 192001] {
+			assert!(samples(&wav(8000, 1, 128), rate, &|| true).is_err());
+		}
+	}
+
+	#[test]
+	fn cue_duration_bytes_and_mid_decode_cancellation_are_bounded() {
+		let wav = wav(8000, 1, 48000);
+		assert_eq!(samples(&wav, 192000, &|| true).unwrap().len(), 192000 * 6);
+		assert!(samples(&self::wav(8000, 1, 48001), 8000, &|| true).is_err());
+		assert!(samples(&[], 8000, &|| true).is_err());
+		let checks = std::cell::Cell::new(0);
+		assert!(
+			samples(&wav, 48000, &|| {
+				checks.set(checks.get() + 1);
+				checks.get() < 4
+			})
+			.is_err()
+		);
+		assert_eq!(checks.get(), 4);
+
+		let mut padded = wav;
+		let padding = MAX_CUE_BYTES - padded.len();
+		let mut junk = b"JUNK".to_vec();
+		junk.extend_from_slice(&((padding - 8) as u32).to_le_bytes());
+		junk.resize(padding, 0);
+		padded.splice(12..12, junk);
+		padded[4..8].copy_from_slice(&((MAX_CUE_BYTES - 8) as u32).to_le_bytes());
+		assert_eq!(samples(&padded, 8000, &|| true).unwrap().len(), 48000);
+		padded.push(0);
+		assert!(samples(&padded, 8000, &|| true).is_err());
+	}
+
+	#[test]
+	fn pcm_packets_reject_format_changes_and_partial_frames() {
+		let mut pcm = Vec::new();
+		let mut spec = None;
+		append_pcm(&mut pcm, &mut spec, &[f32::NAN, 2.0, -2.0], 1, 24000).unwrap();
+		assert_eq!(pcm, [0.0, 1.0, -1.0]);
+		for (chunk, channels, rate) in [
+			(&[0.0, 0.0][..], 2, 24000),
+			(&[0.0][..], 1, 48000),
+			(&[0.0][..], 0, 24000),
+		] {
+			assert!(append_pcm(&mut pcm, &mut spec, chunk, channels, rate).is_err());
+		}
+		assert_eq!(pcm, [0.0, 1.0, -1.0]);
+		assert!(append_pcm(&mut Vec::new(), &mut None, &[0.0], 2, 8000).is_err());
+	}
+
 	#[test]
 	fn callback_drains_delayed_output_and_cancellation_is_request_local() {
 		let config = cpal::StreamConfig {
@@ -404,7 +594,7 @@ mod tests {
 				Sound::PttStop,
 				Sound::ViewerJoin,
 			]
-			.map(|s| samples(s, rate, &|| true).unwrap());
+			.map(|s| samples(bundled(s), rate, &|| true).unwrap());
 			assert_ne!(cues[0], cues[1]);
 			assert_ne!(cues[3], cues[4]);
 			assert_ne!(cues[5], cues[6]);
@@ -451,7 +641,7 @@ mod tests {
 				);
 			}
 		}
-		assert!(samples(Sound::Message, 48000, &|| false).is_err());
-		assert!(samples(Sound::Message, 0, &|| true).is_err());
+		assert!(samples(bundled(Sound::Message), 48000, &|| false).is_err());
+		assert!(samples(bundled(Sound::Message), 0, &|| true).is_err());
 	}
 }

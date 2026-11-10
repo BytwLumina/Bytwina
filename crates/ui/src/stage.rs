@@ -307,7 +307,7 @@ impl EventsUi {
 		let instance = state
 			.guild_stages(guild)
 			.iter()
-			.find(|stage| stage.id == channel)
+			.find(|stage| stage.channel_id == channel)
 			.map(|stage| stage.topic.clone());
 		// The voice roster is the membership of the channel; the stage flags come from the
 		// presence map the gateway keeps.

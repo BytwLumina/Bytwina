@@ -151,6 +151,7 @@ impl ScheduledEventDto {
 pub struct StageInstanceDto {
 	pub id: Id,
 	pub guild_id: Id,
+	pub channel_id: Id,
 	#[serde(default)]
 	pub guild_scheduled_event_id: Option<Id>,
 	#[serde(deserialize_with = "topic_field")]
@@ -167,6 +168,7 @@ impl StageInstanceDto {
 		let stage = model::StageInstance {
 			id: self.id,
 			guild_id: self.guild_id,
+			channel_id: self.channel_id,
 			guild_scheduled_event_id: self.guild_scheduled_event_id,
 			topic: self.topic,
 			privacy_level: self.privacy_level,
@@ -371,6 +373,8 @@ pub struct ScheduledEventUserEventDto {
 pub struct StageInstanceDeleteDto {
 	pub id: Id,
 	pub guild_id: Id,
+	#[serde(default)]
+	pub channel_id: Option<Id>,
 }
 
 /// A deleted scheduled event, as the gateway reports it.
@@ -388,7 +392,9 @@ pub fn scheduled_event_user(bytes: &[u8]) -> Result<(Id, Id, Id), crate::DecodeE
 /// A deleted stage instance, as the gateway reports it.
 pub fn stage_instance_delete(bytes: &[u8]) -> Result<(Id, Id), crate::DecodeError> {
 	let dto = crate::decode::<StageInstanceDeleteDto>(bytes)?;
-	Ok((dto.guild_id, dto.id))
+	// The payload names the channel too; the core removes by both, so a stale instance id cannot
+	// leave a dead stage on screen.
+	Ok((dto.guild_id, dto.channel_id.unwrap_or(dto.id)))
 }
 
 #[cfg(test)]
@@ -440,11 +446,24 @@ mod tests {
 
 	#[test]
 	fn a_stage_instance_decodes_into_the_model() {
-		let raw = r#"{"id":"3","guild_id":"2","topic":"Keynote","privacy_level":1,"discoverable_disabled":false}"#;
+		let raw = r#"{"id":"9","guild_id":"2","channel_id":"3","topic":"Keynote","privacy_level":1,"discoverable_disabled":false}"#;
 		let stage = stage_instance(raw.as_bytes()).unwrap();
-		assert_eq!(stage.id, Id(3));
+		assert_eq!(stage.id, Id(9));
+		assert_eq!(stage.channel_id, Id(3));
 		assert_eq!(stage.topic, "Keynote");
 		assert_eq!(stage.privacy_level, model::PRIVACY_PUBLIC);
+		assert!(stage_instance(raw.replace("\"channel_id\":\"3\",", "").as_bytes()).is_err());
+		assert!(
+			stage_instance(
+				raw.replace("\"channel_id\":\"3\"", "\"channel_id\":\"0\"")
+					.as_bytes()
+			)
+			.is_err()
+		);
+		assert_eq!(
+			stage_instance_delete(raw.as_bytes()).unwrap(),
+			(Id(2), Id(3))
+		);
 	}
 
 	#[test]

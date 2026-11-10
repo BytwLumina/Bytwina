@@ -105,6 +105,8 @@ pub struct TimelineView {
 	pub(super) quick_reaction_used: Option<&'static str>,
 	/// Requested pin change: channel, message, pinned.
 	pub(super) pin_request: Option<(Id, Id, bool)>,
+	/// A message-menu choice for the saved list: None removes, Some(due) saves.
+	pub(super) saved_request: Option<(Id, Id, Option<Option<i64>>)>,
 	/// Requested new thread: parent channel and the message that starts it.
 	pub(super) thread_request: Option<(Id, Id)>,
 	/// Starter message of the first visible thread card whose latest message is unknown.
@@ -1678,7 +1680,9 @@ fn message_actions(
 		model::ReactionEmoji,
 		&mut Option<(Id, model::ReactionEmoji, bool)>,
 	)>,
+	saved: (bool, bool, &mut Option<(Id, Id, Option<Option<i64>>)>),
 ) {
+	let (saved_now, saved_enabled, saved_request) = saved;
 	let (mark_read, mark_unread, reply) = selection;
 	let (editing, edit_started) = editing;
 	let (own, can_reply, can_edit, can_delete) = actions;
@@ -1827,6 +1831,38 @@ fn message_actions(
 		}
 		if own || can_delete {
 			ui.separator();
+		}
+		if ui
+			.add_enabled(
+				saved_enabled,
+				egui::Button::new(crate::i18n::translate(if saved_now {
+					"message-menu-remove-from-saved"
+				} else {
+					"message-menu-save-message"
+				})),
+			)
+			.clicked()
+		{
+			*saved_request = Some((message.channel, message.id, (!saved_now).then_some(None)));
+			ui.close();
+		}
+		if !saved_now {
+			ui.menu_button(crate::i18n::translate("message-menu-remind-me"), |ui| {
+				let now = std::time::SystemTime::now()
+					.duration_since(std::time::UNIX_EPOCH)
+					.map_or(0, |elapsed| elapsed.as_secs() as i64);
+				for (key, hours) in [
+					("message-menu-remind-in-1-hour", 1),
+					("message-menu-remind-in-3-hours", 3),
+					("message-menu-remind-tomorrow", 24),
+				] {
+					if ui.button(crate::i18n::translate(key)).clicked() {
+						*saved_request =
+							Some((message.channel, message.id, Some(Some(now + hours * 3600))));
+						ui.close();
+					}
+				}
+			});
 		}
 		if own
 			&& ui
@@ -4666,6 +4702,16 @@ impl TimelineView {
 									.map(|reaction| {
 										(reaction.emoji.clone(), &mut self.reaction_users)
 									}),
+								(
+									state.saved_messages.saved(message.channel, id).is_some(),
+									!state.saved_messages.busy()
+										&& state.permission(
+											message.channel,
+											model::permissions::VIEW_CHANNEL
+												| model::permissions::READ_MESSAGE_HISTORY,
+										) == Some(true),
+									&mut self.saved_request,
+								),
 							);
 							self.toolbar = Some((id, toolbar_rect));
 						}
@@ -6281,6 +6327,7 @@ mod tests {
 							(own, &mut thread_request),
 							(false, &mut None),
 							None,
+							(false, false, &mut None),
 						)
 					},
 				);

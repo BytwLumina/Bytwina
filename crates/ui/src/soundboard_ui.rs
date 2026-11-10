@@ -1,17 +1,25 @@
 //! Soundboard picker and voice channel status editor. Session-only; nothing is persisted.
-use crate::design;
-use client_core::{Command, State};
+use crate::{design, i18n};
+use client_core::{
+	Command, State,
+	soundboard::{MAX_STATUS_CHARS, PreviewState, VoiceStatuses},
+};
 use model::Id;
 
 #[derive(Default)]
 pub(super) struct SoundboardUi {
 	open: bool,
-	/// The channel the popup belongs to; switching channels closes it.
+	/// A new account starts with a closed popup.
+	generation: Option<u64>,
 	channel: Option<Id>,
+	/// The click that opened the popup lands this frame; a later click outside closes it.
+	opened_frame: bool,
 	status_editing: bool,
 	status_draft: String,
 	/// Kept so a stale answer cannot close a newer editor.
 	status_request: u64,
+	status_pending: bool,
+	status_error: Option<&'static str>,
 }
 impl SoundboardUi {
 	pub(super) fn close(&mut self) {
@@ -20,12 +28,6 @@ impl SoundboardUi {
 	}
 	pub(super) fn is_open(&self, channel: Id) -> bool {
 		self.open && self.channel == Some(channel)
-	}
-	/// Called when the status write for `request` finished.
-	pub(super) fn status_finished(&mut self, request: u64) {
-		if request == self.status_request {
-			self.status_editing = false;
-		}
 	}
 
 	/// The launcher button beside the call controls, plus its popup.
@@ -37,25 +39,43 @@ impl SoundboardUi {
 		channel: Id,
 		commands: &mut Vec<Command>,
 	) {
-		// Close the editor as soon as the write settles, whatever its outcome.
-		if let Some((request, _)) = state.voice_statuses.take_settled() {
-			self.status_finished(request);
+		if self.generation != Some(state.generation) {
+			*self = Self {
+				generation: Some(state.generation),
+				..Default::default()
+			};
+		}
+		if self.channel.is_some_and(|previous| previous != channel) {
+			self.close();
+			state.soundboard.stop_preview();
+			self.status_pending = false;
+			self.status_error = None;
+		}
+		if let Some((request, error)) = state.voice_statuses.take_settled()
+			&& request == self.status_request
+		{
+			self.status_pending = false;
+			self.status_error = error;
+			if error.is_none() {
+				self.status_editing = false;
+			}
 		}
 		if response.clicked() {
 			if self.is_open(channel) {
 				self.close();
+				state.soundboard.stop_preview();
 			} else {
 				self.open = true;
+				self.opened_frame = true;
 				self.channel = Some(channel);
-				if state.soundboard.sounds.is_empty()
-					&& !state.soundboard.busy
-					&& state.soundboard.error.is_none()
+				let guild = state.channel(channel).and_then(|c| c.guild);
+				// A catalog belongs to one guild; switching guilds reloads even when it is full.
+				if state.soundboard.guild != guild
+					|| (state.soundboard.sounds.is_empty()
+						&& !state.soundboard.busy
+						&& state.soundboard.error.is_none())
 				{
-					let guild = state.channel(channel).and_then(|c| c.guild);
-					let request = state.soundboard.request.wrapping_add(1);
-					// Marked busy here so a second frame cannot queue the same load again.
-					state.soundboard.begin(request);
-					commands.push(Command::Soundboard { guild, request });
+					self.reload(state, guild, commands);
 				}
 			}
 		}
@@ -63,8 +83,7 @@ impl SoundboardUi {
 			return;
 		}
 		let anchor = response.rect;
-		let mut sent = None;
-		egui::Area::new(response.id.with("soundboard-popup"))
+		let area = egui::Area::new(response.id.with("soundboard-popup"))
 			.order(egui::Order::Foreground)
 			.fixed_pos(egui::pos2(
 				anchor.right() - POPUP_WIDTH,
@@ -74,113 +93,157 @@ impl SoundboardUi {
 			.show(ctx, |ui| {
 				egui::Frame::popup(ui.style()).show(ui, |ui| {
 					ui.set_width(POPUP_WIDTH);
-					ui.set_max_height(POPUP_HEIGHT);
-					sent = self.contents(ui, state, channel, commands);
+					self.contents(ui, state, channel, commands);
 				});
 			});
-		if let Some(sound) = sent {
-			// Marked here, where the state is mutable, so the tile disables immediately. The
-			// request id is the one the popup put on the command.
-			let request = state.soundboard.send_request.wrapping_add(1);
-			state.soundboard.begin_send(sound, request);
+		let outside = !std::mem::take(&mut self.opened_frame)
+			&& ctx.input(|i| {
+				i.pointer.any_pressed()
+					&& i.pointer.interact_pos().is_some_and(|pos| {
+						!area.response.rect.contains(pos) && !anchor.contains(pos)
+					})
+			});
+		if outside || ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+			self.close();
 		}
+		if !self.open {
+			state.soundboard.stop_preview();
+		}
+	}
+
+	fn reload(&mut self, state: &mut State, guild: Option<Id>, commands: &mut Vec<Command>) {
+		let request = state.soundboard.request.wrapping_add(1);
+		// Marked busy here so a second frame cannot queue the same load again.
+		state.soundboard.begin(guild, request);
+		commands.push(Command::Soundboard { guild, request });
 	}
 
 	fn contents(
 		&mut self,
 		ui: &mut egui::Ui,
-		state: &State,
+		state: &mut State,
 		channel: Id,
 		commands: &mut Vec<Command>,
-	) -> Option<Id> {
-		let mut closed = false;
-		let mut send = None;
+	) {
 		let colors = design::palette(ui);
+		let mut reload = false;
 		ui.horizontal(|ui| {
 			ui.label(
-				design::semibold(ui, crate::i18n::translate("soundboard-ui-title"), 14.0)
+				design::semibold(ui, i18n::translate("soundboard-ui-title"), 14.0)
 					.color(colors.text_strong),
 			);
 			ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
 				if ui
-					.add(egui::Button::new(crate::i18n::translate("soundboard-ui-close")).small())
-					.on_hover_text(crate::i18n::translate("soundboard-ui-close-popup"))
+					.small_button(i18n::translate("soundboard-ui-close"))
 					.clicked()
 				{
-					closed = true;
+					self.close();
 				}
+				reload = ui
+					.add_enabled(
+						!state.soundboard.busy,
+						egui::Button::new(i18n::translate("soundboard-ui-refresh")).small(),
+					)
+					.clicked();
 			});
 		});
-		ui.add_space(4.0);
-		ui.separator();
+		ui.add_space(6.0);
+		ui.add(
+			egui::TextEdit::singleline(&mut state.soundboard.query)
+				.hint_text(i18n::translate("soundboard-ui-search"))
+				.char_limit(100)
+				.desired_width(f32::INFINITY),
+		);
+		ui.add_space(6.0);
+		if let Some(error) = state.soundboard.error {
+			ui.label(egui::RichText::new(i18n::translate_if_key(error)).color(colors.danger));
+		}
+		if let Some(preview) = &state.soundboard.preview
+			&& let PreviewState::Failed(error) = preview.state
+		{
+			ui.label(egui::RichText::new(i18n::translate_if_key(error)).color(colors.danger));
+		}
+		let mut send = None;
+		let mut preview = None;
+		let mut stop = false;
 		egui::ScrollArea::vertical()
 			.id_salt(("soundboard-list", channel))
-			.max_height(220.0)
+			.max_height(210.0)
 			.auto_shrink([false, true])
 			.show(ui, |ui| {
 				if state.soundboard.busy {
 					ui.horizontal(|ui| {
-						ui.add(egui::Spinner::new().size(14.0));
-						ui.label(
-							egui::RichText::new(crate::i18n::translate("soundboard-ui-loading"))
-								.color(colors.muted),
-						);
+						ui.spinner();
+						ui.label(i18n::translate("soundboard-ui-loading"));
 					});
-					return None;
+					return;
 				}
-				if let Some(error) = state.soundboard.error {
-					ui.label(egui::RichText::new(error).color(colors.danger));
-					return None;
-				}
-				if state.soundboard.sounds.is_empty() {
-					ui.label(
-						egui::RichText::new(crate::i18n::translate("soundboard-ui-empty"))
-							.color(colors.muted),
-					);
-					return None;
-				}
-				for sound in state.soundboard.matches() {
-					let sending = state.soundboard.sending == Some(sound.id);
-					let own = sound.guild.is_some();
-					let row = egui::Button::new(if own {
-						format!(
-							"{}  ·  {}",
-							sound.name,
-							crate::i18n::translate("soundboard-ui-own-guild")
-						)
+				let rows = state.soundboard.matches();
+				if rows.is_empty() {
+					let key = if state.soundboard.sounds.is_empty() {
+						"soundboard-ui-empty"
 					} else {
-						sound.name.clone()
-					})
-					.min_size(egui::vec2(ui.available_width(), 28.0));
-					if ui
-						.add_enabled(!sending, row)
-						.on_hover_text(format!(
-							"{} · volume {}%",
-							sound.guild.map_or_else(
-								|| crate::i18n::translate("soundboard-ui-default-source"),
-								|_| crate::i18n::translate("soundboard-ui-own-guild")
-							),
-							(sound.volume * 100.0).round()
-						))
-						.clicked()
-					{
-						send = Some(sound.id);
-						commands.push(Command::SendSoundboardSound {
-							channel,
-							sound: sound.id,
-							source_guild: sound.guild,
-							request: state.soundboard.send_request.wrapping_add(1),
-						});
-					}
+						"soundboard-ui-no-results"
+					};
+					ui.label(egui::RichText::new(i18n::translate(key)).color(colors.muted));
+					return;
+				}
+				for sound in rows {
+					let playing = state.soundboard.preview.as_ref().is_some_and(|row| {
+						row.sound == sound.id
+							&& matches!(row.state, PreviewState::Loading | PreviewState::Playing)
+					});
+					ui.horizontal(|ui| {
+						let key = if playing {
+							"soundboard-ui-stop"
+						} else {
+							"soundboard-ui-preview"
+						};
+						if ui
+							.add(egui::Button::new(i18n::translate(key)).small())
+							.clicked()
+						{
+							if playing {
+								stop = true;
+							} else {
+								preview = Some(sound.clone());
+							}
+						}
+						let enabled = state.can_send_soundboard(channel, sound);
+						let button = ui.add_enabled(
+							enabled,
+							egui::Button::new(&sound.name)
+								.min_size(egui::vec2(ui.available_width(), 28.0)),
+						);
+						let key = if enabled {
+							"soundboard-ui-send"
+						} else {
+							"soundboard-ui-send-unavailable"
+						};
+						if button.on_hover_text(i18n::translate(key)).clicked() {
+							send = Some(sound.id);
+						}
+					});
 					ui.add_space(2.0);
 				}
 			});
+		if stop {
+			state.soundboard.stop_preview();
+		}
+		if let Some(sound) = preview {
+			state.soundboard.begin_preview(&sound);
+		}
+		if let Some(sound) = send
+			&& let Some(command) = state.send_soundboard(channel, sound)
+		{
+			commands.push(command);
+		}
+		if reload {
+			let guild = state.channel(channel).and_then(|c| c.guild);
+			self.reload(state, guild, commands);
+		}
 		ui.separator();
 		self.status_section(ui, state, channel, commands);
-		if closed {
-			self.close();
-		}
-		send
 	}
 
 	fn status_section(
@@ -192,86 +255,77 @@ impl SoundboardUi {
 	) {
 		let colors = design::palette(ui);
 		let current = state.voice_statuses.get(channel).map(str::to_owned);
-		if !self.status_editing {
-			ui.horizontal(|ui| {
-				ui.add(
-					egui::Label::new(
-						egui::RichText::new(current.as_deref().unwrap_or_else(|| {
-							crate::i18n::translate("soundboard-ui-status-placeholder")
-						}))
-						.color(colors.muted),
+		if let Some(error) = self.status_error {
+			ui.label(egui::RichText::new(i18n::translate_if_key(error)).color(colors.danger));
+		}
+		ui.add_enabled_ui(!self.status_pending, |ui| {
+			if !self.status_editing {
+				ui.label(
+					egui::RichText::new(
+						current
+							.clone()
+							.unwrap_or_else(|| i18n::translate("soundboard-ui-status-placeholder")),
 					)
-					.truncate(),
+					.color(colors.muted),
 				);
-				ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+				ui.horizontal(|ui| {
 					if ui
-						.small_button(crate::i18n::translate("soundboard-ui-status-edit"))
+						.small_button(i18n::translate("soundboard-ui-status-edit"))
 						.clicked()
 					{
 						self.status_editing = true;
 						self.status_draft = current.clone().unwrap_or_default();
+						self.status_error = None;
 					}
 					if current.is_some()
 						&& ui
-							.small_button(crate::i18n::translate("soundboard-ui-status-clear"))
+							.small_button(i18n::translate("soundboard-ui-status-clear"))
 							.clicked()
 					{
-						self.status_request = self.status_request.wrapping_add(1);
-						commands.push(Command::SetVoiceStatus {
-							channel,
-							status: None,
-							request: self.status_request,
-						});
+						self.save_status(channel, None, commands);
 					}
 				});
-			});
-			return;
-		}
-		ui.label(
-			egui::RichText::new(crate::i18n::translate("soundboard-ui-status-placeholder"))
-				.size(12.0)
-				.color(colors.muted),
-		);
-		ui.add(
-			egui::TextEdit::singleline(&mut self.status_draft)
-				.hint_text(&crate::i18n::translate("soundboard-ui-status-hint"))
-				.desired_width(f32::INFINITY),
-		);
-		ui.add_space(4.0);
-		ui.horizontal(|ui| {
-			let over =
-				self.status_draft.chars().count() > client_core::soundboard::MAX_STATUS_CHARS;
-			if over {
-				ui.label(
-					egui::RichText::new(crate::i18n::translate("soundboard-ui-status-too-long"))
-						.color(colors.danger),
-				);
+				return;
 			}
-			ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-				let valid = !over
-					&& client_core::soundboard::VoiceStatuses::valid_status(&self.status_draft);
+			ui.add(
+				egui::TextEdit::singleline(&mut self.status_draft)
+					.hint_text(i18n::translate("soundboard-ui-status-hint"))
+					.char_limit(MAX_STATUS_CHARS)
+					.desired_width(f32::INFINITY),
+			);
+			ui.horizontal(|ui| {
+				let valid = VoiceStatuses::valid_status(&self.status_draft);
 				if ui
 					.add_enabled(
 						valid,
-						egui::Button::new(crate::i18n::translate("soundboard-ui-status-save")),
+						egui::Button::new(i18n::translate("soundboard-ui-status-save")),
 					)
 					.clicked()
 				{
-					self.status_request = self.status_request.wrapping_add(1);
 					let status = self.status_draft.trim().to_owned();
-					commands.push(Command::SetVoiceStatus {
-						channel,
-						status: (!status.is_empty()).then_some(status),
-						request: self.status_request,
-					});
-				}
-				if ui
-					.small_button(crate::i18n::translate("soundboard-ui-status-cancel"))
-					.clicked()
-				{
-					self.status_editing = false;
+					self.save_status(channel, (!status.is_empty()).then_some(status), commands);
 				}
 			});
+			if ui
+				.small_button(i18n::translate("soundboard-ui-status-cancel"))
+				.clicked()
+			{
+				self.status_editing = false;
+			}
+		});
+		if self.status_pending {
+			ui.spinner();
+		}
+	}
+
+	fn save_status(&mut self, channel: Id, status: Option<String>, commands: &mut Vec<Command>) {
+		self.status_request = self.status_request.wrapping_add(1);
+		self.status_pending = true;
+		self.status_error = None;
+		commands.push(Command::SetVoiceStatus {
+			channel,
+			status,
+			request: self.status_request,
 		});
 	}
 
@@ -281,5 +335,5 @@ impl SoundboardUi {
 	}
 }
 
-const POPUP_WIDTH: f32 = 288.0;
-const POPUP_HEIGHT: f32 = 340.0;
+const POPUP_WIDTH: f32 = 320.0;
+const POPUP_HEIGHT: f32 = 380.0;

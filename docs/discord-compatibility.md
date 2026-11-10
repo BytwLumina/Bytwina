@@ -1,5 +1,35 @@
 # Discord compatibility — checked 2026-09-10
 
+## Quests — November 10, 2026
+
+Discord does not publish developer documentation for Quests. The shapes below come from the
+userdoccers project (`docs.discord.food/resources/quests`) and are therefore **unofficial and
+restricted**: they may change or disappear without notice, and a payload the client cannot bound
+is refused rather than approximated.
+
+Read and act:
+
+- `GET /quests/@me` — this account's current quests, with `excluded_quests` ignored and
+  `quest_enrollment_blocked_until` shown as a warning.
+- `POST /quests/{quest_id}/enroll` with `{"location": 11}` (the desktop Quest Home area) — accepts
+  one quest and returns a quest user status.
+- `POST /quests/{quest_id}/claim-reward` with `{"location": 11, "platform": n}` — claims the reward
+  of a completed quest. The platform comes from the quest's rewards configuration.
+- `QUESTS_USER_STATUS_UPDATE` on the gateway keeps the displayed progress current.
+
+The client does not send quest heartbeats. The heartbeat route rejects user agents without an
+Electron version, and this client is native; a quest whose progress depends on heartbeats
+(`PLAY_ON_DESKTOP`, `STREAM_ON_DESKTOP`, play-activity tasks) is therefore shown but cannot be
+advanced by this client. Video and achievement tasks are tracked by the service and still update
+through the gateway. Conversely, nothing here is faked: enrolling or claiming is a real request to
+the service.
+
+Quest data is session memory. Nothing is written to the local store, so the SQLite schema stays at
+29 and a restart reads the list again.
+
+Enrolment and claiming are **unverified** until an owner-session run confirms them: this client has
+never talked to the service with these endpoints.
+
 ## Guild scheduled events and stage channels — November 9, 2026
 
 The event object, the stage instance and every route below are **documented** at

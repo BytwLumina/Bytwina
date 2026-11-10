@@ -28,13 +28,19 @@ struct ListKey {
 	tab: Tab,
 }
 #[derive(Default, PartialEq, Eq, Clone, Copy)]
-enum Tab {
+pub(crate) enum Tab {
 	#[default]
 	Online,
 	All,
 	Pending,
 	Restricted,
 	Add,
+	/// Discord Quests: the account's sponsored quests and their rewards.
+	Quests,
+	/// Message bookmarks and reminders.
+	Saved,
+	/// The discoverable-server directory.
+	Discover,
 }
 impl Friends {
 	fn matches(&self, state: &State, user: &model::User, query: &str) -> bool {
@@ -103,6 +109,7 @@ impl MessagingUi {
 			"pending" => Tab::Pending,
 			"blocked" => Tab::Restricted,
 			"add" => Tab::Add,
+			"quests" => Tab::Quests,
 			_ => Tab::Online,
 		};
 	}
@@ -434,15 +441,21 @@ impl MessagingUi {
 						(Tab::Pending, language.text("friends-pending")),
 						(Tab::Restricted, language.text("friends-blocked-ignored")),
 						(Tab::Add, language.text("friends-add")),
+						(Tab::Quests, language.text("quests")),
 					] {
-						let count = (tab == Tab::Pending)
-							.then(|| {
-								state
-									.pending_friends()
-									.filter(|(_, _, incoming)| *incoming)
-									.count()
-							})
-							.filter(|count| *count > 0);
+						let count = if tab == Tab::Pending {
+							state
+								.pending_friends()
+								.filter(|(_, _, incoming)| *incoming)
+								.count()
+						} else if tab == Tab::Quests {
+							state.quests().len()
+						} else if tab == Tab::Saved {
+							state.saved_messages.len()
+						} else {
+							0
+						};
+						let count = (count > 0).then_some(count);
 						if header_tab(ui, &title, count, self.friends.tab == tab, tab == Tab::Add)
 							.clicked() && self.friends.tab != tab
 						{
@@ -486,6 +499,18 @@ impl MessagingUi {
 		}
 		if self.friends.tab == Tab::Add {
 			self.add_friend_page(ui, state, commands);
+			return;
+		}
+		if self.friends.tab == Tab::Quests {
+			self.quests_page(ui, state, commands);
+			return;
+		}
+		if self.friends.tab == Tab::Saved {
+			self.saved_messages_page(ui, state, commands);
+			return;
+		}
+		if self.friends.tab == Tab::Discover {
+			self.discovery_page(ui, state, commands);
 			return;
 		}
 		if self.friends.tab == Tab::Pending {

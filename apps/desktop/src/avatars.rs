@@ -664,6 +664,13 @@ fn cdn_url(key: &str) -> Option<String> {
 			_ => None,
 		};
 	}
+	if let Some(value) = key.strip_prefix("guild-card-") {
+		// A discoverable server that is not joined yet: the icon hash alone still resolves.
+		let (id, hash) = value.split_once('-')?;
+		let id: Id = id.parse().ok()?;
+		return (id.0 != 0 && model::valid_avatar_hash(hash))
+			.then(|| format!("https://cdn.discordapp.com/icons/{id}/{hash}.png?size=128"));
+	}
 	if let Some(value) = key.strip_prefix("role-icon-") {
 		let (role, hash) = value.split_once('-')?;
 		let role: Id = role.parse().ok()?;

@@ -5,6 +5,7 @@ pub mod auth;
 pub mod captcha;
 pub mod channel_actions;
 pub mod collectibles;
+pub mod discovery;
 pub mod fingerprint;
 pub mod forum;
 pub mod game_mentions;
@@ -12,6 +13,8 @@ pub mod gifs;
 pub mod guild_creation;
 pub mod guild_folders;
 pub mod permissions;
+pub mod quests;
+pub mod saved_messages;
 pub mod soundboard;
 pub mod stage;
 pub mod stickers;
@@ -219,6 +222,25 @@ pub enum Command {
 	StageInstanceDelete {
 		guild: Id,
 		channel: Id,
+		request: u64,
+	},
+	/// Read the account's Discord Quests.
+	Quests {
+		request: u64,
+	},
+	/// Accept one quest.
+	EnrollQuest {
+		quest: Id,
+		request: u64,
+	},
+	/// Saved messages and reminders.
+	SavedMessages(saved_messages::Command),
+	/// Browse one page of discoverable servers.
+	Discovery(discovery::Command),
+	/// Claim the reward of one completed quest.
+	ClaimQuest {
+		quest: Id,
+		platform: u8,
 		request: u64,
 	},
 	Archives {
@@ -626,6 +648,12 @@ pub enum Event {
 	},
 	/// A guild's scheduled events and live stages.
 	ScheduledEvent(stage::Event),
+	/// The account's Discord Quests.
+	Quests(quests::Event),
+	/// Saved messages and reminders.
+	SavedMessages(saved_messages::Event),
+	/// A page of discoverable servers.
+	Discovery(discovery::Event),
 	Search {
 		channel: Id,
 		request: u64,
@@ -680,6 +708,8 @@ pub enum Event {
 		channel: Id,
 		status: Option<String>,
 	},
+	/// A soundboard effect someone played in a voice channel this account can hear.
+	VoiceEffect(model::VoiceEffect),
 	ProfileEdited {
 		user: Id,
 		request: u64,
@@ -844,6 +874,8 @@ pub struct State {
 	pub collectibles: collectibles::Picker,
 	pub soundboard: soundboard::Soundboard,
 	pub voice_statuses: soundboard::VoiceStatuses,
+	/// Remote soundboard effects heard in the connected channel; session memory only.
+	pub voice_effects: soundboard::Effects,
 	pub stickers: stickers::Stickers,
 	pub interactions: interactions::Interactions,
 	pub application_commands: application_commands::Catalog,
@@ -871,6 +903,12 @@ pub struct State {
 	pub forum_visit: Option<forum::Visit>,
 	/// The guilds' scheduled events and live stages; session memory only.
 	pub events: stage::Events,
+	/// The account's Discord Quests; session memory only.
+	pub quests: quests::Quests,
+	/// Saved messages and reminders; session memory only.
+	pub saved_messages: saved_messages::SavedMessages,
+	/// The discoverable-server page on screen; session memory only.
+	pub discovery: discovery::Discovery,
 	pub archived_thread: Option<Id>,
 	pub thread_starter: thread_starter::Starter,
 	pub thread_previews: thread_previews::Previews,
@@ -1096,6 +1134,7 @@ impl Default for State {
 			collectibles: Default::default(),
 			soundboard: Default::default(),
 			voice_statuses: Default::default(),
+			voice_effects: Default::default(),
 			stickers: Default::default(),
 			interactions: Default::default(),
 			application_commands: Default::default(),
@@ -1119,6 +1158,9 @@ impl Default for State {
 			posts: forum::Posts::default(),
 			forum_visit: None,
 			events: Default::default(),
+			quests: Default::default(),
+			saved_messages: Default::default(),
+			discovery: Default::default(),
 			archived_thread: None,
 			thread_starter: Default::default(),
 			thread_previews: Default::default(),
@@ -2796,6 +2838,18 @@ impl State {
 			self.events.apply(event.clone());
 			return;
 		}
+		if let Event::Quests(event) = &envelope.event {
+			self.quests.apply(event.clone());
+			return;
+		}
+		if let Event::SavedMessages(event) = &envelope.event {
+			self.saved_messages.apply(event.clone());
+			return;
+		}
+		if let Event::Discovery(event) = &envelope.event {
+			self.discovery.apply(event.clone());
+			return;
+		}
 		if let Event::Typing(signal) = &envelope.event {
 			self.observe_typing_at(
 				*signal,
@@ -2995,6 +3049,13 @@ impl State {
 				Ok(())
 			}
 			Event::Typing(_) => unreachable!("typing is handled before timeline invalidation"),
+			// Session-memory panels are folded in before timeline invalidation.
+			Event::ScheduledEvent(_)
+			| Event::Quests(_)
+			| Event::SavedMessages(_)
+			| Event::Discovery(_) => {
+				unreachable!("session memory is applied before timeline revision")
+			}
 			Event::Permissions(mut event) => {
 				let known = |id: Id| self.guild(id).is_some();
 				match &mut event {
@@ -3275,6 +3336,20 @@ impl State {
 			}
 			Event::VoiceStatus { channel, status } => {
 				self.voice_statuses.set(channel, status);
+				Ok(())
+			}
+			Event::VoiceEffect(effect) => {
+				// Only the channel this device is listening to plays; a deafened ear stays silent.
+				let listening = self.voice.active.as_ref().is_some_and(|call| {
+					call.channel == effect.channel
+						&& !call.deafened && !call.server_deafened
+						&& matches!(call.phase, voice::Phase::Connected | voice::Phase::Waiting)
+				});
+				if listening && effect.valid() {
+					let known = self.soundboard.find(effect.sound).cloned();
+					self.voice_effects
+						.push(effect, known.as_ref(), std::time::Instant::now());
+				}
 				Ok(())
 			}
 

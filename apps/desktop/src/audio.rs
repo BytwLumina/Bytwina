@@ -28,6 +28,63 @@ const MAX_FIXTURE_BYTES: usize = 20 * 1024 * 1024;
 const MAX_SAMPLES: usize = 64 * 1024 * 1024 / size_of::<f32>();
 const MAX_SECONDS: u64 = 600;
 const NO_SEEK: u64 = u64::MAX;
+/// A non-seekable clip fetched whole and bounded: soundboard sounds are short by design.
+pub(crate) async fn download_clip(
+	url: url::Url,
+	budget: usize,
+	current: &(impl Fn() -> bool + ?Sized),
+) -> Result<Vec<u8>, &'static str> {
+	if budget == 0 || budget > MAX_FIXTURE_BYTES {
+		return Err(TOO_LARGE);
+	}
+	let client = reqwest::Client::builder()
+		.no_proxy()
+		.no_gzip()
+		.no_brotli()
+		.no_deflate()
+		.no_zstd()
+		.redirect(reqwest::redirect::Policy::none())
+		.connect_timeout(Duration::from_secs(5))
+		.timeout(Duration::from_secs(15))
+		.build()
+		.map_err(|_| "Audio download unavailable")?;
+	let mut response = client
+		.get(url)
+		.header(reqwest::header::ACCEPT_ENCODING, "identity")
+		.send()
+		.await
+		.map_err(|_| "Audio download failed")?;
+	if response.status() != reqwest::StatusCode::OK
+		|| response
+			.headers()
+			.get(reqwest::header::CONTENT_ENCODING)
+			.is_some_and(|value| value != "identity")
+		|| response
+			.content_length()
+			.is_some_and(|size| size == 0 || size > budget as u64)
+	{
+		return Err("Audio unavailable; reload the conversation");
+	}
+	let mut bytes = Vec::with_capacity(response.content_length().unwrap_or(0) as usize);
+	while let Some(chunk) = response
+		.chunk()
+		.await
+		.map_err(|_| "Audio download interrupted")?
+	{
+		if !current() {
+			return Err("Cancelled");
+		}
+		if chunk.len() > budget - bytes.len() {
+			return Err(TOO_LARGE);
+		}
+		bytes.extend_from_slice(&chunk);
+	}
+	if bytes.is_empty() || !current() {
+		return Err("Audio download failed");
+	}
+	Ok(bytes)
+}
+
 const INVALID: &str = "Unsupported or damaged audio; download to play externally";
 const TOO_LARGE: &str = "Audio preview limit: 64 MiB decoded, 10 minutes";
 

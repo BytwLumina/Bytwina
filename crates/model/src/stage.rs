@@ -149,9 +149,8 @@ impl ScheduledEvent {
 	/// The channel the event is hosted in, when it is hosted in Discord at all.
 	pub fn host_channel(&self) -> Option<Id> {
 		match self.entity_type {
-			ScheduledEventEntity::StageInstance | ScheduledEventEntity::Voice => {
-				self.channel_id.or(self.entity_id)
-			}
+			ScheduledEventEntity::StageInstance => self.channel_id,
+			ScheduledEventEntity::Voice => self.channel_id.or(self.entity_id),
 			ScheduledEventEntity::External | ScheduledEventEntity::PrimeTime => None,
 		}
 	}
@@ -160,9 +159,10 @@ impl ScheduledEvent {
 /// The live stage in one stage channel.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StageInstance {
-	/// The stage channel's id; a stage instance is keyed by its channel.
+	/// The instance id, used by gateway updates and deletions.
 	pub id: Id,
 	pub guild_id: Id,
+	pub channel_id: Id,
 	/// The scheduled event that started this stage.
 	pub guild_scheduled_event_id: Option<Id>,
 	pub topic: String,
@@ -178,6 +178,7 @@ impl StageInstance {
 	pub fn valid(&self) -> bool {
 		self.id.0 != 0
 			&& self.guild_id.0 != 0
+			&& self.channel_id.0 != 0
 			&& !self.topic.is_empty()
 			&& self.topic.len() <= MAX_STAGE_TOPIC_BYTES
 			&& matches!(self.privacy_level, PRIVACY_PUBLIC | PRIVACY_GUILD_ONLY)
@@ -211,7 +212,11 @@ pub fn valid_stage_instances(instances: &Vec<StageInstance>, max: usize) -> bool
 	instances.len() <= max
 		&& stage_bytes(instances) <= MAX_EVENT_BYTES
 		&& instances.iter().enumerate().all(|(i, stage)| {
-			stage.valid() && !instances[..i].iter().any(|other| other.id == stage.id)
+			// Live stages are unique per channel; the instance id alone does not say where it is.
+			stage.valid()
+				&& !instances[..i]
+					.iter()
+					.any(|other| other.id == stage.id || other.channel_id == stage.channel_id)
 		})
 }
 
@@ -279,6 +284,7 @@ mod tests {
 		let stage = StageInstance {
 			id: Id(3),
 			guild_id: Id(2),
+			channel_id: Id(7),
 			guild_scheduled_event_id: Some(Id(9)),
 			topic: "Keynote".to_owned(),
 			privacy_level: PRIVACY_PUBLIC,

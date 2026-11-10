@@ -43,7 +43,7 @@ impl DiscordApi {
 		sound: Id,
 		source_guild: Option<Id>,
 	) -> Result<(), Failure> {
-		if channel.0 == 0 || sound.0 == 0 {
+		if channel.0 == 0 || sound.0 == 0 || source_guild.is_some_and(|id| id.0 == 0) {
 			return Err(Failure::Protocol);
 		}
 		let path = format!("/channels/{channel}/send-soundboard-sound");

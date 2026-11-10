@@ -56,6 +56,7 @@ mod server_settings_demo;
 mod sign_in;
 #[cfg(feature = "demo")]
 mod slash_demo;
+mod soundboard_audio;
 mod spotify;
 mod startup;
 mod sticker_upload;
@@ -1044,6 +1045,13 @@ struct Desktop {
 	pointer: pointer::Pointer,
 	downloads: downloads::Downloads,
 	audio: audio::Audio,
+	soundboard_audio: soundboard_audio::Player,
+	/// Requests the fetcher was already asked for, so a frame does not download twice.
+	soundboard_requested: Vec<u64>,
+	/// The offline fixture's saved messages, so saving a message shows up on the page.
+	demo_saved: Vec<model::saved_messages::SavedMessage>,
+	/// The volume of the remote effect downloading now.
+	voice_effect_volume: f32,
 	video: video::Video,
 	/// Synthetic stream/camera textures the demo view borrows by id.
 	_demo_textures: Vec<egui::TextureHandle>,
@@ -1573,6 +1581,221 @@ fn align_undecorated_surface(window: &winit::window::Window) {
 	// Maximized skips the shift.
 	window.set_undecorated_shadow(false);
 }
+
+impl Desktop {
+	/// Answers the saved-message commands from the fixture's own list.
+	fn demo_saved_messages(&mut self, command: client_core::saved_messages::Command) -> Event {
+		use client_core::saved_messages::{Command, Event as SavedEvent};
+		Event::SavedMessages(match command {
+			Command::Load { request } => SavedEvent::List {
+				request,
+				result: Ok(self.demo_saved.clone()),
+			},
+			Command::Save {
+				channel,
+				message,
+				due_at,
+				request,
+			} => {
+				let row = model::saved_messages::SavedMessage {
+					channel,
+					message,
+					guild: self.state.channel(channel).and_then(|c| c.guild),
+					saved_at: 0,
+					due_at,
+					author_summary: "Offline preview".into(),
+					channel_summary: self
+						.state
+						.channel(channel)
+						.map_or_else(String::new, |c| c.name.clone()),
+					message_summary: String::new(),
+					preview: Some(model::saved_messages::MessagePreview {
+						author: "Offline preview".into(),
+						content: self
+							.state
+							.timeline
+							.get(message)
+							.map_or_else(String::new, |m| m.content.clone()),
+					}),
+				};
+				match self
+					.demo_saved
+					.iter_mut()
+					.find(|saved| saved.key() == row.key())
+				{
+					Some(saved) => *saved = row.clone(),
+					None => self.demo_saved.push(row.clone()),
+				}
+				SavedEvent::Saved {
+					channel,
+					message,
+					request,
+					result: Ok(row),
+				}
+			}
+			Command::Remove {
+				channel,
+				message,
+				request,
+			} => {
+				self.demo_saved
+					.retain(|saved| saved.key() != (channel, message));
+				SavedEvent::Removed {
+					request,
+					result: Ok((channel, message)),
+				}
+			}
+		})
+	}
+
+	/// One fetch per request; the audio player owns playback and reports when each clip settles.
+	fn poll_soundboard(&mut self, ctx: &eframe::egui::Context) {
+		let demo = self.fixture_only || self.state.demo;
+		let mut failure = None;
+		self.soundboard_requested.retain(|request| {
+			self.state
+				.soundboard
+				.preview
+				.as_ref()
+				.is_some_and(|preview| preview.request == *request)
+		});
+		if let Some(preview) = self.state.soundboard.preview.as_ref() {
+			let request = preview.request;
+			let needs_fetch = !self.soundboard_audio.settled(request)
+				&& self.soundboard_audio.playing() != Some(request)
+				&& !self.soundboard_requested.contains(&request);
+			let mut url = None;
+			if needs_fetch {
+				match soundboard_audio::clip_url(preview.sound) {
+					Ok(found) => url = Some(found),
+					Err(key) => failure = Some((request, key)),
+				}
+			}
+			// Borrowed fields end here, before the audio state below is written back.
+			if let Some(url) = url {
+				self.soundboard_requested.push(request);
+				self.fetch_soundboard(url, request, ctx, demo);
+			}
+		} else {
+			self.soundboard_requested.clear();
+			self.soundboard_audio.stop();
+		}
+		// The queue belongs to an active call with sound; an auditioned clip has the output first.
+		let now = std::time::Instant::now();
+		let listening = self
+			.state
+			.voice
+			.active
+			.as_ref()
+			.is_some_and(|call| !call.deafened && !call.server_deafened);
+		if listening
+			&& !self.soundboard_audio.busy()
+			&& self.state.soundboard.preview.is_none()
+			&& let Some(row) = self.state.voice_effects.unplayed(now).cloned()
+			&& let Ok(url) = soundboard_audio::clip_url(row.sound)
+		{
+			self.state.voice_effects.mark_played(&row);
+			self.voice_effect_volume = row.volume;
+			self.fetch_soundboard(url, EFFECT_REQUEST, ctx, demo);
+		}
+		let volume = self
+			.state
+			.soundboard
+			.preview
+			.as_ref()
+			.map_or(1.0, |preview| preview.volume);
+		let downloaded: Option<DownloadedClip> =
+			ctx.data(|data| data.get_temp(egui::Id::new("soundboard-clip")));
+		if let Some((request, result)) = downloaded {
+			ctx.data_mut(|data| data.remove::<DownloadedClip>(egui::Id::new("soundboard-clip")));
+			// A clip replaced while it downloaded is dropped; its request is no longer shown.
+			if request == EFFECT_REQUEST {
+				if let Ok(bytes) = result {
+					self.soundboard_audio
+						.enqueue_owned(request, self.voice_effect_volume, bytes);
+				}
+			} else if self
+				.state
+				.soundboard
+				.preview
+				.as_ref()
+				.is_some_and(|preview| preview.request == request)
+			{
+				match result {
+					Ok(bytes) if self.soundboard_audio.enqueue_owned(request, volume, bytes) => {
+						self.state.soundboard.preview_progress(
+							request,
+							client_core::soundboard::PreviewState::Loading,
+						)
+					}
+					_ => self.state.soundboard.preview_progress(
+						request,
+						client_core::soundboard::PreviewState::Failed(
+							"soundboard-ui-playback-failed",
+						),
+					),
+				}
+			}
+		}
+		if let Some((request, key)) = failure {
+			self.state
+				.soundboard
+				.preview_progress(request, client_core::soundboard::PreviewState::Failed(key));
+		}
+		while let Some((request, error)) = self.soundboard_audio.take_settled() {
+			let state = if error.is_empty() {
+				client_core::soundboard::PreviewState::Ended
+			} else {
+				client_core::soundboard::PreviewState::Failed(error)
+			};
+			self.state.soundboard.preview_progress(request, state);
+		}
+		self.soundboard_audio.advance();
+	}
+
+	/// The download runs off the render thread; the answer comes back as egui temp data.
+	fn fetch_soundboard(
+		&self,
+		url: url::Url,
+		request: u64,
+		ctx: &eframe::egui::Context,
+		demo: bool,
+	) {
+		let runtime = self.runtime.handle().clone();
+		let context = ctx.clone();
+		std::thread::Builder::new()
+			.name("bytwina-soundboard-fetch".into())
+			.spawn(move || {
+				let bytes: Result<Vec<u8>, &'static str> = if demo {
+					Ok(client_core_soundboard_fixture().to_vec())
+				} else {
+					runtime.block_on(crate::audio::download_clip(
+						url,
+						crate::notification_sounds::MAX_CUE_BYTES,
+						&|| true,
+					))
+				};
+				context.data_mut(|data| {
+					data.insert_temp(egui::Id::new("soundboard-clip"), (request, bytes))
+				});
+				context.request_repaint();
+			})
+			.map_err(|_| {
+				diagnostics::record(
+					diagnostics::Category::Media,
+					diagnostics::Level::Warn,
+					"soundboard fetch thread failed",
+				)
+			})
+			.ok();
+	}
+}
+
+/// The request id reserved for remote effects; preview requests count up from one.
+const EFFECT_REQUEST: u64 = 0;
+
+/// What the fetch thread hands back to the render thread through egui temp data.
+type DownloadedClip = (u64, Result<Vec<u8>, &'static str>);
 
 impl Desktop {
 	fn new(
@@ -2427,6 +2650,10 @@ impl Desktop {
 			pointer: pointer::Pointer::default(),
 			downloads: downloads::Downloads::default(),
 			audio: audio::Audio::default(),
+			soundboard_audio: soundboard_audio::Player::default(),
+			soundboard_requested: Vec::new(),
+			demo_saved: Vec::new(),
+			voice_effect_volume: 1.0,
 			video: video::Video::default(),
 			_demo_textures: demo_textures,
 			demo_video_autoplay: if std::env::args().any(|arg| arg == "--demo-video-paused") {
@@ -4611,6 +4838,18 @@ impl Desktop {
 				| Command::StageModerate { .. }
 				| Command::StageInstanceCreate { .. }
 				| Command::StageInstanceDelete { .. } => return,
+				// The fixture has no sponsored quests, so the page settles as empty.
+				Command::Quests { request } => {
+					Event::Quests(client_core::quests::Event::Snapshot {
+						request,
+						result: Ok(Default::default()),
+					})
+				}
+				Command::EnrollQuest { .. } | Command::ClaimQuest { .. } => return,
+				// The fixture's saved list is session memory; a write is acknowledged so the row settles.
+				Command::SavedMessages(command) => self.demo_saved_messages(command),
+				// The fixture has no directory; the page stays on its empty state.
+				Command::Discovery(_) => return,
 			};
 			self.state.apply(Envelope {
 				generation: self.state.generation,
@@ -6019,11 +6258,13 @@ impl eframe::App for Desktop {
 			|| hidden_or_closing
 		{
 			self.audio.stop();
+			self.soundboard_audio.stop();
 			self.messaging.audio().stop();
 			self.video.stop();
 			self.messaging.video().stop();
 		}
 		self.video.poll(self.messaging.video(), ctx);
+		self.poll_soundboard(ctx);
 		let audio = self.audio.poll();
 		let player = self.messaging.audio();
 		player.position = audio.position.as_secs_f64();

@@ -568,7 +568,7 @@ fn kind_label(kind: u8) -> &'static str {
 		5 => "categories-paint-shelf-rule-announcement-channel",
 		10..=12 => "categories-paint-shelf-rule-thread",
 		13 => "categories-paint-shelf-rule-stage-channel",
-		14 => "categories-paint-shelf-rule-directory-not-implemented",
+		14 => "categories-paint-shelf-rule-directory",
 		15 => "categories-paint-shelf-rule-forum-loaded-posts",
 		16 => "categories-paint-shelf-rule-media-loaded-posts",
 		_ => "categories-paint-shelf-rule-unknown-channel-type-not-implemented",

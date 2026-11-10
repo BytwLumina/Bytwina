@@ -6,11 +6,12 @@ use std::collections::BTreeMap;
 /// Most channel statuses remembered at once; the oldest is evicted.
 const MAX_STATUSES: usize = 512;
 /// Longest accepted status text, matching the service's 500 character ceiling.
-pub const MAX_STATUS_CHARS: usize = 500;
+pub const MAX_STATUS_CHARS: usize = model::MAX_STATUS_CHARS;
 
 #[derive(Default)]
 pub struct Soundboard {
 	pub sounds: Vec<SoundboardSound>,
+	pub guild: Option<Id>,
 	pub request: u64,
 	pub busy: bool,
 	pub error: Option<&'static str>,
@@ -18,24 +19,81 @@ pub struct Soundboard {
 	/// The sound whose send is in flight, so the tile can show progress.
 	pub sending: Option<Id>,
 	pub send_request: u64,
+	/// The clip being auditioned locally. Sending to the channel is a separate action.
+	pub preview: Option<Preview>,
+	preview_request: u64,
+}
+/// A local audition. The desktop owns fetching, decoding and the output device.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Preview {
+	pub sound: Id,
+	pub volume: f32,
+	pub request: u64,
+	pub state: PreviewState,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum PreviewState {
+	#[default]
+	Loading,
+	Playing,
+	Ended,
+	Failed(&'static str),
 }
 impl Soundboard {
+	/// Start auditioning one sound, replacing whatever was playing.
+	pub fn begin_preview(&mut self, sound: &SoundboardSound) -> u64 {
+		self.preview_request = self.preview_request.wrapping_add(1);
+		self.preview = Some(Preview {
+			sound: sound.id,
+			volume: sound.volume,
+			request: self.preview_request,
+			state: PreviewState::Loading,
+		});
+		self.preview_request
+	}
+	pub fn preview_progress(&mut self, request: u64, state: PreviewState) {
+		if let Some(preview) = &mut self.preview
+			&& preview.request == request
+		{
+			preview.state = state;
+		}
+	}
+	pub fn stop_preview(&mut self) {
+		self.preview = None;
+	}
+	/// The catalog row for an id, so a remote effect can reuse a name already loaded.
+	pub fn find(&self, sound: Id) -> Option<&SoundboardSound> {
+		self.sounds.iter().find(|row| row.id == sound)
+	}
 	pub fn bytes(&self) -> usize {
 		self.sounds.iter().map(SoundboardSound::heap_bytes).sum()
 	}
-	pub fn begin(&mut self, request: u64) {
+	pub fn begin(&mut self, guild: Option<Id>, request: u64) {
+		if self.guild != guild {
+			self.sounds.clear();
+			self.preview = None;
+		}
+		self.guild = guild;
 		self.request = request;
 		self.busy = true;
 		self.error = None;
 	}
 	pub fn finish(&mut self, request: u64, result: Result<Vec<SoundboardSound>, Failure>) {
-		if request != self.request {
+		if request != self.request || !self.busy {
 			return;
 		}
 		self.busy = false;
 		match result {
 			Ok(sounds) => {
-				self.sounds = sounds;
+				let mut seen = std::collections::BTreeSet::new();
+				self.sounds = sounds
+					.into_iter()
+					.filter(|sound| {
+						sound.valid() && (sound.guild.is_none() || sound.guild == self.guild)
+					})
+					.filter(|sound| seen.insert(sound.id))
+					.take(model::MAX_SOUNDBOARD_SOUNDS)
+					.collect();
 				self.error = None;
 			}
 			Err(failure) => {
@@ -52,10 +110,14 @@ impl Soundboard {
 		self.error = result.err().map(|failure| failure.label());
 	}
 	pub fn clear(&mut self) {
+		self.request = self.request.wrapping_add(1);
+		self.send_request = self.send_request.wrapping_add(1);
 		self.sounds.clear();
+		self.query.clear();
 		self.busy = false;
 		self.sending = None;
 		self.error = None;
+		self.preview = None;
 	}
 	/// Mark a sound as in flight; the tile disables until the answer settles.
 	pub fn begin_send(&mut self, sound: Id, request: u64) {
@@ -117,5 +179,211 @@ impl VoiceStatuses {
 	}
 	pub fn valid_status(status: &str) -> bool {
 		status.chars().count() <= MAX_STATUS_CHARS && !status.chars().any(char::is_control)
+	}
+}
+
+/// Most remote effects remembered at once; the oldest is dropped.
+const MAX_EFFECTS: usize = 8;
+
+/// A soundboard effect someone else played in the channel this device is listening to.
+#[derive(Clone, Debug)]
+pub struct Effect {
+	pub channel: Id,
+	pub user: Id,
+	pub name: String,
+	pub emoji: Option<model::ReactionEmoji>,
+	pub at: std::time::Instant,
+	/// The queued preview's request, so one row is never played twice.
+	pub playback: u64,
+}
+
+/// The short-lived trail of remote effects, plus the one clip queued for local output.
+#[derive(Default)]
+pub struct Effects {
+	rows: Vec<Effect>,
+	pending: Option<(Id, std::time::Instant, Preview)>,
+	request: u64,
+	/// The newest row already queued for playback, so a frame cannot queue it twice.
+	played: Option<(Id, u64)>,
+}
+impl Effects {
+	/// Rows new enough to animate, newest first.
+	pub fn recent(&self, now: std::time::Instant) -> impl Iterator<Item = &Effect> {
+		self.rows
+			.iter()
+			.rev()
+			.take_while(move |row| now.saturating_duration_since(row.at) < EFFECT_TTL)
+	}
+	/// Record an effect and queue its clip. `known` supplies the catalog name when loaded.
+	pub fn push(
+		&mut self,
+		effect: model::VoiceEffect,
+		known: Option<&SoundboardSound>,
+		now: std::time::Instant,
+	) {
+		if !effect.valid() {
+			return;
+		}
+		self.request = self.request.wrapping_add(1);
+		let playback = Preview {
+			sound: effect.sound,
+			volume: effect.volume,
+			request: self.request,
+			state: PreviewState::Loading,
+		};
+		if self.rows.len() >= MAX_EFFECTS {
+			self.rows.remove(0);
+		}
+		self.rows.push(Effect {
+			channel: effect.channel,
+			user: effect.user,
+			name: known.map_or_else(String::new, |sound| sound.name.clone()),
+			emoji: effect.emoji,
+			at: now,
+			playback: playback.request,
+		});
+		self.pending = Some((effect.channel, now, playback));
+		self.played = None;
+	}
+	pub fn take_pending(&mut self, channel: Id, now: std::time::Instant) -> Option<Preview> {
+		self.pending
+			.take()
+			.filter(|(target, at, _)| {
+				*target == channel && now.saturating_duration_since(*at) < EFFECT_TTL
+			})
+			.map(|(_, _, preview)| preview)
+	}
+	pub fn clear(&mut self) {
+		self.rows.clear();
+		self.pending = None;
+	}
+}
+
+/// How long a remote effect stays on screen.
+pub const EFFECT_TTL: std::time::Duration = std::time::Duration::from_secs(6);
+
+impl crate::State {
+	pub fn can_send_soundboard(&self, channel: Id, sound: &SoundboardSound) -> bool {
+		use model::permissions as p;
+		let Some(call) = self.voice.active.as_ref() else {
+			return false;
+		};
+		let Some(target) = self.channel(channel) else {
+			return false;
+		};
+		sound.valid()
+			&& sound.available
+			&& target.kind == 2
+			&& target.guild.is_some()
+			&& call.channel == channel
+			&& call.guild == target.guild
+			&& !call.server_muted
+			&& !call.server_deafened
+			&& !call.deafened
+			&& matches!(
+				call.phase,
+				crate::voice::Phase::Connected | crate::voice::Phase::Waiting
+			) && self.soundboard.sending.is_none()
+			&& self.permission(channel, p::VIEW_CHANNEL | p::CONNECT | p::USE_SOUNDBOARD)
+				== Some(true)
+			&& (sound.guild.is_none()
+				|| sound.guild == target.guild
+				|| self.permission(channel, p::USE_EXTERNAL_SOUNDS) == Some(true))
+	}
+
+	pub fn send_soundboard(&mut self, channel: Id, sound: Id) -> Option<crate::Command> {
+		let row = self.soundboard.find(sound)?;
+		if !self.can_send_soundboard(channel, row) {
+			return None;
+		}
+		let source_guild = row
+			.guild
+			.filter(|guild| self.channel(channel).and_then(|c| c.guild) != Some(*guild));
+		let request = self.soundboard.send_request.wrapping_add(1);
+		self.soundboard.begin_send(sound, request);
+		Some(crate::Command::SendSoundboardSound {
+			channel,
+			sound,
+			source_guild,
+			request,
+		})
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	fn sound(id: u64, guild: Option<Id>) -> SoundboardSound {
+		SoundboardSound {
+			id: Id(id),
+			name: "Sample".into(),
+			volume: 0.5,
+			emoji_id: None,
+			emoji_name: None,
+			guild,
+			available: true,
+		}
+	}
+	#[test]
+	fn preview_does_not_invalidate_a_pending_send_or_reuse_a_stopped_request() {
+		let mut board = Soundboard::default();
+		board.begin_send(Id(1), 7);
+		let first = board.begin_preview(&sound(1, None));
+		board.sent(7, Ok(()));
+		assert!(board.sending.is_none());
+		board.stop_preview();
+		let second = board.begin_preview(&sound(2, None));
+		assert_ne!(first, second);
+		board.preview_progress(first, PreviewState::Ended);
+		assert_eq!(board.preview.as_ref().unwrap().state, PreviewState::Loading);
+		board.preview_progress(second, PreviewState::Playing);
+		assert_eq!(board.preview.as_ref().unwrap().state, PreviewState::Playing);
+	}
+	#[test]
+	fn catalog_switch_and_clear_reject_stale_results() {
+		let mut board = Soundboard::default();
+		board.begin(Some(Id(10)), 1);
+		board.begin(Some(Id(20)), 2);
+		board.finish(1, Ok(vec![sound(1, Some(Id(10)))]));
+		assert!(board.busy && board.sounds.is_empty());
+		board.finish(
+			2,
+			Ok(vec![
+				sound(1, None),
+				sound(1, None),
+				sound(2, Some(Id(10))),
+				sound(3, Some(Id(20))),
+			]),
+		);
+		assert_eq!(board.sounds.len(), 2);
+		board.begin(Some(Id(20)), 3);
+		board.clear();
+		board.finish(3, Ok(vec![sound(4, None)]));
+		assert!(board.sounds.is_empty());
+	}
+	#[test]
+	fn effects_are_one_shot_scoped_fresh_and_use_the_wire_volume_once() {
+		let now = std::time::Instant::now();
+		let effect = model::VoiceEffect {
+			channel: Id(1),
+			user: Id(2),
+			sound: Id(3),
+			volume: 0.5,
+			emoji: None,
+		};
+		let mut effects = Effects::default();
+		effects.push(effect.clone(), Some(&sound(3, None)), now);
+		assert_eq!(effects.take_pending(Id(1), now).unwrap().volume, 0.5);
+		assert!(effects.take_pending(Id(1), now).is_none());
+		effects.push(effect.clone(), None, now);
+		assert!(effects.take_pending(Id(9), now).is_none());
+		effects.push(effect.clone(), None, now);
+		assert!(effects.take_pending(Id(1), now + EFFECT_TTL).is_none());
+		for _ in 0..20 {
+			effects.push(effect.clone(), None, now);
+		}
+		assert_eq!(effects.recent(now).count(), MAX_EFFECTS);
+		effects.clear();
+		assert!(effects.take_pending(Id(1), now).is_none());
 	}
 }

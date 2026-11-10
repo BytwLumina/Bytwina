@@ -1972,6 +1972,17 @@ async fn run_recoverable(
 											emit(Event::Typing(client_core::typing::Signal { channel:typing.channel_id,user:typing.user_id,timestamp:typing.timestamp }))?;
 										}
 									}
+									"VOICE_CHANNEL_EFFECT_SEND" => {
+										// Emoji-only reactions carry no sound and are dropped by the decoder.
+										if let Ok(Some(effect))=discord_protocol::soundboard::voice_effect(packet.d.get().as_bytes()) {
+											emit(Event::VoiceEffect(effect))?;
+										}
+									}
+									"VOICE_CHANNEL_STATUS_UPDATE" => {
+										if let Ok((channel,status))=discord_protocol::soundboard::voice_status(packet.d.get().as_bytes()) {
+											emit(Event::VoiceStatus { channel,status })?;
+										}
+									}
 									"GUILD_SCHEDULED_EVENT_CREATE" | "GUILD_SCHEDULED_EVENT_UPDATE" => {
 										// A malformed event update must not stop the connection.
 										if let Ok(event)=discord_protocol::stage::scheduled_event(packet.d.get().as_bytes()) {
@@ -1997,6 +2008,12 @@ async fn run_recoverable(
 									"STAGE_INSTANCE_DELETE" => {
 										if let Ok((guild,stage))=discord_protocol::stage::stage_instance_delete(packet.d.get().as_bytes()) {
 											emit(Event::ScheduledEvent(client_core::stage::Event::StageEnded { guild,stage }))?;
+										}
+									}
+									"QUESTS_USER_STATUS_UPDATE" => {
+										// A malformed quest update must not stop the connection.
+										if let Ok(status)=discord_protocol::quests::quest_status(packet.d.get().as_bytes()) {
+											emit(Event::Quests(client_core::quests::Event::Status { status }))?;
 										}
 									}
 									"CHANNEL_RECIPIENT_ADD" => {let d:RecipientAdded=decode(packet.d.get().as_bytes()).map_err(|_|Failure::Protocol)?;shared_presence.add_recipient(d.user.id);emit(Event::RecipientAdded {channel:d.channel_id,user:d.user.into_model()})?;}

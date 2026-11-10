@@ -19,6 +19,8 @@ pub(super) struct Settings {
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 enum Page {
 	Account,
+	/// The discoverable-server directory; kept here because this shell owns the avatar cache.
+	Discovery,
 	Profile,
 	General,
 	#[default]
@@ -57,13 +59,15 @@ impl Page {
 		Self::Extensions,
 	];
 	/// Sidebar sections: account-level choices first, then how this app looks and behaves,
-	/// then community add-ons.
+	/// then community add-ons. Discovery sits with the account pages because it browses servers
+	/// before joining one.
 	const SECTIONS: [(&'static str, &'static [Self]); 3] = [
 		(
 			"section-user",
 			&[
 				Self::Account,
 				Self::Profile,
+				Self::Discovery,
 				Self::MessagingPermissions,
 				Self::Storage,
 			],
@@ -87,6 +91,7 @@ impl Page {
 	fn label_key(self) -> &'static str {
 		match self {
 			Self::Account => "page-account",
+			Self::Discovery => "page-discovery",
 			Self::Profile => "page-profile",
 			Self::General => "page-general",
 			Self::LanguageTime => "page-language-time",
@@ -109,6 +114,7 @@ impl Page {
 	fn description_key(self) -> &'static str {
 		match self {
 			Self::Account => "description-account",
+			Self::Discovery => "discovery-title",
 			Self::Profile => "description-profile",
 			Self::General => "description-general",
 			Self::LanguageTime => "description-language-time",
@@ -464,6 +470,7 @@ impl MessagingUi {
 										&mut self.avatars,
 										commands,
 									),
+									Page::Discovery => self.discovery_page(ui, state, commands),
 									Page::Appearance => self.appearance_settings(ui, state.demo),
 									Page::Chat => self.chat_settings(ui, state.demo),
 									Page::MessagingPermissions => {

@@ -140,44 +140,226 @@ pub(crate) const TONES: [char; 5] = [
 	'\u{1f3ff}',
 ];
 
-/// Strip a trailing skin-tone modifier so variants collapse onto their base emoji.
-pub(crate) fn base_emoji(text: &str) -> &str {
-	match text.chars().last() {
-		Some(last) if TONES.contains(&last) => &text[..text.len() - last.len_utf8()],
-		_ => text,
+/// Remove modifiers anywhere in a sequence, including inside ZWJ and multi-person emoji.
+/// Keep presentation selectors here; the catalog lookup normalizes them only as a fallback.
+pub(crate) fn base_emoji(text: &str) -> std::borrow::Cow<'_, str> {
+	if text.chars().any(|c| TONES.contains(&c)) {
+		text.chars()
+			.filter(|c| !TONES.contains(c))
+			.collect::<String>()
+			.into()
+	} else {
+		text.into()
 	}
 }
 
-/// One grid entry per base emoji: the catalog index used when browsing without a query.
-pub(crate) fn browse_indices() -> &'static [usize] {
-	static ENTRIES: OnceLock<Vec<usize>> = OnceLock::new();
-	ENTRIES.get_or_init(|| {
-		let mut seen = std::collections::BTreeSet::new();
-		standard()
+struct Category {
+	anchor: &'static str,
+	label: &'static str,
+	icon: crate::icons::Icon,
+}
+
+// CLDR group starts, verified against the bundled names.tsv (including Components).
+// Never reorder standard(): its positions also address shortcodes and the emoji atlas.
+const CATEGORIES: [Category; 10] = [
+	Category {
+		anchor: "grinning face",
+		label: "emoji-picker-category-smileys",
+		icon: crate::icons::Icon::Smile,
+	},
+	Category {
+		anchor: "waving hand",
+		label: "emoji-picker-category-people",
+		icon: crate::icons::Icon::People,
+	},
+	Category {
+		anchor: "light skin tone",
+		label: "emoji-picker-category-components",
+		icon: crate::icons::Icon::Sliders,
+	},
+	Category {
+		anchor: "monkey face",
+		label: "emoji-picker-category-nature",
+		icon: crate::icons::Icon::Sparkle,
+	},
+	Category {
+		anchor: "grapes",
+		label: "emoji-picker-category-food",
+		icon: crate::icons::Icon::ShoppingCart,
+	},
+	Category {
+		anchor: "globe showing europe-africa",
+		label: "emoji-picker-category-travel",
+		icon: crate::icons::Icon::Globe,
+	},
+	Category {
+		anchor: "jack-o-lantern",
+		label: "emoji-picker-category-activities",
+		icon: crate::icons::Icon::GameController,
+	},
+	Category {
+		anchor: "glasses",
+		label: "emoji-picker-category-objects",
+		icon: crate::icons::Icon::Bell,
+	},
+	Category {
+		anchor: "atm sign",
+		label: "emoji-picker-category-symbols",
+		icon: crate::icons::Icon::Hash,
+	},
+	Category {
+		anchor: "chequered flag",
+		label: "emoji-picker-category-flags",
+		icon: crate::icons::Icon::Megaphone,
+	},
+];
+
+const TONE_LABELS: [&str; 6] = [
+	"emoji-picker-tone-default",
+	"emoji-picker-tone-light",
+	"emoji-picker-tone-medium-light",
+	"emoji-picker-tone-medium",
+	"emoji-picker-tone-medium-dark",
+	"emoji-picker-tone-dark",
+];
+
+struct UnicodeIndex {
+	by_text: std::collections::HashMap<&'static str, usize>,
+	bases: Vec<usize>,
+	variants: Vec<Vec<usize>>,
+	browse: Vec<usize>,
+	categories: [std::ops::Range<usize>; CATEGORIES.len()],
+}
+
+/// All storage is bounded by the bundled catalog, initialized once rather than per frame.
+fn unicode_index() -> &'static UnicodeIndex {
+	static INDEX: OnceLock<UnicodeIndex> = OnceLock::new();
+	INDEX.get_or_init(|| {
+		let entries = standard();
+		let by_text: std::collections::HashMap<_, _> = entries
 			.iter()
 			.enumerate()
-			.filter(|(_, (text, _))| seen.insert(base_emoji(text)))
-			.map(|(index, _)| index)
-			.collect()
+			.map(|(i, (text, _))| (*text, i))
+			.collect();
+		let mut plain = std::collections::HashMap::new();
+		let mut names = std::collections::HashMap::new();
+		for (i, (text, name)) in entries.iter().enumerate() {
+			if !text.chars().any(|c| TONES.contains(&c)) {
+				plain.insert(text.replace('\u{fe0f}', ""), i);
+				names.insert(*name, i);
+			}
+		}
+		let bases: Vec<_> = entries
+			.iter()
+			.enumerate()
+			.map(|(i, (text, name))| {
+				let base = base_emoji(text);
+				if base == *text {
+					return i;
+				}
+				by_text
+					.get(base.as_ref())
+					.copied()
+					.or_else(|| plain.get(&base.replace('\u{fe0f}', "")).copied())
+					.or_else(|| {
+						// Legacy single-codepoint couples/handshakes have differently shaped ZWJ
+						// variants. Match their actual CLDR base name, retaining non-tone qualifiers.
+						let (name, qualifiers) = name.split_once(": ")?;
+						let qualifiers: Vec<_> = qualifiers
+							.split(", ")
+							.filter(|part| !part.ends_with("skin tone"))
+							.collect();
+						let name = if qualifiers.is_empty() {
+							name.to_owned()
+						} else {
+							format!("{name}: {}", qualifiers.join(", "))
+						};
+						names.get(name.as_str()).copied()
+					})
+					// Standalone modifiers remain independent Components, not one empty tile.
+					.unwrap_or(i)
+			})
+			.collect();
+		let browse: Vec<_> = bases
+			.iter()
+			.enumerate()
+			.filter_map(|(i, &base)| (i == base).then_some(i))
+			.collect();
+		let mut variants = vec![Vec::new(); entries.len()];
+		for &base in &browse {
+			variants[base].push(base);
+		}
+		for (i, &base) in bases.iter().enumerate() {
+			if i != base {
+				variants[base].push(i);
+			}
+		}
+		let starts = CATEGORIES.map(|category| {
+			entries
+				.iter()
+				.position(|(_, name)| *name == category.anchor)
+				.expect("bundled CLDR group start")
+		});
+		assert_eq!(starts[0], 0);
+		assert!(starts.windows(2).all(|pair| pair[0] < pair[1]));
+		let categories =
+			std::array::from_fn(|i| starts[i]..starts.get(i + 1).copied().unwrap_or(entries.len()));
+		UnicodeIndex {
+			by_text,
+			bases,
+			variants,
+			browse,
+			categories,
+		}
 	})
 }
 
-/// Variant indices for a base emoji, base first then each available tone.
-pub(crate) fn tone_variants(base: &str) -> Vec<usize> {
-	let mut out = Vec::with_capacity(6);
-	if let Some(index) = standard()
-		.binary_search_by_key(&base, |(text, _)| *text)
-		.ok()
-	{
-		out.push(index);
-	}
-	for tone in TONES {
-		let candidate = format!("{base}{tone}");
-		if let Ok(index) = standard().binary_search_by_key(&candidate.as_str(), |(t, _)| *t) {
-			out.push(index);
-		}
-	}
-	out
+/// One real catalog entry per family, preserving CLDR order.
+pub(crate) fn browse_indices() -> &'static [usize] {
+	&unicode_index().browse
+}
+
+/// Actual catalog sequences only, base first; mixed multi-person tones remain available.
+pub(crate) fn tone_variants(text: &str) -> &'static [usize] {
+	let index = unicode_index();
+	index
+		.by_text
+		.get(text)
+		.map_or(&[], |&i| index.variants[index.bases[i]].as_slice())
+}
+
+/// A category's entries in the current browsing list: tones collapsed, order preserved.
+fn category_rows(category: usize, tone: usize) -> Vec<usize> {
+	let index = unicode_index();
+	let Some(range) = index.categories.get(category) else {
+		return Vec::new();
+	};
+	let browse = index.browse.as_slice();
+	let start = browse.partition_point(|entry| *entry < range.start);
+	let end = browse.partition_point(|entry| *entry < range.end);
+	browse[start..end]
+		.iter()
+		.copied()
+		.map(|base| preferred_variant(base, tone))
+		.collect()
+}
+
+fn preferred_variant(base: usize, tone: usize) -> usize {
+	let Some(&tone) = tone.checked_sub(1).and_then(|i| TONES.get(i)) else {
+		return base;
+	};
+	tone_variants(standard()[base].0)
+		.iter()
+		.copied()
+		.find(|&i| {
+			let mut modifiers = standard()[i]
+				.0
+				.chars()
+				.filter(|c| TONES.contains(c))
+				.peekable();
+			modifiers.peek().is_some() && modifiers.all(|c| c == tone)
+		})
+		.unwrap_or(base)
 }
 
 pub(crate) fn standard() -> &'static [(&'static str, &'static str)] {
@@ -448,6 +630,10 @@ pub(crate) struct Picker {
 	gif_query: String,
 	/// Time the GIF query last changed; the search fires once typing pauses.
 	gif_changed_at: Option<f64>,
+	/// Default skin tone: 0 keeps the unqualified emoji, 1-5 pick the lightest available match.
+	unicode_tone: usize,
+	/// The CLDR group being browsed, if the grid is pinned to one.
+	unicode_category: Option<usize>,
 }
 
 impl Default for Picker {
@@ -475,6 +661,8 @@ impl Default for Picker {
 			gif_section: GifSection::Home,
 			gif_query: String::new(),
 			gif_changed_at: None,
+			unicode_tone: 0,
+			unicode_category: None,
 		}
 	}
 }
@@ -558,6 +746,7 @@ impl Picker {
 					*selected = None;
 					ui.close();
 				}
+				self.unicode_bar(ui);
 				egui::ScrollArea::vertical().max_height(240.0).show_rows(
 					ui,
 					CELL,
@@ -583,6 +772,70 @@ impl Picker {
 					},
 				);
 			});
+	}
+
+	/// The tone picker and the CLDR group row above the grid. Both only re-filter the catalog.
+	fn unicode_bar(&mut self, ui: &mut egui::Ui) {
+		let mut changed = false;
+		ui.horizontal_wrapped(|ui| {
+			ui.spacing_mut().item_spacing.x = 4.0;
+			let sample = if self.unicode_tone == 0 {
+				"👍"
+			} else {
+				standard()[preferred_variant(unicode_index().by_text["👍"], self.unicode_tone)].0
+			};
+			if let Some(image) = crate::emoji::image(ui.ctx(), sample, 20.0) {
+				let button = ui
+					.add(egui::Button::image(image).frame(false))
+					.on_hover_text(crate::i18n::translate("emoji-picker-tone-default"));
+				egui::Popup::menu(&button).show(|ui| {
+					for (tone, key) in TONE_LABELS.iter().enumerate() {
+						if ui
+							.selectable_label(
+								self.unicode_tone == tone,
+								crate::i18n::translate(key),
+							)
+							.clicked()
+						{
+							self.unicode_tone = tone;
+							changed = true;
+							ui.close();
+						}
+					}
+				});
+			}
+			ui.separator();
+			if ui
+				.selectable_label(
+					self.unicode_category.is_none(),
+					crate::i18n::translate("emoji-picker-category-all"),
+				)
+				.clicked()
+			{
+				self.unicode_category = None;
+				changed = true;
+			}
+			for (index, category) in CATEGORIES.iter().enumerate() {
+				let label = crate::i18n::translate(category.label);
+				let selected = self.unicode_category == Some(index);
+				let response = crate::icons::button(ui, category.icon, 18.0, &label);
+				if selected {
+					ui.painter().rect_stroke(
+						response.rect,
+						6,
+						egui::Stroke::new(1.5, crate::design::palette(ui).accent),
+						egui::StrokeKind::Inside,
+					);
+				}
+				if response.on_hover_text(label).clicked() {
+					self.unicode_category = Some(index);
+					changed = true;
+				}
+			}
+		});
+		if changed {
+			self.filter();
+		}
 	}
 
 	pub(crate) fn is_open(&self) -> bool {
@@ -643,8 +896,16 @@ impl Picker {
 		let query = self.query.trim().to_lowercase();
 		self.matches.clear();
 		if query.is_empty() {
-			// Browsing collapses skin-tone variants onto their base emoji.
-			self.matches.extend_from_slice(browse_indices());
+			// Browsing collapses skin-tone variants onto their base emoji, then prefers the
+			// chosen tone only where the catalog actually contains that variant.
+			self.matches = match self.unicode_category {
+				Some(category) => category_rows(category, self.unicode_tone),
+				None => browse_indices()
+					.iter()
+					.copied()
+					.map(|base| preferred_variant(base, self.unicode_tone))
+					.collect(),
+			};
 			return;
 		}
 		let words: Vec<&str> = query.split_whitespace().collect();
@@ -2639,6 +2900,46 @@ fn cell(
 
 #[cfg(test)]
 mod tests {
+	#[test]
+	fn tone_families_collapse_through_zwj_and_prefer_only_real_variants() {
+		let index = unicode_index();
+		let technologist = index.by_text["🧑‍💻"];
+		let family = tone_variants("🧑‍💻");
+		assert!(family.len() > 1, "a ZWJ profession keeps its tone entries");
+		assert_eq!(family[0], technologist);
+		for &variant in family {
+			assert_eq!(base_emoji(standard()[variant].0).as_ref(), "🧑‍💻");
+		}
+		let thumb = index.by_text["👍"];
+		assert!(preferred_variant(thumb, 0) == thumb);
+		let deep = preferred_variant(thumb, 5);
+		assert_ne!(deep, thumb);
+		assert!(standard()[deep].0.contains('\u{1f3ff}'));
+		// A base with no dark variant falls back to itself rather than an invented sequence.
+		for base in browse_indices() {
+			let chosen = preferred_variant(*base, 5);
+			assert_eq!(
+				base_emoji(standard()[chosen].0),
+				base_emoji(standard()[*base].0)
+			);
+		}
+	}
+
+	#[test]
+	fn categories_partition_the_catalog_without_skipping_entries() {
+		let index = unicode_index();
+		let covered: usize = index.categories.iter().map(std::ops::Range::len).sum();
+		assert_eq!(covered, standard().len());
+		assert!(!category_rows(0, 0).is_empty());
+		assert!(category_rows(CATEGORIES.len(), 0).is_empty());
+		for (position, category) in index.categories.iter().enumerate() {
+			let rows = category_rows(position, 2);
+			assert!(!rows.is_empty(), "every group has browsable entries");
+			assert!(rows.iter().all(|row| category.contains(row)
+				|| index.categories.iter().any(|range| range.contains(row))));
+		}
+	}
+
 	use super::*;
 	#[test]
 	fn gif_favorite_loading_is_single_flight_and_video_placeholders_never_request_media() {

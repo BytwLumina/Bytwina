@@ -17,10 +17,13 @@ mod onboarding;
 mod profile_edit;
 #[cfg(debug_assertions)]
 pub use profile_edit::debug_profile_board_request_check;
+mod discovery;
 pub mod proxy;
 #[cfg(test)]
 mod proxy_tests;
+mod quests;
 pub mod rpc;
+mod saved_messages;
 mod server_actions;
 mod server_admin;
 mod server_audit_log;
@@ -1201,6 +1204,33 @@ impl DiscordApi {
 					}),
 				}
 			}
+			Command::Quests { request } => {
+				let result = self.quests().await;
+				Event::Quests(client_core::quests::Event::Snapshot {
+					request,
+					result: result.map_err(quests::failure_key),
+				})
+			}
+			Command::EnrollQuest { quest, request } => {
+				let result = self.enroll_quest(quest).await;
+				Event::Quests(client_core::quests::Event::Enrolled {
+					quest,
+					request,
+					result: result.map_err(quests::failure_key),
+				})
+			}
+			Command::ClaimQuest {
+				quest,
+				platform,
+				request,
+			} => {
+				let result = self.claim_quest(quest, platform).await;
+				Event::Quests(client_core::quests::Event::Claimed {
+					quest,
+					request,
+					result: result.map_err(quests::failure_key),
+				})
+			}
 			Command::Archives {
 				parent,
 				guild,
@@ -1652,6 +1682,8 @@ impl DiscordApi {
 				request,
 				result: self.set_voice_status(channel, status.as_deref()).await,
 			},
+			Command::SavedMessages(command) => self.saved_messages_command(command).await,
+			Command::Discovery(command) => self.discovery_command(command).await,
 			Command::MemberSearch(_) | Command::Voice(_) | Command::Members { .. } => {
 				Event::Failure(Failure::Protocol)
 			}

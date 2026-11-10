@@ -13,6 +13,8 @@ use crate::Command;
 pub const MAX_GUILDS: usize = 256;
 /// Subscribers kept for one event; Discord pages the list by the hundred.
 pub const MAX_SUBSCRIBERS: usize = 100;
+/// Subscriber lists kept per guild; unknown event ids must not grow the map.
+pub const MAX_SUBSCRIBER_EVENTS: usize = 16;
 /// Voice presences kept at once; one per member of every joined channel.
 pub const MAX_PRESENCES: usize = 2048;
 
@@ -103,6 +105,14 @@ pub enum Event {
 		request: u64,
 		error: Option<&'static str>,
 	},
+}
+
+#[derive(Clone, Copy)]
+enum StageAction {
+	Speak { channel: Id, user: Id, asking: bool },
+	Moderate,
+	Create { channel: Id },
+	End { stage: Id },
 }
 
 /// One guild's known events.
@@ -287,7 +297,9 @@ impl Events {
 				let Some(slot) = self.guild(guild) else {
 					return;
 				};
-				slot.stages.retain(|known| known.id != stage);
+				// The gateway delete names the instance; a local end names the channel.
+				slot.stages
+					.retain(|known| known.id != stage && known.channel_id != stage);
 			}
 			Event::Subscriber {
 				guild,
@@ -298,6 +310,11 @@ impl Events {
 				let Some(slot) = self.guild(guild) else {
 					return;
 				};
+				if !slot.subscribers.contains_key(&event)
+					&& slot.subscribers.len() >= MAX_SUBSCRIBER_EVENTS
+				{
+					return;
+				}
 				let members = slot.subscribers.entry(event).or_default();
 				if subscribed {
 					if !members.contains(&member) && members.len() < MAX_SUBSCRIBERS {
@@ -317,7 +334,11 @@ impl Events {
 				};
 				let mut members = members;
 				members.truncate(MAX_SUBSCRIBERS);
-				slot.subscribers.insert(event, members);
+				if slot.subscribers.contains_key(&event)
+					|| slot.subscribers.len() < MAX_SUBSCRIBER_EVENTS
+				{
+					slot.subscribers.insert(event, members);
+				}
 			}
 			Event::Interest {
 				guild,
