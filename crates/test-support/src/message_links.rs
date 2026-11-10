@@ -89,7 +89,7 @@ pub fn message_links_demo_state() -> State {
 			channel.last_message = Some(Id(FIRST + 6));
 		}
 	});
-	state.status = "Offline message-link fixture · no account or network access";
+	state.status = "Offline message-link fixture · no account or network access".into();
 	state.revision += 1;
 	state
 }

@@ -878,7 +878,7 @@ impl MessagingUi {
 			if !self.startup_available {
 				design::hint(ui, &language.text("general-startup-unavailable"));
 			} else if !self.startup_status.is_empty() {
-				design::hint(ui, self.startup_status);
+				design::hint(ui, self.startup_status.as_str());
 			}
 		});
 		let title = language.text("general-window");
@@ -922,7 +922,7 @@ impl MessagingUi {
 			if !self.tray_available {
 				design::hint(ui, &language.text("general-tray-unavailable"));
 			} else if !self.tray_status.is_empty() {
-				design::hint(ui, self.tray_status);
+				design::hint(ui, self.tray_status.as_str());
 			}
 			#[cfg(target_os = "linux")]
 			{
@@ -1295,7 +1295,7 @@ impl MessagingUi {
 			let detail = if state.demo {
 				"settings-activity-demo-detail"
 			} else {
-				self.game_activity_status
+				self.game_activity_status.as_str()
 			};
 			design::row(ui, title, (!detail.is_empty()).then_some(detail), |ui| {
 				if let Some((label, enable)) = action {

@@ -93,7 +93,7 @@ pub(super) struct JoinDialog {
 	picker: bool,
 	input: String,
 	focus: bool,
-	status: &'static str,
+	status: client_core::status::Status,
 	name: String,
 	name_focus: bool,
 	icon: Option<String>,
@@ -472,7 +472,7 @@ impl JoinDialog {
 				input.request_focus();
 			}
 			if input.changed() {
-				self.status = "";
+				self.status.clear();
 			}
 			if let Some(error) = self.icon_error {
 				ui.add_space(10.0);
@@ -505,7 +505,7 @@ impl JoinDialog {
 				);
 			} else if !self.status.is_empty() {
 				ui.add_space(10.0);
-				design::notice(ui, design::Level::Error, self.status);
+				design::notice(ui, design::Level::Error, self.status.as_str());
 			}
 		});
 		d.footer(|ui| {
@@ -535,9 +535,11 @@ impl JoinDialog {
 						Some(command) => {
 							commands.push(command);
 							self.submitted = true;
-							self.status = "";
+							self.status.clear();
 						}
-						None => self.status = "join-server-status-unable-to-create-this-server",
+						None => {
+							self.status = "join-server-status-unable-to-create-this-server".into()
+						}
 					}
 				}
 			});
@@ -564,7 +566,7 @@ impl JoinDialog {
 		let input = invite_input(ui, &mut self.input, std::mem::take(&mut self.focus))
 			.labelled_by(label.id);
 		if input.changed() {
-			self.status = "";
+			self.status.clear();
 		}
 		ui.add_space(10.0);
 		ui.add(
@@ -729,6 +731,8 @@ impl JoinDialog {
 					});
 				});
 		}
+		// The dialog's own status is owned text, so it is borrowed for the whole loop.
+		let own_status = self.status.as_str();
 		for (text, danger) in [
 			(lookup_error.map(|error| error.label()), true),
 			(join_error.map(|error| error.label()), true),
@@ -740,7 +744,7 @@ impl JoinDialog {
 				state.demo.then_some("join-server-status-offline-preview"),
 				false,
 			),
-			((!self.status.is_empty()).then_some(self.status), false),
+			((!own_status.is_empty()).then_some(own_status), false),
 		] {
 			let Some(text) = text else { continue };
 			let text = crate::i18n::translate_if_key(text);
@@ -795,7 +799,8 @@ impl JoinDialog {
 		commands: &mut Vec<Command>,
 	) {
 		let Some(code) = parsed else {
-			self.status = "join-server-status-enter-a-valid-discord-invite-link-or-invite-code";
+			self.status =
+				"join-server-status-enter-a-valid-discord-invite-link-or-invite-code".into();
 			return;
 		};
 		let command = if ready {
@@ -808,10 +813,10 @@ impl JoinDialog {
 		match command {
 			Some(command) => {
 				commands.push(command);
-				self.status = "";
+				self.status.clear();
 			}
 			None => {
-				self.status = "join-server-status-unable-to-proceed-check-your-connection";
+				self.status = "join-server-status-unable-to-proceed-check-your-connection".into();
 			}
 		}
 	}

@@ -1287,7 +1287,7 @@ fn queue_channel_preferences(
 	let Some(cache) = cache else {
 		messaging.channel_preferences_reload = false;
 		messaging.channel_preferences_status =
-			"Local storage is unavailable; channel preferences could not be restored.";
+			"Local storage is unavailable; channel preferences could not be restored.".into();
 		return false;
 	};
 	let accepted = cache.queue(
@@ -1300,7 +1300,7 @@ fn queue_channel_preferences(
 	messaging.channel_preferences_reload = !accepted;
 	messaging.channel_preferences_load_pending = accepted;
 	if accepted {
-		messaging.channel_preferences_status = "";
+		messaging.channel_preferences_status = client_core::status::Status::default();
 	}
 	accepted
 }
@@ -2101,7 +2101,7 @@ impl Desktop {
 				"Loading saved font…"
 			} else {
 				"Could not load the saved font."
-			};
+			}.into();
 		}
 		messaging.minimize_to_tray = tray_setting.enabled;
 		app_settings.apply(&mut messaging);
@@ -3078,15 +3078,14 @@ impl Desktop {
 			Ok(font) => {
 				ui::fonts::apply_custom(ctx, font.as_ref());
 				self.messaging.custom_font.name = font.as_ref().map(|font| font.name.clone());
-				self.messaging.custom_font.status = "";
+				self.messaging.custom_font.status = client_core::status::Status::default();
 			}
-			Err(error) => self.messaging.custom_font.status = error,
-		}
+			Err(error) => self.messaging.custom_font.status = error,.into();}
 	}
 	fn save_font(&mut self, ctx: &egui::Context, font: Option<ui::fonts::CustomFont>) {
 		if self.fixture_only || self.state.demo {
 			self.accept_font(ctx, &Ok(font));
-			self.messaging.custom_font.status = "Preview only; this font is not saved.";
+			self.messaging.custom_font.status = "Preview only; this font is not saved.".into();
 		} else {
 			self.messaging.custom_font.busy =
 				self.queue_cache_for(model::Id(0), cache::Operation::SaveCustomFont(font));
@@ -3094,7 +3093,7 @@ impl Desktop {
 				"Saving font…"
 			} else {
 				"Could not save the font. Try again."
-			};
+			}.into();
 		}
 	}
 	fn sync_fonts(&mut self, ctx: &egui::Context) {
@@ -3109,12 +3108,11 @@ impl Desktop {
 			if let Some(result) = result {
 				self.font_picker = None;
 				self.messaging.custom_font.busy = false;
-				self.messaging.custom_font.status = "";
+				self.messaging.custom_font.status = client_core::status::Status::default();
 				match result {
 					Ok(Some(font)) => self.save_font(ctx, Some(font)),
 					Ok(None) => {}
-					Err(error) => self.messaging.custom_font.status = error,
-				}
+					Err(error) => self.messaging.custom_font.status = error,.into();}
 			}
 		}
 		if let Some(families) = &self.font_families
@@ -3141,7 +3139,7 @@ impl Desktop {
 				ui::fonts::Action::Select(family) => {
 					self.font_picker = Some(font_import::load(&self.runtime, ctx, family));
 					self.messaging.custom_font.busy = true;
-					self.messaging.custom_font.status = "Loading font…";
+					self.messaging.custom_font.status = "Loading font…".into();
 				}
 				ui::fonts::Action::Reset => self.save_font(ctx, None),
 			}
@@ -3174,7 +3172,7 @@ impl Desktop {
 		if let Some(delay) = self.reading.remaining(now) {
 			ctx.request_repaint_after(delay);
 		}
-		self.messaging.reading_status = self.reading.status();
+		self.messaging.reading_status = self.reading.status().into();
 	}
 	fn sync_tray(&mut self, ctx: &egui::Context) {
 		let previous_status = self.messaging.tray_status;
@@ -3251,7 +3249,7 @@ impl Desktop {
 		// The icon remains registered independently of minimize-on-close.
 		self.messaging.tray_status = self
 			.tray_error
-			.unwrap_or_else(|| self.tray_setting.status());
+			.unwrap_or_else(|| self.tray_setting.status()).into();
 		if previous_status != self.messaging.tray_status {
 			ctx.request_repaint();
 		}
@@ -3454,7 +3452,7 @@ impl Desktop {
 			}
 		} else {
 			"Not connected; status is not shared."
-		};
+		}.into();
 		self.persist_account_presence();
 		if changed || previous_status != self.messaging.own_presence_status {
 			ctx.request_repaint();
@@ -3497,7 +3495,7 @@ impl Desktop {
 		);
 		let previous = (
 			self.messaging.own_game.clone(),
-			self.messaging.game_activity_status,
+			self.messaging.game_activity_status.clone(),
 		);
 		#[cfg(feature = "demo")]
 		if self.state.demo {
@@ -3530,12 +3528,12 @@ impl Desktop {
 						.any(|game| game.executable == "osu!.exe" && game.hidden)
 				});
 			let changed = self.state.set_local_game_activity(activity);
-			self.messaging.game_activity_status = "settings-activity-status-offline-preview";
+			self.messaging.game_activity_status = "settings-activity-status-offline-preview".into();
 			if changed
 				|| previous
 					!= (
 						self.messaging.own_game.clone(),
-						self.messaging.game_activity_status,
+						self.messaging.game_activity_status.clone(),
 					) {
 				ctx.request_repaint();
 			}
@@ -3567,7 +3565,7 @@ impl Desktop {
 		self.messaging.discord_activity_sharing_retry = false;
 		let sharing_request = self.messaging.discord_activity_sharing_request.take();
 		let mut own_activity = None;
-		self.messaging.game_activity_status = self.game_activity.status();
+		self.messaging.game_activity_status = self.game_activity.status().into();
 		if let Some(connection) = &self.connection {
 			let custom_changed = self.extensions.take_rich_presence_change();
 			let custom = self.extensions.rich_presence();
@@ -3623,11 +3621,10 @@ impl Desktop {
 									"settings-activity-status-hidden"
 								}
 								Observation::ServerMissing => "settings-activity-status-missing",
-							};
+							}.into();
 						}
 					}
-					Err(error) => self.messaging.game_activity_status = error,
-				}
+					Err(error) => self.messaging.game_activity_status = error,.into();}
 			}
 			if self.game_activity.enabled && self.state.gateway_connected {
 				match *connection.activity_sharing.borrow() {
@@ -3638,12 +3635,10 @@ impl Desktop {
 							match value {
 								Some(false) => {
 									self.messaging.game_activity_status =
-										"settings-activity-status-sharing-off"
-								}
+										"settings-activity-status-sharing-off".into();}
 								None => {
 									self.messaging.game_activity_status =
-										"settings-activity-status-checking"
-								}
+										"settings-activity-status-checking".into();}
 								Some(true) => {}
 							}
 						}
@@ -3652,18 +3647,18 @@ impl Desktop {
 						self.messaging.discord_activity_sharing_retry = true;
 						if !self.game_activity.needs_attention() {
 							self.messaging.game_activity_status =
-								"settings-activity-status-check-failed";
+								"settings-activity-status-check-failed".into();
 						}
 					}
 				}
 				if let Some(enable) = sharing_request {
 					if connection.activity_sharing_request.try_send(enable).is_ok() {
 						self.messaging.discord_activity_sharing_busy = true;
-						self.messaging.game_activity_status = "settings-activity-status-updating";
+						self.messaging.game_activity_status = "settings-activity-status-updating".into();
 					} else {
 						self.messaging.discord_activity_sharing_retry = true;
 						self.messaging.game_activity_status =
-							"settings-activity-status-request-failed";
+							"settings-activity-status-request-failed".into();
 					}
 				}
 			}
@@ -3695,7 +3690,7 @@ impl Desktop {
 				) || previous
 			!= (
 				self.messaging.own_game.clone(),
-				self.messaging.game_activity_status,
+				self.messaging.game_activity_status.clone(),
 			) {
 			ctx.request_repaint();
 		}
@@ -5031,14 +5026,14 @@ impl Desktop {
 						if self.messaging.custom_font.busy && self.font_picker.is_none() {
 							self.messaging.custom_font.busy = false;
 							self.messaging.custom_font.status =
-								"Local storage worker stopped. Restart Bytwina to save fonts.";
+								"Local storage worker stopped. Restart Bytwina to save fonts.".into();
 						}
 						if self.messaging.channel_preferences_reload
 							|| self.messaging.channel_preferences_load_pending
 						{
 							self.messaging.channel_preferences_reload = false;
 							self.messaging.channel_preferences_load_pending = false;
-							self.messaging.channel_preferences_status = "Local storage worker stopped; restart Bytwina to restore channel preferences.";
+							self.messaging.channel_preferences_status = "Local storage worker stopped; restart Bytwina to restore channel preferences.".into();
 						}
 						presence_cache_stopped = self.presence_load_pending;
 						break;
@@ -5213,7 +5208,7 @@ impl Desktop {
 									"Saved channel preferences are damaged or incompatible with this build."
 								}
 								_ => "Could not read channel preferences from local storage.",
-							};
+							}.into();
 						}
 					}
 				}
@@ -5223,7 +5218,7 @@ impl Desktop {
 						""
 					} else {
 						"Could not save channel preferences."
-					};
+					}.into();
 				}
 				cache::Outcome::GifFavorites(favorites) => {
 					self.state.restore_gif_favorites(favorites);
@@ -7306,7 +7301,7 @@ impl eframe::App for Desktop {
 						""
 					} else {
 						"Could not save channel preferences."
-					};
+					}.into();
 			}
 		}
 		if let Some(variant) = self.messaging.theme_variant_changed.take() {

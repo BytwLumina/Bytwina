@@ -234,7 +234,7 @@ impl MessagingUi {
 	}
 
 	fn reading_save_notice(&mut self, ui: &mut egui::Ui, demo: bool) {
-		let status = crate::i18n::translate_if_key(self.reading_status);
+		let status = crate::i18n::translate_if_key(self.reading_status.as_str());
 		if !demo
 			&& self.reading_status
 				== "reading-reading-save-notice-reading-settings-could-not-be-saved"
@@ -251,6 +251,7 @@ impl MessagingUi {
 				self.reading_save_requested = true;
 			}
 		}
+		.into();
 	}
 
 	/// `panel` is the resizable panel id and `reserved` the fixed width it holds besides the list.
@@ -440,7 +441,8 @@ mod tests {
 			view.notifications_enabled,
 			"Reading defaults do not change OS notification consent"
 		);
-		view.reading_status = "reading-reading-save-notice-reading-settings-could-not-be-saved";
+		view.reading_status =
+			"reading-reading-save-notice-reading-settings-could-not-be-saved".into();
 		let found = frame(&mut view, vec![]);
 		let retry = found
 			.iter()

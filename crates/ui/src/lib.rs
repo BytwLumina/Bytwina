@@ -281,7 +281,7 @@ pub struct MessagingUi {
 	/// not write, so the host enforces it and republishes the cleared presence.
 	pub own_presence_expires: Option<u64>,
 	pub own_presence_changed: bool,
-	pub own_presence_status: &'static str,
+	pub own_presence_status: client_core::status::Status,
 	group_menu: group_menu::GroupMenu,
 	server_menu: server_menu::ServerMenu,
 	channel_menu: channel_menu::ChannelMenu,
@@ -291,7 +291,7 @@ pub struct MessagingUi {
 	pub channel_preferences_load_pending: bool,
 	pub channel_preferences_reload: bool,
 	pub channel_preferences_save_pending: bool,
-	pub channel_preferences_status: &'static str,
+	pub channel_preferences_status: client_core::status::Status,
 	/// Saved per-server channels still need to reach this session's navigation memory.
 	last_channels_seed: bool,
 	last_channel_recorded: Option<Id>,
@@ -374,16 +374,16 @@ pub struct MessagingUi {
 	pub steady_refresh_rate: bool,
 	/// Adapter currently in use, shown next to the preference for bug reports.
 	pub gpu_adapter: String,
-	pub reading_status: &'static str,
+	pub reading_status: client_core::status::Status,
 	pub reading_save_requested: bool,
 	pub minimize_to_tray: bool,
 	pub tray_available: bool,
-	pub tray_status: &'static str,
+	pub tray_status: client_core::status::Status,
 	pub startup_enabled: bool,
 	pub startup_minimized: bool,
 	pub startup_available: bool,
 	pub startup_busy: bool,
-	pub startup_status: &'static str,
+	pub startup_status: client_core::status::Status,
 	pub startup_disable_requested: bool,
 	pub discord_activity_sharing: Option<bool>,
 	pub discord_activity_sharing_busy: bool,
@@ -392,7 +392,7 @@ pub struct MessagingUi {
 	pub discord_activity_sharing_request: Option<bool>,
 	pub share_game_activity: bool,
 	pub own_game: Option<String>,
-	pub game_activity_status: &'static str,
+	pub game_activity_status: client_core::status::Status,
 	/// Edited on the Registered Games page; the desktop app persists and applies the list.
 	pub registered_games: Vec<model::registered_games::RegisteredGame>,
 	/// The game the local process scan reports while activity sharing is on.
@@ -1271,7 +1271,7 @@ impl MessagingUi {
 		if !self.channel_preferences_changed && preferences.is_valid() {
 			self.channel_preferences = preferences;
 			self.channel_preferences_loaded = true;
-			self.channel_preferences_status = "";
+			self.channel_preferences_status = client_core::status::Status::default();
 			self.last_channels_seed = true;
 			self.last_channel_recorded = None;
 			self.channel_cache.invalidate();
@@ -2168,7 +2168,7 @@ impl MessagingUi {
 				if !self.channel_preferences_status.is_empty() {
 					ui.colored_label(
 						design::palette(ui).warning,
-						crate::i18n::translate_if_key(self.channel_preferences_status),
+						crate::i18n::translate_if_key(self.channel_preferences_status.as_str()),
 					);
 					if ui.button(language.text("retry-shortcuts")).clicked() {
 						if self.channel_preferences_loaded {
@@ -4698,7 +4698,7 @@ impl MessagingUi {
 			&mut self.draft_changes,
 			self.editing.is_some(),
 			&mut self.avatars,
-			(self.game_activity_status, self.share_game_activity),
+			(self.game_activity_status.as_str(), self.share_game_activity),
 		) && let Err(error) = self.apply_extension_effect(&ctx, state, effect, &mut commands)
 		{
 			self.extensions.report_error(error);

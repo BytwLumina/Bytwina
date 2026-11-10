@@ -726,7 +726,7 @@ pub fn demo_state() -> State {
 			.collect(),
 		))),
 	});
-	state.status = "Offline fixture · no network access";
+	state.status = "Offline fixture · no network access".into();
 	state
 }
 /// Notification rail evidence: synthetic incoming DMs and a guild mention, no OS delivery.
@@ -752,7 +752,7 @@ pub fn notification_demo_state() -> State {
 			event: Event::Message(message),
 		});
 	}
-	state.status = "Offline notification fixture · no network or OS alerts";
+	state.status = "Offline notification fixture · no network or OS alerts".into();
 	state
 }
 /// Voice-only visual evidence: synthetic membership, no media or gateway commands.
@@ -845,7 +845,7 @@ pub fn voice_demo_state() -> State {
 	});
 	state.select(Id(25));
 	load_page(&mut state, None);
-	state.status = "Offline voice fixture · no microphone or network access";
+	state.status = "Offline voice fixture · no microphone or network access".into();
 	state
 }
 /// Synthetic direct-message call: two participants, connected for a while. Never live audio.
@@ -881,7 +881,7 @@ pub fn call_demo_state() -> State {
 		error: None,
 		reconnecting: None,
 	});
-	state.status = "Offline call fixture · no microphone or network access";
+	state.status = "Offline call fixture · no microphone or network access".into();
 	state
 }
 /// Synthetic ongoing DM call on another client; this device has never joined.
@@ -897,7 +897,7 @@ pub fn existing_call_demo_state() -> State {
 		unavailable: false,
 	});
 	state.demo = true;
-	state.status = "Offline call fixture · no microphone or network access";
+	state.status = "Offline call fixture · no microphone or network access".into();
 	state
 }
 pub fn load_page(state: &mut State, before: Option<Id>) {

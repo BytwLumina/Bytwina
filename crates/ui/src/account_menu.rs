@@ -903,7 +903,7 @@ impl MessagingUi {
 			);
 		}
 		if !self.own_presence_status.is_empty() {
-			dialog::hint(ui, self.own_presence_status);
+			dialog::hint(ui, self.own_presence_status.as_str());
 		}
 	}
 

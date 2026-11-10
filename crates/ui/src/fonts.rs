@@ -105,7 +105,7 @@ pub enum Action {
 pub struct Settings {
 	pub name: Option<String>,
 	pub busy: bool,
-	pub status: &'static str,
+	pub status: client_core::status::Status,
 	pub request: Option<Action>,
 	/// Installed family names, sorted; `None` until the platform list arrives.
 	pub families: Option<Vec<String>>,
