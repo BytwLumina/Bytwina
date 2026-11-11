@@ -8,7 +8,7 @@ fn session_clear_preserves_device_startup_preferences_and_pending_status() {
 	view.startup_enabled = true;
 	view.startup_minimized = true;
 	view.startup_busy = true;
-	view.startup_status = "Synthetic pending startup write";
+	view.startup_status = "Synthetic pending startup write".into();
 	view.clear();
 	assert!(view.startup_available && view.startup_enabled && view.startup_minimized);
 	assert!(view.startup_busy);
