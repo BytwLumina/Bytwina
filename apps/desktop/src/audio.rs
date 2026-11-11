@@ -23,7 +23,6 @@ use symphonia::core::{
 use tokio::sync::{Notify, watch};
 
 // Whole-file fixture helpers are bounded separately from the streaming player.
-#[cfg(any(test, all(debug_assertions, feature = "demo")))]
 const MAX_FIXTURE_BYTES: usize = 20 * 1024 * 1024;
 const MAX_SAMPLES: usize = 64 * 1024 * 1024 / size_of::<f32>();
 const MAX_SECONDS: u64 = 600;

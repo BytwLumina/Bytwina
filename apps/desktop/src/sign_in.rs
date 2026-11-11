@@ -943,7 +943,7 @@ impl Desktop {
 						if self.state.status != "Disconnected" || attention {
 							ui.add(
 								egui::Label::new(
-									egui::RichText::new(self.state.status)
+									egui::RichText::new(self.state.status.as_str())
 										.size(13.0)
 										.color(color),
 								)

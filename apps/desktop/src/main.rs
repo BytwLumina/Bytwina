@@ -3084,7 +3084,7 @@ impl Desktop {
 				self.messaging.custom_font.status = client_core::status::Status::default();
 			}
 			Err(error) => {
-				self.messaging.custom_font.status = error.into();
+				self.messaging.custom_font.status = (*error).into();
 			}
 		}
 	}
@@ -3638,7 +3638,7 @@ impl Desktop {
 						}
 					}
 					Err(error) => {
-						self.messaging.game_activity_status = error.into();
+						self.messaging.game_activity_status = (*error).into();
 					}
 				}
 			}

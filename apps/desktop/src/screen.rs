@@ -128,7 +128,7 @@ impl Screen {
 			"share_failed",
 			&[("reason", diagnostics::Value::Text(message))],
 		);
-		self.toast = Some((ui::design::Level::Error, message));
+		self.toast = Some((ui::design::Level::Error, message.into()));
 		self.request_stop(message);
 	}
 
@@ -216,7 +216,7 @@ impl Screen {
 				// A server-side end names its cause, so it is never mistaken for a local stop.
 				self.status = reason.unwrap_or("Screen sharing stopped").into();
 				if let Some(reason) = reason {
-					self.toast = Some((ui::design::Level::Info, reason));
+					self.toast = Some((ui::design::Level::Info, reason.into()));
 				}
 			}
 			screen::Event::Failed(message) => self.fail(message),
@@ -534,7 +534,7 @@ impl Screen {
 			|| self.closing.is_some()
 			|| self.retiring.is_some();
 		if let Some((level, message)) = self.toast.take() {
-			ui.toasts.push(level, &message);
+			ui.toasts.push(level, message);
 		}
 		ui.screen.status = self.status.clone();
 		ui.screen.capture_status = self
@@ -547,7 +547,7 @@ impl Screen {
 		let pending = self.pending.take().expect("complete screen negotiation");
 		let context = pending.context;
 		if let Err(error) = self.start(runtime, pending, ctx) {
-			self.toast = Some((ui::design::Level::Error, error));
+			self.toast = Some((ui::design::Level::Error, error.into()));
 			self.close(context, error);
 		}
 	}
