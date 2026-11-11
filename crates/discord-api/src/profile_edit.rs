@@ -116,7 +116,24 @@ impl DiscordApi {
 				|| changes
 					.avatar
 					.as_ref()
-					.is_some_and(|avatar| avatar.is_some() != saved.user.avatar.is_some()))
+					.is_some_and(|avatar| avatar.is_some() != saved.user.avatar.is_some())
+				|| changes.avatar_decoration_sku.is_some_and(|sku| {
+					sku != saved
+						.user
+						.cosmetics
+						.as_deref()
+						.and_then(|cosmetics| cosmetics.decoration.as_ref())
+						.map(|decoration| decoration.sku)
+				}) || changes.nameplate_sku.is_some_and(|sku| {
+				sku != saved
+					.user
+					.cosmetics
+					.as_deref()
+					.and_then(|cosmetics| cosmetics.nameplate.as_ref())
+					.map(|nameplate| nameplate.sku)
+			}) || changes
+				.profile_effect_sku
+				.is_some_and(|sku| sku != saved.effect_sku))
 		{
 			return Err(Failure::ProtocolAt(
 				"Profile changes were not confirmed; reload before retrying",
@@ -242,7 +259,8 @@ mod tests {
 				api.execute(Command::EditProfile {
 					user: Id(1),
 					request: 42,
-					changes: Some(edit)
+					changes: Some(edit),
+					cosmetics: model::CosmeticPreferences::SHOWN,
 				}),
 				server
 			);
@@ -271,6 +289,25 @@ mod tests {
 			};
 			let (result, ()) = tokio::join!(api.edit_profile(Id(1), Some(set)), server);
 			assert_eq!(result.unwrap().user.name, "New name");
+
+			for confirmed in [true, false] {
+				let changes = ProfileEdit {
+					avatar_decoration_sku: Some(Some(Id(7))),
+					..Default::default()
+				};
+				let server = async {
+					respond(&listener, PATCH, Some(json!({"avatar_decoration_sku_id":"7"})), 200, USER).await;
+					let mut saved: Value = serde_json::from_str(PROFILE).unwrap();
+					if confirmed {
+						saved["user"]["avatar_decoration_data"] = json!({
+							"sku_id": "7", "asset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+						});
+					}
+					respond(&listener, GET, None, 200, &saved.to_string()).await;
+				};
+				let (result, ()) = tokio::join!(api.edit_profile(Id(1), Some(changes)), server);
+				assert_eq!(result.is_ok(), confirmed);
+			}
 
 			let only_bio = ProfileEdit {
 				bio: Some("hello".into()),

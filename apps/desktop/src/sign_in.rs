@@ -47,6 +47,7 @@ impl Desktop {
 		}
 		self.avatar_start_failed = false;
 		self.messaging.clear_avatars();
+		self.state.collectibles.clear();
 		self.state.generation += 1;
 		self.messaging.channel_preferences = model::ChannelPreferences::default();
 		self.messaging.channel_preferences_changed = false;

@@ -1,5 +1,9 @@
 # tr application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = Süslemelerin yükleniyor…
+profile-edit-collectibles-empty = Sahip olduğun süsleme bulunamadı.
+profile-edit-collectibles-current = Mevcut süsleme
+profile-edit-collectibles-keep-current = Mevcut olanı koru
 language-system = Sistem
 language-group = Dil
 language-label = Ekran dili

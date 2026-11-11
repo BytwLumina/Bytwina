@@ -4215,7 +4215,7 @@ fn card_view(
 				data,
 				rect,
 				frame_back,
-				(full, dock_clip),
+				(full, dock_clip, false, true),
 				state.demo,
 			);
 		}
@@ -4491,7 +4491,7 @@ fn effect_clock(
 	ctx: &egui::Context,
 	user: Id,
 	sku: Id,
-	kind: (bool, bool),
+	kind: (bool, bool, bool),
 	ready: bool,
 ) -> Option<std::time::Duration> {
 	// One record per card kind, replaced when another profile or effect shows there.
@@ -4508,18 +4508,22 @@ fn effect_clock(
 }
 
 /// The equipped profile frame and effect around and over a finished card.
-fn paint_collectibles(
+pub(crate) fn paint_collectibles(
 	ui: &mut egui::Ui,
 	avatars: &mut Avatars,
 	data: &model::UserProfile,
 	card: Rect,
 	frame_back: egui::layers::ShapeIdx,
-	(full, dock_clip): (bool, Option<Rect>),
+	(full, dock_clip, preview, show_effect): (bool, Option<Rect>, bool, bool),
 	demo: bool,
 ) {
-	if let Some(effect) = data.effect.as_deref().filter(|_| avatars.cosmetics.effects) {
+	if let Some(effect) = data
+		.effect
+		.as_deref()
+		.filter(|_| show_effect && avatars.cosmetics.effects)
+	{
 		// The popout, full profile and docked card each keep their own clock and fade.
-		let kind = (full, dock_clip.is_some());
+		let kind = (full, dock_clip.is_some(), preview);
 		let ready = avatars.effect_ready(ui, effect, demo);
 		let elapsed = effect_clock(ui.ctx(), data.user.id, effect.sku, kind, ready);
 		// Docked, the effect covers the whole fixed card, not just its scrolling details.

@@ -247,8 +247,8 @@ impl Avatars {
 
 	/// Effect layers over a card. `elapsed` counts from when the layers were ready; nothing shows
 	/// before then, so the still (the effect's end state) never flashes ahead of the animation.
-	/// Only disabled motion or a layerless effect shows the still. One-shot files hold their
-	/// last frame; `opacity` fades the effect while the card is hovered.
+	/// Disabled motion, an unfocused window or a layerless effect shows a still. One-shot files
+	/// hold their last frame; `opacity` fades the effect while the card is hovered.
 	pub(crate) fn paint_effect(
 		&mut self,
 		ui: &egui::Ui,
@@ -271,13 +271,24 @@ impl Avatars {
 				vec2(f32::from(size[0]), f32::from(size[1])) * scale,
 			)
 		};
-		if !self.animate_gifs || effect.layers.is_empty() {
-			if let Some(still) = &effect.still
-				&& let Some(texture) = self.cosmetic(ui.ctx(), &still.still_key(), demo)
-				&& let Some(shape) =
-					clipped(&texture, place([0, 0], model::EFFECT_CANVAS), clip, tint)
-			{
-				painter.add(shape);
+		if !self.animate_gifs || !ui.input(|input| input.focused) || effect.layers.is_empty() {
+			if let Some(still) = &effect.still {
+				if let Some(texture) = self.cosmetic(ui.ctx(), &still.still_key(), demo)
+					&& let Some(shape) =
+						clipped(&texture, place([0, 0], model::EFFECT_CANVAS), clip, tint)
+				{
+					painter.add(shape);
+				}
+			} else if let Some(start) = effect.layers.iter().map(|layer| layer.start_ms).min() {
+				// The first frame of the earliest layers is a bounded static approximation.
+				for layer in effect.layers.iter().filter(|layer| layer.start_ms == start) {
+					if let Some(texture) = self.cosmetic(ui.ctx(), &layer.asset.still_key(), demo)
+						&& let Some(shape) =
+							clipped(&texture, place(layer.position, layer.size), clip, tint)
+					{
+						painter.add(shape);
+					}
+				}
 			}
 			return;
 		}
@@ -679,5 +690,131 @@ mod tests {
 		assert_eq!(avatars.take_requests(), std::slice::from_ref(&key));
 		avatars.accept(&ctx, key.clone(), None);
 		assert!(!avatars.effect_decoding.contains(&key));
+	}
+
+	#[test]
+	fn unfocused_effect_requests_its_still_frame() {
+		let ctx = egui::Context::default();
+		let asset = model::EffectAsset {
+			shop: false,
+			hash: "a".repeat(64),
+		};
+		let effect = ProfileEffect {
+			sku: Id(1),
+			title: String::new(),
+			label: String::new(),
+			still: Some(asset.clone()),
+			layers: vec![model::EffectLayer {
+				asset: model::EffectAsset {
+					shop: false,
+					hash: "b".repeat(64),
+				},
+				looping: true,
+				position: [0, 0],
+				size: model::EFFECT_CANVAS,
+				start_ms: 0,
+				duration_ms: 500,
+				loop_delay_ms: 0,
+				z: 0,
+			}],
+		};
+		let mut avatars = Avatars::default();
+		avatars.set_animation(true);
+		let input = egui::RawInput {
+			focused: false,
+			..Default::default()
+		};
+		ctx.run_ui(input, |ui| {
+			avatars.paint_effect(
+				ui,
+				&effect,
+				Rect::from_min_size(pos2(0.0, 0.0), vec2(200.0, 300.0)),
+				None,
+				1.0,
+				false,
+			);
+		})
+		.drop_without_applying_deltas();
+		assert_eq!(avatars.take_requests(), vec![asset.still_key()]);
+	}
+
+	#[test]
+	fn effect_without_still_paints_earliest_layers_without_animation() {
+		fn image_ids(shape: &egui::Shape, ids: &mut Vec<egui::TextureId>) {
+			match shape {
+				egui::Shape::Mesh(mesh) => ids.push(mesh.texture_id),
+				egui::Shape::Vec(shapes) => {
+					for shape in shapes {
+						image_ids(shape, ids);
+					}
+				}
+				_ => {}
+			}
+		}
+		let layer = |hash: char, start, z| model::EffectLayer {
+			asset: model::EffectAsset {
+				shop: false,
+				hash: hash.to_string().repeat(64),
+			},
+			looping: true,
+			position: [0, 0],
+			size: model::EFFECT_CANVAS,
+			start_ms: start,
+			duration_ms: 500,
+			loop_delay_ms: 0,
+			z,
+		};
+		let effect = ProfileEffect {
+			sku: Id(1),
+			title: String::new(),
+			label: String::new(),
+			still: None,
+			layers: vec![layer('a', 100, 0), layer('b', 0, 1), layer('c', 0, 2)],
+		};
+		for (focused, animate) in [(false, true), (true, false)] {
+			let ctx = egui::Context::default();
+			let mut avatars = Avatars::default();
+			avatars.set_animation(animate);
+			let input = || egui::RawInput {
+				focused,
+				..Default::default()
+			};
+			let paint = |ui: &mut egui::Ui, avatars: &mut Avatars| {
+				avatars.paint_effect(
+					ui,
+					&effect,
+					Rect::from_min_size(pos2(0.0, 0.0), vec2(200.0, 300.0)),
+					None,
+					1.0,
+					false,
+				);
+			};
+			ctx.run_ui(input(), |ui| paint(ui, &mut avatars))
+				.drop_without_applying_deltas();
+			let expected = vec![
+				effect.layers[1].asset.still_key(),
+				effect.layers[2].asset.still_key(),
+			];
+			assert_eq!(avatars.take_requests(), expected);
+			for key in &expected {
+				avatars.accept(
+					&ctx,
+					key.clone(),
+					Some(ColorImage::filled([4, 4], Color32::WHITE)),
+				);
+			}
+			let expected_ids: Vec<_> = expected
+				.iter()
+				.map(|key| avatars.textures[key].1.id())
+				.collect();
+			let output = ctx.run_ui(input(), |ui| paint(ui, &mut avatars));
+			let mut painted = Vec::new();
+			for shape in &output.shapes {
+				image_ids(&shape.shape, &mut painted);
+			}
+			painted.retain(|id| expected_ids.contains(id));
+			assert_eq!(painted, expected_ids);
+			output.drop_without_applying_deltas();
+		}
 	}
 }
