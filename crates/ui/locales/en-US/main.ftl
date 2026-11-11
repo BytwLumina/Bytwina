@@ -5365,21 +5365,6 @@ events-stage-end = End stage
 # The cover of a scheduled event.
 events-cover = Cover image
 
-public-badge-staff = Discord Employee
-public-badge-partner = Partnered Server Owner
-public-badge-hypesquad = HypeSquad Events Member
-public-badge-bug-hunter-1 = Bug Hunter Level 1
-public-badge-house-bravery = House Bravery Member
-public-badge-house-brilliance = House Brilliance Member
-public-badge-house-balance = House Balance Member
-public-badge-early-supporter = Early Nitro Supporter
-public-badge-bug-hunter-2 = Bug Hunter Level 2
-public-badge-verified-bot = Verified Bot
-public-badge-verified-developer = Early Verified Bot Developer
-public-badge-certified-moderator = Moderator Programs Alumni
-public-badge-active-developer = Active Developer
-public-badge-nitro = Nitro Subscriber
-
 ## crates/ui/src/public_badges.rs
 public-badge-staff = Discord Employee
 public-badge-partner = Partnered Server Owner

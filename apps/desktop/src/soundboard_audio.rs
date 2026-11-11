@@ -35,7 +35,8 @@ pub fn clip_url(sound: model::Id) -> Result<url::Url, &'static str> {
 struct Playback {
 	request: u64,
 	// The stream stays alive until the clip drains or is replaced.
-	_stream: cpal::Stream,
+	// A test playback carries no stream, so the field is optional.
+	_stream: Option<cpal::Stream>,
 	gate: CueGate,
 	deadline: Instant,
 }
@@ -85,7 +86,7 @@ impl Player {
 			Ok((stream, duration)) => {
 				self.playing = Some(Playback {
 					request: clip.request,
-					_stream: stream,
+					_stream: Some(stream),
 					gate,
 					deadline: Instant::now() + duration + Duration::from_secs(2),
 				});

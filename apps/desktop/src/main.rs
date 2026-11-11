@@ -1710,9 +1710,9 @@ impl Desktop {
 			.as_ref()
 			.map_or(1.0, |preview| preview.volume);
 		let downloaded: Option<DownloadedClip> =
-			ctx.data(|data| data.get_temp(egui::Id::new("soundboard-clip")));
+			ctx.data(|data| data.get_temp(egui::Id::unique("soundboard-clip")));
 		if let Some((request, result)) = downloaded {
-			ctx.data_mut(|data| data.remove::<DownloadedClip>(egui::Id::new("soundboard-clip")));
+			ctx.data_mut(|data| data.remove::<DownloadedClip>(egui::Id::unique("soundboard-clip")));
 			// A clip replaced while it downloaded is dropped; its request is no longer shown.
 			if request == EFFECT_REQUEST {
 				if let Ok(bytes) = result {
@@ -1783,7 +1783,7 @@ impl Desktop {
 					))
 				};
 				context.data_mut(|data| {
-					data.insert_temp(egui::Id::new("soundboard-clip"), (request, bytes))
+					data.insert_temp(egui::Id::unique("soundboard-clip"), (request, bytes))
 				});
 				context.request_repaint();
 			})

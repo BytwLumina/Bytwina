@@ -7639,7 +7639,7 @@ mod tests {
 			state.freshness = model::Freshness::Stale;
 			assert!(view.highlighted.is_none());
 			state.history_pending = false;
-			state.status = "Synthetic history failure";
+			state.status = "Synthetic history failure".into();
 			frame(&mut view, &mut state, vec![]);
 			assert_eq!(state.status, "Synthetic history failure");
 			assert_eq!(state.search_target, Some(Id(19)));

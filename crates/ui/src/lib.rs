@@ -8462,7 +8462,7 @@ mod composer_tests {
 						failure: client_core::auth::Failure::Network,
 					},
 				});
-				let failure = state.status;
+				let failure = state.status.clone();
 				let (_, commands) = frame(&mut view, &mut state, vec![]);
 				assert_eq!(
 					state.status, failure,

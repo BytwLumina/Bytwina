@@ -6171,7 +6171,7 @@ mod tests {
 						"This stream is not available in the connected voice channel"
 					);
 				} else {
-					state.status = "";
+					state.status = "".into();
 					messaging.stream_preview_watch = Some((Id(25), Id(3)));
 					messaging.apply_stream_preview_watch(&mut state, &mut commands);
 					assert!(messaging.stream_preview_watch.is_none());

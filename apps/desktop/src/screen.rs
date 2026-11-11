@@ -216,7 +216,7 @@ impl Screen {
 				// A server-side end names its cause, so it is never mistaken for a local stop.
 				self.status = reason.unwrap_or("Screen sharing stopped").into();
 				if let Some(reason) = reason {
-					self.toast = Some((ui::design::Level::Info, reason.into()));
+					self.toast = Some((ui::design::Level::Info, (*reason).into()));
 				}
 			}
 			screen::Event::Failed(message) => self.fail(message),

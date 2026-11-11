@@ -425,7 +425,8 @@ mod tests {
 		quests.begin(read);
 		let action = quests.next_request();
 		assert!(quests.begin_action(Id(1), action));
-		assert!(!quests.begin_action(Id(2), quests.next_request()));
+		let second = quests.next_request();
+		assert!(!quests.begin_action(Id(2), second));
 		quests.apply(Event::Snapshot {
 			request: read,
 			result: Ok(model::quests::QuestList::default()),

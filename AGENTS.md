@@ -293,7 +293,7 @@ Tokens: `RADIUS = 16`, `PAD = 20.0`, `BUTTON_HEIGHT = 38.0`, `TITLE_BAR_HEIGHT =
 `MAX_CUSTOM_FONT_BYTES = 32 MiB`, `DEFAULT_IDLE_TIMEOUT_SECS = 600`.
 
 i18n: 14 languages (`i18n::Language::ALL`, `cs de en-US es fr it ja pl pt-BR ru tr vi zh-CN zh-TW`)
-backed by `crates/ui/locales/<tag>/main.ftl`; the `en-US` catalog carries the same **2968** keys as
+backed by `crates/ui/locales/<tag>/main.ftl`; the `en-US` catalog carries the same **3075** keys as
 every other locale that has been translated in full. Adding a
 string means adding it to **every** locale or it falls back to English. Status strings in the core
 are `&'static str`, so the shell stores the locale *key* and translates once at the toast boundary
@@ -608,7 +608,7 @@ Changing any of these without updating the test breaks CI:
 | legacy SDK fixture **574_991 bytes** | `crates/extensions/examples/legacy_sdk_check.rs` + fixture README |
 | session cache **500 / 4 MiB / 1024** | `crates/session-cache/src/lib.rs` |
 | `WINDOWS_FILES` allowlist | `apps/desktop/src/updater_install.rs` — must list every packaged top-level entry |
-| locale key count **2968** in `en-US` | `crates/ui/locales/*/main.ftl` |
+| locale key count **3075** in `en-US` | `crates/ui/locales/*/main.ftl` |
 | SQLite schema **29** | `crates/local-store/src/lib.rs` |
 | extension limits (16/4/2/0.25 MiB, 8 plugins, 64 capabilities) | `crates/extensions/src/lib.rs` |
 | `THEME_FIELDS` order (18) | `crates/ui/src/design.rs` and `theme_editor` |

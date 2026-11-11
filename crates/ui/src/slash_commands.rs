@@ -1720,7 +1720,7 @@ mod tests {
 			assert!(view.slash_commands.applications.is_empty());
 			assert!(!view.slash_commands.can_submit(&state, channel));
 			assert!(frame(&mut view, &mut state, Some((egui::Key::Enter, false))).is_empty());
-			assert_eq!(Some(state.status), view.slash_commands.error);
+			assert_eq!(state.status, view.slash_commands.error.unwrap_or_default());
 			assert_eq!(state.drafts[&channel], "/ask ");
 			assert_eq!(
 				view.slash_commands.active.as_ref().unwrap().values[0].1,

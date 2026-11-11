@@ -5362,21 +5362,6 @@ events-stage-end = Kết thúc sân khấu
 # The cover of a scheduled event.
 events-cover = Ảnh bìa
 
-public-badge-staff = Nhân viên Discord
-public-badge-partner = Chủ sở hữu máy chủ đối tác
-public-badge-hypesquad = Thành viên HypeSquad Events
-public-badge-bug-hunter-1 = Bug Hunter Mức 1
-public-badge-house-bravery = Thành viên House Bravery
-public-badge-house-brilliance = Thành viên House Brilliance
-public-badge-house-balance = Thành viên House Balance
-public-badge-early-supporter = Người ủng hộ Nitro sớm
-public-badge-bug-hunter-2 = Bug Hunter Mức 2
-public-badge-verified-bot = Bot đã xác minh
-public-badge-verified-developer = Nhà phát triển bot xác minh sớm
-public-badge-certified-moderator = Cựu thành viên chương trình điều hành
-public-badge-active-developer = Nhà phát triển đang hoạt động
-public-badge-nitro = Người đăng ký Nitro
-
 ## crates/ui/src/public_badges.rs
 public-badge-staff = Nhân viên Discord
 public-badge-partner = Chủ sở hữu máy chủ đối tác

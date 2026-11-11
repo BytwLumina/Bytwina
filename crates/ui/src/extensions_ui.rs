@@ -3162,7 +3162,7 @@ mod tests {
 					&mut extensions,
 					width,
 					&labels,
-					capability_label(Capability::Composer),
+					&capability_label(Capability::Composer),
 				);
 				let labels = frame(&ctx, &mut extensions, width, vec![]);
 				click(&ctx, &mut extensions, width, &labels, "Enable");
@@ -3186,7 +3186,7 @@ mod tests {
 					&mut extensions,
 					width,
 					&labels,
-					capability_label(Capability::Composer),
+					&capability_label(Capability::Composer),
 				);
 				let labels = frame(&ctx, &mut extensions, width, vec![]);
 				click(&ctx, &mut extensions, width, &labels, "Enable");
