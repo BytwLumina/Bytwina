@@ -83,7 +83,7 @@ pub fn preview() -> State {
 		},
 	});
 	state.drafts.insert(channel, "/".into());
-	state.status = "Synthetic slash commands — all commands and replies stay offline";
+	state.status = "Synthetic slash commands — all commands and replies stay offline".into();
 	state
 }
 

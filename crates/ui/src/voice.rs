@@ -899,14 +899,16 @@ impl MessagingUi {
 					self.stream_preview_watch = None;
 					state.status = crate::i18n::translate(
 						"voice-stream-preview-popup-could-not-join-this-streams-voice-channel",
-					);
+					)
+					.into();
 				}
 			}
 			Some((active, _)) if active != channel => {
 				self.stream_preview_watch = None;
 				state.status = crate::i18n::translate(
 					"voice-stream-preview-popup-leave-the-current-call-before-watching-this-stream",
-				);
+				)
+				.into();
 			}
 			Some((_, Phase::Connected | Phase::Waiting)) => {
 				self.stream_preview_watch = None;
@@ -917,7 +919,8 @@ impl MessagingUi {
 				} else {
 					state.status = crate::i18n::translate(
 						"voice-stream-preview-popup-this-stream-is-not-available-in-the-connected-voice-channel",
-					);
+					)
+					.into();
 				}
 			}
 			Some((_, Phase::Failed)) => {
@@ -2199,7 +2202,8 @@ impl MessagingUi {
 				self.voice_switch = None;
 				state.status = crate::i18n::translate(
 					"voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect",
-				);
+				)
+				.into();
 			} else {
 				ctx.request_repaint_after(std::time::Duration::from_millis(100));
 			}
@@ -3073,7 +3077,7 @@ impl MessagingUi {
 					|ui| {
 						egui::ComboBox::from_id_salt("voice-suppression-strength")
 							.selected_text(crate::i18n::translate_if_key(
-								strength[usize::from(processing.suppression_level.min(3))],
+								&strength[usize::from(processing.suppression_level.min(3))],
 							))
 							.width(ui.available_width().min(160.0))
 							.show_ui(ui, |ui| {

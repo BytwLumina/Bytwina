@@ -2265,7 +2265,7 @@ impl Desktop {
 		messaging.notification_test_available =
 			demo && std::env::args().any(|arg| arg == "--demo-system-notifications");
 		if messaging.notification_test_available {
-			state.status = "Offline fixture · explicit system notification test";
+			state.status = "Offline fixture · explicit system notification test".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo
@@ -2333,7 +2333,7 @@ impl Desktop {
 				test_support::message(1, model::Id(20)).author
 			};
 			messaging.preview_profile(user);
-			state.status = "Offline fixture · synthetic profile card opened at startup";
+			state.status = "Offline fixture · synthetic profile card opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		let demo_typing = demo && std::env::args().any(|arg| arg == "--demo-reply");
@@ -2345,12 +2345,12 @@ impl Desktop {
 				.iter()
 				.last()
 				.map(|message| client_core::Reply::to(message.id));
-			state.status = "Offline fixture · reply bar and typing row shown at startup";
+			state.status = "Offline fixture · reply bar and typing row shown at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-pins") {
 			messaging.preview_pins();
-			state.status = "Offline fixture · pinned messages popout opened at startup";
+			state.status = "Offline fixture · pinned messages popout opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo
@@ -2382,24 +2382,24 @@ impl Desktop {
 			} else {
 				messaging.preview_account_menu(state.generation);
 			}
-			state.status = "Offline fixture · account popout opened at startup";
+			state.status = "Offline fixture · account popout opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-stickers") {
 			test_support::seed_stickers(&mut state);
 			messaging.preview_sticker_picker();
-			state.status = "Offline fixture: sticker picker";
+			state.status = "Offline fixture: sticker picker".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-emoji") {
 			messaging.preview_emoji_picker();
-			state.status = "Offline fixture · emoji popout opened at startup";
+			state.status = "Offline fixture · emoji popout opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-viewer") {
 			// Opens the full-window media viewer on the fixture gallery message.
 			messaging.preview_image_viewer(model::Id(500), model::Id(700));
-			state.status = "Offline fixture · media viewer opened at startup";
+			state.status = "Offline fixture · media viewer opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-captcha") {
@@ -2409,7 +2409,8 @@ impl Desktop {
 		if demo && std::env::args().any(|arg| arg == "--demo-attachment=file") {
 			// Non-image variant: exercises the file-kind glyph and extension badge.
 			messaging.preview_attachment("quarterly-report.pdf", 1_482_311, None);
-			state.status = "Offline fixture · synthetic file attachment staged in the composer";
+			state.status =
+				"Offline fixture · synthetic file attachment staged in the composer".into();
 			if std::env::args().any(|arg| arg == "--demo-external-upload")
 				&& let Some(channel) = state.selected
 			{
@@ -2466,15 +2467,16 @@ impl Desktop {
 				);
 				messaging.preview_attachment("synthetic-agenda.pdf", 482_311, None);
 				state.status =
-					"Offline fixture · three synthetic attachments staged in the composer";
+					"Offline fixture · three synthetic attachments staged in the composer".into();
 			} else {
-				state.status = "Offline fixture · synthetic attachment staged in the composer";
+				state.status =
+					"Offline fixture · synthetic attachment staged in the composer".into();
 			}
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-sending") {
 			messaging.preview_sending(&cc.egui_ctx, &mut state);
-			state.status = "Offline fixture · synthetic pending message; no upload or send";
+			state.status = "Offline fixture · synthetic pending message; no upload or send".into();
 		}
 		// `--demo-gifs`, `--demo-gifs=favorites`, `--demo-gifs=trending` or `--demo-gifs=<query>`.
 		#[cfg(feature = "demo")]
@@ -2491,7 +2493,7 @@ impl Desktop {
 				.collect();
 			state.restore_gif_favorites(favorites);
 			messaging.preview_gif_picker(&section);
-			state.status = "Offline fixture · GIF popout opened at startup";
+			state.status = "Offline fixture · GIF popout opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo
@@ -2499,7 +2501,7 @@ impl Desktop {
 				.find_map(|arg| arg.strip_prefix("--demo-search=").map(str::to_owned))
 		{
 			messaging.preview_search(&query);
-			state.status = "Offline fixture · synthetic search opened at startup";
+			state.status = "Offline fixture · synthetic search opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo
@@ -2515,7 +2517,7 @@ impl Desktop {
 				partial: false,
 			});
 			state.history_targeted = true;
-			state.status = "Offline fixture · unread strip and older-messages bar shown";
+			state.status = "Offline fixture · unread strip and older-messages bar shown".into();
 		}
 		// Owner authorization for a new sign-in; fixture captures pre-tick it.
 		#[cfg_attr(not(feature = "demo"), allow(unused_mut))]
@@ -2527,13 +2529,13 @@ impl Desktop {
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-join-server") {
 			messaging.preview_join_server(state.generation);
-			state.status = "Offline fixture · join-server dialog opened at startup";
+			state.status = "Offline fixture · join-server dialog opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-screen-share") {
 			// Pairs with `--demo-call`: synthetic sources, never a real capture.
 			messaging.preview_screen_share(&state);
-			state.status = "Offline fixture · screen-share picker opened at startup";
+			state.status = "Offline fixture · screen-share picker opened at startup".into();
 		}
 		#[cfg(feature = "demo")]
 		if demo
@@ -2554,14 +2556,14 @@ impl Desktop {
 			}
 			authorized = true;
 			state.user = None;
-			state.status = "Disconnected";
+			state.status = "Disconnected".into();
 			sign_in_panels = rest == "panels";
 			if rest == "forget" {
 				sign_in_forget = messaging.accounts.get(1).map(|account| account.id);
 			}
 			if rest == "failed" {
 				state.auth = AuthState::Failed;
-				state.status = "Synthetic fixture failure · Discord was not contacted";
+				state.status = "Synthetic fixture failure · Discord was not contacted".into();
 				state.failure_detail =
 					Some("guilds[3].channels[12].permission_overwrites[0].allow: invalid type: null, expected a string".into());
 			}
@@ -2947,7 +2949,7 @@ impl Desktop {
 		let _ = writeln!(
 			report,
 			"- **Voice devices:** {}",
-			self.messaging.voice_device_status
+			self.messaging.voice_device_status.unwrap_or("")
 		);
 		let _ = writeln!(
 			report,
@@ -3183,7 +3185,7 @@ impl Desktop {
 		self.messaging.reading_status = self.reading.status().into();
 	}
 	fn sync_tray(&mut self, ctx: &egui::Context) {
-		let previous_status = self.messaging.tray_status;
+		let previous_status = self.messaging.tray_status.clone();
 		self.tray_setting.observe(self.messaging.minimize_to_tray);
 		if self.tray_setting.dirty && !self.tray_setting.saving {
 			self.tray_error = None;
@@ -3440,7 +3442,7 @@ impl Desktop {
 			self.presence_authoritative = true;
 		}
 		let published = self.presence_snapshot();
-		let previous_status = self.messaging.own_presence_status;
+		let previous_status = self.messaging.own_presence_status.clone();
 		self.messaging.own_presence_status = if !published.valid() {
 			"Status must be at most 128 characters without line breaks or surrounding spaces."
 		} else if self.state.demo || self.fixture_only {
@@ -3958,7 +3960,7 @@ impl Desktop {
 		}
 		if let Command::Voice(control) = &command {
 			if self.state.demo || self.fixture_only {
-				self.state.status = "Voice calls are unavailable in the offline preview";
+				self.state.status = "Voice calls are unavailable in the offline preview".into();
 				return;
 			}
 			if let client_core::voice::Command::Join {
@@ -4879,7 +4881,7 @@ impl Desktop {
 				generation: self.state.generation,
 				event,
 			});
-			self.state.status = "Offline fixture · action affected synthetic RAM only";
+			self.state.status = "Offline fixture · action affected synthetic RAM only".into();
 			return;
 		}
 		if let Some(connection) = &self.connection {
@@ -5772,11 +5774,12 @@ impl Desktop {
 				let crashed = login.crashed();
 				self.login = None;
 				self.state.auth = AuthState::Challenged;
-				self.state.status = if crashed {
+				self.state.status = (if crashed {
 					"Login window stopped unexpectedly (web process ended); no session accepted"
 				} else {
 					"Login timed out or token handoff unavailable; no session accepted"
-				};
+				})
+				.into();
 			}
 		}
 		// Network and store workers request repaint only when their outcomes change.
@@ -7182,7 +7185,7 @@ impl eframe::App for Desktop {
 				if self.state.auth == AuthState::Authenticated {
 					if let Some(connection) = &self.connection {
 						connection.reconnect();
-						self.state.status = "Reconnecting to Discord…";
+						self.state.status = "Reconnecting to Discord…".into();
 					}
 				} else {
 					if let Some(store) = &mut self.store {
@@ -7193,7 +7196,7 @@ impl eframe::App for Desktop {
 						wake.request_repaint()
 					}) {
 						Ok(login) => self.login = Some(login),
-						Err(error) => self.state.status = error.label(),
+						Err(error) => self.state.status = error.label().into(),
 					}
 				}
 			}

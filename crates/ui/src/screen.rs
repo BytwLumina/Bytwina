@@ -105,10 +105,12 @@ impl ScreenUi {
 			};
 			self.selected = self.sources.first().map(|source| source.id);
 			self.status =
-				crate::i18n::translate("screen-launch-offline-preview-no-screen-is-captured");
+				crate::i18n::translate("screen-launch-offline-preview-no-screen-is-captured")
+					.into();
 		} else {
 			self.refresh_requested = true;
-			self.status = crate::i18n::translate("screen-launch-looking-for-screens-and-windows");
+			self.status =
+				crate::i18n::translate("screen-launch-looking-for-screens-and-windows").into();
 		}
 	}
 	fn selected_source(&self) -> Option<&Source> {
@@ -245,7 +247,8 @@ impl ScreenUi {
 					self.sources.clear();
 					self.refresh_requested = true;
 					self.status =
-						crate::i18n::translate("screen-body-looking-for-screens-and-windows");
+						crate::i18n::translate("screen-body-looking-for-screens-and-windows")
+							.into();
 				}
 			});
 		});

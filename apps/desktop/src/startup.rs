@@ -34,11 +34,12 @@ impl Startup {
 		let (send, receive) = mpsc::sync_channel(1);
 		self.pending = Some(receive);
 		view.startup_busy = true;
-		view.startup_status = if setting.is_some() {
+		view.startup_status = (if setting.is_some() {
 			"Saving startup settings…"
 		} else {
 			"Loading startup settings…"
-		};
+		})
+		.into();
 		let ctx = ctx.clone();
 		runtime.spawn_blocking(move || {
 			let result = match setting {
@@ -64,9 +65,9 @@ impl Startup {
 		match result {
 			Ok(saved) => {
 				self.saved = saved;
-				view.startup_status = "";
+				view.startup_status = "".into();
 			}
-			Err(error) => view.startup_status = error,
+			Err(error) => view.startup_status = error.into(),
 		}
 		view.startup_enabled = self.saved.enabled;
 		view.startup_minimized = self.saved.minimized;

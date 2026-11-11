@@ -141,7 +141,7 @@ impl Settings {
 				"fonts-show-the-quick-brown-fox-jumps-over-the-lazy-dog-0123456789",
 			));
 			if !self.status.is_empty() {
-				design::hint(ui, self.status);
+				design::hint(ui, self.status.as_str());
 			}
 		});
 	}

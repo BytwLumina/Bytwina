@@ -54,7 +54,7 @@ impl Desktop {
 		self.messaging.channel_preferences_load_pending = false;
 		self.messaging.channel_preferences_reload = false;
 		self.messaging.channel_preferences_save_pending = false;
-		self.messaging.channel_preferences_status = "";
+		self.messaging.channel_preferences_status = "".into();
 		self.presence_authoritative = false;
 		self.presence_saved = None;
 		let cached = self
@@ -71,7 +71,7 @@ impl Desktop {
 		self.messaging.own_presence_changed = false;
 		self.messaging.draft_restore_pending = false;
 		self.state.auth = AuthState::Authenticating;
-		self.state.status = "Connecting to Discord…";
+		self.state.status = "Connecting to Discord…".into();
 		self.state.failure_detail = None;
 		let secret = Arc::new(secret);
 		self.pending_save = save.then(|| secret.clone());
@@ -474,7 +474,7 @@ impl Desktop {
 								self.plaintext_save_pending = [false; 2];
 								self.pending_account_save = None;
 								self.state.auth = AuthState::Unauthenticated;
-								self.state.status = "Disconnected";
+								self.state.status = "Disconnected".into();
 								self.credential_status = "Saved-login restore cancelled";
 							}
 						},
@@ -700,11 +700,11 @@ impl Desktop {
 						Ok(login) => {
 							self.login = Some(login);
 							self.state.auth = AuthState::Authenticating;
-							self.state.status = "Waiting for Discord login";
+							self.state.status = "Waiting for Discord login".into();
 						}
 						Err(error) => {
 							self.state.auth = AuthState::Failed;
-							self.state.status = error.label();
+							self.state.status = error.label().into();
 						}
 					}
 				}
@@ -1183,7 +1183,7 @@ impl Desktop {
 						let input = std::mem::take(&mut *self.token_input);
 						match SessionSecret::from_owner_input(input) {
 							Ok(secret) => self.connect(secret, true, ctx),
-							Err(failure) => self.state.status = failure.label(),
+							Err(failure) => self.state.status = failure.label().into(),
 						}
 					}
 				});

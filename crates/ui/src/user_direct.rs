@@ -326,11 +326,13 @@ impl crate::MessagingUi {
 	) {
 		if self.user_direct.is_some() {
 			state.status =
-				crate::i18n::translate("user-direct-status-wait-for-the-current-direct-message");
+				crate::i18n::translate("user-direct-status-wait-for-the-current-direct-message")
+					.into();
 			return;
 		}
 		if matches!(intent, Intent::Call) && (state.demo || !self.voice_available) {
-			state.status = crate::i18n::translate("user-direct-status-calls-are-unavailable");
+			state.status =
+				crate::i18n::translate("user-direct-status-calls-are-unavailable").into();
 			return;
 		}
 		if !state.can_open_user_dm(&user)
@@ -343,7 +345,8 @@ impl crate::MessagingUi {
 			self.profile.finish_message(user.id, false);
 			state.status = crate::i18n::translate(
 				"user-direct-status-this-direct-message-action-is-unavailable-your-message-was-kept",
-			);
+			)
+			.into();
 			return;
 		}
 		let pending = Pending {
@@ -459,7 +462,7 @@ impl crate::MessagingUi {
 				<= client_core::MAX_DRAFT_BYTES;
 		if !can_keep {
 			state.status =
-				"Clear some draft space before opening chat; your profile message was kept";
+				"Clear some draft space before opening chat; your profile message was kept".into();
 			return false;
 		}
 		let Some(draft) = self.profile.take_message_draft(generation, user) else {

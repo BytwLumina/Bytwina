@@ -1445,7 +1445,7 @@ impl crate::MessagingUi {
 			if matching.peek().is_some()
 				&& !matching.any(|command| state.can_use_application_command(channel, command))
 			{
-				state.status = NO_PERMISSION;
+				state.status = NO_PERMISSION.into();
 				self.slash_commands.error = Some(NO_PERMISSION);
 				return true;
 			}
@@ -1459,7 +1459,8 @@ impl crate::MessagingUi {
 			{
 				state.status = crate::i18n::translate(
 					"slash-commands-status-choose-a-command-from-the-list-before-running-it",
-				);
+				)
+				.into();
 				self.slash_commands.dismissed = false;
 				return true;
 			}

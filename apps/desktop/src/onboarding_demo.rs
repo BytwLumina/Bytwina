@@ -107,5 +107,5 @@ pub fn open(state: &mut State) {
 	if !std::env::args().any(|arg| arg == "--demo-onboarding=closed") {
 		state.open_onboarding(guild);
 	}
-	state.status = "Offline fixture · server onboarding opened at startup";
+	state.status = "Offline fixture · server onboarding opened at startup".into();
 }

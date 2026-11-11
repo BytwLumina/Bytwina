@@ -2866,7 +2866,8 @@ impl TimelineView {
 					self.target_browsing = true;
 					self.mark_read = None;
 					state.status =
-						"Message was not returned; it may have been removed or become unavailable";
+						"Message was not returned; it may have been removed or become unavailable"
+							.into();
 				}
 			} else {
 				state.restore_scroll = false;

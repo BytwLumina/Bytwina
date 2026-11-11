@@ -1,7 +1,7 @@
 //! Server discovery: one page of verified/partnered servers with a category rail.
 //! Joining always goes through the existing invite preview, never a direct member write.
 use crate::{MessagingUi, design, i18n};
-use client_core::{Command, State, discovery::PAGE_SIZE};
+use client_core::{Command, State};
 
 #[derive(Clone)]
 enum Action {
@@ -252,7 +252,7 @@ impl MessagingUi {
 				// Only the service-supplied vanity code may enter the invite flow.
 				self.join_server.open_with(state.generation, code);
 			}
-			None => {}
+			Some(Action::Preview(_)) | None => {}
 		}
 	}
 }

@@ -910,9 +910,9 @@ impl Voice {
 			.as_ref()
 			.is_some_and(|live| live.audio.devices_missing());
 		if missing {
-			ui.voice_device_status = AUDIO_UNAVAILABLE;
-		} else if ui.voice_device_status == AUDIO_UNAVAILABLE {
-			ui.voice_device_status = "";
+			ui.voice_device_status = Some(AUDIO_UNAVAILABLE);
+		} else if ui.voice_device_status == Some(AUDIO_UNAVAILABLE) {
+			ui.voice_device_status = None;
 		}
 		ui.voice_switch_ready =
 			self.pending.is_none() && self.live.is_none() && self.retiring.is_none();
@@ -934,9 +934,11 @@ impl Voice {
 					}) {
 					Ok(_) => {
 						self.device_scan = Some(receive);
-						ui.voice_device_status = "Looking for audio devices…";
+						ui.voice_device_status = Some("Looking for audio devices…");
 					}
-					Err(_) => ui.voice_device_status = "Could not start audio device discovery",
+					Err(_) => {
+						ui.voice_device_status = Some("Could not start audio device discovery")
+					}
 				}
 			}
 		}
@@ -946,15 +948,15 @@ impl Voice {
 					ui.voice_inputs = devices.inputs;
 					ui.voice_outputs = devices.outputs;
 					ui.voice_device_status =
-						"Audio devices loaded · headphones avoid microphone echo";
+						Some("Audio devices loaded · headphones avoid microphone echo");
 					self.device_scan = None;
 				}
 				Ok(Err(error)) => {
-					ui.voice_device_status = error;
+					ui.voice_device_status = Some(error);
 					self.device_scan = None;
 				}
 				Err(mpsc::TryRecvError::Disconnected) => {
-					ui.voice_device_status = "Audio device discovery stopped";
+					ui.voice_device_status = Some("Audio device discovery stopped");
 					self.device_scan = None;
 				}
 				Err(mpsc::TryRecvError::Empty) => {}
@@ -1345,7 +1347,7 @@ impl Voice {
 			self.stop();
 			self.pending = Some(pending);
 			// Only new service credentials can retry. Do not hang up another client's candidate.
-			state.status = "Waiting for current voice connection details";
+			state.status = "Waiting for current voice connection details".into();
 			ctx.request_repaint_after(Duration::from_millis(50));
 			return None;
 		}
@@ -1585,15 +1587,17 @@ impl Voice {
 				Ok(_) => {
 					self.camera_scan = Some(receive);
 					ui.voice_camera_devices_loading = true;
-					ui.voice_camera_device_status = "Looking for cameras…";
+					ui.voice_camera_device_status = Some("Looking for cameras…");
 				}
-				Err(_) => ui.voice_camera_device_status = "Could not start camera device discovery",
+				Err(_) => {
+					ui.voice_camera_device_status = Some("Could not start camera device discovery")
+				}
 			}
 		}
 		if let Some(scan) = &self.camera_scan {
 			match scan.try_recv() {
 				Ok(result) => {
-					ui.voice_camera_device_status = match result {
+					ui.voice_camera_device_status = Some(match result {
 						Ok(devices) => {
 							ui.voice_cameras = devices;
 							if ui.voice_cameras.is_empty() {
@@ -1603,12 +1607,12 @@ impl Voice {
 							}
 						}
 						Err(error) => error,
-					};
+					});
 					self.camera_scan = None;
 					ui.voice_camera_devices_loading = false;
 				}
 				Err(mpsc::TryRecvError::Disconnected) => {
-					ui.voice_camera_device_status = "Camera device discovery stopped";
+					ui.voice_camera_device_status = Some("Camera device discovery stopped");
 					ui.voice_camera_devices_loading = false;
 					self.camera_scan = None;
 				}

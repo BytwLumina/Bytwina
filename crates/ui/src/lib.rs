@@ -468,7 +468,7 @@ pub struct MessagingUi {
 	pub voice_cameras: Vec<(String, String)>,
 	pub voice_camera_device: Option<String>,
 	pub voice_refresh_cameras: bool,
-	pub voice_camera_device_status: &'static str,
+	pub voice_camera_device_status: Option<&'static str>,
 	pub voice_camera_devices_loading: bool,
 	pub voice_camera_preview: Option<egui::TextureHandle>,
 	pub camera_test_requested: bool,
@@ -513,7 +513,7 @@ pub struct MessagingUi {
 	/// Speakers silenced on this device only; never sent to Discord.
 	voice_user_muted: Vec<u64>,
 	pub voice_refresh_devices: bool,
-	pub voice_device_status: &'static str,
+	pub voice_device_status: Option<&'static str>,
 	pub voice_microphone_unavailable: bool,
 	pub voice_push_to_talk: bool,
 	/// Device-local voice intent, retained between calls and restarts.
@@ -791,7 +791,7 @@ impl MessagingUi {
 		&mut self.soundboard
 	}
 	/// Status text for a voice channel row, if the channel has one.
-	pub fn voice_status_line(&self, state: &State, channel: Id) -> Option<&str> {
+	pub fn voice_status_line<'a>(&self, state: &'a State, channel: Id) -> Option<&'a str> {
 		soundboard_ui::SoundboardUi::channel_line(state, channel)
 	}
 	pub fn take_profile_picture_request(&mut self) -> Option<(u64, Id, u64)> {
@@ -1139,7 +1139,8 @@ impl MessagingUi {
 				ctx.input_mut(|i| i.events.push(egui::Event::Paste(text)));
 				self.pasted_text_frame = Some(ctx.cumulative_frame_nr());
 			} else {
-				state.status = "lib-status-paste-cancelled-focus-the-message-and-paste-again";
+				state.status =
+					"lib-status-paste-cancelled-focus-the-message-and-paste-again".into();
 			}
 		} else if paste_enabled && self.pasted_text_frame != Some(ctx.cumulative_frame_nr()) {
 			let mut request = AttachmentPaste {
@@ -1187,13 +1188,13 @@ impl MessagingUi {
 					.as_ref()
 					.is_some_and(|text| text.len() > MAX_DRAFT_BYTES)
 				{
-					state.status = "lib-status-pasted-text-exceeds-the-draft-limit";
+					state.status = "lib-status-pasted-text-exceeds-the-draft-limit".into();
 				} else if request
 					.image
 					.as_ref()
 					.is_some_and(|image| image.pixels.len() > 4 * 1024 * 1024)
 				{
-					state.status = "lib-status-paste-an-image-with-at-most-4-million-pixels";
+					state.status = "lib-status-paste-an-image-with-at-most-4-million-pixels".into();
 				} else {
 					self.attachment_paste_requested = Some(request);
 					self.upload_busy = true;
@@ -1256,12 +1257,12 @@ impl MessagingUi {
 			diagnostics_log_open_failed: self.diagnostics_log_open_failed,
 			minimize_to_tray: self.minimize_to_tray,
 			tray_available: self.tray_available,
-			tray_status: self.tray_status,
+			tray_status: self.tray_status.clone(),
 			startup_enabled: self.startup_enabled,
 			startup_minimized: self.startup_minimized,
 			startup_available: self.startup_available,
 			startup_busy: self.startup_busy,
-			startup_status: self.startup_status,
+			startup_status: self.startup_status.clone(),
 			startup_disable_requested: self.startup_disable_requested,
 			..Self::default()
 		};
@@ -2855,15 +2856,18 @@ impl MessagingUi {
 		}) {
 			if !state.drafts.contains_key(&channel) && state.drafts.len() >= 64 {
 				state.status =
-					"Draft budget full. Clear an existing draft before restoring pending text";
+					"Draft budget full. Clear an existing draft before restoring pending text"
+						.into();
 			} else if state.pending[index].reply_conflicts(state.reply) {
 				// Restoring now would send this text to the newer reply's author.
-				state.status = "lib-status-cancel-the-current-reply-before-restoring-this-message";
+				state.status =
+					"lib-status-cancel-the-current-reply-before-restoring-this-message".into();
 			} else if state.drafts.get(&channel).is_none_or(String::is_empty) {
 				let pending = state.pending.remove(index);
 				if !pending.attachments.is_empty() {
 					state.status =
-						"lib-status-text-restored-reselect-the-attachment-before-sending-again";
+						"lib-status-text-restored-reselect-the-attachment-before-sending-again"
+							.into();
 				}
 				state.drafts.insert(channel, pending.content);
 				self.draft_changes.push(channel);
@@ -2875,7 +2879,8 @@ impl MessagingUi {
 				}
 			} else {
 				state.status =
-					"lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text";
+					"lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text"
+						.into();
 			}
 		}
 	}
@@ -2920,7 +2925,7 @@ impl MessagingUi {
 		{
 			if !state.can_attach(channel) {
 				state.status =
-					"Attaching images is unavailable here; add text to send a named link.";
+					"Attaching images is unavailable here; add text to send a named link.".into();
 				return;
 			}
 			self.image_share_requested =
@@ -3110,7 +3115,7 @@ impl MessagingUi {
 		if !editing_here && !state.can_compose(channel) {
 			if self.pending_mention.take().is_some() {
 				state.status =
-					"lib-status-you-don-t-have-permission-to-mention-anyone-in-this-channel";
+					"lib-status-you-don-t-have-permission-to-mention-anyone-in-this-channel".into();
 			}
 			// Returning to an edit must restore its focus after visiting a read-only channel.
 			self.composer_edit = None;
@@ -3737,16 +3742,16 @@ impl MessagingUi {
                             },
                             Some(emoji_picker::Pick::React(_, _) | emoji_picker::Pick::Choose(_)) => None,
                             Some(emoji_picker::Pick::Sticker(sticker)) => {
-                                if editing_here { state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker"; }
-                                else if self.upload_busy { state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker"; }
+                                if editing_here { state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker".into(); }
+                                else if self.upload_busy { state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker".into(); }
                                 else if let Some(command) = state.prepare_sticker_send(&sticker) { self.timeline.follow_latest(state); commands.push(command); }
                                 None
                             },
                             Some(emoji_picker::Pick::Send(url)) => {
                                 if editing_here {
-                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-gif";
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-gif".into();
                                 } else if self.upload_busy || !state.can_send(channel) {
-                                    state.status = "lib-status-sending-is-unavailable-with-the-current-connection-or-permissions";
+                                    state.status = "lib-status-sending-is-unavailable-with-the-current-connection-or-permissions".into();
                                 } else {
                                     let saved = state.drafts.insert(channel, url);
                                     let command = state.prepare_send();
@@ -3821,7 +3826,7 @@ impl MessagingUi {
 							None => {}
 							Some(MentionWrite::Inserted) => mention_changed = true,
 							Some(MentionWrite::DidNotFit) => {
-								state.status = "lib-status-mention-will-not-fit-shorten-this-message-or-free-draft-space";
+								state.status = "lib-status-mention-will-not-fit-shorten-this-message-or-free-draft-space".into();
 							}
 						}
 						if let Some(pick) = pick {
@@ -3838,7 +3843,7 @@ impl MessagingUi {
                                 mention_changed = true;
                             } else {
                                 state.status =
-                                    "Emoji will not fit. Shorten this message or free draft space.";
+                                    "Emoji will not fit. Shorten this message or free draft space.".into();
                             }
                         }
                         if let Some(pick) = slash_pick
@@ -3854,9 +3859,9 @@ impl MessagingUi {
                                 // Discord sends a picked sticker as its own message and never
                                 // writes anything into the draft.
                                 if editing_here {
-                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker";
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker".into();
                                 } else if self.upload_busy {
-                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker";
+                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker".into();
                                 } else if let Some(command) = state.prepare_sticker_send(&sticker) {
                                     // The sent sticker replaces the typed `:` token.
                                     draft.replace_range(pick.range(), "");
@@ -3905,7 +3910,7 @@ impl MessagingUi {
                                 edit_state.store(ctx, composer_id);
                                 mention_changed = true;
                             } else {
-                                state.status = "lib-status-formatting-will-not-fit-shorten-this-message-or-free-draft-space";
+                                state.status = "lib-status-formatting-will-not-fit-shorten-this-message-or-free-draft-space".into();
                             }
                         }
                         let rich_layout = &mut self.composer_layout;
@@ -4003,9 +4008,9 @@ impl MessagingUi {
                             if let Some(sticker) = sticker {
                                 // A sticker pick sends the sticker; the draft text is untouched.
                                 if editing_here {
-                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker";
+                                    state.status = "lib-status-finish-or-cancel-the-edit-before-sending-a-sticker".into();
                                 } else if self.upload_busy {
-                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker";
+                                    state.status = "lib-status-wait-for-the-upload-before-sending-a-sticker".into();
                                 } else if let Some(command) = state.prepare_sticker_send(&sticker) {
                                     // The sent sticker replaces the typed `:` token.
                                     draft.replace_range(pick.range(), "");
@@ -4122,7 +4127,7 @@ impl MessagingUi {
                                     }
                                     commands.push(command);
                                 } else {
-                                    state.status = "lib-status-edit-kept-wait-for-your-current-message-and-connection-and-enter-nonempty-text";
+                                    state.status = "lib-status-edit-kept-wait-for-your-current-message-and-connection-and-enter-nonempty-text".into();
                                 }
                             } else if self.send_application_command(state, channel, commands)
                                 || self.handle_builtin_slash(state, channel, ctx, commands) {
@@ -4629,7 +4634,8 @@ impl MessagingUi {
 			});
 		if mention_waiting && !composer_open {
 			self.pending_mention = None;
-			state.status = "lib-status-this-view-has-no-message-box-so-the-mention-was-not-added";
+			state.status =
+				"lib-status-this-view-has-no-message-box-so-the-mention-was-not-added".into();
 		}
 		if self.editing.is_none()
 			&& let Some(index) = state
@@ -5436,7 +5442,7 @@ impl MessagingUi {
 								channel,
 								guild,
 								self.language,
-								commands,
+								&mut commands,
 							);
 						}
 						self.timeline.show_with_scroll(
