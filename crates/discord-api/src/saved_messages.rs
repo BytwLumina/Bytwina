@@ -8,19 +8,6 @@ use discord_protocol::saved_messages;
 use model::Id;
 use reqwest::Method;
 
-/// The service names the error path; every failure becomes a reason the user can act on.
-fn reason(failure: Failure) -> &'static str {
-	match failure {
-		Failure::Expired => "saved-messages-expired",
-		Failure::Challenged => "saved-messages-challenged",
-		Failure::Forbidden => "saved-messages-forbidden",
-		Failure::RateLimited => "saved-messages-rate-limited",
-		Failure::Network => "saved-messages-network",
-		Failure::ProtocolAt(text) => text,
-		_ => "saved-messages-unavailable",
-	}
-}
-
 /// RFC 3339 only: the service rejects local times, and a past date is still a valid reminder.
 fn due(due_at: Option<i64>) -> Result<Option<String>, Failure> {
 	let Some(due_at) = due_at else {
@@ -40,10 +27,7 @@ impl DiscordApi {
 		Event::SavedMessages(match command {
 			Command::Load { request } => SavedEvent::List {
 				request,
-				result: self
-					.saved_message_list()
-					.await
-					.map_err(|failure| reason(failure)),
+				result: self.saved_message_list().await,
 			},
 			Command::Save {
 				channel,
@@ -54,10 +38,7 @@ impl DiscordApi {
 				channel,
 				message,
 				request,
-				result: self
-					.save_message(channel, message, due_at)
-					.await
-					.map_err(|failure| reason(failure)),
+				result: self.save_message(channel, message, due_at).await,
 			},
 			Command::Remove {
 				channel,
@@ -68,8 +49,7 @@ impl DiscordApi {
 				result: self
 					.remove_saved_message(channel, message)
 					.await
-					.map(|(found, _): (Id, _)| (found, message))
-					.map_err(|failure| reason(failure)),
+					.map(|(found, _): (Id, _)| (found, message)),
 			},
 		})
 	}

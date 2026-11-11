@@ -4,7 +4,7 @@ use client_core::{Command, State};
 use egui::RichText;
 use model::Id;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Intent {
 	Open(String),
 	Remove(Id, Id),

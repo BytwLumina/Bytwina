@@ -2082,7 +2082,7 @@ impl ExtensionUi {
 					for capability in &consent.entry.manifest.capabilities {
 						let mut granted = consent.grants.contains(capability);
 						let changed =
-							design::switch(ui, capability_label(*capability), None, &mut granted)
+							design::switch(ui, &capability_label(*capability), None, &mut granted)
 								.changed();
 						if changed {
 							if granted {

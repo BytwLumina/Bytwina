@@ -9,6 +9,18 @@ use crate::auth::Failure;
 use model::{Id, saved_messages::MAX_SAVED_MESSAGES, saved_messages::SavedMessage};
 use std::collections::BTreeMap;
 
+/// The panel's own wording per failure, so the API can keep forwarding the typed error.
+fn panel_reason(failure: Failure) -> &'static str {
+	match failure {
+		Failure::Expired => "saved-messages-expired",
+		Failure::Challenged => "saved-messages-challenged",
+		Failure::Forbidden => "saved-messages-forbidden",
+		Failure::RateLimited => "saved-messages-rate-limited",
+		Failure::Network => "saved-messages-network",
+		_ => "saved-messages-unavailable",
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
 	Load {
@@ -128,7 +140,7 @@ impl SavedMessages {
 						self.rows.insert((channel, message), row);
 					}
 					Ok(_) => self.error = Some("saved-messages-answer-mismatch"),
-					Err(failure) => self.error = Some(failure.label()),
+					Err(failure) => self.error = Some(panel_reason(failure)),
 				}
 			}
 			Event::Removed { request, result } => {
@@ -152,7 +164,7 @@ impl SavedMessages {
 						self.write_epoch += 1;
 						self.rows.remove(&(channel, message));
 					}
-					Err(failure) => self.error = Some(failure.label()),
+					Err(failure) => self.error = Some(panel_reason(failure)),
 				}
 			}
 		}
@@ -184,7 +196,7 @@ impl SavedMessages {
 					.collect();
 				self.list_error = None;
 			}
-			Err(failure) => self.list_error = Some(failure.label()),
+			Err(failure) => self.list_error = Some(panel_reason(failure)),
 		}
 	}
 	pub fn clear(&mut self) {

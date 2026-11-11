@@ -45,7 +45,7 @@ impl Default for ScreenUi {
 			refresh_requested: false,
 			request: None,
 			busy: false,
-			status: "",
+			status: client_core::status::Status::default(),
 			capture_status: None,
 			supported: false,
 			preview: None,

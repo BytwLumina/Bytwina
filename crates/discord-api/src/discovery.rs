@@ -18,10 +18,7 @@ impl DiscordApi {
 				request,
 			} => DiscoveryEvent::Page {
 				request,
-				result: self
-					.discoverable_guilds(category, offset)
-					.await
-					.map_err(|failure| failure.label()),
+				result: self.discoverable_guilds(category, offset).await,
 			},
 		})
 	}

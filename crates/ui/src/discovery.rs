@@ -6,7 +6,7 @@ use client_core::{Command, State, discovery::PAGE_SIZE};
 #[derive(Clone)]
 enum Action {
 	Reload(Option<u32>, u32),
-	Preview(u64),
+	Preview(String),
 }
 
 impl MessagingUi {

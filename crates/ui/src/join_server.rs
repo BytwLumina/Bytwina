@@ -113,7 +113,7 @@ impl Default for JoinDialog {
 			picker: false,
 			input: String::new(),
 			focus: false,
-			status: "",
+			status: client_core::status::Status::default(),
 			name: String::new(),
 			name_focus: false,
 			icon: None,
