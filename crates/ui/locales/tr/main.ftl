@@ -4996,3 +4996,19 @@ saved-messages-count = { $count ->
 saved-messages-full = Kaydedilen mesajlar dolu. Yenisini kaydetmeden önce birini kaldır.
 new-message-too-many = Senin dışında bir grup en fazla { $limit } kişiyle başlayabilir.
 extensions-ui-capability-guildfolders = Hesabın sunucu klasörlerini ve sırasını okur
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Discord Çalışanı
+public-badge-partner = Ortak Sunucu Sahibi
+public-badge-hypesquad = HypeSquad Etkinliği Üyesi
+public-badge-bug-hunter-1 = Hata Avcısı Seviye 1
+public-badge-house-bravery = Bravery Evi Üyesi
+public-badge-house-brilliance = Brilliance Evi Üyesi
+public-badge-house-balance = Balance Evi Üyesi
+public-badge-early-supporter = Erken Nitro Destekçisi
+public-badge-bug-hunter-2 = Hata Avcısı Seviye 2
+public-badge-verified-bot = Doğrulanmış Bot
+public-badge-verified-developer = Erken Doğrulanmış Bot Geliştiricisi
+public-badge-certified-moderator = Moderatör Programları Mezunu
+public-badge-active-developer = Aktif Geliştirici
+public-badge-nitro = Nitro Abonesi

@@ -578,6 +578,53 @@ mod tests {
 	}
 
 	#[test]
+	fn no_catalog_declares_a_message_twice() {
+		// A repeated message id makes the bundle reject the whole catalog, so the app would
+		// panic while loading a locale. Every catalog is checked here instead.
+		for language in Language::ALL {
+			let source = language.source();
+			let resource = FluentResource::try_new(source.to_owned())
+				.unwrap_or_else(|(_, errors)| panic!("{language:?}: {errors:?}"));
+			let mut bundle = FluentBundle::new_concurrent(vec![language.identifier().clone()]);
+			bundle
+				.add_resource(resource)
+				.unwrap_or_else(|errors| panic!("{language:?}: {errors:?}"));
+		}
+	}
+
+	#[test]
+	fn every_catalog_names_the_public_badges() {
+		// The badge emblems are labelled through `translate`, which falls back to English, so
+		// a catalog that lacks a key would quietly show the English name instead of the
+		// translated one. Every catalog is checked for the key itself instead.
+		let keys = [
+			"public-badge-staff",
+			"public-badge-partner",
+			"public-badge-hypesquad",
+			"public-badge-bug-hunter-1",
+			"public-badge-house-bravery",
+			"public-badge-house-brilliance",
+			"public-badge-house-balance",
+			"public-badge-early-supporter",
+			"public-badge-bug-hunter-2",
+			"public-badge-verified-bot",
+			"public-badge-verified-developer",
+			"public-badge-certified-moderator",
+			"public-badge-active-developer",
+			"public-badge-nitro",
+		];
+		for language in Language::ALL {
+			let source = language.source();
+			for key in keys {
+				assert!(
+					source.lines().any(|line| line.starts_with(key)),
+					"{language:?} {key}"
+				);
+			}
+		}
+	}
+
+	#[test]
 	fn missing_keys_fall_back_to_english() {
 		set_current(Language::German);
 		assert_eq!(translate("settings-chat-box"), "Chatfenster");

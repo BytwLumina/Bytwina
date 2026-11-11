@@ -5108,3 +5108,19 @@ saved-messages-count = { $count ->
 saved-messages-full = 已儲存的訊息已滿，請先移除一則再儲存。
 new-message-too-many = 除你以外，群組最多可由 { $limit } 人開始。
 extensions-ui-capability-guildfolders = 讀取帳號的伺服器資料夾與排序
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Discord 員工
+public-badge-partner = 合作伺服器擁有者
+public-badge-hypesquad = HypeSquad 活動成員
+public-badge-bug-hunter-1 = 漏洞獵手等級 1
+public-badge-house-bravery = 勇氣之屋成員
+public-badge-house-brilliance = 智慧之屋成員
+public-badge-house-balance = 平衡之屋成員
+public-badge-early-supporter = 早期 Nitro 支持者
+public-badge-bug-hunter-2 = 漏洞獵手等級 2
+public-badge-verified-bot = 已驗證的機器人
+public-badge-verified-developer = 早期已驗證的機器人開發者
+public-badge-certified-moderator = 審核員計劃校友
+public-badge-active-developer = 活躍開發者
+public-badge-nitro = Nitro 訂閱者

@@ -4993,3 +4993,19 @@ saved-messages-count = { $count ->
 saved-messages-full = 保存済みメッセージがいっぱいです。保存する前に 1 件削除してください。
 new-message-too-many = 自分以外に最大 { $limit } 人まで一緒にグループを始められます。
 extensions-ui-capability-guildfolders = アカウントのサーバーフォルダーと並び順を読み取る
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Discord スタッフ
+public-badge-partner = パートナーサーバーオーナー
+public-badge-hypesquad = HypeSquad イベントメンバー
+public-badge-bug-hunter-1 = バグハンター レベル 1
+public-badge-house-bravery = ハウス・BRAVERY メンバー
+public-badge-house-brilliance = ハウス・BRILLIANCE メンバー
+public-badge-house-balance = ハウス・BALANCE メンバー
+public-badge-early-supporter = 初期 Nitro サポーター
+public-badge-bug-hunter-2 = バグハンター レベル 2
+public-badge-verified-bot = 認証済みボット
+public-badge-verified-developer = 初期 認証済みボット開発者
+public-badge-certified-moderator = モデレータープログラムの卒業生
+public-badge-active-developer = アクティブな開発者
+public-badge-nitro = Nitro サブスクライバー

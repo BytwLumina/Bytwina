@@ -5013,3 +5013,19 @@ saved-messages-count = { $count ->
 saved-messages-full = Сохранённые сообщения заполнены. Удалите одно, прежде чем сохранять новое.
 new-message-too-many = Кроме вас, в группе может быть не больше { $limit } человек.
 extensions-ui-capability-guildfolders = Читать папки серверов аккаунта и их порядок
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Сотрудник Discord
+public-badge-partner = Владелец партнёрского сервера
+public-badge-hypesquad = Участник событий HypeSquad
+public-badge-bug-hunter-1 = Охотник за багами, уровень 1
+public-badge-house-bravery = Участник дома Bravery
+public-badge-house-brilliance = Участник дома Brilliance
+public-badge-house-balance = Участник дома Balance
+public-badge-early-supporter = Ранний сторонник Nitro
+public-badge-bug-hunter-2 = Охотник за багами, уровень 2
+public-badge-verified-bot = Проверенный бот
+public-badge-verified-developer = Ранний разработчик проверенных ботов
+public-badge-certified-moderator = Выпускник программ модерации
+public-badge-active-developer = Активный разработчик
+public-badge-nitro = Подписчик Nitro

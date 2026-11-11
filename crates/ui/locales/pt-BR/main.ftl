@@ -5010,3 +5010,19 @@ saved-messages-count = { $count ->
 saved-messages-full = As mensagens salvas estão cheias. Remova uma antes de salvar outra.
 new-message-too-many = Além de você, um grupo pode começar com no máximo { $limit } outras pessoas.
 extensions-ui-capability-guildfolders = Ler as pastas de servidores da conta e a ordem delas
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Funcionário da Discord
+public-badge-partner = Proprietário de servidor parceiro
+public-badge-hypesquad = Membro dos eventos HypeSquad
+public-badge-bug-hunter-1 = Caçador de bugs nível 1
+public-badge-house-bravery = Membro da Casa Bravery
+public-badge-house-brilliance = Membro da Casa Brilliance
+public-badge-house-balance = Membro da Casa Balance
+public-badge-early-supporter = Apoiador inicial do Nitro
+public-badge-bug-hunter-2 = Caçador de bugs nível 2
+public-badge-verified-bot = Bot verificado
+public-badge-verified-developer = Desenvolvedor inicial de bots verificados
+public-badge-certified-moderator = Ex-aluno dos programas de moderação
+public-badge-active-developer = Desenvolvedor ativo
+public-badge-nitro = Assinante do Nitro

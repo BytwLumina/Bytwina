@@ -5108,3 +5108,19 @@ saved-messages-count = { $count ->
 saved-messages-full = 已保存的消息已满，请先移除一条再保存。
 new-message-too-many = 除你以外，群组最多可由 { $limit } 人开始。
 extensions-ui-capability-guildfolders = 读取账号的服务器文件夹与排序
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Discord 员工
+public-badge-partner = 合作服务器所有者
+public-badge-hypesquad = HypeSquad 活动成员
+public-badge-bug-hunter-1 = 漏洞猎手等级 1
+public-badge-house-bravery = 勇气之屋成员
+public-badge-house-brilliance = 智慧之屋成员
+public-badge-house-balance = 平衡之屋成员
+public-badge-early-supporter = 早期 Nitro 支持者
+public-badge-bug-hunter-2 = 漏洞猎手等级 2
+public-badge-verified-bot = 已验证的机器人
+public-badge-verified-developer = 早期已验证的机器人开发者
+public-badge-certified-moderator = 审核员计划校友
+public-badge-active-developer = 活跃开发者
+public-badge-nitro = Nitro 订阅者

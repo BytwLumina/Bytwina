@@ -5099,3 +5099,19 @@ saved-messages-count = { $count ->
 saved-messages-full = Uložené zprávy jsou plné. Před uložením další jednu odeber.
 new-message-too-many = Kromě tebe může skupina začít nejvýše s { $limit } lidmi.
 extensions-ui-capability-guildfolders = Čte složky serverů účtu a jejich pořadí
+
+## crates/ui/src/public_badges.rs
+public-badge-staff = Zaměstnanec Discordu
+public-badge-partner = Vlastník partnerského serveru
+public-badge-hypesquad = Člen HypeSquad Events
+public-badge-bug-hunter-1 = Lovec chyb úroveň 1
+public-badge-house-bravery = Člen domu Bravery
+public-badge-house-brilliance = Člen domu Brilliance
+public-badge-house-balance = Člen domu Balance
+public-badge-early-supporter = Raný podporovatel Nitra
+public-badge-bug-hunter-2 = Lovec chyb úroveň 2
+public-badge-verified-bot = Ověřený bot
+public-badge-verified-developer = Raný vývojář ověřených botů
+public-badge-certified-moderator = Absolvent programů moderátorů
+public-badge-active-developer = Aktivní vývojář
+public-badge-nitro = Předplatitel Nitra
