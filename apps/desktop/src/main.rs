@@ -2101,7 +2101,8 @@ impl Desktop {
 				"Loading saved font…"
 			} else {
 				"Could not load the saved font."
-			}.into();
+			}
+			.into();
 		}
 		messaging.minimize_to_tray = tray_setting.enabled;
 		app_settings.apply(&mut messaging);
@@ -3080,7 +3081,10 @@ impl Desktop {
 				self.messaging.custom_font.name = font.as_ref().map(|font| font.name.clone());
 				self.messaging.custom_font.status = client_core::status::Status::default();
 			}
-			Err(error) => self.messaging.custom_font.status = error,.into();}
+			Err(error) => {
+				self.messaging.custom_font.status = error.into();
+			}
+		}
 	}
 	fn save_font(&mut self, ctx: &egui::Context, font: Option<ui::fonts::CustomFont>) {
 		if self.fixture_only || self.state.demo {
@@ -3093,7 +3097,8 @@ impl Desktop {
 				"Saving font…"
 			} else {
 				"Could not save the font. Try again."
-			}.into();
+			}
+			.into();
 		}
 	}
 	fn sync_fonts(&mut self, ctx: &egui::Context) {
@@ -3112,7 +3117,10 @@ impl Desktop {
 				match result {
 					Ok(Some(font)) => self.save_font(ctx, Some(font)),
 					Ok(None) => {}
-					Err(error) => self.messaging.custom_font.status = error,.into();}
+					Err(error) => {
+						self.messaging.custom_font.status = error.into();
+					}
+				}
 			}
 		}
 		if let Some(families) = &self.font_families
@@ -3249,7 +3257,8 @@ impl Desktop {
 		// The icon remains registered independently of minimize-on-close.
 		self.messaging.tray_status = self
 			.tray_error
-			.unwrap_or_else(|| self.tray_setting.status()).into();
+			.unwrap_or_else(|| self.tray_setting.status())
+			.into();
 		if previous_status != self.messaging.tray_status {
 			ctx.request_repaint();
 		}
@@ -3452,7 +3461,8 @@ impl Desktop {
 			}
 		} else {
 			"Not connected; status is not shared."
-		}.into();
+		}
+		.into();
 		self.persist_account_presence();
 		if changed || previous_status != self.messaging.own_presence_status {
 			ctx.request_repaint();
@@ -3621,10 +3631,14 @@ impl Desktop {
 									"settings-activity-status-hidden"
 								}
 								Observation::ServerMissing => "settings-activity-status-missing",
-							}.into();
+							}
+							.into();
 						}
 					}
-					Err(error) => self.messaging.game_activity_status = error,.into();}
+					Err(error) => {
+						self.messaging.game_activity_status = error.into();
+					}
+				}
 			}
 			if self.game_activity.enabled && self.state.gateway_connected {
 				match *connection.activity_sharing.borrow() {
@@ -3635,10 +3649,12 @@ impl Desktop {
 							match value {
 								Some(false) => {
 									self.messaging.game_activity_status =
-										"settings-activity-status-sharing-off".into();}
+										"settings-activity-status-sharing-off".into();
+								}
 								None => {
 									self.messaging.game_activity_status =
-										"settings-activity-status-checking".into();}
+										"settings-activity-status-checking".into();
+								}
 								Some(true) => {}
 							}
 						}
@@ -3654,7 +3670,8 @@ impl Desktop {
 				if let Some(enable) = sharing_request {
 					if connection.activity_sharing_request.try_send(enable).is_ok() {
 						self.messaging.discord_activity_sharing_busy = true;
-						self.messaging.game_activity_status = "settings-activity-status-updating".into();
+						self.messaging.game_activity_status =
+							"settings-activity-status-updating".into();
 					} else {
 						self.messaging.discord_activity_sharing_retry = true;
 						self.messaging.game_activity_status =
@@ -5026,7 +5043,8 @@ impl Desktop {
 						if self.messaging.custom_font.busy && self.font_picker.is_none() {
 							self.messaging.custom_font.busy = false;
 							self.messaging.custom_font.status =
-								"Local storage worker stopped. Restart Bytwina to save fonts.".into();
+								"Local storage worker stopped. Restart Bytwina to save fonts."
+									.into();
 						}
 						if self.messaging.channel_preferences_reload
 							|| self.messaging.channel_preferences_load_pending
@@ -5208,7 +5226,8 @@ impl Desktop {
 									"Saved channel preferences are damaged or incompatible with this build."
 								}
 								_ => "Could not read channel preferences from local storage.",
-							}.into();
+							}
+							.into();
 						}
 					}
 				}
@@ -5218,7 +5237,8 @@ impl Desktop {
 						""
 					} else {
 						"Could not save channel preferences."
-					}.into();
+					}
+					.into();
 				}
 				cache::Outcome::GifFavorites(favorites) => {
 					self.state.restore_gif_favorites(favorites);
@@ -7301,7 +7321,8 @@ impl eframe::App for Desktop {
 						""
 					} else {
 						"Could not save channel preferences."
-					}.into();
+					}
+					.into();
 			}
 		}
 		if let Some(variant) = self.messaging.theme_variant_changed.take() {

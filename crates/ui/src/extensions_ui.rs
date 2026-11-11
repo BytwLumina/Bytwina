@@ -891,9 +891,9 @@ impl ExtensionUi {
 		state: &State,
 	) {
 		if !context.is_current(state) {
-			self.status =
-				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed"
-					.into();
+			self.status = String::from(
+				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed",
+			);
 			return;
 		}
 		invocation.storage = None;
@@ -933,7 +933,7 @@ impl ExtensionUi {
 			ctx.request_repaint();
 		} else {
 			self.status =
-				"Extensions are busy. Try again after the current action finishes.".into();
+				String::from("Extensions are busy. Try again after the current action finishes.");
 		}
 	}
 	pub(crate) fn message_actions(&self) -> Arc<Vec<MenuAction>> {
@@ -2223,9 +2223,9 @@ impl ExtensionUi {
 		};
 		if !result.context.is_current(state) {
 			self.proxy_auth.clear_draft();
-			self.status =
-				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed"
-					.into();
+			self.status = String::from(
+				"extensions-ui-status-result-discarded-because-the-conversation-or-draft-changed",
+			);
 			return None;
 		}
 		let mut applied = false;
@@ -2354,9 +2354,9 @@ impl ExtensionUi {
 									}
 									applied = true;
 								} else {
-									self.status =
-										"The draft changed or the proposal exceeds the draft limit."
-											.into();
+									self.status = String::from(
+										"The draft changed or the proposal exceeds the draft limit.",
+									);
 								}
 							}
 						});

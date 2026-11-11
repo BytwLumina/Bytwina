@@ -251,7 +251,6 @@ impl MessagingUi {
 				self.reading_save_requested = true;
 			}
 		}
-		.into();
 	}
 
 	/// `panel` is the resizable panel id and `reserved` the fixed width it holds besides the list.
