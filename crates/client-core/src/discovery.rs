@@ -155,7 +155,11 @@ impl crate::State {
 		if !offset.is_multiple_of(PAGE_SIZE) {
 			return None;
 		}
-		if self.discovery.loaded == Some((category, offset)) && !self.discovery.loading {
+		if (self.discovery.loading
+			&& self.discovery.category == category
+			&& self.discovery.offset == offset)
+			|| (!self.discovery.loading && self.discovery.loaded == Some((category, offset)))
+		{
 			return None;
 		}
 		let request = self.discovery.next_request();
@@ -244,6 +248,12 @@ mod tests {
 		assert_eq!(discovery.categories().len(), 1);
 		discovery.filter = "missing".into();
 		assert!(discovery.guilds().is_empty());
+		assert_eq!(discovery.next(), Some(PAGE_SIZE * 2));
+		discovery.begin(None, PAGE_SIZE * 2, 3);
+		discovery.apply(Event::Page {
+			request: 3,
+			result: Ok(page(PAGE_SIZE * 2, 50, Vec::new())),
+		});
 		assert_eq!(discovery.next(), None);
 	}
 
@@ -253,5 +263,7 @@ mod tests {
 		assert!(state.request_discovery(None, 1).is_none());
 		assert!(state.request_discovery(None, PAGE_SIZE).is_some());
 		assert!(state.request_discovery(None, PAGE_SIZE).is_none());
+		assert!(state.request_discovery(Some(3), 0).is_some());
+		assert!(state.request_discovery(Some(3), 0).is_none());
 	}
 }
