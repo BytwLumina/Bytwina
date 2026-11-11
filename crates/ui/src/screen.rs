@@ -85,8 +85,7 @@ impl ScreenUi {
 				vec![
 					Source {
 						id: SourceId::Display(1),
-						name: crate::i18n::translate("screen-launch-display-1-synthetic-preview")
-							.into(),
+						name: crate::i18n::translate("screen-launch-display-1-synthetic-preview"),
 						width: 2560,
 						height: 1440,
 						refresh_hz: 165,
@@ -95,8 +94,7 @@ impl ScreenUi {
 						id: SourceId::Window(2),
 						name: crate::i18n::translate(
 							"screen-launch-project-notes-synthetic-window",
-						)
-						.into(),
+						),
 						width: 1280,
 						height: 720,
 						refresh_hz: 60,

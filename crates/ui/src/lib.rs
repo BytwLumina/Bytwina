@@ -785,15 +785,11 @@ impl MessagingUi {
 		})
 	}
 
-	/// Pending profile picture selection: (generation, own user, editor revision).
-	/// Soundboard popup and voice channel status editor.
-	pub fn soundboard_ui(&mut self) -> &mut soundboard_ui::SoundboardUi {
-		&mut self.soundboard
-	}
 	/// Status text for a voice channel row, if the channel has one.
 	pub fn voice_status_line<'a>(&self, state: &'a State, channel: Id) -> Option<&'a str> {
 		soundboard_ui::SoundboardUi::channel_line(state, channel)
 	}
+	/// Pending profile picture selection: (generation, own user, editor revision).
 	pub fn take_profile_picture_request(&mut self) -> Option<(u64, Id, u64)> {
 		self.settings.editor.avatar_request.take()
 	}

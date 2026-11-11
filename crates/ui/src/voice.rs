@@ -113,7 +113,7 @@ impl MessagingUi {
 					egui::WidgetInfo::labeled(
 						egui::Role::Button,
 						true,
-						&crate::i18n::translate("voice-fullscreen-exit-fullscreen"),
+						crate::i18n::translate("voice-fullscreen-exit-fullscreen"),
 					)
 				});
 				exit |= button
@@ -747,7 +747,7 @@ impl MessagingUi {
 				ui.label(
 					design::semibold(
 						ui,
-						&crate::i18n::translate("voice-stream-preview-popup-streaming-now"),
+						crate::i18n::translate("voice-stream-preview-popup-streaming-now"),
 						15.0,
 					)
 					.color(colors.text_strong),
@@ -1316,7 +1316,7 @@ impl MessagingUi {
 					egui::WidgetInfo::labeled(
 						egui::Role::Button,
 						can_watch,
-						&crate::i18n::translate("voice-watch-stream-watch-stream"),
+						crate::i18n::translate("voice-watch-stream-watch-stream"),
 					)
 				});
 				if can_watch && (watch || response.clicked()) {
@@ -1533,7 +1533,7 @@ impl MessagingUi {
 			egui::WidgetInfo::labeled(
 				egui::Role::Button,
 				true,
-				&crate::i18n::translate("voice-stream-overlay-controls-stream-audio"),
+				crate::i18n::translate("voice-stream-overlay-controls-stream-audio"),
 			)
 		});
 		egui::Popup::menu(&response)
@@ -1777,7 +1777,7 @@ impl MessagingUi {
 			self.avatars
 				.show(&mut avatar_ui, user, avatar_size, state.demo)
 		} else {
-			design::avatar(&mut avatar_ui, &name, avatar_size)
+			design::avatar(&mut avatar_ui, name, avatar_size)
 		};
 		// Mute state reads as Discord's red ring plus the matching slashed glyph.
 		let shown = shown_participant(state, entry);
@@ -1816,7 +1816,7 @@ impl MessagingUi {
 		}
 		if silenced.is_none() && speaking {
 			if video.is_none() && frameless {
-				speaking_avatar(ui, &avatar, &name);
+				speaking_avatar(ui, &avatar, name);
 			}
 			if !frameless {
 				ui.painter().rect_stroke(
@@ -4718,7 +4718,7 @@ fn fullscreen_control(ui: &mut egui::Ui, color: egui::Color32) -> egui::Response
 		egui::WidgetInfo::labeled(
 			egui::Role::Button,
 			true,
-			&crate::i18n::translate("voice-fullscreen-control-fullscreen"),
+			crate::i18n::translate("voice-fullscreen-control-fullscreen"),
 		)
 	});
 	response.on_hover_text(crate::i18n::translate(

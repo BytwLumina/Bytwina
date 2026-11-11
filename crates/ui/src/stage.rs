@@ -151,6 +151,7 @@ impl EventsUi {
 			return;
 		}
 		// The events are read before they are drawn, so the rows are copied out first.
+		#[allow(clippy::type_complexity)]
 		let rows: Vec<(
 			Id,
 			bool,
