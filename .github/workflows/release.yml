@@ -89,6 +89,9 @@ jobs:
       VERSION: ${{ needs.prepare.outputs.version }}
       PACKAGE_ROOT: dist
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
+      # Preserve cache statistics through the long final link.
+      SCCACHE_IDLE_TIMEOUT: "5400"
     defaults:
       run:
         shell: bash
@@ -103,9 +106,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
           components: rustfmt, clippy
-      # The nightly release recompiles an unchanged dependency graph every night. sccache
-      # keeps every crate compilation in the Actions cache, so only the changed crates and
-      # the final link are rebuilt. The shipped binary still uses the fat-LTO profile.
+      # Cache compatible crate compilations across releases; binaries, non-cacheable crates
+      # and the final link still build. The shipped binary keeps the fat-LTO profile.
       - uses: mozilla-actions/sccache-action@v0.0.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
