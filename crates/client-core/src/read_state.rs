@@ -141,13 +141,13 @@ impl ReadState {
 		if let Some(Pending::All { scope, .. }) = self.pending.take() {
 			self.continue_all = Some(scope);
 		}
-		self.status = None.into();
+		self.status = None;
 	}
 	pub fn forget(&mut self, channel: Id) {
 		self.entries.remove(&channel);
 		self.activity.forget(channel);
 		if self.status(channel).is_some() {
-			self.status = None.into();
+			self.status = None;
 		}
 		let cancel = match self.pending.as_mut() {
 			Some(Pending::Channel {
