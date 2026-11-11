@@ -179,17 +179,21 @@ mod tests {
 
 	#[test]
 	fn a_finished_or_expired_clip_settles_once_and_opens_the_queue() {
-		let mut player = Player::default();
-		player.playing = Some(Playback {
-			request: 4,
-			_stream: None,
-			gate: CueGate::new(Arc::new(AtomicU64::new(1)), 1),
-			deadline: Instant::now() + Duration::from_secs(30),
-		});
+		let mut player = Player {
+			playing: Some(Playback {
+				request: 4,
+				_stream: None,
+				gate: CueGate::new(Arc::new(AtomicU64::new(1)), 1),
+				deadline: Instant::now() + Duration::from_secs(30),
+			}),
+			..Player::default()
+		};
 		assert!(player.take_settled().is_none());
 		player.playing.as_ref().unwrap().gate.finish_test();
-		assert_eq!(player.take_settled(), Some((4, "")));
+		// Poll settles the record; `settled()` answers until the UI drains it below.
+		player.poll();
 		assert!(player.settled(4));
+		assert_eq!(player.take_settled(), Some((4, "")));
 		assert!(player.take_settled().is_none());
 		player.playing = Some(Playback {
 			request: 5,

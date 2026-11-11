@@ -1049,6 +1049,7 @@ struct Desktop {
 	/// Requests the fetcher was already asked for, so a frame does not download twice.
 	soundboard_requested: Vec<u64>,
 	/// The offline fixture's saved messages, so saving a message shows up on the page.
+	#[cfg(feature = "demo")]
 	demo_saved: Vec<model::saved_messages::SavedMessage>,
 	/// The volume of the remote effect downloading now.
 	voice_effect_volume: f32,
@@ -1586,6 +1587,7 @@ fn align_undecorated_surface(window: &winit::window::Window) {
 
 impl Desktop {
 	/// Answers the saved-message commands from the fixture's own list.
+	#[cfg(feature = "demo")]
 	fn demo_saved_messages(&mut self, command: client_core::saved_messages::Command) -> Event {
 		use client_core::saved_messages::{Command, Event as SavedEvent};
 		Event::SavedMessages(match command {
@@ -2666,6 +2668,7 @@ impl Desktop {
 			audio: audio::Audio::default(),
 			soundboard_audio: soundboard_audio::Player::default(),
 			soundboard_requested: Vec::new(),
+			#[cfg(feature = "demo")]
 			demo_saved: Vec::new(),
 			voice_effect_volume: 1.0,
 			voice_effect_played: None,
