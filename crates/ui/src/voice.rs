@@ -6038,12 +6038,11 @@ mod tests {
 		state.voice.active = None;
 		assert!(messaging.call_unavailable(&state, Id(25)).is_some());
 		state.demo = false;
+		assert!(messaging.call_unavailable(&state, Id(25)).is_none());
 		messaging.voice_available = false;
-		assert!(
-			messaging
-				.call_unavailable(&state, Id(25))
-				.unwrap()
-				.contains("Voice is unavailable")
+		assert_eq!(
+			messaging.call_unavailable(&state, Id(25)),
+			Some("voice-call-unavailable-voice-is-unavailable-in-this-session")
 		);
 	}
 
@@ -6247,11 +6246,9 @@ mod tests {
 			"Incoming calls require an explicit answer"
 		);
 		messaging.voice_available = false;
-		assert!(
-			messaging
-				.call_unavailable(&state, Id(1))
-				.unwrap()
-				.contains("Voice is unavailable")
+		assert_eq!(
+			messaging.call_unavailable(&state, Id(1)),
+			Some("voice-call-unavailable-voice-is-unavailable-in-this-session")
 		);
 		messaging.voice_available = true;
 		assert!(messaging.call_unavailable(&state, Id(1)).is_none());

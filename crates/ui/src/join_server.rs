@@ -875,6 +875,7 @@ mod tests {
 		let texts = frame(ctx, dialog, state, commands, size, vec![]);
 		let rect = texts
 			.iter()
+			.rev()
 			.find(|(text, _)| text == label)
 			.unwrap_or_else(|| panic!("Missing {label}: {texts:?}"))
 			.1;
@@ -978,7 +979,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Check Invite",
+				&crate::i18n::translate("join-server-show-join-check-invite"),
 			);
 			assert!(matches!(commands.pop(), Some(Command::Invite { .. })));
 			frame(&ctx, &mut dialog, &mut state, &mut commands, size, vec![]);
@@ -988,10 +989,9 @@ mod tests {
 				Err(client_core::auth::Failure::Forbidden),
 			);
 			let texts = frame(&ctx, &mut dialog, &mut state, &mut commands, size, vec![]);
-			assert!(
-				texts.iter().any(|(text, _)| text == "Permission denied"),
-				"{texts:?}"
-			);
+			let error =
+				crate::i18n::translate_if_key(client_core::auth::Failure::Forbidden.label());
+			assert!(texts.iter().any(|(text, _)| text == &error), "{texts:?}");
 			assert!(commands.is_empty(), "no automatic retries");
 			click(
 				&ctx,
@@ -999,7 +999,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Check Invite",
+				&crate::i18n::translate("join-server-show-join-check-invite"),
 			);
 			assert!(matches!(commands.pop(), Some(Command::Invite { .. })));
 			state.apply_invite(
@@ -1023,7 +1023,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Join Server",
+				&crate::i18n::translate("join-server-show-join-join-a-server"),
 			);
 			let Some(Command::JoinInvite { request, .. }) = commands.pop() else {
 				panic!("join missing")
@@ -1034,7 +1034,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Please wait…",
+				&crate::i18n::translate("join-server-customize-please-wait"),
 			);
 			assert!(commands.is_empty());
 			state.apply(client_core::Envelope {
@@ -1045,8 +1045,14 @@ mod tests {
 				},
 			});
 			assert!(state.guild(model::Id(12)).is_none());
-			// The dialog now closes from the header control or Escape; there is no Back button.
-			assert!(!texts.iter().any(|(text, _)| text == "Back"));
+			// The accepted invite stays open until navigation or dismissal; it offers Cancel, not Back.
+			let texts = frame(&ctx, &mut dialog, &mut state, &mut commands, size, vec![]);
+			assert_eq!(dialog.generation, Some(state.generation));
+			let cancel = crate::i18n::translate("join-server-show-join-cancel");
+			let back = crate::i18n::translate("join-server-show-join-back");
+			assert!(texts.iter().any(|(text, _)| text == &cancel), "{texts:?}");
+			assert!(!texts.iter().any(|(text, _)| text == &back), "{texts:?}");
+			assert!(commands.is_empty());
 			frame(
 				&ctx,
 				&mut dialog,

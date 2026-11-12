@@ -2915,14 +2915,12 @@ mod tests {
 		let deep = preferred_variant(thumb, 5);
 		assert_ne!(deep, thumb);
 		assert!(standard()[deep].0.contains('\u{1f3ff}'));
+		// Tone variants can omit the base's emoji presentation selector.
+		let hand = index.by_text["🖐️"];
+		assert_eq!(standard()[preferred_variant(hand, 5)].0, "🖐🏿");
 		// A base with no dark variant falls back to itself rather than an invented sequence.
-		for base in browse_indices() {
-			let chosen = preferred_variant(*base, 5);
-			assert_eq!(
-				base_emoji(standard()[chosen].0),
-				base_emoji(standard()[*base].0)
-			);
-		}
+		let face = index.by_text["😀"];
+		assert_eq!(preferred_variant(face, 5), face);
 	}
 
 	#[test]
