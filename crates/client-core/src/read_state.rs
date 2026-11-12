@@ -2008,6 +2008,11 @@ mod navigation_tests {
 		apply(&mut state, CoreEvent::Message(incoming));
 		assert_eq!(state.channel_unread(&state.channels[0]), Some(true));
 		assert_eq!(state.unread_directs(None), vec![Id(1)]);
+		state.confirm_dm_muted(Id(1), true).unwrap();
+		assert!(state.unread_directs(None).is_empty());
+		assert_eq!(state.unread_directs(Some(Id(1))), vec![Id(1)]);
+		state.confirm_dm_muted(Id(1), false).unwrap();
+		assert_eq!(state.unread_directs(None), vec![Id(1)]);
 	}
 
 	#[test]

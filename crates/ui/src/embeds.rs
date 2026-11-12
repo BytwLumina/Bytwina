@@ -12,11 +12,15 @@ pub fn has_spoilers(message: &Message) -> bool {
 	has_media_spoilers(message) || message.content.contains("||")
 }
 pub fn has_media_spoilers(message: &Message) -> bool {
-	message.attachments.iter().any(|a| {
-		a.spoiler
-			|| a.filename.starts_with("SPOILER_")
-			|| a.description.as_deref().is_some_and(|s| s.contains("||"))
-	}) || message.embeds.iter().any(|e| {
+	message.attachments.iter().any(attachment_spoiler) || has_embed_spoilers(message)
+}
+pub fn attachment_spoiler(a: &model::Attachment) -> bool {
+	a.spoiler
+		|| a.filename.starts_with("SPOILER_")
+		|| a.description.as_deref().is_some_and(|s| s.contains("||"))
+}
+pub fn has_embed_spoilers(message: &Message) -> bool {
+	message.embeds.iter().any(|e| {
 		[&e.title, &e.description]
 			.into_iter()
 			.flatten()

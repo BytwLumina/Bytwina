@@ -2257,7 +2257,7 @@ impl TimelineView {
 											&message.attachments,
 										))
 										.value(),
-									)) || !crate::embeds::has_media_spoilers(message)
+									)) || !crate::embeds::attachment_spoiler(attachment)
 									|| self.revealed.get(id).is_some_and(|reveal| {
 										reveal.media && reveal.matches(message)
 									}))
@@ -3824,8 +3824,31 @@ impl TimelineView {
 													.color(colors.muted),
 												);
 											}
-											if crate::embeds::has_media_spoilers(message) && !media
-											{
+											let concealed =
+												crate::embeds::has_media_spoilers(message)
+													&& !media;
+											if !message.extra_content.components_v2 {
+												let previous_view = self.viewing;
+												for run in message
+													.attachments
+													.split(|a| {
+														concealed
+															&& crate::embeds::attachment_spoiler(a)
+													})
+													.filter(|run| !run.is_empty())
+												{
+													crate::attachments::show_subset(
+														ui, message, run, avatars, &mut self.viewing, &mut self.opening,
+														&mut self.download, &mut self.audio, &mut self.video, state.demo,
+														&mut surface, crate::design::MessageCardSurface::Conversation,
+													);
+												}
+												if self.viewing != previous_view {
+													self.component_viewing = None;
+													self.embed_viewing = None;
+												}
+											}
+											if concealed {
 												let reveal = ui.button(crate::i18n::translate(
 													"timeline-show-with-scroll-reveal-spoiler-media",
 												));
@@ -3833,27 +3856,10 @@ impl TimelineView {
 												if reveal.clicked() {
 													media = true;
 												}
-											} else {
-												if !message.extra_content.components_v2 {
-													let previous_view = self.viewing;
-													crate::attachments::show(
-														ui,
-														message,
-														avatars,
-														&mut self.viewing,
-														&mut self.opening,
-														&mut self.download,
-														&mut self.audio,
-														&mut self.video,
-														state.demo,
-														&mut surface,
-														crate::design::MessageCardSurface::Conversation,
-													);
-													if self.viewing != previous_view {
-														self.component_viewing = None;
-														self.embed_viewing = None;
-													}
-												}
+											}
+											if !concealed
+												|| !crate::embeds::has_embed_spoilers(message)
+											{
 												let invite_top = ui.cursor().top();
 												crate::invites::show(
 													ui,
@@ -5172,7 +5178,7 @@ impl TimelineView {
 				&& display_message(state, *message).is_some_and(|source| {
 					!source.embeds_suppressed
 						&& Revealed::fingerprint(source) == *fingerprint
-						&& (!crate::embeds::has_media_spoilers(source)
+						&& (!crate::embeds::has_embed_spoilers(source)
 							|| self
 								.revealed
 								.get(message)
@@ -5195,6 +5201,11 @@ impl TimelineView {
 			}
 		}
 		if let Some((message_id, attachment_id)) = self.viewing {
+			let revealed = |m: &Message| {
+				self.revealed
+					.get(&m.id)
+					.is_some_and(|r| r.media && r.matches(m))
+			};
 			let message = state
 				.timeline
 				.get(message_id)
@@ -5213,14 +5224,21 @@ impl TimelineView {
 								egui::Id::unique((&m.components, &m.attachments)).value(),
 							)
 					} else {
-						!crate::embeds::has_media_spoilers(m)
-							|| self
-								.revealed
-								.get(&m.id)
-								.is_some_and(|reveal| reveal.media && reveal.matches(m))
+						revealed(m)
+							|| m.attachments.iter().any(|a| {
+								a.id == attachment_id && !crate::embeds::attachment_spoiler(a)
+							})
 					}
 				});
 			self.viewing = message.and_then(|m| {
+				let gallery = if revealed(m) {
+					&m.attachments[..]
+				} else {
+					m.attachments
+						.split(crate::embeds::attachment_spoiler)
+						.find(|run| run.iter().any(|a| a.id == attachment_id))
+						.unwrap_or(&[])
+				};
 				crate::attachments::viewer(
 					ui,
 					if self.component_viewing.is_some() {
@@ -5230,7 +5248,7 @@ impl TimelineView {
 							.map(std::slice::from_ref)
 							.unwrap_or(&[])
 					} else {
-						&m.attachments
+						gallery
 					},
 					attachment_id,
 					crate::attachments::Floor::Fit,
@@ -9854,6 +9872,44 @@ mod tests {
 		assert!(view.viewing.is_none() && view.revealed.is_empty());
 		assert!(!hidden_again.contains("SPOILER_hidden.png"));
 		assert!(images.take_requests().is_empty());
+		let mut mixed = state.timeline.get(Id(1)).unwrap().clone();
+		let mut spoiler = mixed.attachments[0].clone();
+		spoiler.id = Id(70);
+		spoiler.media.url = Some("https://cdn.discordapp.com/attachments/2/70/hidden.png".into());
+		let plain = |id| model::Attachment {
+			id: Id(id),
+			filename: format!("plain-{id}.png"),
+			description: None,
+			spoiler: false,
+			media: model::EmbedMedia {
+				url: Some(format!(
+					"https://cdn.discordapp.com/attachments/2/{id}/plain.png"
+				)),
+				..spoiler.media.clone()
+			},
+			..spoiler.clone()
+		};
+		mixed.attachments = vec![plain(60), spoiler.clone(), plain(80)];
+		state.timeline.insert(mixed.clone(), true, false).unwrap();
+		state.revision += 1;
+		render(&mut view, &mut state, &mut images);
+		let requests = images.take_requests();
+		assert!(requests.iter().any(|key| key.contains("/2/60/")));
+		assert!(requests.iter().any(|key| key.contains("/2/80/")));
+		assert!(requests.iter().all(|key| !key.contains("/2/70/")));
+		view.viewing = Some((mixed.id, Id(70)));
+		render(&mut view, &mut state, &mut images);
+		assert!(view.viewing.is_none());
+		view.viewing = Some((mixed.id, Id(60)));
+		render(&mut view, &mut state, &mut images);
+		render(&mut view, &mut state, &mut images);
+		assert_eq!(view.viewing, Some((mixed.id, Id(60))));
+		assert!(
+			images
+				.take_requests()
+				.iter()
+				.all(|key| !key.contains("/2/70/"))
+		);
 	}
 
 	fn label_ys(output: &egui::FullOutput) -> BTreeMap<String, f32> {
