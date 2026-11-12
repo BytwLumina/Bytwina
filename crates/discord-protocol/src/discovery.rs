@@ -158,7 +158,7 @@ mod tests {
 	#[test]
 	fn a_wrapper_page_keeps_supported_rows_and_drops_the_rest() {
 		let json = r#"{"guilds":[
-			{"id":"1","name":"Supported","description":"Hello","icon":"a_12","vanity_url_code":"chat",
+			{"id":"1","name":"Supported","description":"Hello","icon":"a_0123456789abcdef0123456789abcdef","vanity_url_code":"chat",
 			 "approximate_member_count":400,"approximate_presence_count":20,"primary_category_id":5,
 			 "features":["VERIFIED","COMMUNITY"]},
 			{"id":"2","name":"","icon":"../../evil"},
@@ -166,6 +166,10 @@ mod tests {
 		],"total":40,"limit":24,"offset":0}"#;
 		let page = decode_page(json.as_bytes(), Vec::new()).unwrap();
 		assert_eq!(page.guilds.len(), 1);
+		assert_eq!(
+			page.guilds[0].icon.as_deref(),
+			Some("a_0123456789abcdef0123456789abcdef")
+		);
 		assert!(page.guilds[0].verified && !page.guilds[0].partnered);
 		assert_eq!(page.guilds[0].vanity_url_code.as_deref(), Some("chat"));
 		assert_eq!(page.next_offset(), Some(24));
@@ -177,6 +181,13 @@ mod tests {
 			.is_err()
 		);
 		assert!(decode_page(json.replace(r#""total":40,"#, "").as_bytes(), Vec::new()).is_err());
+		let invalid_hash = json.replace("a_0123456789abcdef0123456789abcdef", "a_12");
+		assert!(
+			decode_page(invalid_hash.as_bytes(), Vec::new())
+				.unwrap()
+				.guilds
+				.is_empty()
+		);
 		let extra = json.replacen("\"guilds\":[", "\"guilds\":[null,", 1);
 		assert_eq!(
 			decode_page(extra.as_bytes(), Vec::new())

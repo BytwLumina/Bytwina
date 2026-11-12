@@ -413,7 +413,7 @@ mod tests {
 		assert_eq!(event.status, model::ScheduledEventStatus::Scheduled);
 		assert_eq!(event.entity_type, model::ScheduledEventEntity::Voice);
 		assert_eq!(event.user_count, 12);
-		assert_eq!(event.scheduled_start_time, Some(1_767_322_845));
+		assert_eq!(event.scheduled_start_time, Some(1_767_323_045));
 		assert_eq!(event.host_channel(), Some(Id(3)));
 	}
 
