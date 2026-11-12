@@ -204,7 +204,8 @@ pub fn extend_frame(window: &Window, extended: bool) -> Result<(), String> {
 mod tests {
 	use super::*;
 	use windows::Win32::UI::WindowsAndMessaging::{
-		CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_OVERLAPPEDWINDOW,
+		CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
+		WS_OVERLAPPEDWINDOW, WS_POPUP,
 	};
 	use windows::core::w;
 
@@ -216,7 +217,7 @@ mod tests {
 				WINDOW_EX_STYLE::default(),
 				w!("STATIC"),
 				w!("caption test"),
-				WS_OVERLAPPEDWINDOW,
+				WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
 				0,
 				0,
 				100,
@@ -228,6 +229,7 @@ mod tests {
 			)
 			.unwrap();
 			let style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+			assert_eq!(style & WS_CAPTION.0 as isize, 0);
 			set_custom_caption(hwnd, true).unwrap();
 			assert_eq!(
 				GetWindowLongPtrW(hwnd, GWL_STYLE),
@@ -243,8 +245,9 @@ mod tests {
 			assert_eq!(GetWindowLongPtrW(hwnd, GWL_STYLE), style);
 			set_custom_caption(hwnd, true).unwrap();
 			// Borderless fullscreen removes the menu while suppression is active.
-			let fullscreen_style = style & !(WS_OVERLAPPEDWINDOW.0 as isize);
-			SetWindowLongPtrW(hwnd, GWL_STYLE, fullscreen_style);
+			let fullscreen_request = style & !(WS_OVERLAPPEDWINDOW.0 as isize);
+			let fullscreen_style = fullscreen_request | WS_THICKFRAME.0 as isize;
+			SetWindowLongPtrW(hwnd, GWL_STYLE, fullscreen_request);
 			set_custom_caption(hwnd, false).unwrap();
 			assert_eq!(GetWindowLongPtrW(hwnd, GWL_STYLE), fullscreen_style);
 			// Disabling twice, or enabling in fullscreen, must not invent a menu.
