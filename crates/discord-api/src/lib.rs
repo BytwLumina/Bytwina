@@ -1649,11 +1649,35 @@ impl DiscordApi {
 				user,
 				request,
 				changes,
-			} => Event::ProfileEdited {
-				user,
-				request,
-				result: self.edit_profile(user, changes).await,
-			},
+				cosmetics,
+			} => {
+				let result = async {
+					let mut profile = self.edit_profile(user, changes).await?;
+					let effect = profile.effect_sku.filter(|_| cosmetics.effects);
+					let frame = profile.frame_sku.filter(|_| cosmetics.frames);
+					if let Ok(result) = tokio::time::timeout(
+						PROFILE_EXTRAS,
+						self.load_profile_collectibles(effect, frame),
+					)
+					.await
+					{
+						let (effect, frame) = result?;
+						profile.effect = effect.map(Box::new);
+						profile.frame = frame.map(Box::new);
+						if !profile.valid() {
+							profile.effect = None;
+							profile.frame = None;
+						}
+					}
+					Ok(profile)
+				}
+				.await;
+				Event::ProfileEdited {
+					user,
+					request,
+					result,
+				}
+			}
 			Command::CancelProfile => Event::Failure(Failure::Protocol),
 			Command::OwnedCollectibles { request } => Event::OwnedCollectibles {
 				request,

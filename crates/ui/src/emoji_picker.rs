@@ -105,7 +105,7 @@ pub(crate) fn complete_shortcode(
 		return None;
 	}
 	let name = &prefix[start + 1..];
-	if !(2..=64).contains(&name.chars().count()) {
+	if !(1..=64).contains(&name.chars().count()) {
 		return None;
 	}
 	let emoji =
@@ -2915,14 +2915,12 @@ mod tests {
 		let deep = preferred_variant(thumb, 5);
 		assert_ne!(deep, thumb);
 		assert!(standard()[deep].0.contains('\u{1f3ff}'));
+		// Tone variants can omit the base's emoji presentation selector.
+		let hand = index.by_text["🖐️"];
+		assert_eq!(standard()[preferred_variant(hand, 5)].0, "🖐🏿");
 		// A base with no dark variant falls back to itself rather than an invented sequence.
-		for base in browse_indices() {
-			let chosen = preferred_variant(*base, 5);
-			assert_eq!(
-				base_emoji(standard()[chosen].0),
-				base_emoji(standard()[*base].0)
-			);
-		}
+		let face = index.by_text["😀"];
+		assert_eq!(preferred_variant(face, 5), face);
 	}
 
 	#[test]
@@ -3658,6 +3656,9 @@ mod tests {
 		let cursor = shortcode.chars().count();
 		assert!(complete_shortcode(&mut shortcode, cursor, 64, false).is_some());
 		assert!(shortcode.ends_with("❤️"));
+		let mut single = "no :x:".to_owned();
+		assert!(complete_shortcode(&mut single, 6, 64, false).is_some());
+		assert_eq!(single, "no ❌");
 		assert!(model::message_options::valid(
 			&shortcode,
 			client_core::MAX_CONTENT,

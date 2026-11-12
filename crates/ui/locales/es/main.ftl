@@ -1,5 +1,9 @@
 # es application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = Cargando tus decoraciones…
+profile-edit-collectibles-empty = No tienes decoraciones disponibles.
+profile-edit-collectibles-current = Decoración actual
+profile-edit-collectibles-keep-current = Mantener la actual
 language-system = Sistema
 language-group = Idioma
 language-label = Idioma de visualización

@@ -472,10 +472,21 @@ struct PurchaseDto {
 	kind: u32,
 	#[serde(default)]
 	name: Option<String>,
+	#[serde(default)]
+	bundled_products: Option<Lenient<Vec<Lenient<PurchaseProductDto>>>>,
 }
 
-/// Owned collectibles offered by the decoration picker. Unknown product types, bundles and
-/// malformed rows are dropped so one bad entry cannot hide the rest of the list.
+#[derive(Deserialize)]
+struct PurchaseProductDto {
+	sku_id: Id,
+	#[serde(rename = "type")]
+	kind: u32,
+	#[serde(default)]
+	name: Option<String>,
+}
+
+/// Owned collectibles offered by the decoration picker. Bundle children are products too;
+/// unknown product types and malformed rows do not hide the rest of the list.
 pub fn decode_purchases(bytes: &[u8]) -> Result<Vec<model::OwnedCollectible>, DecodeError> {
 	if bytes.len() > MAX_PURCHASES_WIRE {
 		return Err(DecodeError);
@@ -483,27 +494,30 @@ pub fn decode_purchases(bytes: &[u8]) -> Result<Vec<model::OwnedCollectible>, De
 	let rows: Vec<Lenient<PurchaseDto>> = crate::decode(bytes)?;
 	let mut owned = Vec::new();
 	let mut seen = std::collections::BTreeSet::new();
+	let mut add = |sku: Id, kind: u32, name: Option<String>| {
+		if owned.len() >= model::MAX_OWNED_COLLECTIBLES {
+			return;
+		}
+		let (Some(kind), Some(name)) = (model::CollectibleKind::from_id(kind), name) else {
+			return;
+		};
+		let item = model::OwnedCollectible { sku, kind, name };
+		if item.valid() && seen.insert(item.sku) {
+			owned.push(item);
+		}
+	};
 	for row in rows {
 		let Some(row) = Lenient::value(Some(row)) else {
 			continue;
 		};
-		let Some(kind) = model::CollectibleKind::from_id(row.kind) else {
-			continue;
-		};
-		let Some(name) = row.name else {
-			continue;
-		};
-		let item = model::OwnedCollectible {
-			sku: row.sku_id,
-			kind,
-			name,
-		};
-		if !item.valid() || !seen.insert(item.sku) {
-			continue;
-		}
-		owned.push(item);
-		if owned.len() >= model::MAX_OWNED_COLLECTIBLES {
-			break;
+		if row.kind == 1000 {
+			for product in Lenient::value(row.bundled_products).unwrap_or_default() {
+				if let Some(product) = Lenient::value(Some(product)) {
+					add(product.sku_id, product.kind, product.name);
+				}
+			}
+		} else {
+			add(row.sku_id, row.kind, row.name);
 		}
 	}
 	Ok(owned)
@@ -511,6 +525,42 @@ pub fn decode_purchases(bytes: &[u8]) -> Result<Vec<model::OwnedCollectible>, De
 
 #[cfg(test)]
 mod tests {
+	#[test]
+	fn purchased_bundles_expose_only_valid_unique_products() {
+		let bytes = serde_json::to_vec(&serde_json::json!([
+			{"sku_id":"10", "type":1000, "name":"Bundle", "bundled_products":[
+				{"sku_id":"1", "type":0, "name":"Decoration"},
+				{"sku_id":"2", "type":3, "name":"Frame"},
+				{"sku_id":"3", "type":999, "name":"Unknown"},
+				{"sku_id":"4", "type":1, "name":"bad\nname"},
+				null
+			]},
+			{"sku_id":"1", "type":0, "name":"Duplicate"},
+			{"sku_id":"5", "type":1, "name":"Effect"}
+		]))
+		.unwrap();
+		let owned = super::decode_purchases(&bytes).unwrap();
+		assert_eq!(
+			owned.iter().map(|item| item.sku.0).collect::<Vec<_>>(),
+			[1, 2, 5]
+		);
+		assert_eq!(owned[1].kind, model::CollectibleKind::Frame);
+	}
+
+	#[test]
+	fn purchased_products_obey_wire_and_item_limits() {
+		let rows: Vec<_> = (1..=model::MAX_OWNED_COLLECTIBLES + 1)
+			.map(
+				|sku| serde_json::json!({"sku_id": sku.to_string(), "type": 0, "name": "Synthetic"}),
+			)
+			.collect();
+		let bytes = serde_json::to_vec(&rows).unwrap();
+		assert_eq!(
+			super::decode_purchases(&bytes).unwrap().len(),
+			model::MAX_OWNED_COLLECTIBLES
+		);
+		assert!(super::decode_purchases(&vec![b' '; super::MAX_PURCHASES_WIRE + 1]).is_err());
+	}
 	#[test]
 	fn name_styles_parse_bounded_and_members_override_users() {
 		let user: crate::UserDto = serde_json::from_value(serde_json::json!({
@@ -677,6 +727,10 @@ mod tests {
 		let [top, bottom, side] = frame.overflow(300.0);
 		assert_eq!((top, bottom, side), (76.0, 53.0, 14.0));
 		assert!(decode_frame(frame_json_without_layers().as_bytes(), Id(30)).is_err());
+		// Integer layer fields have no documented mapping; do not invent one.
+		let numeric = json!({"sku_id":"30","items":[{"type":3,"sku_id":"30",
+			"layers":[{"id":"31","type":0,"order":0,"anchor":0}]}]});
+		assert!(decode_frame(numeric.to_string().as_bytes(), Id(30)).is_err());
 	}
 
 	fn frame_json_without_layers() -> String {

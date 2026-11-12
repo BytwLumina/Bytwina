@@ -48,9 +48,27 @@ impl Draft {
 				Some(None) if profile.banner.is_none() => None,
 				other => other.clone(),
 			},
-			avatar_decoration_sku: self.decoration,
-			nameplate_sku: self.nameplate,
-			profile_effect_sku: self.effect,
+			avatar_decoration_sku: self.decoration.filter(|selected| {
+				*selected
+					!= profile
+						.user
+						.cosmetics
+						.as_deref()
+						.and_then(|cosmetics| cosmetics.decoration.as_ref())
+						.map(|decoration| decoration.sku)
+			}),
+			nameplate_sku: self.nameplate.filter(|selected| {
+				*selected
+					!= profile
+						.user
+						.cosmetics
+						.as_deref()
+						.and_then(|cosmetics| cosmetics.nameplate.as_ref())
+						.map(|nameplate| nameplate.sku)
+			}),
+			profile_effect_sku: self
+				.effect
+				.filter(|selected| *selected != profile.effect_sku),
 		}
 	}
 	fn rebase(&mut self, before: &Self, fresh: &Self) {
@@ -70,6 +88,7 @@ impl Draft {
 }
 
 /// What the preview card paints inside the avatar circle.
+#[derive(Clone, Copy)]
 enum Picture<'a> {
 	/// The account's current picture, fetched like any other avatar.
 	Remote,
@@ -182,7 +201,8 @@ impl Editor {
 			commands.push(command);
 		}
 		// The decoration picker needs the owned list; load it once per session.
-		if state.collectibles.owned.is_empty()
+		if !state.demo
+			&& !state.collectibles.loaded
 			&& !state.collectibles.busy
 			&& state.collectibles.error.is_none()
 			&& state.auth == client_core::auth::AuthState::Authenticated
@@ -190,6 +210,27 @@ impl Editor {
 			let request = state.collectibles.request.wrapping_add(1);
 			state.collectibles.begin(request);
 			commands.push(Command::OwnedCollectibles { request });
+		}
+		if !state.demo && state.collectibles.busy {
+			ui.horizontal(|ui| {
+				ui.add(egui::Spinner::new().size(14.0));
+				ui.label(crate::i18n::translate("profile-edit-collectibles-loading"));
+			});
+		} else if let Some(error) = state.collectibles.error {
+			design::notice(ui, design::Level::Error, error);
+			if state.auth == client_core::auth::AuthState::Authenticated
+				&& design::text_action(ui, &crate::i18n::translate("channel-menu-show-retry"))
+					.clicked()
+			{
+				let request = state.collectibles.request.wrapping_add(1);
+				state.collectibles.begin(request);
+				commands.push(Command::OwnedCollectibles { request });
+			}
+		} else if !state.demo && state.collectibles.loaded && state.collectibles.owned.is_empty() {
+			design::hint(
+				ui,
+				&crate::i18n::translate("profile-edit-collectibles-empty"),
+			);
 		}
 		if self.submitted == Some(state.own_profile.request) && !state.own_profile.saving {
 			self.submitted = None;
@@ -575,6 +616,12 @@ fn form(
 		"profile-edit-form-decoration",
 		model::CollectibleKind::Decoration,
 		&mut draft.decoration,
+		profile.user.cosmetics.as_deref().and_then(|cosmetics| {
+			cosmetics
+				.decoration
+				.as_ref()
+				.map(|decoration| decoration.sku)
+		}),
 		owned,
 	);
 	ui.add_space(6.0);
@@ -583,6 +630,11 @@ fn form(
 		"profile-edit-form-nameplate",
 		model::CollectibleKind::Nameplate,
 		&mut draft.nameplate,
+		profile
+			.user
+			.cosmetics
+			.as_deref()
+			.and_then(|cosmetics| cosmetics.nameplate.as_ref().map(|nameplate| nameplate.sku)),
 		owned,
 	);
 	ui.add_space(6.0);
@@ -591,6 +643,7 @@ fn form(
 		"profile-edit-form-profile-effect",
 		model::CollectibleKind::Effect,
 		&mut draft.effect,
+		profile.effect_sku,
 		owned,
 	);
 	ui.add_space(6.0);
@@ -643,16 +696,20 @@ fn decor_row(
 	label: &str,
 	kind: model::CollectibleKind,
 	slot: &mut Option<Option<Id>>,
+	current: Option<Id>,
 	owned: &[model::OwnedCollectible],
 ) {
-	let chosen = match slot {
-		Some(Some(sku)) => Some(*sku),
-		_ => None,
-	};
+	let chosen = slot.unwrap_or(current);
 	let name = chosen
 		.and_then(|sku| owned.iter().find(|item| item.sku == sku))
 		.map_or_else(
-			|| crate::i18n::translate("profile-edit-form-default"),
+			|| {
+				crate::i18n::translate(if chosen.is_some() {
+					"profile-edit-collectibles-current"
+				} else {
+					"profile-edit-form-none"
+				})
+			},
 			|item| item.name.clone(),
 		);
 	design::row(ui, label, None, |ui| {
@@ -664,7 +721,7 @@ fn decor_row(
 					.selectable_value(
 						slot,
 						None,
-						crate::i18n::translate("profile-edit-form-default"),
+						crate::i18n::translate("profile-edit-collectibles-keep-current"),
 					)
 					.clicked()
 				{
@@ -756,6 +813,7 @@ fn preview(
 	let theme = crate::profiles::Theme::new(&colors, profile.theme_colors);
 	let rgb = |c: u32| egui::Color32::from_rgb((c >> 16) as u8, (c >> 8) as u8, c as u8);
 	ui.scope(|ui| {
+		let frame_back = ui.painter().add(egui::Shape::Noop);
 		let background = ui.painter().add(egui::Shape::Noop);
 		ui.visuals_mut().override_text_color = Some(theme.text);
 		ui.visuals_mut().hyperlink_color = theme.link;
@@ -787,6 +845,15 @@ fn preview(
 			);
 			ui.painter()
 				.circle_filled(avatar.center(), 46.0, theme.card);
+			let current_decoration = profile
+				.user
+				.cosmetics
+				.as_deref()
+				.and_then(|cosmetics| cosmetics.decoration.as_ref())
+				.map(|decoration| decoration.sku);
+			let show_decoration = draft
+				.decoration
+				.is_none_or(|choice| choice == current_decoration);
 			let response =
 				ui.scope_builder(
 					egui::UiBuilder::new().max_rect(avatar),
@@ -798,10 +865,21 @@ fn preview(
 						),
 						Picture::Removed => design::avatar(ui, &profile.user.name, 80.0),
 						Picture::Remote => avatars.with_avatar_animation(true, |avatars| {
-							avatars.show_plain(ui, &profile.user, 80.0, demo)
+							if show_decoration {
+								avatars.show_plain(ui, &profile.user, 80.0, demo)
+							} else {
+								let mut user = profile.user.clone();
+								if let Some(cosmetics) = &mut user.cosmetics {
+									cosmetics.decoration = None;
+								}
+								avatars.show_plain(ui, &user, 80.0, demo)
+							}
 						}),
 					},
 				);
+			if show_decoration && !matches!(picture, Picture::Remote) {
+				avatars.paint_decoration(ui, &profile.user, 80.0, avatar, demo);
+			}
 			if clickable {
 				let hit = ui.interact(
 					avatar,
@@ -894,6 +972,22 @@ fn preview(
 		}
 		let rect = ui.min_rect();
 		ui.painter().set(background, theme.background(rect));
+		crate::profiles::paint_collectibles(
+			ui,
+			avatars,
+			profile,
+			rect,
+			frame_back,
+			(
+				true,
+				None,
+				true,
+				draft
+					.effect
+					.is_none_or(|choice| choice == profile.effect_sku),
+			),
+			demo,
+		);
 	});
 	action
 }
@@ -935,6 +1029,52 @@ mod tests {
 		assert_eq!(draft.pronouns, "she/her");
 		assert!(draft.name.is_empty() && draft.bio.is_empty());
 		assert_eq!(draft.changes(&profile).pronouns, None);
+		profile.user.cosmetics = Some(Box::new(test_support::synthetic_cosmetics()));
+		let mut draft = Draft::from_profile(&profile);
+		draft.decoration = Some(Some(Id(9101)));
+		draft.nameplate = Some(Some(Id(9102)));
+		draft.effect = Some(profile.effect_sku);
+		assert!(draft.changes(&profile) == ProfileEdit::default());
+		draft.decoration = Some(None);
+		draft.effect = Some(Some(Id(5)));
+		let changes = draft.changes(&profile);
+		assert_eq!(changes.avatar_decoration_sku, Some(None));
+		assert_eq!(changes.profile_effect_sku, Some(Some(Id(5))));
+		assert_eq!(changes.nameplate_sku, None);
+	}
+
+	#[test]
+	fn empty_owned_list_is_not_requested_again_on_each_frame() {
+		let ctx = egui::Context::default();
+		let mut state = test_support::demo_state();
+		state.demo = false;
+		state.auth = client_core::auth::AuthState::Authenticated;
+		state.gateway_connected = true;
+		let mut editor = Editor::default();
+		let mut avatars = Avatars::default();
+		let mut frame = |state: &mut State| {
+			let mut commands = Vec::new();
+			ctx.run_ui(Default::default(), |ui| {
+				editor.show(ui, state, &mut avatars, &mut commands);
+			})
+			.drop_without_applying_deltas();
+			commands
+		};
+		let commands = frame(&mut state);
+		assert!(
+			commands
+				.iter()
+				.any(|command| matches!(command, Command::OwnedCollectibles { .. }))
+		);
+		let request = state.collectibles.request;
+		state.collectibles.finish(request, Ok(Vec::new()));
+		for _ in 0..3 {
+			assert!(
+				!frame(&mut state)
+					.iter()
+					.any(|command| matches!(command, Command::OwnedCollectibles { .. }))
+			);
+		}
 	}
 	#[test]
 	fn editor_saves_once_preserves_failed_draft_and_cancels_in_both_themes() {
@@ -993,6 +1133,7 @@ mod tests {
 					user,
 					request,
 					changes: None,
+					..
 				} = commands.into_iter().next().unwrap()
 				else {
 					panic!("load expected")
@@ -1060,6 +1201,7 @@ mod tests {
 					user,
 					request,
 					changes: Some(changes),
+					..
 				} = sent.pop().unwrap()
 				else {
 					panic!("save expected")

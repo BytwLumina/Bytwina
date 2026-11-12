@@ -13,8 +13,8 @@ jobs:
   # `cargo xtask check` runs fmt, clippy, the workspace tests, the no-default-features
   # check and the policy gate in sequence, and every one of them compiles the whole
   # dependency graph again under a different feature set. Running them as separate jobs
-  # lets the runners work in parallel, and sccache lets each job reuse the dependency
-  # objects the others already compiled instead of rebuilding them.
+  # lets the runners work in parallel. The shared sccache backend can reuse compatible
+  # compilation outputs across jobs and runs; cold or concurrent builds can still miss.
   lint:
     if: github.event_name == 'push' || github.event.pull_request.draft == false
     strategy:
@@ -24,20 +24,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
           components: rustfmt, clippy
-      # sccache stores every crate compilation in the Actions cache, so the shared
-      # dependency graph is compiled once per feature set across the whole pipeline.
+      # sccache stores cacheable compilations in the Actions cache for later runs.
       - uses: mozilla-actions/sccache-action@v0.0.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2.9.2
         with:
-          # sccache replaces the target directory cache: it is far smaller and it is
-          # shared between the feature sets that this pipeline builds.
+          # Registry data is cached here; compatible compiler outputs use sccache.
           cache-targets: false
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/main' }}
@@ -55,6 +54,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@1.98.1
@@ -77,6 +77,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@1.98.1
@@ -104,6 +105,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@1.98.1
@@ -126,6 +128,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dtolnay/rust-toolchain@1.98.1
@@ -170,6 +173,9 @@ jobs:
     # from Cargo.toml. Thin LTO with parallel codegen units is several times faster.
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
+      # Preserve cache statistics through the long final link.
+      SCCACHE_IDLE_TIMEOUT: "5400"
       CARGO_PROFILE_RELEASE_LTO: thin
       CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
     steps:

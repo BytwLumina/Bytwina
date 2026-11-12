@@ -2103,7 +2103,8 @@ mod tests {
 				icon: None,
 				emojis: None,
 			}],
-			channels: vec![channel(9, 13, 0, None)],
+			// Stage channels are supported; a directory still needs the Discord fallback.
+			channels: vec![channel(9, 14, 0, None)],
 			demo: true,
 			..State::default()
 		};

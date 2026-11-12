@@ -150,7 +150,16 @@ primary UI is not Electron and not a WebView; webviews exist only for login and 
 | Licence | Dual MIT OR Apache-2.0, `publish = false` |
 | Author | "Lumina contributors"; org `BytwLumina`; repo `BytwLumina/Bytwina` |
 | Platforms | **Windows 10/11 is the current target**; macOS/Linux code exists but builds are paused |
-| Size | ~356k lines of Rust across 14 crates and one app (excluding `vendor/`) |
+| Size | 1,465 files; 401,505 physical source lines including `vendor/` (snapshot below) |
+
+Repository size snapshot (2026-11-12, `2d78d4d`): 742 source files / 401,505 physical lines,
+including 98 files / 29,833 lines in `vendor/`. Excluding `vendor/`: 1,322 files in total,
+644 source files / 371,672 lines, of which 592 Rust files / 366,162 lines. These counts use
+existing Git-tracked and non-ignored untracked files; ignored build outputs are excluded. Source
+includes `.rs`, `.py`, `.rb`, `.kt`, `.js`, `.cjs`, `.mjs`, `.html`, `.rc`, `.sh`, `.ps1`,
+`.cmd`, `.nix`, `.nsi` and the extensionless `AppRun` script, including tests and generated code.
+Other configuration, documentation, translations and assets are excluded from source lines.
+Physical lines include blank lines and comments, so they are not executable-line counts.
 
 Largest files, so you know where the weight is: `crates/ui/src/lib.rs` (10.4k lines),
 `apps/desktop/src/main.rs` (7.5k), `crates/client-core/src/lib.rs` (6.8k),
@@ -638,9 +647,10 @@ Changing any of these without updating the test breaks CI:
 - Windows binaries are unsigned: SmartScreen warns, users choose "More info → Run anyway".
 - Several protocol claims in `docs/discord-compatibility.md` are explicitly unverified; do not
   promote them to verified without evidence.
-- The emoji picker lists one tile per base emoji and expands skin-tone variants on search, but has
-  no tone chooser (Discord's `emoji_tone`) and no category jump bar; the bundled CLDR order allows
-  one without new data.
+- Some older compatibility sections are superseded by newer code: pin/unpin is implemented through
+  `State::prepare_pin` and `Command::Pin`; normal-account Discord behavior remains unverified.
+- The emoji picker includes a skin-tone selector and category filter bar; these re-filter the
+  Unicode catalog rather than jumping within it. See `crates/ui/src/emoji_picker.rs`.
 - Name styles cover 14 of Discord's fonts (ids 1-6, 8-10, 12-16): Néo-Castel (7) and Hexagon (17)
   have no identified source and Default (11) falls back to the interface font.
 - Badges beside a message author or in a member row appear only for profiles already cached; a

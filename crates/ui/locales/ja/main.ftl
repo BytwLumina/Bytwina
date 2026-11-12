@@ -1,5 +1,9 @@
 # ja application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = 所有しているデコレーションを読み込み中…
+profile-edit-collectibles-empty = 所有しているデコレーションがありません。
+profile-edit-collectibles-current = 現在のデコレーション
+profile-edit-collectibles-keep-current = 現在のものを維持
 language-system = システム
 language-group = 言語
 language-label = 表示言語

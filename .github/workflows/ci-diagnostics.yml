@@ -39,6 +39,8 @@ jobs:
     env:
       TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       TARGET_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -47,8 +49,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
           components: rustfmt
-      # The failing run already compiled most of the dependency graph; sccache makes
-      # the repeated check below reuse those objects instead of rebuilding them.
+      # Reuse compatible compiler outputs from earlier runs when they are cached.
       - uses: mozilla-actions/sccache-action@v0.0.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,6 +141,8 @@ jobs:
       contents: write
     env:
       TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v7.0.1
         with:

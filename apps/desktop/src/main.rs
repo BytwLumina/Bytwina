@@ -1922,6 +1922,8 @@ impl Desktop {
 					state
 				}
 			};
+			state.collectibles.owned = demo_collectibles();
+			state.collectibles.loaded = true;
 		}
 		#[cfg(feature = "demo")]
 		if demo && std::env::args().any(|arg| arg == "--demo-group-dm") {
@@ -4643,6 +4645,7 @@ impl Desktop {
 					user,
 					request,
 					changes,
+					..
 				} => {
 					let result = self
 						.state
@@ -4678,6 +4681,34 @@ impl Desktop {
 									// Synthetic hash: the fixture never uploads or fetches images.
 									profile.user.avatar = avatar
 										.map(|_| "0123456789abcdef0123456789abcdef".to_owned());
+								}
+								if let Some(sku) = changes.avatar_decoration_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.decoration = sku.and_then(|sku| {
+										let mut decoration =
+											test_support::synthetic_cosmetics().decoration?;
+										decoration.sku = sku;
+										Some(decoration)
+									});
+								}
+								if let Some(sku) = changes.nameplate_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.nameplate = sku.and_then(|sku| {
+										let mut nameplate =
+											test_support::synthetic_cosmetics().nameplate?;
+										nameplate.sku = sku;
+										Some(nameplate)
+									});
+								}
+								if let Some(sku) = changes.profile_effect_sku {
+									profile.effect_sku = sku;
+									profile.effect = sku.and_then(|sku| {
+										let mut effect = ui::synthetic_own_profile(own).effect?;
+										effect.sku = sku;
+										Some(effect)
+									});
 								}
 							}
 							Ok(Box::new(profile))

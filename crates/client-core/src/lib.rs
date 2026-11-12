@@ -360,6 +360,7 @@ pub enum Command {
 		user: Id,
 		request: u64,
 		changes: Option<model::ProfileEdit>,
+		cosmetics: model::CosmeticPreferences,
 	},
 	Voice(voice::Command),
 	Members {
@@ -2345,6 +2346,15 @@ impl State {
 		}
 		if let Command::EditProfile { user, request, .. } = command {
 			self.reject_own_profile(user, request);
+			return;
+		}
+		if let Command::OwnedCollectibles { request } = command {
+			self.collectibles.finish(
+				request,
+				Err(auth::Failure::ProtocolAt(
+					"Owned decorations were not queued; try again",
+				)),
+			);
 			return;
 		}
 		if let Command::BadgeSettings { request, .. } = command {

@@ -1,5 +1,9 @@
 # en-US application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = 正在加载你的装饰…
+profile-edit-collectibles-empty = 未找到已拥有的装饰。
+profile-edit-collectibles-current = 当前装饰
+profile-edit-collectibles-keep-current = 保留当前装饰
 language-system = 系统
 language-group = 语言
 language-label = 显示语言

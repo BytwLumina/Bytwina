@@ -1,6 +1,10 @@
 # vi application translations. Generated from en-US; keys omitted here fall
 # back to English. Complex messages with placeables or selectors stay in en-US.
 
+profile-edit-collectibles-loading = Đang tải đồ trang trí của bạn…
+profile-edit-collectibles-empty = Không tìm thấy đồ trang trí đã sở hữu.
+profile-edit-collectibles-current = Đồ trang trí hiện tại
+profile-edit-collectibles-keep-current = Giữ hiện tại
 language-system = Hệ thống
 language-group = Ngôn ngữ
 language-label = Ngôn ngữ hiển thị

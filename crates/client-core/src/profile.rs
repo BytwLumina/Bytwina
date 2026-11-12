@@ -298,6 +298,7 @@ impl State {
 			user,
 			request: self.own_profile.request,
 			changes: None,
+			cosmetics: self.profile_cosmetics,
 		})
 	}
 	pub fn save_own_profile(&mut self, changes: model::ProfileEdit) -> Option<Command> {
@@ -316,6 +317,7 @@ impl State {
 			user,
 			request: self.own_profile.request,
 			changes: Some(changes),
+			cosmetics: self.profile_cosmetics,
 		})
 	}
 	pub fn clear_own_profile(&mut self) {

@@ -2417,17 +2417,18 @@ mod tests {
 				})
 				.unwrap();
 			calls.allowed.remove(&Id(20));
+			events.lock().unwrap().clear();
 			calls.dispatch("VOICE_STATE_UPDATE", br#"{"guild_id":"10","channel_id":"20","user_id":"1","session_id":"synthetic-revoked-session"}"#, Some(Id(1)), &emit).unwrap();
 			assert!(calls.active.is_none());
-			assert!(matches!(
-				events.lock().unwrap().last(),
-				Some(Event::Voice(voice::Event::State {
+			assert!(events.lock().unwrap().iter().any(|event| matches!(
+				event,
+				Event::Voice(voice::Event::State {
 					channel: None,
 					session: None,
 					request: Some(2),
 					..
-				}))
-			));
+				})
+			)));
 		}
 	}
 

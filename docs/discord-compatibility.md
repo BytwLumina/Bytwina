@@ -86,6 +86,11 @@ verified against a live session:
   according to the documentation. Account fields keep going to `PATCH /users/@me`.
 - `PATCH /users/@me` with `avatar_decoration_sku_id` and `nameplate_sku_id`; a nested `null` clears.
 - `GET /users/@me/collectibles-purchases` for the owned list the picker shows.
+- The picker also reads immediate products in purchased bundles, up to the existing 256-item and
+  512 KiB response limits. It does not support grouped variants or equipping profile frames.
+  The account editor loads equipped effect and frame artwork only when their display settings
+  permit it. Newly selected artwork is not previewed until the saved profile is read back.
+  These paths remain unofficial and unverified against a live account.
 - `GET /soundboard-default-sounds`, `GET /guilds/{id}/soundboard-sounds` and
   `POST /channels/{id}/send-soundboard-sound`.
 - `PUT /channels/{id}/voice-status` with a status of at most 500 characters.
@@ -256,16 +261,23 @@ establish it.
   delay. The timeline starts once every layer has loaded or failed, so a short opening
   layer is not skipped while it downloads. It restarts when the card reopens, and one
   shared random index picks among `randomizedSources`. With animation disabled or the
-  window unfocused, the card shows `staticFrameSrc`, falling back to the first frame of `reducedMotionSrc`.
+  window unfocused, the card shows `staticFrameSrc`, falling back to the first frame of
+  `reducedMotionSrc`. When neither is available, it approximates a still using the first frame of
+  each layer with the earliest start time, in z-order; this fallback is not verified against Discord.
 - **Frames** fetch static layers from `/media/v1/collectibles-shop/{sku}/{layer}/static`
   and scale them from `inner_width` (default 1200). Staples pin to the top or bottom and
   overflow by `overflow_top`/`overflow_bottom`/`overflow_horizontal`. Rails align inside
   the card height and are hidden when responsive and the card is at least 0.625 as wide
   as it is tall. Borders tile down the card. Back layers sit behind the card and front
-  layers over it. The popout keeps the overflow on screen.
+  layers over it. The popout keeps the overflow on screen. The community reference describes layer
+  `type`, `order` and `anchor` as integers without a value mapping, while the decompiled mobile
+  client at [ad8e236](https://github.com/Wumpus-Central/discord-mobile-datamining/tree/ad8e2365ca125cbf01109d0733a1e0504a4c37aa/discord_common/js/shared/shared-constants)
+  uses string constants. The parser accepts only those known strings; numeric layers are rejected
+  until a reliable mapping is available. Neither form has been verified against a live response.
 
 Unknown palettes, layer kinds, anchors, malformed values and expired items are dropped
-without rejecting the user, member row or profile. Cosmetic editing is not supported. All
+without rejecting the user, member row or profile. Cosmetic editing was added later as described
+above; selecting a profile frame is not supported. All
 five are shown by default, matching the official client; each can be hidden individually in
 Settings › Appearance › Profile cosmetics, and hidden ones stay unrequested and without
 catalog reads. This is a local display choice; nothing is sent to Discord.

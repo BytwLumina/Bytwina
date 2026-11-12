@@ -1,5 +1,9 @@
 # ru application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = Загрузка ваших украшений…
+profile-edit-collectibles-empty = Купленные украшения не найдены.
+profile-edit-collectibles-current = Текущее украшение
+profile-edit-collectibles-keep-current = Сохранить текущее
 language-system = Система
 language-group = Язык
 language-label = Отображаемый язык

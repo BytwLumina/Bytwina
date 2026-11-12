@@ -1,5 +1,9 @@
 # cs application translations. Edit with Weblate or any Fluent editor.
 
+profile-edit-collectibles-loading = Načítání vašich dekorací…
+profile-edit-collectibles-empty = Nebyly nalezeny žádné vlastněné dekorace.
+profile-edit-collectibles-current = Aktuální dekorace
+profile-edit-collectibles-keep-current = Ponechat aktuální
 language-system = Systém
 language-group = Jazyk
 language-label = Jazyk zobrazení
