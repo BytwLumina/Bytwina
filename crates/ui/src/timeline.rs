@@ -167,6 +167,7 @@ struct Revealed {
 	content: u64,
 	text: u32,
 	media: bool,
+	attachments: u16,
 }
 impl Revealed {
 	fn fingerprint(message: &Message) -> u64 {
@@ -181,11 +182,50 @@ impl Revealed {
 			content: Self::fingerprint(message),
 			text,
 			media,
+			attachments: 0,
 		}
 	}
 	fn matches(&self, message: &Message) -> bool {
 		self.content == Self::fingerprint(message)
 	}
+	fn attachment_visible(&self, message: &Message, attachment: &model::Attachment) -> bool {
+		!crate::embeds::attachment_spoiler(attachment)
+			|| (self.matches(message)
+				&& message
+					.attachments
+					.iter()
+					.position(|a| a.id == attachment.id)
+					.is_some_and(|index| {
+						self.attachments.checked_shr(index as u32).unwrap_or(0) & 1 != 0
+					}))
+	}
+}
+fn attachment_visible(
+	message: &Message,
+	attachment: &model::Attachment,
+	reveal: Option<&Revealed>,
+) -> bool {
+	!crate::embeds::attachment_spoiler(attachment)
+		|| reveal.is_some_and(|reveal| reveal.attachment_visible(message, attachment))
+}
+fn attachment_gallery(
+	message: &Message,
+	current: Id,
+	reveal: Option<&Revealed>,
+) -> Vec<model::Attachment> {
+	if !message
+		.attachments
+		.iter()
+		.any(|a| a.id == current && attachment_visible(message, a, reveal))
+	{
+		return Vec::new();
+	}
+	message
+		.attachments
+		.iter()
+		.filter(|a| attachment_visible(message, a, reveal))
+		.cloned()
+		.collect()
 }
 pub fn visible_range(rows: &[(Id, f32)], min: f32, max: f32) -> (usize, usize, f32) {
 	let mut top = 0.0;
@@ -2259,7 +2299,7 @@ impl TimelineView {
 										.value(),
 									)) || !crate::embeds::attachment_spoiler(attachment)
 									|| self.revealed.get(id).is_some_and(|reveal| {
-										reveal.media && reveal.matches(message)
+										reveal.attachment_visible(message, attachment)
 									}))
 						})
 						.map(|message| (message, attachment.clone()))
@@ -3755,6 +3795,9 @@ impl TimelineView {
 												text,
 											);
 											let mut media = before.1;
+											let before_attachments =
+												reveal.map_or(0, |reveal| reveal.attachments);
+											let mut attachments = before_attachments;
 											let content_shown =
 												system.as_ref().is_some_and(|s| s.content_shown);
 											if !content_shown
@@ -3825,24 +3868,25 @@ impl TimelineView {
 												);
 											}
 											let concealed =
-												crate::embeds::has_media_spoilers(message)
+												crate::embeds::has_embed_spoilers(message)
 													&& !media;
 											if !message.extra_content.components_v2 {
 												let previous_view = self.viewing;
-												for run in message
-													.attachments
-													.split(|a| {
-														concealed
-															&& crate::embeds::attachment_spoiler(a)
-													})
-													.filter(|run| !run.is_empty())
-												{
-													crate::attachments::show_subset(
-														ui, message, run, avatars, &mut self.viewing, &mut self.opening,
-														&mut self.download, &mut self.audio, &mut self.video, state.demo,
-														&mut surface, crate::design::MessageCardSurface::Conversation,
-													);
-												}
+												crate::attachments::show_with_reveals(
+													ui,
+													message,
+													&message.attachments,
+													avatars,
+													&mut self.viewing,
+													&mut self.opening,
+													&mut self.download,
+													&mut self.audio,
+													&mut self.video,
+													state.demo,
+													&mut surface,
+													crate::design::MessageCardSurface::Conversation,
+													Some(&mut attachments),
+												);
 												if self.viewing != previous_view {
 													self.component_viewing = None;
 													self.embed_viewing = None;
@@ -3911,14 +3955,16 @@ impl TimelineView {
 													),
 												));
 											}
-											if before != (text, media) {
-												if text == 0 && !media {
+											if before != (text, media)
+												|| before_attachments != attachments
+											{
+												if text == 0 && !media && attachments == 0 {
 													self.revealed.remove(&id);
 												} else {
-													self.revealed.insert(
-														id,
-														Revealed::new(message, text, media),
-													);
+													let mut revealed =
+														Revealed::new(message, text, media);
+													revealed.attachments = attachments;
+													self.revealed.insert(id, revealed);
 												}
 												self.heights.remove(&id);
 												ui.ctx().request_repaint();
@@ -5201,11 +5247,6 @@ impl TimelineView {
 			}
 		}
 		if let Some((message_id, attachment_id)) = self.viewing {
-			let revealed = |m: &Message| {
-				self.revealed
-					.get(&m.id)
-					.is_some_and(|r| r.media && r.matches(m))
-			};
 			let message = state
 				.timeline
 				.get(message_id)
@@ -5224,21 +5265,14 @@ impl TimelineView {
 								egui::Id::unique((&m.components, &m.attachments)).value(),
 							)
 					} else {
-						revealed(m)
-							|| m.attachments.iter().any(|a| {
-								a.id == attachment_id && !crate::embeds::attachment_spoiler(a)
-							})
+						m.attachments.iter().any(|a| {
+							a.id == attachment_id
+								&& attachment_visible(m, a, self.revealed.get(&m.id))
+						})
 					}
 				});
 			self.viewing = message.and_then(|m| {
-				let gallery = if revealed(m) {
-					&m.attachments[..]
-				} else {
-					m.attachments
-						.split(crate::embeds::attachment_spoiler)
-						.find(|run| run.iter().any(|a| a.id == attachment_id))
-						.unwrap_or(&[])
-				};
+				let gallery = attachment_gallery(m, attachment_id, self.revealed.get(&m.id));
 				crate::attachments::viewer(
 					ui,
 					if self.component_viewing.is_some() {
@@ -5248,7 +5282,7 @@ impl TimelineView {
 							.map(std::slice::from_ref)
 							.unwrap_or(&[])
 					} else {
-						gallery
+						&gallery
 					},
 					attachment_id,
 					crate::attachments::Floor::Fit,
@@ -9854,8 +9888,9 @@ mod tests {
 				.all(|key| !key.starts_with("media:")),
 			"Hidden attachments must not request media; the visible author avatar is independent"
 		);
-		view.revealed
-			.insert(message.id, Revealed::new(&message, u32::MAX, true));
+		let mut attachment_reveal = Revealed::new(&message, u32::MAX, false);
+		attachment_reveal.attachments = 1;
+		view.revealed.insert(message.id, attachment_reveal);
 		view.viewing = Some((message.id, Id(7)));
 		render(&mut view, &mut state, &mut images); // Modal sizing pass precedes visible paint.
 		render(&mut view, &mut state, &mut images);
@@ -9889,7 +9924,68 @@ mod tests {
 			},
 			..spoiler.clone()
 		};
-		mixed.attachments = vec![plain(60), spoiler.clone(), plain(80)];
+		let mut second_spoiler = spoiler.clone();
+		second_spoiler.id = Id(90);
+		second_spoiler.media.url =
+			Some("https://cdn.discordapp.com/attachments/2/90/hidden.png".into());
+		mixed.attachments = vec![
+			plain(60),
+			spoiler.clone(),
+			plain(80),
+			second_spoiler,
+			plain(100),
+		];
+		// Concealed images still occupy tiles in the same gallery row.
+		let mut grid_message = mixed.clone();
+		grid_message.attachments = vec![mixed.attachments[1].clone(), mixed.attachments[3].clone()];
+		let mut mask = 0;
+		let output = ctx.run_ui(
+			egui::RawInput {
+				screen_rect: Some(egui::Rect::from_min_size(
+					egui::Pos2::ZERO,
+					egui::vec2(900.0, 900.0),
+				)),
+				..Default::default()
+			},
+			|ui| {
+				let mut surface = crate::select::Surface::new(ui, "spoiler-grid-test");
+				crate::attachments::show_with_reveals(
+					ui,
+					&grid_message,
+					&grid_message.attachments,
+					&mut images,
+					&mut view.viewing,
+					&mut view.opening,
+					&mut view.download,
+					&mut view.audio,
+					&mut view.video,
+					false,
+					&mut surface,
+					crate::design::MessageCardSurface::Conversation,
+					Some(&mut mask),
+				);
+			},
+		);
+		fn reveal_positions(shape: &egui::Shape, positions: &mut Vec<egui::Pos2>) {
+			match shape {
+				egui::Shape::Text(text) if text.galley.job.text.contains("Reveal spoiler") => {
+					positions.push(text.pos)
+				}
+				egui::Shape::Vec(shapes) => {
+					for shape in shapes {
+						reveal_positions(shape, positions);
+					}
+				}
+				_ => {}
+			}
+		}
+		let mut positions = Vec::new();
+		for shape in &output.shapes {
+			reveal_positions(&shape.shape, &mut positions);
+		}
+		assert_eq!(positions.len(), 2);
+		assert!(positions[1].x > positions[0].x && (positions[1].y - positions[0].y).abs() < 2.0);
+		output.drop_without_applying_deltas();
 		state.timeline.insert(mixed.clone(), true, false).unwrap();
 		state.revision += 1;
 		render(&mut view, &mut state, &mut images);
@@ -9897,6 +9993,7 @@ mod tests {
 		assert!(requests.iter().any(|key| key.contains("/2/60/")));
 		assert!(requests.iter().any(|key| key.contains("/2/80/")));
 		assert!(requests.iter().all(|key| !key.contains("/2/70/")));
+		assert!(requests.iter().all(|key| !key.contains("/2/90/")));
 		view.viewing = Some((mixed.id, Id(70)));
 		render(&mut view, &mut state, &mut images);
 		assert!(view.viewing.is_none());
@@ -9910,6 +10007,57 @@ mod tests {
 				.iter()
 				.all(|key| !key.contains("/2/70/"))
 		);
+		let mut reveal = Revealed::new(&mixed, 0, false);
+		reveal.attachments = 1 << 1;
+		view.revealed.insert(mixed.id, reveal);
+		render(&mut view, &mut state, &mut images);
+		let requests = images.take_requests();
+		assert!(requests.iter().any(|key| key.contains("/2/70/")));
+		assert!(requests.iter().all(|key| !key.contains("/2/90/")));
+		let reveal = view.revealed.get(&mixed.id);
+		let gallery = attachment_gallery(&mixed, Id(60), reveal);
+		assert_eq!(
+			gallery.iter().map(|a| a.id).collect::<Vec<_>>(),
+			vec![Id(60), Id(70), Id(80), Id(100)]
+		);
+		assert!(attachment_gallery(&mixed, Id(90), reveal).is_empty());
+		let mut next = None;
+		let ctx = egui::Context::default();
+		let output = ctx.run_ui(
+			egui::RawInput {
+				events: vec![egui::Event::Key {
+					key: egui::Key::ArrowRight,
+					physical_key: None,
+					pressed: true,
+					repeat: false,
+					modifiers: egui::Modifiers::NONE,
+				}],
+				..Default::default()
+			},
+			|ui| {
+				next = crate::attachments::viewer(
+					ui,
+					&gallery,
+					Id(80),
+					crate::attachments::Floor::Fit,
+					&mut images,
+					&mut view.download,
+					&mut view.opening,
+					false,
+				);
+			},
+		);
+		output.drop_without_applying_deltas();
+		assert_eq!(next, Some(Id(100)), "navigation skips the second spoiler");
+		view.revealed.get_mut(&mixed.id).unwrap().attachments |= 1 << 3;
+		let gallery = attachment_gallery(&mixed, Id(80), view.revealed.get(&mixed.id));
+		assert_eq!(
+			gallery.iter().map(|a| a.id).collect::<Vec<_>>(),
+			vec![Id(60), Id(70), Id(80), Id(90), Id(100)]
+		);
+		let mut edited = mixed.clone();
+		edited.attachments[3].filename = "SPOILER_changed.png".into();
+		assert!(attachment_gallery(&edited, Id(90), view.revealed.get(&mixed.id)).is_empty());
 	}
 
 	fn label_ys(output: &egui::FullOutput) -> BTreeMap<String, f32> {

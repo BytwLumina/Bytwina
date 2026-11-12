@@ -354,6 +354,39 @@ pub(crate) fn show_subset(
 	surface: &mut crate::select::Surface,
 	card_surface: design::MessageCardSurface,
 ) {
+	show_with_reveals(
+		ui,
+		message,
+		attachments,
+		images,
+		viewing,
+		opening,
+		download,
+		audio,
+		video,
+		demo,
+		surface,
+		card_surface,
+		None,
+	);
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn show_with_reveals(
+	ui: &mut egui::Ui,
+	message: &Message,
+	attachments: &[Attachment],
+	images: &mut Avatars,
+	viewing: &mut Option<(Id, Id)>,
+	opening: &mut Option<String>,
+	download: &mut DownloadUi,
+	audio: &mut crate::audio::AudioUi,
+	video: &mut crate::video::VideoUi,
+	demo: bool,
+	surface: &mut crate::select::Surface,
+	card_surface: design::MessageCardSurface,
+	mut revealed: Option<&mut u16>,
+) {
 	for group in attachments.chunk_by(|a, b| a.is_image() == b.is_image()) {
 		if group[0].is_image() {
 			let (columns, size) = image_layout(group.len(), ui.available_width());
@@ -363,6 +396,17 @@ pub(crate) fn show_subset(
 					ui.horizontal_top(|ui| {
 						for attachment in row {
 							ui.push_id(("attachment", attachment.id), |ui| {
+								if let Some(mask) = revealed.as_deref_mut()
+									&& conceal_attachment(
+										ui,
+										message,
+										attachment,
+										mask,
+										Some(size),
+										surface,
+									) {
+									return;
+								}
 								let image = images
 									.show_media(
 										ui,
@@ -434,6 +478,11 @@ pub(crate) fn show_subset(
 		} else {
 			for attachment in group {
 				ui.push_id(("attachment", attachment.id), |ui| {
+					if let Some(mask) = revealed.as_deref_mut()
+						&& conceal_attachment(ui, message, attachment, mask, None, surface)
+					{
+						return;
+					}
 					if attachment.is_video() {
 						let response = video.show(ui, message, attachment, download, opening, demo);
 						surface.keep(&response);
@@ -464,6 +513,41 @@ pub(crate) fn show_subset(
 			}
 		}
 	}
+}
+
+fn conceal_attachment(
+	ui: &mut egui::Ui,
+	message: &Message,
+	attachment: &Attachment,
+	revealed: &mut u16,
+	size: Option<egui::Vec2>,
+	surface: &mut crate::select::Surface,
+) -> bool {
+	if !crate::embeds::attachment_spoiler(attachment) {
+		return false;
+	}
+	let bit = message
+		.attachments
+		.iter()
+		.position(|a| a.id == attachment.id)
+		.and_then(|i| 1_u16.checked_shl(i as u32))
+		.unwrap_or(0);
+	if *revealed & bit != 0 {
+		return false;
+	}
+	let button = egui::Button::new(crate::i18n::translate(
+		"timeline-show-with-scroll-reveal-spoiler-media",
+	));
+	let response = if let Some(size) = size {
+		ui.add_sized(size, button)
+	} else {
+		ui.add(button)
+	};
+	surface.keep(&response);
+	if response.clicked() {
+		*revealed |= bit;
+	}
+	true
 }
 // Shared with height estimation so compact artwork does not leave a gallery-sized gap.
 pub(crate) fn artwork_edge(filename: &str) -> Option<f32> {
