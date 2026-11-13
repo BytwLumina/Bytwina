@@ -4689,6 +4689,49 @@ impl Desktop {
 						result,
 					}
 				}
+				Command::EditGuildProfile {
+					user,
+					guild,
+					request,
+					changes,
+				} => {
+					let result = self
+						.state
+						.user
+						.as_ref()
+						.filter(|own| own.id == user)
+						.map(|own| {
+							let profile = self
+								.state
+								.own_profile
+								.data
+								.clone()
+								.unwrap_or_else(|| ui::synthetic_own_profile(own));
+							if profile
+								.guild
+								.as_ref()
+								.is_none_or(|member| member.guild != guild)
+							{
+								return Err(Failure::Protocol);
+							}
+							if let Some(changes) = changes {
+								if !changes.valid()
+									|| changes.global_name.is_some()
+									|| changes.avatar.is_some()
+								{
+									return Err(Failure::Capacity);
+								}
+							}
+							Ok(Box::new(profile))
+						})
+						.unwrap_or(Err(Failure::Protocol));
+					Event::GuildProfileEdited {
+						user,
+						guild,
+						request,
+						result,
+					}
+				}
 				Command::Members {
 					guild,
 					channel,
@@ -4874,7 +4917,10 @@ impl Desktop {
 						result: Ok(Default::default()),
 					})
 				}
-				Command::EnrollQuest { .. } | Command::ClaimQuest { .. } => return,
+				Command::EnrollQuest { .. }
+				| Command::ClaimQuest { .. }
+				| Command::QuestHeartbeat { .. }
+				| Command::DismissQuestContent { .. } => return,
 				// The fixture's saved list is session memory; a write is acknowledged so the row settles.
 				Command::SavedMessages(command) => self.demo_saved_messages(command),
 				// The fixture has no directory; the page stays on its empty state.

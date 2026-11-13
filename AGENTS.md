@@ -522,6 +522,13 @@ a reducer in `client-core`, and a demo arm in `apps/desktop/src/main.rs`.
 `State::cached_badges` reads a profile that is already cached and never fetches. Do not call the
 profile endpoint per visible row.
 
+**Quest progress:** quest status may include `claimed_tier`, `orb_quantity_claimed`, stream heartbeat
+timestamps, per-task heartbeat expiry, `stream_progress_seconds` and the integer
+`dismissed_quest_content` bitmask. Heartbeats use `POST /quests/{quest.id}/heartbeat`; dismissals use
+`POST /quests/{quest.id}/dismissible-content/{quest_content_type}/dismiss`. Keep these writes in the
+core/API boundary and schedule them outside UI rendering; never invent a heartbeat cadence from a
+paint callback.
+
 Picker and artwork performance: emoji, stickers, GIF previews, avatars and badge art must use the
 bounded `AvatarWorker` cache. UI rendering may enqueue a bounded request or paint a placeholder,
 but must not perform network, disk or decode work synchronously. Picker triggers may warm a bounded

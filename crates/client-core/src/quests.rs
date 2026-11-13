@@ -36,6 +36,16 @@ pub enum Event {
 		request: u64,
 		result: Result<model::quests::UserStatus, &'static str>,
 	},
+	Heartbeat {
+		quest: Id,
+		request: u64,
+		result: Result<model::quests::UserStatus, &'static str>,
+	},
+	Dismissed {
+		quest: Id,
+		request: u64,
+		result: Result<model::quests::UserStatus, &'static str>,
+	},
 	/// One reward was claimed; the reply is when the service granted it.
 	Claimed {
 		quest: Id,
@@ -145,6 +155,36 @@ impl Quests {
 					Err(error) => self.error = Some(error),
 				}
 			}
+			Event::Heartbeat {
+				quest,
+				request,
+				result,
+			} => {
+				if self.action != Some((quest, request)) {
+					return;
+				}
+				self.action = None;
+				if let Ok(status) = result {
+					if let Some(known) = self.quest_mut(quest) {
+						status.apply_to(known);
+					}
+				}
+			}
+			Event::Dismissed {
+				quest,
+				request,
+				result,
+			} => {
+				if self.action != Some((quest, request)) {
+					return;
+				}
+				self.action = None;
+				if let Ok(status) = result {
+					if let Some(known) = self.quest_mut(quest) {
+						status.apply_to(known);
+					}
+				}
+			}
 			Event::Claimed {
 				quest,
 				request,
@@ -247,6 +287,46 @@ impl super::State {
 			request,
 		})
 	}
+	/// Sends one documented desktop heartbeat. Callers must enforce the service interval.
+	pub fn request_quest_heartbeat(
+		&mut self,
+		quest: Id,
+		application: Option<Id>,
+		stream_key: Option<String>,
+		terminal: bool,
+	) -> Option<Command> {
+		let known = self.quests.list().iter().find(|known| known.id == quest)?;
+		if known.status() != model::quests::Status::Enrolled || self.quests.action_pending(quest) {
+			return None;
+		}
+		if stream_key.as_ref().is_some_and(|key| key.len() > 256) {
+			return None;
+		}
+		let request = self.quests.next_request();
+		self.quests
+			.begin_action(quest, request)
+			.then_some(Command::QuestHeartbeat {
+				quest,
+				application,
+				stream_key,
+				terminal,
+				request,
+			})
+	}
+	pub fn dismiss_quest_content(&mut self, quest: Id, content: u32) -> Option<Command> {
+		if content == 0 || content > (1 << 31) || self.quests.action_pending(quest) {
+			return None;
+		}
+		self.quests.list().iter().find(|known| known.id == quest)?;
+		let request = self.quests.next_request();
+		self.quests
+			.begin_action(quest, request)
+			.then_some(Command::DismissQuestContent {
+				quest,
+				content,
+				request,
+			})
+	}
 }
 
 #[cfg(test)]
@@ -270,6 +350,7 @@ mod tests {
 				target: 900,
 				value: 0,
 				completed: false,
+				heartbeat: None,
 			}],
 			reward: Some("Cybernetic Headgear".to_owned()),
 			platform: model::quests::PLATFORM_CROSS,
@@ -335,6 +416,7 @@ mod tests {
 				completed_at: None,
 				claimed_at: None,
 				progress: vec![],
+				..Default::default()
 			}),
 		});
 		assert_eq!(quests.list()[0].status(), model::quests::Status::Enrolled);
@@ -354,6 +436,7 @@ mod tests {
 				completed_at: None,
 				claimed_at: None,
 				progress: vec![],
+				..Default::default()
 			}),
 		});
 		assert_eq!(quests.list()[0].status(), model::quests::Status::Available);
@@ -386,7 +469,9 @@ mod tests {
 				kind: "PLAY_ON_DESKTOP".to_owned(),
 				value: 900,
 				completed: false,
+				heartbeat: None,
 			}],
+			..Default::default()
 		};
 		quests.apply(Event::Status {
 			status: status.clone(),

@@ -4386,9 +4386,22 @@ impl TimelineView {
 							toolbar.spacing_mut().item_spacing = egui::vec2(2.0, 0.0);
 							toolbar.spacing_mut().button_padding = egui::vec2(4.0, 2.0);
 							toolbar.spacing_mut().interact_size.y = 28.0;
+							toolbar.painter().rect_filled(
+								toolbar_rect.expand(2.0),
+								8.0,
+								egui::Color32::from_black_alpha(24),
+							);
 							toolbar
 								.painter()
 								.rect_filled(toolbar_rect, 6.0, colors.raised);
+							toolbar.painter().rect_filled(
+								egui::Rect::from_min_max(
+									toolbar_rect.left_top(),
+									egui::pos2(toolbar_rect.right(), toolbar_rect.top() + 2.0),
+								),
+								6.0,
+								colors.accent.gamma_multiply(0.7),
+							);
 							toolbar.painter().rect_stroke(
 								toolbar_rect,
 								6.0,
@@ -4446,13 +4459,15 @@ impl TimelineView {
 							let shift = ui.input(|input| input.modifiers.shift);
 							let can_pin = state.can_pin(message.channel, id);
 							let can_delete = state.can_delete(message.channel, id);
+							let delete_pending = state.is_delete_pending(message.channel, id);
 							let link = state
 								.channel(message.channel)
 								.and_then(|channel| discord_url(channel, Some(id)));
 							let buttons = if react && !shift { 4 } else { 1 }
 								+ 3 + usize::from(own) + if shift {
 								2 + usize::from(link.is_some())
-									+ usize::from(can_delete) + usize::from(can_mark_unread)
+									+ usize::from(can_delete && !delete_pending)
+									+ usize::from(can_mark_unread)
 									+ usize::from(can_pin)
 							} else {
 								0
@@ -4620,16 +4635,17 @@ impl TimelineView {
 								);
 							}
 							if can_delete
-								&& shift && toolbar
-								.push_id("quick-delete", |ui| {
-									action_button(
-										ui,
-										crate::icons::Icon::Trash,
-										"timeline-message-actions-delete-message",
-									)
-								})
-								.inner
-								.clicked()
+								&& !delete_pending && shift
+								&& toolbar
+									.push_id("quick-delete", |ui| {
+										action_button(
+											ui,
+											crate::icons::Icon::Trash,
+											"timeline-message-actions-delete-message",
+										)
+									})
+									.inner
+									.clicked()
 							{
 								self.quick_delete = Some((message.channel, id));
 							}
@@ -4671,7 +4687,7 @@ impl TimelineView {
 									&self.extension_actions,
 									&mut self.extension_request,
 								),
-								(own, can_reply, can_edit, can_delete),
+								(own, can_reply, can_edit, can_delete && !delete_pending),
 								(
 									can_mark_read.then_some(&mut self.mark_read),
 									can_mark_unread.then_some(&mut self.mark_unread),

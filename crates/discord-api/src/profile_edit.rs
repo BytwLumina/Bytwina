@@ -128,10 +128,68 @@ impl DiscordApi {
 							.cosmetics
 							.as_deref()
 							.and_then(|cosmetics| cosmetics.name_style.clone())
-				}))
-		{
+				})) {
 			return Err(Failure::ProtocolAt(
 				"Profile changes were not confirmed; reload before retrying",
+			));
+		}
+		Ok(Box::new(saved))
+	}
+
+	/// Save and reload only the server-scoped profile metadata. Discord intentionally
+	/// does not accept this payload at `/users/@me/profile`.
+	pub(super) async fn edit_guild_profile(
+		&self,
+		user: Id,
+		guild: Id,
+		changes: Option<ProfileEdit>,
+	) -> Result<Box<UserProfile>, Failure> {
+		if user.0 == 0 || guild.0 == 0 {
+			return Err(Failure::Protocol);
+		}
+		if let Some(changes) = &changes {
+			if !changes.valid()
+				|| changes.global_name.is_some()
+				|| changes.avatar.is_some()
+				|| changes.avatar_decoration_sku.is_some()
+				|| changes.nameplate_sku.is_some()
+				|| changes.display_name_style.is_some()
+			{
+				return Err(Failure::Protocol);
+			}
+			if let Some(metadata) = profile::encode_profile_metadata(changes) {
+				let bytes = zeroize::Zeroizing::new(
+					self.request_limited(
+						Method::PATCH,
+						&format!("/guilds/{guild}/profile/@me"),
+						Some(metadata),
+						profile::MAX_PROFILE_WIRE,
+					)
+					.await?,
+				);
+				let _: serde_json::Value = discord_protocol::decode(&bytes).map_err(|_| {
+					Failure::ProtocolAt(
+						"Server profile save could not be confirmed; reload before retrying",
+					)
+				})?;
+			}
+		}
+		let path = format!(
+			"/users/{user}/profile?guild_id={guild}&with_mutual_guilds=false&with_mutual_friends=false&with_mutual_friends_count=false"
+		);
+		let bytes = self
+			.request_limited(Method::GET, &path, None, profile::MAX_PROFILE_WIRE)
+			.await?;
+		let saved =
+			profile::decode_profile(&bytes, Some(guild), false).map_err(|_| Failure::Protocol)?;
+		if saved.user.id != user
+			|| saved
+				.guild
+				.as_ref()
+				.is_none_or(|profile| profile.guild != guild)
+		{
+			return Err(Failure::ProtocolAt(
+				"Server profile response was not for the requested guild",
 			));
 		}
 		Ok(Box::new(saved))

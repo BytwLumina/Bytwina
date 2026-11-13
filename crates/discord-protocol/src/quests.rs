@@ -253,6 +253,16 @@ pub struct TaskProgressDto {
 	pub value: u64,
 	#[serde(default)]
 	pub completed_at: Option<crate::Timestamp>,
+	#[serde(default)]
+	pub heartbeat: Option<TaskHeartbeatDto>,
+}
+
+#[derive(Deserialize)]
+pub struct TaskHeartbeatDto {
+	#[serde(default)]
+	pub last_beat_at: Option<crate::Timestamp>,
+	#[serde(default)]
+	pub expires_at: Option<crate::Timestamp>,
 }
 
 /// The progress map of a user status, bounded while it is read.
@@ -283,6 +293,12 @@ impl<'de> serde::Deserialize<'de> for ProgressMap {
 						kind: key,
 						value: value.value,
 						completed: value.completed_at.is_some(),
+						heartbeat: value
+							.heartbeat
+							.map(|heartbeat| model::quests::TaskHeartbeat {
+								last_beat_at: seconds(heartbeat.last_beat_at),
+								expires_at: seconds(heartbeat.expires_at),
+							}),
 					});
 				}
 				Ok(ProgressMap(progress))
@@ -303,7 +319,23 @@ pub struct UserStatusDto {
 	#[serde(default)]
 	pub claimed_at: Option<crate::Timestamp>,
 	#[serde(default)]
+	pub claimed_tier: Option<u32>,
+	#[serde(default)]
+	pub orb_quantity_claimed: Option<u64>,
+	#[serde(default)]
+	pub last_stream_heartbeat_at: Option<crate::Timestamp>,
+	#[serde(default)]
+	pub stream_progress_seconds: u64,
+	#[serde(default)]
+	pub dismissed_quest_content: u32,
+	#[serde(default)]
 	pub progress: ProgressMap,
+	#[serde(default)]
+	pub orb_quantity_claimed: u64,
+	#[serde(default)]
+	pub stream_progress_seconds: u64,
+	#[serde(default)]
+	pub dismissed_quest_content: DismissedContent,
 }
 impl UserStatusDto {
 	pub fn into_model(self) -> Result<model::quests::UserStatus, crate::DecodeError> {
@@ -321,7 +353,12 @@ impl UserStatusDto {
 			// A claim always implies completion, even if the service omitted it.
 			completed_at: seconds(self.completed_at).or(claimed_at),
 			claimed_at,
+			claimed_tier: self.claimed_tier,
 			progress: self.progress.0,
+			orb_quantity_claimed: self.orb_quantity_claimed,
+			last_stream_heartbeat_at: seconds(self.last_stream_heartbeat_at),
+			stream_progress_seconds: self.stream_progress_seconds,
+			dismissed_quest_content: self.dismissed_quest_content,
 		}
 	}
 }
@@ -367,6 +404,7 @@ impl QuestDto {
 				target: task.target,
 				value: 0,
 				completed: false,
+				heartbeat: None,
 			})
 			.collect::<Vec<_>>();
 		let rewards = self.config.rewards_config;

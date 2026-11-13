@@ -73,6 +73,7 @@ pub const MAX_CONTENT: usize = 2000;
 pub const MAX_PREMIUM_CONTENT: usize = 4000;
 /// Discord accepts at most ten attachments per message.
 pub const MAX_ATTACHMENTS: usize = 10;
+const MAX_PENDING_DELETES: usize = 64;
 pub const MAX_NAV: usize = model::account::MAX_ENTRIES;
 /// Mark-all-read pairs per command (16 KiB); the rest stay unread for another choice.
 pub const MAX_BULK_ACK: usize = 1024;
@@ -236,6 +237,19 @@ pub enum Command {
 		quest: Id,
 		request: u64,
 	},
+	/// Report bounded desktop quest progress; the host must schedule this, never the UI.
+	QuestHeartbeat {
+		quest: Id,
+		application: Option<Id>,
+		stream_key: Option<String>,
+		terminal: bool,
+		request: u64,
+	},
+	DismissQuestContent {
+		quest: Id,
+		content: u32,
+		request: u64,
+	},
 	/// Saved messages and reminders.
 	SavedMessages(saved_messages::Command),
 	/// Browse one page of discoverable servers.
@@ -358,6 +372,14 @@ pub enum Command {
 	/// None loads the account's global profile; Some writes only explicitly changed fields.
 	EditProfile {
 		user: Id,
+		request: u64,
+		changes: Option<model::ProfileEdit>,
+	},
+	/// Load or save the account's profile metadata for one server. This is deliberately
+	/// separate from the global editor because Discord uses a guild-scoped endpoint.
+	EditGuildProfile {
+		user: Id,
+		guild: Id,
 		request: u64,
 		changes: Option<model::ProfileEdit>,
 	},
@@ -718,6 +740,12 @@ pub enum Event {
 		request: u64,
 		result: Result<Box<UserProfile>, auth::Failure>,
 	},
+	GuildProfileEdited {
+		user: Id,
+		guild: Id,
+		request: u64,
+		result: Result<Box<UserProfile>, auth::Failure>,
+	},
 	Voice(voice::Event),
 	ChannelCreated(Channel),
 	ChannelRestored(Channel),
@@ -995,6 +1023,8 @@ pub struct State {
 	pub failure_detail: Option<Box<str>>,
 	pub drafts: BTreeMap<Id, String>,
 	pub pending: Vec<Pending>,
+	/// Message deletes awaiting Discord's acknowledgement; bounded to prevent repeated clicks.
+	pub pending_deletes: BTreeSet<(Id, Id)>,
 	/// Discord rate-limited a send; the UI shows "sending too quickly" until dismissed.
 	pub send_throttled: bool,
 	/// The notice was dismissed for this burst; it returns only after the queue drains.
@@ -1225,6 +1255,7 @@ impl Default for State {
 			failure_detail: None,
 			drafts: BTreeMap::new(),
 			pending: vec![],
+			pending_deletes: BTreeSet::new(),
 			send_throttled: false,
 			send_throttle_seen: false,
 			search_oldest: false,
@@ -2347,6 +2378,19 @@ impl State {
 			self.reject_own_profile(user, request);
 			return;
 		}
+		if let Command::EditGuildProfile {
+			user,
+			guild,
+			request,
+			..
+		} = command
+		{
+			self.fail(auth::Failure::ProtocolAt(
+				"Server profile was not queued; reload to continue",
+			));
+			let _ = (user, guild, request);
+			return;
+		}
 		if let Command::BadgeSettings { request, .. } = command {
 			self.apply_badge_settings(
 				request,
@@ -3299,6 +3343,18 @@ impl State {
 				self.apply_own_profile(user, request, result);
 				Ok(())
 			}
+			Event::GuildProfileEdited { result, .. } => {
+				if result.is_err() {
+					self.fail(
+						result
+							.as_ref()
+							.err()
+							.copied()
+							.unwrap_or(auth::Failure::Protocol),
+					);
+				}
+				Ok(())
+			}
 			Event::Profile {
 				user,
 				guild,
@@ -4070,6 +4126,7 @@ impl State {
 				}
 			}
 			Event::Delete { channel, id } => {
+				self.pending_deletes.remove(&(channel, id));
 				self.parked_replies.forget_targets(channel, &[id]);
 				self.read_state.activity.delete(channel, id);
 				self.forget_pending_replies(channel, &[id]);
@@ -4243,6 +4300,7 @@ impl State {
 				Ok(())
 			}
 			Event::Failure(f) => {
+				self.pending_deletes.clear();
 				self.fail(f);
 				Ok(())
 			}
@@ -4251,6 +4309,7 @@ impl State {
 				Ok(())
 			}
 			Event::Disconnected => {
+				self.pending_deletes.clear();
 				self.release_message_challenge(
 					"Verification ended by disconnect; retry the message",
 				);
@@ -4316,6 +4375,8 @@ impl State {
 				Ok(())
 			}
 			Event::Unavailable(channel) | Event::ThreadRemoved { id: channel, .. } => {
+				self.pending_deletes
+					.retain(|(pending_channel, _)| *pending_channel != channel);
 				let mut removed = BTreeSet::from([channel]);
 				removed.extend(
 					self.channels
@@ -4799,9 +4860,9 @@ impl Event {
 				Self::Invite { code, result } => {
 					code.capacity() + result.as_ref().map_or(0, |embed| embed.bytes())
 				}
-				Self::Profile { result, .. } | Self::ProfileEdited { result, .. } => {
-					result.as_ref().map_or(0, |p| p.bytes())
-				}
+				Self::Profile { result, .. }
+				| Self::ProfileEdited { result, .. }
+				| Self::GuildProfileEdited { result, .. } => result.as_ref().map_or(0, |p| p.bytes()),
 				Self::StreamPreview { result, .. } => result.as_ref().map_or(0, String::capacity),
 				Self::BadgeSettings { result, .. } => result
 					.as_ref()

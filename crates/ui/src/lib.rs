@@ -3089,6 +3089,25 @@ impl MessagingUi {
 			.filter(|(c, _, _)| *c == channel)
 			.map(|(c, id, _)| (*c, *id));
 		let editing_here = editing_key.is_some();
+		if state.send_throttled && !editing_here {
+			design::glass_frame(
+				ui,
+				colors.warning.gamma_multiply(0.14),
+				egui::Margin::symmetric(10, 6),
+			)
+			.corner_radius(8)
+			.stroke(egui::Stroke::new(1.0, colors.warning.gamma_multiply(0.7)))
+			.show(ui, |ui| {
+				ui.horizontal(|ui| {
+					icons::inline(ui, icons::Icon::ShieldWarning, 20.0, colors.warning);
+					ui.label(
+						RichText::new(crate::i18n::translate("send-throttled-body"))
+							.color(colors.warning),
+					);
+				});
+			});
+			ui.add_space(6.0);
+		}
 		let timestamp_target = timestamp_picker::Target {
 			generation: state.generation,
 			channel,

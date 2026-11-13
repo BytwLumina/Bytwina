@@ -1219,6 +1219,34 @@ impl DiscordApi {
 					result: result.map_err(quests::failure_key),
 				})
 			}
+			Command::QuestHeartbeat {
+				quest,
+				application,
+				stream_key,
+				terminal,
+				request,
+			} => {
+				let result = self
+					.quest_heartbeat(quest, application, stream_key, terminal)
+					.await;
+				Event::Quests(client_core::quests::Event::Heartbeat {
+					quest,
+					request,
+					result: result.map_err(quests::failure_key),
+				})
+			}
+			Command::DismissQuestContent {
+				quest,
+				content,
+				request,
+			} => {
+				let result = self.dismiss_quest_content(quest, content).await;
+				Event::Quests(client_core::quests::Event::Dismissed {
+					quest,
+					request,
+					result: result.map_err(quests::failure_key),
+				})
+			}
 			Command::ClaimQuest {
 				quest,
 				platform,
@@ -1653,6 +1681,17 @@ impl DiscordApi {
 				user,
 				request,
 				result: self.edit_profile(user, changes).await,
+			},
+			Command::EditGuildProfile {
+				user,
+				guild,
+				request,
+				changes,
+			} => Event::GuildProfileEdited {
+				user,
+				guild,
+				request,
+				result: self.edit_guild_profile(user, guild, changes).await,
 			},
 			Command::CancelProfile => Event::Failure(Failure::Protocol),
 			Command::OwnedCollectibles { request } => Event::OwnedCollectibles {

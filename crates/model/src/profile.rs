@@ -56,11 +56,10 @@ impl ProfileEdit {
 				theme
 					.as_ref()
 					.is_none_or(|colors| colors.iter().all(|color| *color <= 0xff_ffff))
-			})
-			&& self
-				.display_name_style
-				.as_ref()
-				.is_none_or(|style| style.as_ref().is_none_or(NameStyle::valid))
+			}) && self
+			.display_name_style
+			.as_ref()
+			.is_none_or(|style| style.as_ref().is_none_or(NameStyle::valid))
 			&& self
 				.avatar
 				.as_ref()

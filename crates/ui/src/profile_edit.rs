@@ -62,7 +62,11 @@ impl Draft {
 			profile_effect_sku: self.effect,
 			theme_colors: (self.theme_colors != profile.theme_colors).then_some(self.theme_colors),
 			display_name_style: (self.display_name_style
-				!= profile.user.cosmetics.as_deref().and_then(|c| c.name_style.clone()))
+				!= profile
+					.user
+					.cosmetics
+					.as_deref()
+					.and_then(|c| c.name_style.clone()))
 			.then_some(self.display_name_style.clone()),
 		}
 	}
@@ -663,44 +667,53 @@ fn form(
 fn name_style_editor(ui: &mut egui::Ui, draft: &mut Draft) {
 	let label = crate::i18n::translate("settings-cosmetics-name-styles");
 	let mut reset = false;
-	design::row(ui, &label, Some("settings-cosmetics-name-styles-description"), |ui| {
-		if let Some(style) = draft.display_name_style.as_mut() {
-			egui::ComboBox::from_id_salt("profile-name-style-font")
-				.selected_text(format!("Font {}", style.font))
-				.show_ui(ui, |ui| {
-					for font in [11, 3, 4, 6, 7, 8, 10, 12, 13, 14, 15, 16] {
-						ui.selectable_value(&mut style.font, font, format!("Font {font}"));
-					}
+	design::row(
+		ui,
+		&label,
+		Some("settings-cosmetics-name-styles-description"),
+		|ui| {
+			if let Some(style) = draft.display_name_style.as_mut() {
+				egui::ComboBox::from_id_salt("profile-name-style-font")
+					.selected_text(format!("Font {}", style.font))
+					.show_ui(ui, |ui| {
+						for font in [11, 3, 4, 6, 7, 8, 10, 12, 13, 14, 15, 16] {
+							ui.selectable_value(&mut style.font, font, format!("Font {font}"));
+						}
+					});
+				egui::ComboBox::from_id_salt("profile-name-style-effect")
+					.selected_text(format!("{:?}", style.effect))
+					.show_ui(ui, |ui| {
+						for effect in [
+							NameEffect::Solid,
+							NameEffect::Gradient,
+							NameEffect::Neon,
+							NameEffect::Toon,
+							NameEffect::Pop,
+							NameEffect::Glow,
+							NameEffect::Prism,
+							NameEffect::Gummy,
+						] {
+							ui.selectable_value(&mut style.effect, effect, format!("{effect:?}"));
+						}
+					});
+				reset =
+					design::text_action(ui, &crate::i18n::translate("profile-edit-form-default"))
+						.clicked();
+			} else if design::button(
+				ui,
+				&crate::i18n::translate("profile-edit-form-change"),
+				design::ButtonKind::Outline,
+			)
+			.clicked()
+			{
+				draft.display_name_style = Some(NameStyle {
+					font: 11,
+					effect: NameEffect::Solid,
+					colors: vec![0xffffff],
 				});
-			egui::ComboBox::from_id_salt("profile-name-style-effect")
-				.selected_text(format!("{:?}", style.effect))
-				.show_ui(ui, |ui| {
-					for effect in [
-						NameEffect::Solid,
-						NameEffect::Gradient,
-						NameEffect::Neon,
-						NameEffect::Toon,
-						NameEffect::Pop,
-						NameEffect::Glow,
-						NameEffect::Prism,
-						NameEffect::Gummy,
-					] {
-						ui.selectable_value(&mut style.effect, effect, format!("{effect:?}"));
-					}
-				});
-			reset = design::text_action(ui, &crate::i18n::translate("profile-edit-form-default")).clicked();
-		} else if design::button(
-			ui,
-			&crate::i18n::translate("profile-edit-form-change"),
-			design::ButtonKind::Outline,
-		).clicked() {
-			draft.display_name_style = Some(NameStyle {
-			font: 11,
-			effect: NameEffect::Solid,
-			colors: vec![0xffffff],
-		});
-		}
-	});
+			}
+		},
+	);
 	if reset {
 		draft.display_name_style = None;
 	}
@@ -722,7 +735,9 @@ fn theme_editor(ui: &mut egui::Ui, theme: &mut Option<[u32; 2]>, _original: Opti
 							| u32::from(rgb[2]);
 					}
 				}
-				reset = design::text_action(ui, &crate::i18n::translate("profile-edit-form-default")).clicked();
+				reset =
+					design::text_action(ui, &crate::i18n::translate("profile-edit-form-default"))
+						.clicked();
 			} else if design::button(
 				ui,
 				&crate::i18n::translate("profile-edit-form-change"),

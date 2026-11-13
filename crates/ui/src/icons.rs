@@ -505,12 +505,20 @@ fn button_with_tooltip(
 	if response.hovered() || response.has_focus() {
 		ui.painter().rect_filled(rect, 6, colors.hover);
 	}
+	let semantic = match icon {
+		Icon::Trash => Some(colors.danger),
+		Icon::Reply | Icon::Forward => Some(colors.accent),
+		Icon::Pencil => Some(colors.warning),
+		Icon::Pin | Icon::Inbox => Some(colors.positive),
+		Icon::Link | Icon::Copy | Icon::Hash => Some(colors.accent),
+		_ => None,
+	};
 	let color = if !ui.is_enabled() {
 		colors.muted.gamma_multiply(0.5)
 	} else if response.hovered() || response.has_focus() {
-		colors.text_strong
+		semantic.unwrap_or(colors.text_strong)
 	} else {
-		colors.muted
+		semantic.map_or(colors.muted, |color| color.gamma_multiply(0.82))
 	};
 	paint(ui.painter(), icon, rect.shrink(size * 0.2), color);
 	response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), &label));

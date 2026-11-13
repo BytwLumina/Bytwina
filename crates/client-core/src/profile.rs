@@ -318,6 +318,33 @@ impl State {
 			changes: Some(changes),
 		})
 	}
+	/// Builds a server-scoped profile write. It is intentionally independent from the global
+	/// editor and only permits the metadata fields accepted by Discord's guild endpoint.
+	pub fn save_guild_profile(
+		&mut self,
+		guild: Id,
+		changes: model::ProfileEdit,
+	) -> Option<Command> {
+		let user = self.user.as_ref()?.id;
+		if guild.0 == 0
+			|| !changes.valid()
+			|| changes == model::ProfileEdit::default()
+			|| changes.global_name.is_some()
+			|| changes.avatar.is_some()
+			|| changes.avatar_decoration_sku.is_some()
+			|| changes.nameplate_sku.is_some()
+			|| changes.display_name_style.is_some()
+			|| (!self.demo && (self.auth != AuthState::Authenticated || !self.gateway_connected))
+		{
+			return None;
+		}
+		Some(Command::EditGuildProfile {
+			user,
+			guild,
+			request: self.generation,
+			changes: Some(changes),
+		})
+	}
 	pub fn clear_own_profile(&mut self) {
 		// Hiding an editor cannot cancel an already admitted write or permit a second one.
 		if self.own_profile.saving {

@@ -1025,7 +1025,19 @@ impl State {
 			self.status = "This message cannot be deleted with the current access".into();
 			return None;
 		}
+		if self.pending_deletes.contains(&(channel, message)) {
+			return None;
+		}
+		if self.pending_deletes.len() >= super::MAX_PENDING_DELETES {
+			self.status = "Too many message actions are still in progress".into();
+			return None;
+		}
+		self.pending_deletes.insert((channel, message));
+		self.status = "Deleting message…".into();
 		Some(Command::Delete { channel, message })
+	}
+	pub fn is_delete_pending(&self, channel: Id, message: Id) -> bool {
+		self.pending_deletes.contains(&(channel, message))
 	}
 	pub(crate) fn permission_access(&self) -> Option<(Option<bool>, Option<bool>)> {
 		self.selected.map(|channel| {

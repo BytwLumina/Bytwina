@@ -44,6 +44,53 @@ impl DiscordApi {
 		discord_protocol::quests::quest_status(&bytes).map_err(|_| Failure::Protocol)
 	}
 
+	pub(super) async fn quest_heartbeat(
+		&self,
+		quest: Id,
+		application: Option<Id>,
+		stream_key: Option<String>,
+		terminal: bool,
+	) -> Result<model::quests::UserStatus, Failure> {
+		if quest.0 == 0
+			|| application.is_some_and(|id| id.0 == 0)
+			|| stream_key.as_ref().is_some_and(|key| key.len() > 256)
+		{
+			return Err(Failure::Protocol);
+		}
+		let bytes = self
+			.request_limited(
+				Method::POST,
+				&format!("/quests/{quest}/heartbeat"),
+				Some(serde_json::json!({
+					"application_id": application.map(|id| id.to_string()),
+					"stream_key": stream_key,
+					"terminal": terminal,
+				})),
+				MAX_REPLY_WIRE,
+			)
+			.await?;
+		discord_protocol::quests::quest_status(&bytes).map_err(|_| Failure::Protocol)
+	}
+
+	pub(super) async fn dismiss_quest_content(
+		&self,
+		quest: Id,
+		content: u32,
+	) -> Result<model::quests::UserStatus, Failure> {
+		if quest.0 == 0 || content == 0 || content > (1 << 31) {
+			return Err(Failure::Protocol);
+		}
+		let bytes = self
+			.request_limited(
+				Method::POST,
+				&format!("/quests/{quest}/dismissible-content/{content}/dismiss"),
+				None,
+				MAX_REPLY_WIRE,
+			)
+			.await?;
+		discord_protocol::quests::quest_status(&bytes).map_err(|_| Failure::Protocol)
+	}
+
 	/// Claims the reward of one completed quest; the reply is when it was granted.
 	pub(super) async fn claim_quest(
 		&self,

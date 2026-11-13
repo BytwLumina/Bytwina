@@ -897,6 +897,16 @@ fn message_deletion_uses_manage_messages_without_granting_edit_or_requiring_send
 				message: Id(101)
 			})
 		));
+		assert!(state.is_delete_pending(Id(20), Id(101)));
+		assert!(state.prepare_delete(Id(20), Id(101)).is_none());
+		apply(
+			&mut state,
+			Event::Delete {
+				channel: Id(20),
+				id: Id(101),
+			},
+		);
+		assert!(!state.is_delete_pending(Id(20), Id(101)));
 		assert!(!state.can_delete(Id(21), Id(101)));
 		assert!(!state.can_delete(Id(20), Id(999)));
 		let user = state.user.take();

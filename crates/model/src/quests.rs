@@ -154,8 +154,16 @@ pub struct UserStatus {
 	pub enrolled_at: Option<i64>,
 	pub completed_at: Option<i64>,
 	pub claimed_at: Option<i64>,
+	pub claimed_tier: Option<u32>,
 	/// Progress keyed by task type, bounded at parse time.
 	pub progress: Vec<TaskProgress>,
+	/// Reward currency credited by the quest service.
+	pub orb_quantity_claimed: Option<u64>,
+	pub last_stream_heartbeat_at: Option<i64>,
+	/// Stream/video seconds acknowledged by the service.
+	pub stream_progress_seconds: u64,
+	/// Quest-home/content areas hidden by the account.
+	pub dismissed_quest_content: u32,
 }
 impl UserStatus {
 	pub fn heap_bytes(&self) -> usize {
@@ -163,6 +171,7 @@ impl UserStatus {
 			.iter()
 			.map(TaskProgress::heap_bytes)
 			.sum::<usize>()
+			+ std::mem::size_of_val(&self.dismissed_quest_content)
 	}
 	pub fn valid(&self) -> bool {
 		self.quest.is_none_or(|id| id.0 != 0)
@@ -197,11 +206,18 @@ pub struct TaskProgress {
 	pub value: u64,
 	/// The service marked the task complete, even below its target.
 	pub completed: bool,
+	pub heartbeat: Option<TaskHeartbeat>,
 }
 impl TaskProgress {
 	pub fn heap_bytes(&self) -> usize {
 		self.kind.capacity()
 	}
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TaskHeartbeat {
+	pub last_beat_at: Option<i64>,
+	pub expires_at: Option<i64>,
 }
 
 /// The discovery list the service returns for this account.
@@ -249,6 +265,7 @@ mod tests {
 				target: 900,
 				value: 0,
 				completed: false,
+				heartbeat: None,
 			}],
 			reward: Some("Cybernetic Headgear".to_owned()),
 			platform: PLATFORM_CROSS,
@@ -325,7 +342,9 @@ mod tests {
 				kind: "play_on_desktop".to_owned(),
 				value: 900,
 				completed: false,
+				heartbeat: None,
 			}],
+			..Default::default()
 		};
 		assert!(status.valid());
 		status.apply_to(&mut quest);
@@ -356,8 +375,10 @@ mod tests {
 					kind: format!("TASK_{index}"),
 					value: 0,
 					completed: false,
+					heartbeat: None,
 				})
 				.collect(),
+			..Default::default()
 		};
 		assert!(!status.valid());
 	}
