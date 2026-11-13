@@ -213,12 +213,6 @@ impl TaskProgress {
 	}
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct TaskHeartbeat {
-	pub last_beat_at: Option<i64>,
-	pub expires_at: Option<i64>,
-}
-
 /// The discovery list the service returns for this account.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct QuestList {
@@ -264,7 +258,6 @@ mod tests {
 				target: 900,
 				value: 0,
 				completed: false,
-				heartbeat: None,
 			}],
 			reward: Some("Cybernetic Headgear".to_owned()),
 			platform: PLATFORM_CROSS,
@@ -341,7 +334,6 @@ mod tests {
 				kind: "play_on_desktop".to_owned(),
 				value: 900,
 				completed: false,
-				heartbeat: None,
 			}],
 			..Default::default()
 		};
@@ -374,7 +366,6 @@ mod tests {
 					kind: format!("TASK_{index}"),
 					value: 0,
 					completed: false,
-					heartbeat: None,
 				})
 				.collect(),
 			..Default::default()

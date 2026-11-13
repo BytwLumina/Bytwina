@@ -253,16 +253,6 @@ pub struct TaskProgressDto {
 	pub value: u64,
 	#[serde(default)]
 	pub completed_at: Option<crate::Timestamp>,
-	#[serde(default)]
-	pub heartbeat: Option<TaskHeartbeatDto>,
-}
-
-#[derive(Deserialize)]
-pub struct TaskHeartbeatDto {
-	#[serde(default)]
-	pub last_beat_at: Option<crate::Timestamp>,
-	#[serde(default)]
-	pub expires_at: Option<crate::Timestamp>,
 }
 
 /// The progress map of a user status, bounded while it is read.
@@ -293,12 +283,6 @@ impl<'de> serde::Deserialize<'de> for ProgressMap {
 						kind: key,
 						value: value.value,
 						completed: value.completed_at.is_some(),
-						heartbeat: value
-							.heartbeat
-							.map(|heartbeat| model::quests::TaskHeartbeat {
-								last_beat_at: seconds(heartbeat.last_beat_at),
-								expires_at: seconds(heartbeat.expires_at),
-							}),
 					});
 				}
 				Ok(ProgressMap(progress))
