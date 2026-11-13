@@ -206,7 +206,6 @@ pub struct TaskProgress {
 	pub value: u64,
 	/// The service marked the task complete, even below its target.
 	pub completed: bool,
-	pub heartbeat: Option<TaskHeartbeat>,
 }
 impl TaskProgress {
 	pub fn heap_bytes(&self) -> usize {
