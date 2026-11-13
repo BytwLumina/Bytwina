@@ -1,120 +1,120 @@
-#4271	NEW    cov: 5187 ft: 22209 corp: 606/50Kb lim: 112 exec/s: 170 rss: 394Mb L: 88/112 MS: 5 InsertRepeatedBytes-EraseBytes-ChangeByte-ChangeBit-InsertRepeatedBytes-
-#4302	NEW    cov: 5187 ft: 22210 corp: 607/50Kb lim: 112 exec/s: 172 rss: 394Mb L: 104/112 MS: 1 CMP- DE: "\001\000"-
-#4318	NEW    cov: 5188 ft: 22213 corp: 608/50Kb lim: 112 exec/s: 172 rss: 394Mb L: 65/112 MS: 1 PersAutoDict- DE: "\001\000\000\000\000\000\000\000"-
-#4319	NEW    cov: 5188 ft: 22215 corp: 609/50Kb lim: 112 exec/s: 172 rss: 394Mb L: 52/112 MS: 1 PersAutoDict- DE: "\200\241\210\370\020{\000\000"-
-#4351	REDUCE cov: 5188 ft: 22215 corp: 609/50Kb lim: 112 exec/s: 174 rss: 394Mb L: 41/112 MS: 2 PersAutoDict-EraseBytes- DE: "\000\000\000\000\000\000\000\007"-
-#4357	NEW    cov: 5188 ft: 22216 corp: 610/50Kb lim: 112 exec/s: 174 rss: 394Mb L: 109/112 MS: 1 PersAutoDict- DE: "\000\000\000\000"-
-#4372	REDUCE cov: 5188 ft: 22216 corp: 610/50Kb lim: 112 exec/s: 174 rss: 394Mb L: 57/112 MS: 5 CrossOver-ChangeByte-ChangeASCIIInt-ChangeBit-EraseBytes-
-#4391	NEW    cov: 5188 ft: 22225 corp: 611/50Kb lim: 112 exec/s: 175 rss: 394Mb L: 112/112 MS: 4 CopyPart-ChangeBit-ChangeByte-ShuffleBytes-
-#4395	REDUCE cov: 5188 ft: 22225 corp: 611/50Kb lim: 112 exec/s: 175 rss: 394Mb L: 55/112 MS: 4 ChangeBit-ChangeBinInt-ChangeByte-EraseBytes-
-#4396	REDUCE cov: 5188 ft: 22225 corp: 611/50Kb lim: 112 exec/s: 175 rss: 394Mb L: 55/112 MS: 1 EraseBytes-
-#4404	NEW    cov: 5188 ft: 22227 corp: 612/50Kb lim: 112 exec/s: 176 rss: 394Mb L: 90/112 MS: 3 EraseBytes-ChangeASCIIInt-InsertRepeatedBytes-
-#4407	NEW    cov: 5188 ft: 22239 corp: 613/50Kb lim: 112 exec/s: 176 rss: 394Mb L: 97/112 MS: 3 CrossOver-ChangeBit-CMP- DE: "\377\377"-
-#4425	NEW    cov: 5192 ft: 22246 corp: 614/51Kb lim: 112 exec/s: 177 rss: 394Mb L: 94/112 MS: 3 ChangeByte-InsertRepeatedBytes-InsertRepeatedBytes-
-#4439	NEW    cov: 5192 ft: 22250 corp: 615/51Kb lim: 112 exec/s: 177 rss: 394Mb L: 98/112 MS: 4 PersAutoDict-ShuffleBytes-ChangeBinInt-InsertByte- DE: "\004\000\000\000\000\000\000\000"-
-#4440	NEW    cov: 5192 ft: 22251 corp: 616/51Kb lim: 112 exec/s: 177 rss: 394Mb L: 95/112 MS: 1 CopyPart-
-#4466	NEW    cov: 5192 ft: 22252 corp: 617/51Kb lim: 112 exec/s: 171 rss: 394Mb L: 59/112 MS: 1 EraseBytes-
-#4468	NEW    cov: 5194 ft: 22255 corp: 618/51Kb lim: 112 exec/s: 171 rss: 394Mb L: 94/112 MS: 2 EraseBytes-CrossOver-
-#4504	NEW    cov: 5194 ft: 22257 corp: 619/51Kb lim: 112 exec/s: 173 rss: 394Mb L: 99/112 MS: 1 InsertByte-
-#4505	NEW    cov: 5194 ft: 22262 corp: 620/51Kb lim: 112 exec/s: 173 rss: 394Mb L: 58/112 MS: 1 InsertByte-
-#4507	NEW    cov: 5194 ft: 22264 corp: 621/51Kb lim: 112 exec/s: 173 rss: 394Mb L: 110/112 MS: 2 PersAutoDict-PersAutoDict- DE: "\001\000\000\000"-"\011\000\000\000\000\000\000\000"-
-#4522	NEW    cov: 5194 ft: 22266 corp: 622/51Kb lim: 112 exec/s: 173 rss: 394Mb L: 112/112 MS: 5 InsertByte-CopyPart-ChangeASCIIInt-CMP-CopyPart- DE: "\377\377"-
-#4523	NEW    cov: 5194 ft: 22278 corp: 623/51Kb lim: 112 exec/s: 173 rss: 394Mb L: 104/112 MS: 1 CMP- DE: "\000\231\231\231\231\231\231\231"-
-#4534	NEW    cov: 5194 ft: 22292 corp: 624/51Kb lim: 112 exec/s: 174 rss: 394Mb L: 77/112 MS: 1 CrossOver-
-#4540	NEW    cov: 5195 ft: 22294 corp: 625/52Kb lim: 112 exec/s: 174 rss: 394Mb L: 82/112 MS: 1 CopyPart-
-#4553	NEW    cov: 5195 ft: 22295 corp: 626/52Kb lim: 112 exec/s: 175 rss: 394Mb L: 57/112 MS: 3 CrossOver-EraseBytes-CrossOver-
-#4556	REDUCE cov: 5195 ft: 22295 corp: 626/52Kb lim: 112 exec/s: 175 rss: 394Mb L: 86/112 MS: 3 CrossOver-ChangeASCIIInt-CopyPart-
-#4561	NEW    cov: 5195 ft: 22301 corp: 627/52Kb lim: 112 exec/s: 175 rss: 394Mb L: 72/112 MS: 5 InsertRepeatedBytes-EraseBytes-CrossOver-EraseBytes-CrossOver-
-#4578	NEW    cov: 5195 ft: 22311 corp: 628/52Kb lim: 112 exec/s: 169 rss: 394Mb L: 65/112 MS: 2 ChangeByte-CMP- DE: "\377\377\377\377\377\377\377\002"-
-#4585	NEW    cov: 5195 ft: 22402 corp: 629/52Kb lim: 112 exec/s: 169 rss: 394Mb L: 112/112 MS: 2 InsertByte-InsertRepeatedBytes-
-#4591	NEW    cov: 5195 ft: 22403 corp: 630/52Kb lim: 112 exec/s: 170 rss: 394Mb L: 91/112 MS: 1 InsertByte-
-#4597	NEW    cov: 5195 ft: 22404 corp: 631/52Kb lim: 112 exec/s: 170 rss: 394Mb L: 84/112 MS: 1 ChangeByte-
-#4598	REDUCE cov: 5195 ft: 22404 corp: 631/52Kb lim: 112 exec/s: 170 rss: 394Mb L: 87/112 MS: 1 EraseBytes-
-#4616	REDUCE cov: 5195 ft: 22404 corp: 631/52Kb lim: 112 exec/s: 170 rss: 394Mb L: 105/112 MS: 3 CopyPart-CMP-EraseBytes- DE: "\377\377\377\377\377\377\377\377"-
-#4632	NEW    cov: 5195 ft: 22471 corp: 632/52Kb lim: 112 exec/s: 171 rss: 394Mb L: 103/112 MS: 1 ChangeBinInt-
-#4634	REDUCE cov: 5195 ft: 22472 corp: 633/52Kb lim: 112 exec/s: 171 rss: 394Mb L: 43/112 MS: 2 EraseBytes-CrossOver-
-#4662	NEW    cov: 5195 ft: 22479 corp: 634/52Kb lim: 112 exec/s: 172 rss: 394Mb L: 112/112 MS: 3 ChangeBinInt-ChangeByte-CopyPart-
-#4675	NEW    cov: 5200 ft: 22485 corp: 635/52Kb lim: 112 exec/s: 173 rss: 394Mb L: 85/112 MS: 3 ChangeBit-EraseBytes-ChangeBit-
-#4686	NEW    cov: 5200 ft: 22489 corp: 636/52Kb lim: 112 exec/s: 173 rss: 394Mb L: 112/112 MS: 1 CopyPart-
-#4689	NEW    cov: 5200 ft: 22492 corp: 637/52Kb lim: 112 exec/s: 173 rss: 394Mb L: 105/112 MS: 3 InsertRepeatedBytes-ChangeBit-ShuffleBytes-
-#4692	NEW    cov: 5200 ft: 22495 corp: 638/53Kb lim: 112 exec/s: 173 rss: 394Mb L: 112/112 MS: 3 ChangeASCIIInt-ChangeBit-PersAutoDict- DE: "\377\377"-
-#4719	NEW    cov: 5200 ft: 22497 corp: 639/53Kb lim: 112 exec/s: 174 rss: 394Mb L: 110/112 MS: 2 ChangeBit-ShuffleBytes-
-#4720	NEW    cov: 5200 ft: 22501 corp: 640/53Kb lim: 112 exec/s: 174 rss: 394Mb L: 107/112 MS: 1 ChangeByte-
-#4724	NEW    cov: 5200 ft: 22502 corp: 641/53Kb lim: 112 exec/s: 174 rss: 394Mb L: 72/112 MS: 4 PersAutoDict-CMP-InsertByte-ShuffleBytes- DE: "\000\000\000\000"-"\377\377\377\377\377\377\377\377"-
-#4739	NEW    cov: 5200 ft: 22506 corp: 642/53Kb lim: 112 exec/s: 175 rss: 394Mb L: 40/112 MS: 5 ChangeBinInt-ChangeByte-ChangeBinInt-InsertByte-PersAutoDict- DE: "\000\000\000\000"-
-#4744	REDUCE cov: 5200 ft: 22506 corp: 642/53Kb lim: 112 exec/s: 175 rss: 394Mb L: 101/112 MS: 5 ChangeByte-ShuffleBytes-ChangeBit-ChangeASCIIInt-CrossOver-
-#4750	NEW    cov: 5200 ft: 22508 corp: 643/53Kb lim: 112 exec/s: 175 rss: 394Mb L: 112/112 MS: 1 CopyPart-
-#4758	NEW    cov: 5200 ft: 22514 corp: 644/53Kb lim: 112 exec/s: 176 rss: 394Mb L: 105/112 MS: 3 ChangeBit-PersAutoDict-InsertRepeatedBytes- DE: "\021\002\000\000\000\000\000\000"-
-#4784	REDUCE cov: 5200 ft: 22514 corp: 644/53Kb lim: 112 exec/s: 177 rss: 394Mb L: 107/112 MS: 1 EraseBytes-
-#4787	NEW    cov: 5200 ft: 22531 corp: 645/53Kb lim: 112 exec/s: 170 rss: 394Mb L: 99/112 MS: 3 ChangeByte-CMP-CrossOver- DE: "\377\377\377\377"-
-#4790	NEW    cov: 5200 ft: 22537 corp: 646/53Kb lim: 112 exec/s: 171 rss: 394Mb L: 32/112 MS: 3 PersAutoDict-ShuffleBytes-ChangeBinInt- DE: "\377\377\377\377"-
-#4796	REDUCE cov: 5200 ft: 22537 corp: 646/53Kb lim: 112 exec/s: 171 rss: 394Mb L: 52/112 MS: 1 EraseBytes-
-#4802	REDUCE cov: 5200 ft: 22537 corp: 646/53Kb lim: 112 exec/s: 171 rss: 394Mb L: 50/112 MS: 1 EraseBytes-
-#4846	NEW    cov: 5200 ft: 22539 corp: 647/53Kb lim: 112 exec/s: 173 rss: 394Mb L: 112/112 MS: 4 ChangeByte-ChangeByte-CrossOver-ShuffleBytes-
-#4853	NEW    cov: 5200 ft: 22540 corp: 648/53Kb lim: 112 exec/s: 173 rss: 394Mb L: 96/112 MS: 2 PersAutoDict-InsertByte- DE: "\000\231\231\231\231\231\231\231"-
-#4894	REDUCE cov: 5200 ft: 22541 corp: 649/53Kb lim: 112 exec/s: 168 rss: 394Mb L: 63/112 MS: 1 InsertByte-
-#4899	NEW    cov: 5200 ft: 22542 corp: 650/54Kb lim: 112 exec/s: 168 rss: 394Mb L: 112/112 MS: 5 ChangeBit-ChangeBit-ChangeByte-ChangeBinInt-ChangeBinInt-
-#4925	NEW    cov: 5200 ft: 22544 corp: 651/54Kb lim: 112 exec/s: 169 rss: 394Mb L: 94/112 MS: 1 EraseBytes-
-#4935	NEW    cov: 5200 ft: 22548 corp: 652/54Kb lim: 112 exec/s: 170 rss: 394Mb L: 75/112 MS: 5 EraseBytes-ChangeBinInt-PersAutoDict-PersAutoDict-PersAutoDict- DE: "\031\000\000\000\000\000\000\000"-"\002\000"-"\000\000\000\000"-
-#4942	NEW    cov: 5200 ft: 22552 corp: 653/54Kb lim: 112 exec/s: 170 rss: 394Mb L: 108/112 MS: 2 ChangeByte-InsertByte-
-#4943	NEW    cov: 5200 ft: 22554 corp: 654/54Kb lim: 112 exec/s: 170 rss: 394Mb L: 99/112 MS: 1 CopyPart-
-#4950	REDUCE cov: 5200 ft: 22554 corp: 654/54Kb lim: 112 exec/s: 170 rss: 394Mb L: 47/112 MS: 2 CopyPart-EraseBytes-
-#4957	NEW    cov: 5200 ft: 22559 corp: 655/54Kb lim: 112 exec/s: 170 rss: 394Mb L: 111/112 MS: 2 ChangeBinInt-ShuffleBytes-
-#4999	REDUCE cov: 5200 ft: 22559 corp: 655/54Kb lim: 112 exec/s: 172 rss: 394Mb L: 106/112 MS: 2 EraseBytes-InsertRepeatedBytes-
-#5040	NEW    cov: 5201 ft: 22560 corp: 656/54Kb lim: 112 exec/s: 173 rss: 394Mb L: 110/112 MS: 1 CopyPart-
-#5044	NEW    cov: 5201 ft: 22562 corp: 657/54Kb lim: 112 exec/s: 173 rss: 395Mb L: 109/112 MS: 4 ChangeByte-ShuffleBytes-ChangeBinInt-ChangeBinInt-
-#5081	REDUCE cov: 5201 ft: 22562 corp: 657/54Kb lim: 112 exec/s: 175 rss: 395Mb L: 20/112 MS: 2 CrossOver-EraseBytes-
-#5114	REDUCE cov: 5201 ft: 22562 corp: 657/54Kb lim: 112 exec/s: 170 rss: 395Mb L: 40/112 MS: 3 ChangeByte-ChangeByte-EraseBytes-
-#5122	NEW    cov: 5202 ft: 22569 corp: 658/54Kb lim: 112 exec/s: 170 rss: 395Mb L: 111/112 MS: 3 CMP-CrossOver-InsertByte- DE: "\002\000\000\000\000\000\000\000"-
-#5130	NEW    cov: 5203 ft: 22603 corp: 659/54Kb lim: 112 exec/s: 171 rss: 395Mb L: 107/112 MS: 3 PersAutoDict-ChangeBinInt-CopyPart- DE: "^t\321E\027]t\001"-
-#5146	NEW    cov: 5203 ft: 22604 corp: 660/55Kb lim: 112 exec/s: 171 rss: 395Mb L: 108/112 MS: 1 InsertRepeatedBytes-
-#5148	REDUCE cov: 5203 ft: 22606 corp: 661/55Kb lim: 112 exec/s: 171 rss: 395Mb L: 111/112 MS: 2 ChangeByte-CrossOver-
-#5150	NEW    cov: 5203 ft: 22617 corp: 662/55Kb lim: 112 exec/s: 171 rss: 395Mb L: 111/112 MS: 2 ChangeASCIIInt-CopyPart-
-#5177	NEW    cov: 5203 ft: 22618 corp: 663/55Kb lim: 112 exec/s: 172 rss: 395Mb L: 106/112 MS: 2 CopyPart-CMP- DE: "\000\000\000\000"-
-#5181	NEW    cov: 5203 ft: 22619 corp: 664/55Kb lim: 112 exec/s: 172 rss: 395Mb L: 89/112 MS: 4 ChangeByte-ChangeBit-PersAutoDict-EraseBytes- DE: "\001\000\000\000"-
-#5192	NEW    cov: 5203 ft: 22620 corp: 665/55Kb lim: 112 exec/s: 173 rss: 395Mb L: 104/112 MS: 1 CrossOver-
-#5204	REDUCE cov: 5203 ft: 22620 corp: 665/55Kb lim: 112 exec/s: 173 rss: 395Mb L: 70/112 MS: 2 InsertByte-EraseBytes-
-#5217	NEW    cov: 5203 ft: 22626 corp: 666/55Kb lim: 112 exec/s: 173 rss: 395Mb L: 102/112 MS: 3 ChangeByte-EraseBytes-CopyPart-
-#5223	REDUCE cov: 5203 ft: 22626 corp: 666/55Kb lim: 112 exec/s: 174 rss: 395Mb L: 39/112 MS: 1 EraseBytes-
-#5247	NEW    cov: 5204 ft: 22628 corp: 667/55Kb lim: 112 exec/s: 174 rss: 395Mb L: 40/112 MS: 4 ChangeBit-ChangeBinInt-CMP-ChangeBit- DE: "\000\000\000\000\000\000\000\000"-
-#5261	REDUCE cov: 5204 ft: 22629 corp: 668/55Kb lim: 112 exec/s: 175 rss: 395Mb L: 88/112 MS: 4 InsertByte-InsertByte-ShuffleBytes-CopyPart-
-#5289	NEW    cov: 5204 ft: 22631 corp: 669/55Kb lim: 112 exec/s: 176 rss: 395Mb L: 98/112 MS: 3 PersAutoDict-ChangeByte-CrossOver- DE: "\010\000\000\000\000\000\000\000"-
-#5304	DONE   cov: 5204 ft: 22631 corp: 669/55Kb lim: 112 exec/s: 171 rss: 395Mb
-###### Recommended dictionary. ######
-"\001\000\000\000\000\000\000\036" # Uses: 25
-"\000\000" # Uses: 19
-"\011\000\000\000\000\000\000\000" # Uses: 34
-"\002\000" # Uses: 26
-"\377\377\377\377" # Uses: 18
-"\000\000\000\000\000\000\000\000" # Uses: 17
-"\005\000\000\000\000\000\000\000" # Uses: 16
-"\200\241\210\370\020{\000\000" # Uses: 21
-"\377\377\377\377\377\377\377\377" # Uses: 19
-"\377\377" # Uses: 19
-"\031\000\000\000\000\000\000\000" # Uses: 15
-"\377\377\377\377\377\377\377\006" # Uses: 12
-"\000\000\000\000" # Uses: 25
-"\001\000\000\000" # Uses: 11
-"\032\000\000\000\000\000\000\000" # Uses: 13
-"\021\002\000\000\000\000\000\000" # Uses: 11
-"\010\000\000\000\000\000\000\000" # Uses: 12
-"\001\000\000\000\000\000\000\025" # Uses: 11
-"\000\000\000\000\000\000\000\001" # Uses: 13
-"^t\321E\027]t\001" # Uses: 11
-"\004\000\000\000\000\000\000\000" # Uses: 8
-"\001\000\000\000\000\000\000\000" # Uses: 6
-"\230\231\231\231\231\231\231\001" # Uses: 6
-"\003\000\000\000\000\000\000\000" # Uses: 18
-"\377\377\377\377\377\377\377\003" # Uses: 7
-"\000\000V\010l\3333." # Uses: 10
-"\001\000\000\000\000\000\000\004" # Uses: 10
-"\001t]\027E\321t]" # Uses: 6
-"\002\000\000\000\000\000\000\000" # Uses: 3
-"\000\000\000\000\000\000\000\007" # Uses: 2
-"\014\000\000\000\000\000\000\000" # Uses: 6
-"M\000\000\000\000\000\000\000" # Uses: 3
-"\001\000" # Uses: 1
-"\000\231\231\231\231\231\231\231" # Uses: 1
-"\377\377\377\377\377\377\377\002" # Uses: 0
-###### End of recommended dictionary. ######
-Done 5304 runs in 31 second(s)
+[1m[92m   Compiling[0m discord-protocol v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/discord-protocol)
+[1m[92m   Compiling[0m client-core v0.0.1 (/home/runner/work/Bytwina/Bytwina/crates/client-core)
+[1m[91merror[E0425][0m[1m: cannot find type `DismissedContent` in this scope[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:338:31
+    [1m[94m|[0m
+[1m[94m338[0m [1m[94m|[0m     pub dismissed_quest_content: DismissedContent,
+    [1m[94m|[0m                                  [1m[91m^^^^^^^^^^^^^^^^[0m [1m[91mnot found in this scope[0m
+
+[1m[91merror[E0124][0m[1m: field `orb_quantity_claimed` is already declared[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:334:2
+    [1m[94m|[0m
+[1m[94m324[0m [1m[94m|[0m     pub orb_quantity_claimed: Option<u64>,
+    [1m[94m|[0m     [1m[94m-------------------------------------[0m [1m[94m`orb_quantity_claimed` first declared here[0m
+[1m[94m...[0m
+[1m[94m334[0m [1m[94m|[0m     pub orb_quantity_claimed: u64,
+    [1m[94m|[0m     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mfield already declared[0m
+
+[1m[91merror[E0124][0m[1m: field `stream_progress_seconds` is already declared[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:336:2
+    [1m[94m|[0m
+[1m[94m328[0m [1m[94m|[0m     pub stream_progress_seconds: u64,
+    [1m[94m|[0m     [1m[94m--------------------------------[0m [1m[94m`stream_progress_seconds` first declared here[0m
+[1m[94m...[0m
+[1m[94m336[0m [1m[94m|[0m     pub stream_progress_seconds: u64,
+    [1m[94m|[0m     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mfield already declared[0m
+
+[1m[91merror[E0124][0m[1m: field `dismissed_quest_content` is already declared[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:338:2
+    [1m[94m|[0m
+[1m[94m330[0m [1m[94m|[0m     pub dismissed_quest_content: u32,
+    [1m[94m|[0m     [1m[94m--------------------------------[0m [1m[94m`dismissed_quest_content` first declared here[0m
+[1m[94m...[0m
+[1m[94m338[0m [1m[94m|[0m     pub dismissed_quest_content: DismissedContent,
+    [1m[94m|[0m     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mfield already declared[0m
+
+[1m[91merror[E0308][0m[1m: mismatched types[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:311:10
+    [1m[94m|[0m
+[1m[94m311[0m [1m[94m|[0m #[derive(Deserialize)]
+    [1m[94m|[0m          [1m[91m^^^^^^^^^^^[0m [1m[91mexpected `u64`, found `Option<u64>`[0m
+    [1m[94m|[0m
+    [1m[94m= [0m[1mnote[0m: expected type `[1m[35mu64[0m`
+               found enum `[1m[35mstd::option::Option<u64>[0m`
+    [1m[94m= [0m[1mnote[0m: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+[1m[96mhelp[0m: consider using `Option::expect` to unwrap the `std::option::Option<u64>` value, panicking if the value is an `Option::None`
+    [1m[94m|[0m
+[1m[94m311[0m [1m[94m| [0m#[derive(Deserialize[92m.expect("REASON")[0m)]
+    [1m[94m|[0m                     [92m+++++++++++++++++[0m
+
+[1m[91merror[E0062][0m[1m: field `orb_quantity_claimed` specified more than once[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:334:6
+    [1m[94m|[0m
+[1m[94m311[0m [1m[94m|[0m #[derive(Deserialize)]
+    [1m[94m|[0m          [1m[94m-----------[0m [1m[94mfirst use of `orb_quantity_claimed`[0m
+[1m[94m...[0m
+[1m[94m334[0m [1m[94m|[0m     pub orb_quantity_claimed: u64,
+    [1m[94m|[0m         [1m[91m^^^^^^^^^^^^^^^^^^^^[0m [1m[91mused more than once[0m
+
+[1m[91merror[E0062][0m[1m: field `stream_progress_seconds` specified more than once[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:336:6
+    [1m[94m|[0m
+[1m[94m311[0m [1m[94m|[0m #[derive(Deserialize)]
+    [1m[94m|[0m          [1m[94m-----------[0m [1m[94mfirst use of `stream_progress_seconds`[0m
+[1m[94m...[0m
+[1m[94m336[0m [1m[94m|[0m     pub stream_progress_seconds: u64,
+    [1m[94m|[0m         [1m[91m^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mused more than once[0m
+
+[1m[91merror[E0062][0m[1m: field `dismissed_quest_content` specified more than once[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:338:6
+    [1m[94m|[0m
+[1m[94m311[0m [1m[94m|[0m #[derive(Deserialize)]
+    [1m[94m|[0m          [1m[94m-----------[0m [1m[94mfirst use of `dismissed_quest_content`[0m
+[1m[94m...[0m
+[1m[94m338[0m [1m[94m|[0m     pub dismissed_quest_content: DismissedContent,
+    [1m[94m|[0m         [1m[91m^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[91mused more than once[0m
+
+[1m[91merror[E0560][0m[1m: struct `Task` has no field named `heartbeat`[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:407:5
+    [1m[94m|[0m
+[1m[94m407[0m [1m[94m|[0m                 heartbeat: None,
+    [1m[94m|[0m                 [1m[91m^^^^^^^^^[0m [1m[91m`Task` does not have this field[0m
+    [1m[94m|[0m
+    [1m[94m= [0m[1mnote[0m: all struct fields are already assigned
+
+[1m[33mwarning[0m[1m: unreachable pattern[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:334:6
+    [1m[94m|[0m
+[1m[94m324[0m [1m[94m|[0m     pub orb_quantity_claimed: Option<u64>,
+    [1m[94m|[0m         [1m[94m--------------------[0m [1m[94mmatches all the relevant values[0m
+[1m[94m...[0m
+[1m[94m334[0m [1m[94m|[0m     pub orb_quantity_claimed: u64,
+    [1m[94m|[0m         [1m[33m^^^^^^^^^^^^^^^^^^^^[0m [1m[33mno value can reach this[0m
+    [1m[94m|[0m
+    [1m[94m= [0m[1mnote[0m: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+[1m[33mwarning[0m[1m: unreachable pattern[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:336:6
+    [1m[94m|[0m
+[1m[94m328[0m [1m[94m|[0m     pub stream_progress_seconds: u64,
+    [1m[94m|[0m         [1m[94m-----------------------[0m [1m[94mmatches all the relevant values[0m
+[1m[94m...[0m
+[1m[94m336[0m [1m[94m|[0m     pub stream_progress_seconds: u64,
+    [1m[94m|[0m         [1m[33m^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[33mno value can reach this[0m
+
+[1m[33mwarning[0m[1m: unreachable pattern[0m
+   [1m[94m--> [0m/home/runner/work/Bytwina/Bytwina/crates/discord-protocol/src/quests.rs:338:6
+    [1m[94m|[0m
+[1m[94m330[0m [1m[94m|[0m     pub dismissed_quest_content: u32,
+    [1m[94m|[0m         [1m[94m-----------------------[0m [1m[94mmatches all the relevant values[0m
+[1m[94m...[0m
+[1m[94m338[0m [1m[94m|[0m     pub dismissed_quest_content: DismissedContent,
+    [1m[94m|[0m         [1m[33m^^^^^^^^^^^^^^^^^^^^^^^[0m [1m[33mno value can reach this[0m
+
+[1mSome errors have detailed explanations: E0062, E0124, E0308, E0425, E0560.[0m
+[1mFor more information about an error, try `rustc --explain E0062`.[0m
+[1m[33mwarning[0m: `discord-protocol` (lib) generated 3 warnings
+[1m[91merror[0m: could not compile `discord-protocol` (lib) due to 9 previous errors; 3 warnings emitted
+[1m[33mwarning[0m: build failed, waiting for other jobs to finish...
+Error: failed to build fuzz script: ASAN_OPTIONS="detect_odr_violation=0" RUSTFLAGS=" -Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=4 -Cllvm-args=-sanitizer-coverage-inline-8bit-counters -Cllvm-args=-sanitizer-coverage-pc-table -Cllvm-args=-sanitizer-coverage-trace-compares --cfg fuzzing -Cllvm-args=-simplifycfg-branch-fold-threshold=0 -Zsanitizer=address -Cllvm-args=-sanitizer-coverage-stack-depth -Cdebug-assertions -Ccodegen-units=1" "cargo" "build" "--manifest-path" "/home/runner/work/Bytwina/Bytwina/fuzz/Cargo.toml" "--target" "x86_64-unknown-linux-gnu" "--release" "--config" "profile.release.debug=\"line-tables-only\"" "--bin" "decode"
+decode fuzz smoke failed
