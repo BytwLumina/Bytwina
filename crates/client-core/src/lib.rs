@@ -2391,6 +2391,22 @@ impl State {
 			let _ = (user, guild, request);
 			return;
 		}
+		if let Command::QuestHeartbeat { quest, request, .. } = command {
+			self.quests.apply(quests::Event::Heartbeat {
+				quest,
+				request,
+				result: Err("Quest heartbeat was not queued; try again"),
+			});
+			return;
+		}
+		if let Command::DismissQuestContent { quest, request, .. } = command {
+			self.quests.apply(quests::Event::Dismissed {
+				quest,
+				request,
+				result: Err("Quest dismissal was not queued; try again"),
+			});
+			return;
+		}
 		if let Command::BadgeSettings { request, .. } = command {
 			self.apply_badge_settings(
 				request,

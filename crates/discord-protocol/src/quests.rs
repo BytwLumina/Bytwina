@@ -330,12 +330,6 @@ pub struct UserStatusDto {
 	pub dismissed_quest_content: u32,
 	#[serde(default)]
 	pub progress: ProgressMap,
-	#[serde(default)]
-	pub orb_quantity_claimed: u64,
-	#[serde(default)]
-	pub stream_progress_seconds: u64,
-	#[serde(default)]
-	pub dismissed_quest_content: DismissedContent,
 }
 impl UserStatusDto {
 	pub fn into_model(self) -> Result<model::quests::UserStatus, crate::DecodeError> {
