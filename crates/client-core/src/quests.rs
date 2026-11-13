@@ -164,10 +164,10 @@ impl Quests {
 					return;
 				}
 				self.action = None;
-				if let Ok(status) = result {
-					if let Some(known) = self.quest_mut(quest) {
-						status.apply_to(known);
-					}
+				if let Ok(status) = result
+					&& let Some(known) = self.quest_mut(quest)
+				{
+					status.apply_to(known);
 				}
 			}
 			Event::Dismissed {
@@ -179,10 +179,10 @@ impl Quests {
 					return;
 				}
 				self.action = None;
-				if let Ok(status) = result {
-					if let Some(known) = self.quest_mut(quest) {
-						status.apply_to(known);
-					}
+				if let Ok(status) = result
+					&& let Some(known) = self.quest_mut(quest)
+				{
+					status.apply_to(known);
 				}
 			}
 			Event::Claimed {

@@ -398,7 +398,6 @@ impl QuestDto {
 				target: task.target,
 				value: 0,
 				completed: false,
-				heartbeat: None,
 			})
 			.collect::<Vec<_>>();
 		let rewards = self.config.rewards_config;
