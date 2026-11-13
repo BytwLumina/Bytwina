@@ -75,6 +75,12 @@ impl VerificationUi {
 						.on_hover_text(title);
 					ui.add_space(12.0);
 				}
+				dialog::notice(
+					ui,
+					dialog::Level::Warning,
+					crate::i18n::translate("verification-show-official-client-safety-warning"),
+				);
+				ui.add_space(12.0);
 				let height = if self.active {
 					(ctx.content_rect().height() - 260.0).clamp(160.0, 480.0)
 				} else {
@@ -122,6 +128,15 @@ impl VerificationUi {
 				ui.add_space(16.0);
 			});
 			d.footer(|ui| {
+				if dialog::action(
+					ui,
+					"verification-show-open-discord",
+					dialog::Action::Neutral,
+				)
+				.clicked()
+				{
+					ctx.open_url(egui::OpenUrl::new_tab("https://discord.com/app"));
+				}
 				if !self.active
 					&& dialog::action(ui, "verification-show-verify", dialog::Action::Primary)
 						.clicked()

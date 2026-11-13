@@ -4097,6 +4097,8 @@ verification-show-one-quick-check = Một lần kiểm tra nhanh
 verification-show-verification-required = Yêu cầu xác minh
 # Context: show
 verification-show-verify = Xác minh
+verification-show-official-client-safety-warning = Để bảo vệ tài khoản, hoàn tất bước kiểm tra này trong ứng dụng Discord chính thức sẽ an toàn hơn, đặc biệt với tài khoản mới. Không bao giờ chia sẻ token hoặc thông tin đăng nhập. Discord vẫn có thể đánh dấu hoạt động.
+verification-show-open-discord = Mở Discord
 
 ## crates/ui/src/video.rs
 # Context: show_player

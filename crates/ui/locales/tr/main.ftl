@@ -4083,6 +4083,8 @@ verification-show-one-quick-check = Hızlı bir kontrol
 verification-show-verification-required = Doğrulama gerekli
 # Context: show
 verification-show-verify = Doğrulamak
+verification-show-official-client-safety-warning = Hesap güvenliği için, özellikle yeni hesaplarda bu kontrolü resmi Discord istemcisinde tamamlamak daha güvenlidir. Tokenınızı veya giriş bilgilerinizi asla paylaşmayın. Discord etkinliği yine de işaretleyebilir.
+verification-show-open-discord = Discord'u Aç
 
 ## crates/ui/src/video.rs
 # Context: show_player

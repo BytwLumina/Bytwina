@@ -4107,6 +4107,8 @@ verification-show-one-quick-check = Jedna rychlá kontrola
 verification-show-verification-required = Vyžaduje se ověření
 # Context: show
 verification-show-verify = Ověřte
+verification-show-official-client-safety-warning = Pro bezpečnost účtu je bezpečnější dokončit tuto kontrolu v oficiálním klientovi Discordu, zejména u nových účtů. Nikdy nesdílejte token ani přihlašovací údaje. Discord může aktivitu stále označit.
+verification-show-open-discord = Otevřít Discord
 
 ## crates/ui/src/video.rs
 # Context: show_player

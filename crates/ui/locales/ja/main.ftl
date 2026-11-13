@@ -4083,6 +4083,8 @@ verification-show-one-quick-check = 簡単なチェックを 1 つ
 verification-show-verification-required = 要検証
 # Context: show
 verification-show-verify = 確認する
+verification-show-official-client-safety-warning = アカウントの安全のため、特に新しいアカウントでは公式のDiscordクライアントでこの確認を完了する方が安全です。トークンやログイン情報を共有しないでください。Discordがアクティビティを検出する場合があります。
+verification-show-open-discord = Discordを開く
 
 ## crates/ui/src/video.rs
 # Context: show_player

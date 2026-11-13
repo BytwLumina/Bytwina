@@ -1155,7 +1155,7 @@ pub struct NavStep {
 }
 
 enum Apply {
-	Opened(Option<Command>),
+	Opened(Option<Box<Command>>),
 	AlreadyHere,
 	Rejected(&'static str),
 }
@@ -1487,7 +1487,7 @@ impl State {
 		match self.apply_channel(channel) {
 			Apply::Opened(command) => {
 				self.record(Place::Channel(channel));
-				command
+				command.map(|command| *command)
 			}
 			Apply::AlreadyHere => None,
 			Apply::Rejected(status) => {
@@ -1608,7 +1608,7 @@ impl State {
 				return Apply::Opened(None);
 			}
 			if let Some(command) = self.open_scrolled_window(message) {
-				return Apply::Opened(Some(command));
+				return Apply::Opened(Some(Box::new(command)));
 			}
 		}
 		if let Some(trusted) = trusted {
@@ -1616,7 +1616,7 @@ impl State {
 			self.history_before = None;
 			self.older_exhausted = trusted.older_exhausted;
 			self.freshness = Freshness::Fresh;
-			return Apply::Opened(self.call_sync(channel));
+			return Apply::Opened(self.call_sync(channel).map(Box::new));
 		}
 		let command = self.history(None);
 		if let Command::History { request, .. } = command
@@ -1626,9 +1626,9 @@ impl State {
 				.adopt(channel, request, std::time::Instant::now())
 		{
 			// The page this click needs is already on its way.
-			return Apply::Opened(self.call_sync(channel));
+			return Apply::Opened(self.call_sync(channel).map(Box::new));
 		}
-		Apply::Opened(Some(command))
+		Apply::Opened(Some(Box::new(command)))
 	}
 	/// Opening without a page request still synchronizes a direct call's state, as the host
 	/// does alongside a recent-page request.
@@ -1720,7 +1720,9 @@ impl State {
 						Place::Channel(channel) => self.cancel_invite_navigation(channel),
 						Place::Home => self.invite_join.navigate = None,
 					}
-					return Some(NavStep { command });
+					return Some(NavStep {
+						command: command.map(|command| *command),
+					});
 				}
 				Apply::AlreadyHere => {
 					self.commit_nav(back);

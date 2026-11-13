@@ -4121,6 +4121,8 @@ verification-show-one-quick-check = 一次快速檢查
 verification-show-verification-required = 需要驗證
 # Context: show
 verification-show-verify = 驗證
+verification-show-official-client-safety-warning = 為了帳號安全，尤其是新帳號，使用官方 Discord 用戶端完成此檢查更安全。請勿分享權杖或登入資訊。Discord 仍可能標記相關活動。
+verification-show-open-discord = 開啟 Discord
 
 ## crates/ui/src/video.rs
 # Context: show_player

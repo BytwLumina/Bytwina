@@ -20,6 +20,9 @@ pub struct Notification {
 	roles: Vec<Id>,
 }
 impl Notification {
+	pub fn is_mention(&self) -> bool {
+		self.direct || self.everyone || !self.roles.is_empty()
+	}
 	fn bytes(&self) -> usize {
 		size_of::<Self>()
 			+ self.roles.capacity() * size_of::<Id>()
@@ -659,7 +662,18 @@ impl State {
 		}
 	}
 	pub fn take_notification(&mut self) -> Option<Notification> {
-		while let Some(notification) = self.read_state.activity.notifications.pop_front() {
+		while let Some(notification) = self.read_state.activity.notifications.front() {
+			// Preferences arrive separately from messages. Do not consume an alert while
+			// that snapshot is still unknown: doing so permanently lost early mentions.
+			if !self.notification_preferences_known() {
+				return None;
+			}
+			let notification = self
+				.read_state
+				.activity
+				.notifications
+				.pop_front()
+				.expect("front notification exists");
 			let mention = self.mention_matches(
 				notification.channel,
 				notification.direct,
@@ -1567,6 +1581,38 @@ mod tests {
 			embeds_suppressed: false,
 			attachments: vec![],
 		}
+	}
+
+	#[test]
+	fn queued_alert_survives_preferences_loading_gap() {
+		let mut state = notification_state();
+		let incoming = message(100, 20);
+		state.observe_notification(&incoming);
+		assert_eq!(state.read_state.activity.notifications.len(), 1);
+
+		// Simulate a message arriving before the account notification snapshot.
+		state.notification_preferences = Preferences::default();
+		assert!(state.take_notification().is_none());
+		assert_eq!(state.read_state.activity.notifications.len(), 1);
+
+		let mut preferences = Preferences {
+			complete: true,
+			dnd: Some(false),
+			..Default::default()
+		};
+		preferences.settings.insert(
+			Some(Id(1)),
+			Setting {
+				guild: Some(Id(1)),
+				muted: Some(false),
+				level: Some(0),
+				suppress_everyone: Some(false),
+				suppress_roles: Some(false),
+				..Default::default()
+			},
+		);
+		state.notification_preferences = preferences;
+		assert!(state.take_notification().is_some());
 	}
 
 	#[test]

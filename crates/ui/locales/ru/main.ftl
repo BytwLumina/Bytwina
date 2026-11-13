@@ -4093,6 +4093,8 @@ verification-show-one-quick-check = Одна быстрая проверка
 verification-show-verification-required = Требуется проверка
 # Context: show
 verification-show-verify = Проверять
+verification-show-official-client-safety-warning = Для безопасности аккаунта безопаснее пройти эту проверку в официальном клиенте Discord, особенно для новых аккаунтов. Никогда не сообщайте токен или данные для входа. Discord всё равно может отметить активность.
+verification-show-open-discord = Открыть Discord
 
 ## crates/ui/src/video.rs
 # Context: show_player

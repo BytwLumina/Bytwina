@@ -4089,6 +4089,8 @@ verification-show-one-quick-check = Una comprobación rápida
 verification-show-verification-required = Se requiere verificación
 # Context: show
 verification-show-verify = Verificar
+verification-show-official-client-safety-warning = Por seguridad, es más seguro completar esta comprobación en el cliente oficial de Discord, especialmente en cuentas nuevas. Nunca compartas tu token ni tus credenciales. Discord podría marcar la actividad.
+verification-show-open-discord = Abrir Discord
 
 ## crates/ui/src/video.rs
 # Context: show_player

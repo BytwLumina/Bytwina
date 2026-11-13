@@ -127,13 +127,14 @@ impl Runtime {
 		let mut sound = None;
 		while let Some(notification) = state.take_notification() {
 			let current = focused && ui.viewing_latest(notification.channel);
+			let show_desktop_alert = !current || notification.is_mention();
 			let cue = if current {
 				Sound::CurrentChannel
 			} else {
 				Sound::Message
 			};
 			if audible {
-				if ui.notifications_enabled && !current {
+				if ui.notifications_enabled && show_desktop_alert {
 					let image_path = state.user.as_ref().and_then(|user| {
 						crate::avatars::notification_image_path(user.id, &notification.avatar_key)
 					});
