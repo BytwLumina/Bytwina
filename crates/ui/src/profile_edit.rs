@@ -1,7 +1,7 @@
 //! One bounded, session-only draft for the account's global profile.
 use crate::{avatars::Avatars, design, icons};
 use client_core::{Command, State};
-use model::{Id, ProfileEdit, UserProfile};
+use model::{Id, NameEffect, NameStyle, ProfileEdit, UserProfile};
 
 #[derive(Clone, PartialEq, Eq)]
 struct Draft {
@@ -17,9 +17,16 @@ struct Draft {
 	decoration: Option<Option<Id>>,
 	nameplate: Option<Option<Id>>,
 	effect: Option<Option<Id>>,
+	theme_colors: Option<[u32; 2]>,
+	display_name_style: Option<NameStyle>,
 }
 impl Draft {
 	fn from_profile(profile: &UserProfile) -> Self {
+		let display_name_style = profile
+			.user
+			.cosmetics
+			.as_deref()
+			.and_then(|cosmetics| cosmetics.name_style.clone());
 		Self {
 			name: profile.global_name.clone().unwrap_or_default(),
 			bio: profile.bio.clone(),
@@ -30,6 +37,8 @@ impl Draft {
 			decoration: None,
 			nameplate: None,
 			effect: None,
+			theme_colors: profile.theme_colors,
+			display_name_style,
 		}
 	}
 	fn changes(&self, profile: &UserProfile) -> ProfileEdit {
@@ -51,6 +60,10 @@ impl Draft {
 			avatar_decoration_sku: self.decoration,
 			nameplate_sku: self.nameplate,
 			profile_effect_sku: self.effect,
+			theme_colors: (self.theme_colors != profile.theme_colors).then_some(self.theme_colors),
+			display_name_style: (self.display_name_style
+				!= profile.user.cosmetics.as_deref().and_then(|c| c.name_style.clone()))
+			.then_some(self.display_name_style.clone()),
 		}
 	}
 	fn rebase(&mut self, before: &Self, fresh: &Self) {
@@ -65,6 +78,12 @@ impl Draft {
 		}
 		if self.color == before.color {
 			self.color = fresh.color;
+		}
+		if self.theme_colors == before.theme_colors {
+			self.theme_colors = fresh.theme_colors;
+		}
+		if self.display_name_style == before.display_name_style {
+			self.display_name_style = fresh.display_name_style.clone();
 		}
 	}
 }
@@ -528,6 +547,10 @@ fn form(
 		true,
 	);
 	ui.add_space(8.0);
+	name_style_editor(ui, draft);
+	ui.add_space(8.0);
+	theme_editor(ui, &mut draft.theme_colors, profile.theme_colors);
+	ui.add_space(8.0);
 	let mut enabled = draft.color.is_some();
 	ui.add_space(8.0);
 	let has_banner = match &draft.banner {
@@ -635,6 +658,85 @@ fn form(
 		});
 	}
 	action
+}
+
+fn name_style_editor(ui: &mut egui::Ui, draft: &mut Draft) {
+	let label = crate::i18n::translate("settings-cosmetics-name-styles");
+	let mut reset = false;
+	design::row(ui, &label, Some("settings-cosmetics-name-styles-description"), |ui| {
+		if let Some(style) = draft.display_name_style.as_mut() {
+			egui::ComboBox::from_id_salt("profile-name-style-font")
+				.selected_text(format!("Font {}", style.font))
+				.show_ui(ui, |ui| {
+					for font in [11, 3, 4, 6, 7, 8, 10, 12, 13, 14, 15, 16] {
+						ui.selectable_value(&mut style.font, font, format!("Font {font}"));
+					}
+				});
+			egui::ComboBox::from_id_salt("profile-name-style-effect")
+				.selected_text(format!("{:?}", style.effect))
+				.show_ui(ui, |ui| {
+					for effect in [
+						NameEffect::Solid,
+						NameEffect::Gradient,
+						NameEffect::Neon,
+						NameEffect::Toon,
+						NameEffect::Pop,
+						NameEffect::Glow,
+						NameEffect::Prism,
+						NameEffect::Gummy,
+					] {
+						ui.selectable_value(&mut style.effect, effect, format!("{effect:?}"));
+					}
+				});
+			reset = design::text_action(ui, &crate::i18n::translate("profile-edit-form-default")).clicked();
+		} else if design::button(
+			ui,
+			&crate::i18n::translate("profile-edit-form-change"),
+			design::ButtonKind::Outline,
+		).clicked() {
+			draft.display_name_style = Some(NameStyle {
+			font: 11,
+			effect: NameEffect::Solid,
+			colors: vec![0xffffff],
+		});
+		}
+	});
+	if reset {
+		draft.display_name_style = None;
+	}
+}
+
+fn theme_editor(ui: &mut egui::Ui, theme: &mut Option<[u32; 2]>, _original: Option<[u32; 2]>) {
+	let mut reset = false;
+	design::row(
+		ui,
+		"settings-cosmetics-name-styles",
+		Some("settings-cosmetics-name-styles-description"),
+		|ui| {
+			if let Some(colors) = theme.as_mut() {
+				for color in colors.iter_mut() {
+					let mut rgb = [(*color >> 16) as u8, (*color >> 8) as u8, *color as u8];
+					if design::color_edit(ui, &mut rgb).changed() {
+						*color = (u32::from(rgb[0]) << 16)
+							| (u32::from(rgb[1]) << 8)
+							| u32::from(rgb[2]);
+					}
+				}
+				reset = design::text_action(ui, &crate::i18n::translate("profile-edit-form-default")).clicked();
+			} else if design::button(
+				ui,
+				&crate::i18n::translate("profile-edit-form-change"),
+				design::ButtonKind::Outline,
+			)
+			.clicked()
+			{
+				*theme = Some([0x5865f2, 0x1e1f22]);
+			}
+		},
+	);
+	if reset {
+		*theme = None;
+	}
 }
 
 /// One owned-collectible picker: "Default" plus every owned product of a category.

@@ -109,7 +109,7 @@ pub struct NameStyleDto {
 }
 pub type NameStyleField = Option<Lenient<NameStyleDto>>;
 
-/// A style with at most four valid colours; anything else is dropped.
+/// A style with at most five valid colours; anything else is dropped.
 pub fn name_style(field: NameStyleField) -> Option<model::NameStyle> {
 	let dto = Lenient::value(field)?;
 	let colors = dto.colors?;

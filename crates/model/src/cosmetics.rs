@@ -193,7 +193,8 @@ pub struct NameStyle {
 	pub colors: Vec<u32>,
 }
 impl NameStyle {
-	pub const MAX_COLORS: usize = 4;
+	/// Discord accepts between one and five colors depending on the effect.
+	pub const MAX_COLORS: usize = 5;
 	pub fn valid(&self) -> bool {
 		!self.colors.is_empty()
 			&& self.colors.len() <= Self::MAX_COLORS
@@ -214,6 +215,20 @@ pub enum NameEffect {
 	Gummy,
 }
 impl NameEffect {
+	/// The effect ID used by Discord's profile PATCH payload.
+	pub const fn id(self) -> u32 {
+		match self {
+			Self::Solid => 1,
+			Self::Gradient => 2,
+			Self::Neon => 3,
+			Self::Toon => 4,
+			Self::Pop => 5,
+			Self::Glow => 6,
+			Self::Prism => 7,
+			Self::Gummy => 8,
+		}
+	}
+
 	/// The client's effect ID; unknown and test effects draw as a solid colour.
 	pub fn from_id(id: u32) -> Self {
 		match id {

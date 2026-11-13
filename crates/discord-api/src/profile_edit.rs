@@ -116,7 +116,19 @@ impl DiscordApi {
 				|| changes
 					.avatar
 					.as_ref()
-					.is_some_and(|avatar| avatar.is_some() != saved.user.avatar.is_some()))
+					.is_some_and(|avatar| avatar.is_some() != saved.user.avatar.is_some())
+				|| changes
+					.theme_colors
+					.as_ref()
+					.is_some_and(|theme| *theme != saved.theme_colors)
+				|| changes.display_name_style.as_ref().is_some_and(|style| {
+					*style
+						!= saved
+							.user
+							.cosmetics
+							.as_deref()
+							.and_then(|cosmetics| cosmetics.name_style.clone())
+				}))
 		{
 			return Err(Failure::ProtocolAt(
 				"Profile changes were not confirmed; reload before retrying",

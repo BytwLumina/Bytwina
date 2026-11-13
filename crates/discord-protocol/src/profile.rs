@@ -47,11 +47,23 @@ pub fn encode_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, De
 			serde_json::json!(sku.map(|sku| sku.to_string())),
 		);
 	}
+	if let Some(style) = &changes.display_name_style {
+		let (font, effect, colors) = style.as_ref().map_or((None, None, None), |style| {
+			(
+				Some(style.font),
+				Some(style.effect.id()),
+				Some(style.colors.clone()),
+			)
+		});
+		fields.insert("display_name_font_id".into(), serde_json::json!(font));
+		fields.insert("display_name_effect_id".into(), serde_json::json!(effect));
+		fields.insert("display_name_colors".into(), serde_json::json!(colors));
+	}
 	Ok(serde_json::Value::Object(fields))
 }
 
-/// The `/users/@me/profile` group: banner and profile effect live on a different endpoint
-/// from the account fields, and both are premium-only.
+/// The `/users/@me/profile` group: banner, theme and profile effect live on a different
+/// endpoint from the account fields, and some are premium-only.
 pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_json::Value> {
 	if !changes.valid() {
 		return None;
@@ -65,6 +77,9 @@ pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_jso
 			"profile_effect_id".into(),
 			serde_json::json!(sku.map(|sku| sku.to_string())),
 		);
+	}
+	if let Some(colors) = &changes.theme_colors {
+		fields.insert("theme_colors".into(), serde_json::json!(colors));
 	}
 	(!fields.is_empty()).then_some(serde_json::Value::Object(fields))
 }
@@ -596,6 +611,30 @@ pub fn decode_profile(
 mod tests {
 	use super::*;
 	use serde_json::json;
+	#[test]
+	fn profile_edit_routes_theme_and_name_style_to_the_documented_fields() {
+		let changes = model::ProfileEdit {
+			theme_colors: Some(Some([0x123456, 0xabcdef])),
+			display_name_style: Some(Some(model::NameStyle {
+				font: 13,
+				effect: model::NameEffect::Gradient,
+				colors: vec![1, 2, 3, 4, 5],
+			})),
+			..Default::default()
+		};
+		assert_eq!(
+			encode_edit(&changes).unwrap(),
+			json!({
+				"display_name_font_id": 13,
+				"display_name_effect_id": 2,
+				"display_name_colors": [1, 2, 3, 4, 5]
+			})
+		);
+		assert_eq!(
+			encode_profile_metadata(&changes).unwrap(),
+			json!({"theme_colors": [0x123456, 0xabcdef]})
+		);
+	}
 	#[test]
 	fn partial_profiles_preserve_identity_and_reject_malformed_lists() {
 		let base = json!({"user":{"id":"1","username":"synthetic","global_name":"Display","avatar":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"user_profile":{},"badges":[],"guild_badges":[],"connected_accounts":[],"mutual_guilds":[],"mutual_friends":[]});

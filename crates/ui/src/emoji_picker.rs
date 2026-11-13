@@ -641,7 +641,9 @@ impl Default for Picker {
 		// Initialize the static catalog during application creation, outside rendering.
 		Self {
 			hide_nitro_emojis: false,
-			preload: false,
+			// Warm the picker while the pointer rests on its trigger. Waiting until the
+			// click makes the first open look empty while artwork is still being fetched.
+			preload: true,
 			stickers: crate::stickers::Browser::default(),
 			reaction: None,
 			frequent: Vec::with_capacity(32),

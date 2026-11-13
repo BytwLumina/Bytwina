@@ -1,5 +1,5 @@
 //! One on-demand profile. Profile metadata is never persisted by the client.
-use crate::{Id, User, valid_avatar_hash};
+use crate::{Id, NameStyle, User, valid_avatar_hash};
 
 pub const MAX_PROFILE_BYTES: usize = 64 * 1024;
 pub const MAX_PROFILE_NAME_CHARS: usize = 32;
@@ -26,6 +26,10 @@ pub struct ProfileEdit {
 	pub nameplate_sku: Option<Option<Id>>,
 	/// Equipped profile effect SKU; nested `None` clears it. Premium accounts only.
 	pub profile_effect_sku: Option<Option<Id>>,
+	/// Two profile theme colors; nested `None` restores the default theme.
+	pub theme_colors: Option<Option<[u32; 2]>>,
+	/// Display name font/effect/colors; nested `None` restores the default style.
+	pub display_name_style: Option<Option<NameStyle>>,
 }
 impl ProfileEdit {
 	fn text_bytes(&self) -> usize {
@@ -48,6 +52,15 @@ impl ProfileEdit {
 					.all(|c| !c.is_control() || (multiline && matches!(c, '\n' | '\r' | '\t')))
 		}
 		self.text_bytes() <= MAX_PROFILE_EDIT_BYTES
+			&& self.theme_colors.as_ref().is_none_or(|theme| {
+				theme
+					.as_ref()
+					.is_none_or(|colors| colors.iter().all(|color| *color <= 0xff_ffff))
+			})
+			&& self
+				.display_name_style
+				.as_ref()
+				.is_none_or(|style| style.as_ref().is_none_or(NameStyle::valid))
 			&& self
 				.avatar
 				.as_ref()

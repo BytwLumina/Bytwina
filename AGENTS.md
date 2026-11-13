@@ -511,14 +511,24 @@ API doc, and the theme JSON in `extensions/themes/`.
 
 **Add a profile cosmetic or soundboard surface:** profile edits travel in `model::ProfileEdit` and
 split across two endpoints — account fields (`global_name`, `avatar`, `avatar_decoration_sku_id`,
-`nameplate_sku_id`) go to `PATCH /users/@me`; `banner` and `profile_effect_id` go to
+`nameplate_sku_id`, `display_name_font_id`, `display_name_effect_id` and `display_name_colors` go to
+`PATCH /users/@me`; `banner`, `theme_colors` and `profile_effect_id` go to
 `PATCH /users/@me/profile`. `discord-protocol::profile::encode_profile_metadata` holds the second
-group. A new command needs a `Command`/`Event` pair, an API arm in `crates/discord-api/src/lib.rs`,
+group. Per-server profile metadata uses `PATCH /guilds/{guild.id}/profile/@me`; do not route it
+through the global editor. A new command needs a `Command`/`Event` pair, an API arm in `crates/discord-api/src/lib.rs`,
 a reducer in `client-core`, and a demo arm in `apps/desktop/src/main.rs`.
 
 **Badges beside a name:** badges exist only on the full profile, never on the gateway, so
 `State::cached_badges` reads a profile that is already cached and never fetches. Do not call the
 profile endpoint per visible row.
+
+Picker and artwork performance: emoji, stickers, GIF previews, avatars and badge art must use the
+bounded `AvatarWorker` cache. UI rendering may enqueue a bounded request or paint a placeholder,
+but must not perform network, disk or decode work synchronously. Picker triggers may warm a bounded
+working set before opening; keep that warm-up behind the existing request and disk-cache limits.
+When adding artwork, route it through the `artwork` cache partition so frequently reused small assets
+survive conversation-media eviction. Do not make profile badge rows fetch profiles; use cached profile
+data or the existing bounded preload intent.
 
 ## 6.6 Configuration and identifiers
 
