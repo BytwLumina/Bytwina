@@ -350,7 +350,6 @@ mod tests {
 				target: 900,
 				value: 0,
 				completed: false,
-				heartbeat: None,
 			}],
 			reward: Some("Cybernetic Headgear".to_owned()),
 			platform: model::quests::PLATFORM_CROSS,
@@ -469,7 +468,6 @@ mod tests {
 				kind: "PLAY_ON_DESKTOP".to_owned(),
 				value: 900,
 				completed: false,
-				heartbeat: None,
 			}],
 			..Default::default()
 		};
