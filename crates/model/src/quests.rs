@@ -206,18 +206,11 @@ pub struct TaskProgress {
 	pub value: u64,
 	/// The service marked the task complete, even below its target.
 	pub completed: bool,
-	pub heartbeat: Option<TaskHeartbeat>,
 }
 impl TaskProgress {
 	pub fn heap_bytes(&self) -> usize {
 		self.kind.capacity()
 	}
-}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct TaskHeartbeat {
-	pub last_beat_at: Option<i64>,
-	pub expires_at: Option<i64>,
 }
 
 /// The discovery list the service returns for this account.
@@ -265,7 +258,6 @@ mod tests {
 				target: 900,
 				value: 0,
 				completed: false,
-				heartbeat: None,
 			}],
 			reward: Some("Cybernetic Headgear".to_owned()),
 			platform: PLATFORM_CROSS,
@@ -342,7 +334,6 @@ mod tests {
 				kind: "play_on_desktop".to_owned(),
 				value: 900,
 				completed: false,
-				heartbeat: None,
 			}],
 			..Default::default()
 		};
@@ -375,7 +366,6 @@ mod tests {
 					kind: format!("TASK_{index}"),
 					value: 0,
 					completed: false,
-					heartbeat: None,
 				})
 				.collect(),
 			..Default::default()
