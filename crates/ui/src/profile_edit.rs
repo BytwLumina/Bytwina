@@ -1143,12 +1143,14 @@ mod tests {
 		}
 		// A picture the picker just produced owns the banner until the saved copy arrives.
 		let ctx = egui::Context::default();
-		let mut editor = Editor::default();
-		editor.pending_banner = Some(ctx.load_texture(
-			"profile-banner-preview",
-			egui::ColorImage::filled([8, 4], egui::Color32::RED),
-			egui::TextureOptions::LINEAR,
-		));
+		let mut editor = Editor {
+			pending_banner: Some(ctx.load_texture(
+				"profile-banner-preview",
+				egui::ColorImage::filled([8, 4], egui::Color32::RED),
+				egui::TextureOptions::LINEAR,
+			)),
+			..Default::default()
+		};
 		assert!(editor.pending_banner.is_some());
 		editor.pending_banner = None;
 		assert!(editor.pending_banner.is_none());
