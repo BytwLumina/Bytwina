@@ -1608,6 +1608,7 @@ mod tests {
 				level: Some(0),
 				suppress_everyone: Some(false),
 				suppress_roles: Some(false),
+				overrides_known: true,
 				..Default::default()
 			},
 		);
