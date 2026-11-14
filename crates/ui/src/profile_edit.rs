@@ -129,6 +129,8 @@ pub(super) struct Editor {
 	/// True while the native picker is filling the banner instead of the avatar.
 	choosing_banner: bool,
 	pending_picture: Option<egui::TextureHandle>,
+	/// The banner chosen in this session, drawn by the preview until the saved copy arrives.
+	pending_banner: Option<egui::TextureHandle>,
 	/// Local copy of the last saved picture, keyed by the avatar hash the service returned.
 	saved_picture: Option<(Option<String>, egui::TextureHandle)>,
 }
@@ -162,7 +164,7 @@ impl Editor {
 				};
 				if banner {
 					draft.banner = Some(Some(uri));
-					self.pending_picture = Some(ctx.load_texture(
+					self.pending_banner = Some(ctx.load_texture(
 						"profile-banner-preview",
 						image,
 						egui::TextureOptions::LINEAR,
@@ -284,6 +286,8 @@ impl Editor {
 			},
 		};
 		let mut action = None;
+		let preview_effect = draft_effect(profile, draft.effect);
+		let banner_pending = self.pending_banner.clone();
 		let width = ui.available_width();
 		if width >= 620.0 {
 			ui.horizontal_top(|ui| {
@@ -304,10 +308,12 @@ impl Editor {
 						ui,
 						draft,
 						profile,
+						&preview_effect,
 						avatars,
 						(state.demo, &state.guilds),
 						&mut self.preview_link,
 						picture,
+						banner_pending.as_ref(),
 						editable && !self.choosing,
 					) {
 						action = Some(picked);
@@ -341,9 +347,11 @@ impl Editor {
 			}
 			Some(AvatarAction::BannerRemove) => {
 				draft.banner = Some(None);
+				self.pending_banner = None;
 			}
 			Some(AvatarAction::BannerUndo) => {
 				draft.banner = None;
+				self.pending_banner = None;
 			}
 			_ => {}
 		}
@@ -448,10 +456,12 @@ impl Editor {
 				ui,
 				draft,
 				profile,
+				&preview_effect,
 				avatars,
 				(state.demo, &state.guilds),
 				&mut self.preview_link,
 				picture,
+				banner_pending.as_ref(),
 				false,
 			);
 		}
@@ -849,15 +859,49 @@ fn field(
 	.labelled_by(label_id);
 }
 
+/// The profile a draft paints: an effect the draft cleared is already gone in the preview.
+fn draft_effect(profile: &UserProfile, effect: Option<Option<Id>>) -> UserProfile {
+	let mut shown = profile.clone();
+	if effect == Some(None) {
+		shown.effect = None;
+		shown.effect_sku = None;
+	}
+	shown
+}
+
+/// A banner picked in this session, cover-cropped into `rect` like the saved copy.
+fn paint_draft_banner(
+	ui: &egui::Ui,
+	texture: &egui::TextureHandle,
+	rect: egui::Rect,
+	corner: egui::CornerRadius,
+	color: egui::Color32,
+) {
+	ui.painter().rect_filled(rect, corner, color);
+	if !ui.is_rect_visible(rect) {
+		return;
+	}
+	let source = texture.size_vec2();
+	let scale = (rect.width() / source.x).max(rect.height() / source.y);
+	let uv_size = rect.size() / (source * scale);
+	let uv = egui::Rect::from_center_size(egui::pos2(0.5, 0.5), uv_size);
+	egui::Image::new(texture)
+		.uv(uv)
+		.corner_radius(corner)
+		.paint_at(ui, rect);
+}
+
 #[allow(clippy::too_many_arguments)]
 fn preview(
 	ui: &mut egui::Ui,
 	draft: &Draft,
 	profile: &UserProfile,
+	shown: &UserProfile,
 	avatars: &mut Avatars,
 	media: (bool, &[model::Guild]),
 	opening: &mut Option<String>,
 	picture: Picture<'_>,
+	banner: Option<&egui::TextureHandle>,
 	clickable: bool,
 ) -> Option<AvatarAction> {
 	let (demo, guilds) = media;
@@ -873,6 +917,8 @@ fn preview(
 	let theme = crate::profiles::Theme::new(&colors, profile.theme_colors);
 	let rgb = |c: u32| egui::Color32::from_rgb((c >> 16) as u8, (c >> 8) as u8, c as u8);
 	ui.scope(|ui| {
+		// Back frame layers sit behind the card; front layers and the effect cover it.
+		let frame_back = ui.painter().add(egui::Shape::Noop);
 		let background = ui.painter().add(egui::Shape::Noop);
 		ui.visuals_mut().override_text_color = Some(theme.text);
 		ui.visuals_mut().hyperlink_color = theme.link;
@@ -887,16 +933,23 @@ fn preview(
 				sw: 0,
 				se: 0,
 			};
-			if profile.banner.is_some() {
-				// The banner image covers its color, so the saved profile paints it as is.
-				avatars.paint_banner(ui, profile, banner, corner, demo);
-			} else {
-				let color = profile
-					.theme_colors
-					.map(crate::profiles::Theme::banner)
-					.or_else(|| draft.color.map(rgb))
-					.unwrap_or(colors.raised);
-				ui.painter().rect_filled(banner, corner, color);
+			// The color under the image follows the draft's own accent, then the saved profile.
+			let color = draft
+				.color
+				.or(profile.accent_color)
+				.map(rgb)
+				.or_else(|| profile.theme_colors.map(crate::profiles::Theme::banner))
+				.unwrap_or(colors.raised);
+			match (&draft.banner, banner) {
+				// The banner image covers its color, so a saved profile paints it as is.
+				(None, _) if profile.banner.is_some() => {
+					avatars.paint_banner(ui, profile, banner, corner, demo);
+				}
+				(Some(Some(_)), Some(texture)) => {
+					paint_draft_banner(ui, texture, banner, corner, color);
+				}
+				// A pending removal, or a picture still decoding, shows the color alone.
+				_ => ui.painter().rect_filled(banner, corner, color),
 			}
 			let avatar = egui::Rect::from_min_size(
 				banner.left_bottom() + egui::vec2(16.0, -40.0),
@@ -1011,6 +1064,18 @@ fn preview(
 		}
 		let rect = ui.min_rect();
 		ui.painter().set(background, theme.background(rect));
+		// The popout path keeps the frame's overhang visible; clipping it to the panel would cut
+		// staples that hang outside the card on purpose.
+		// The same pass the real card runs, so frames and effects preview what will be saved.
+		crate::profiles::paint_collectibles(
+			ui,
+			avatars,
+			shown,
+			rect,
+			frame_back,
+			(false, None),
+			demo,
+		);
 	});
 	action
 }
@@ -1052,6 +1117,39 @@ mod tests {
 		assert_eq!(draft.pronouns, "she/her");
 		assert!(draft.name.is_empty() && draft.bio.is_empty());
 		assert_eq!(draft.changes(&profile).pronouns, None);
+	}
+	#[test]
+	fn preview_drops_an_effect_the_draft_cleared() {
+		let user = model::User {
+			flags: model::AccountFlags::default(),
+			id: model::Id(1),
+			name: "Synthetic".into(),
+			avatar: None,
+			webhook: false,
+			kind: Default::default(),
+			discriminator: 0,
+			primary_guild: None,
+			cosmetics: None,
+		};
+		let profile = crate::profiles::synthetic(&user, None);
+		assert!(profile.effect.is_some() && profile.effect_sku.is_some());
+		let cleared = draft_effect(&profile, Some(None));
+		assert!(cleared.effect.is_none() && cleared.effect_sku.is_none());
+		// An untouched or newly chosen slot keeps the equipped effect; only a removal drops it.
+		for untouched in [None, Some(Some(model::Id(9103)))] {
+			assert!(draft_effect(&profile, untouched).effect.is_some());
+		}
+		// A picture the picker just produced owns the banner until the saved copy arrives.
+		let ctx = egui::Context::default();
+		let mut editor = Editor::default();
+		editor.pending_banner = Some(ctx.load_texture(
+			"profile-banner-preview",
+			egui::ColorImage::filled([8, 4], egui::Color32::RED),
+			egui::TextureOptions::LINEAR,
+		));
+		assert!(editor.pending_banner.is_some());
+		editor.pending_banner = None;
+		assert!(editor.pending_banner.is_none());
 	}
 	#[test]
 	fn editor_saves_once_preserves_failed_draft_and_cancels_in_both_themes() {
