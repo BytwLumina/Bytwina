@@ -1028,7 +1028,6 @@ extensions-ui-toolbar-working-on-your-last-action = Работа над посл
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = Импортировать шрифт…
 # Context: show
 fonts-show-inter-default = Интер (по умолчанию)
 # Context: show
@@ -4372,6 +4371,22 @@ emoji-picker-popup-stickers = Стикеры
 profile-edit-form-display-name = Отображаемое имя
 profile-edit-form-pronouns = Местоимения
 profile-edit-form-about-me = Обо мне
+
+profile-edit-form-banner = Баннер
+profile-edit-form-new-banner-chosen-save-to-upload-it = Новый баннер выбран. Сохраните, чтобы загрузить его.
+profile-edit-form-your-banner-will-be-removed-when-you-save = Ваш баннер будет удалён при сохранении.
+profile-edit-form-premium-accounts-can-add-a-banner = Аккаунты Premium могут добавить баннер
+profile-edit-form-decoration = Украшение аватара
+profile-edit-form-nameplate = Табличка с именем
+profile-edit-form-profile-effect = Эффект профиля
+profile-edit-form-profile-frame = Рамка профиля
+profile-edit-form-default = По умолчанию
+profile-edit-form-none = Нет
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = Сохранение…
 group-menu-action-leaving = Выход…
 group-menu-action-save = Сохранить

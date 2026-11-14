@@ -214,6 +214,26 @@ fn is_animated_profile_or_avatar_key(key: &str) -> bool {
 	false
 }
 
+/// Paints a local texture into `rect`, cropped to cover it, with the card's corners.
+pub(crate) fn paint_cover(
+	ui: &mut egui::Ui,
+	texture: &egui::TextureHandle,
+	rect: egui::Rect,
+	corner: egui::CornerRadius,
+) {
+	let source = texture.size_vec2();
+	if source.x <= 0.0 || source.y <= 0.0 {
+		return;
+	}
+	let scale = (rect.width() / source.x).max(rect.height() / source.y);
+	let uv_size = rect.size() / (source * scale);
+	let uv = egui::Rect::from_center_size(egui::pos2(0.5, 0.5), uv_size);
+	egui::Image::new(texture)
+		.uv(uv)
+		.corner_radius(corner)
+		.paint_at(ui, rect);
+}
+
 impl Avatars {
 	/// Expand playback to a hovered row or an open profile, still gated by settings and focus.
 	pub fn with_avatar_animation<R>(
@@ -1052,14 +1072,7 @@ impl Avatars {
 			if let Some(entry) = self.textures.get_mut(&key) {
 				entry.0 = Instant::now();
 				let texture = animated_texture.as_ref().unwrap_or(&entry.1);
-				let source = texture.size_vec2();
-				let scale = (rect.width() / source.x).max(rect.height() / source.y);
-				let uv_size = rect.size() / (source * scale);
-				let uv = egui::Rect::from_center_size(egui::pos2(0.5, 0.5), uv_size);
-				egui::Image::new(texture)
-					.uv(uv)
-					.corner_radius(corner)
-					.paint_at(ui, rect);
+				paint_cover(ui, texture, rect, corner);
 			} else if !demo {
 				self.request(key);
 			}

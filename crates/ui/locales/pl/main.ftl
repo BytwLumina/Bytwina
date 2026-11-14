@@ -1027,7 +1027,6 @@ extensions-ui-toolbar-working-on-your-last-action = Pracuję nad ostatnią akcj�
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = Importuj czcionkę…
 # Context: show
 fonts-show-inter-default = Inter (domyślny)
 # Context: show
@@ -4371,6 +4370,22 @@ emoji-picker-popup-stickers = Naklejki
 profile-edit-form-display-name = Wyświetlana nazwa
 profile-edit-form-pronouns = Zaimki
 profile-edit-form-about-me = O mnie
+
+profile-edit-form-banner = Baner
+profile-edit-form-new-banner-chosen-save-to-upload-it = Wybrano nowy baner. Zapisz, aby go przesłać.
+profile-edit-form-your-banner-will-be-removed-when-you-save = Twój baner zostanie usunięty przy zapisaniu.
+profile-edit-form-premium-accounts-can-add-a-banner = Konta Premium mogą dodać baner
+profile-edit-form-decoration = Dekoracja awatara
+profile-edit-form-nameplate = Tabliczka imienna
+profile-edit-form-profile-effect = Efekt profilu
+profile-edit-form-profile-frame = Ramka profilu
+profile-edit-form-default = Domyślny
+profile-edit-form-none = Brak
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = Zapisywanie…
 group-menu-action-leaving = Opuszczanie…
 group-menu-action-save = Zapisz

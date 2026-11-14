@@ -6,8 +6,12 @@ pub const MAX_PROFILE_NAME_CHARS: usize = 32;
 pub const MAX_PROFILE_BIO_CHARS: usize = 190;
 pub const MAX_PROFILE_PRONOUNS_CHARS: usize = 40;
 pub const MAX_PROFILE_EDIT_BYTES: usize = 4096;
+/// Every equipped collectible is listed when one changes; the service sends at most a handful.
+pub const MAX_COLLECTIBLE_SKUS: usize = 16;
 /// Largest PNG data URI accepted for a new profile picture (256 KiB of PNG, base64 encoded).
 pub const MAX_PROFILE_AVATAR_URI: usize = crate::server_settings::MAX_ICON_DATA_URI;
+/// Largest PNG data URI accepted for a new profile banner (1 MiB of PNG, base64 encoded).
+pub const MAX_PROFILE_BANNER_URI: usize = 22 + 4 * (1024_usize * 1024).div_ceil(3);
 
 /// Only explicitly changed fields are sent. Nested `None` clears a nullable field.
 #[derive(Clone, Default, PartialEq, Eq)]
@@ -16,6 +20,8 @@ pub struct ProfileEdit {
 	pub bio: Option<String>,
 	pub pronouns: Option<String>,
 	pub accent_color: Option<Option<u32>>,
+	/// Two profile-card theme colours; nested `None` clears the theme.
+	pub theme_colors: Option<Option<[u32; 2]>>,
 	/// New picture as a PNG data URI; nested `None` removes the current picture.
 	pub avatar: Option<Option<String>>,
 	/// New banner as a PNG data URI; nested `None` removes it. Premium accounts only.
@@ -26,8 +32,9 @@ pub struct ProfileEdit {
 	pub nameplate_sku: Option<Option<Id>>,
 	/// Equipped profile effect SKU; nested `None` clears it. Premium accounts only.
 	pub profile_effect_sku: Option<Option<Id>>,
-	/// Two profile theme colors; nested `None` restores the default theme.
-	pub theme_colors: Option<Option<[u32; 2]>>,
+	/// The complete equipped-collectible list with the pending pick applied. The service
+	/// equips a frame by rewriting this list, so a partial list unequips everything else.
+	pub collectibles_sku_ids: Option<Vec<Id>>,
 	/// Display name font/effect/colors; nested `None` restores the default style.
 	pub display_name_style: Option<Option<NameStyle>>,
 }
@@ -42,6 +49,15 @@ impl ProfileEdit {
 		self.text_bytes()
 			+ self.avatar.as_ref().map_or(0, bytes)
 			+ self.banner.as_ref().map_or(0, bytes)
+			+ self
+				.collectibles_sku_ids
+				.as_ref()
+				.map_or(0, |skus| skus.capacity() * size_of::<Id>())
+			+ self.display_name_style.as_ref().map_or(0, |style| {
+				style
+					.as_ref()
+					.map_or(0, |style| style.colors.capacity() * size_of::<u32>())
+			})
 	}
 	pub fn valid(&self) -> bool {
 		fn text(value: &str, max: usize, multiline: bool) -> bool {
@@ -67,7 +83,7 @@ impl ProfileEdit {
 			&& self
 				.banner
 				.as_ref()
-				.is_none_or(|banner| banner.as_deref().is_none_or(valid_avatar_uri))
+				.is_none_or(|banner| banner.as_deref().is_none_or(valid_banner_uri))
 			&& self
 				.avatar_decoration_sku
 				.is_none_or(|sku| sku.is_none_or(|sku| sku.0 != 0))
@@ -77,11 +93,15 @@ impl ProfileEdit {
 			&& self
 				.profile_effect_sku
 				.is_none_or(|sku| sku.is_none_or(|sku| sku.0 != 0))
-			&& self.global_name.as_ref().is_none_or(|name| {
-				name.as_ref().is_none_or(|name| {
-					!name.trim().is_empty() && text(name, MAX_PROFILE_NAME_CHARS, false)
-				})
-			}) && self
+			&& self.collectibles_sku_ids.as_ref().is_none_or(|skus| {
+				skus.len() <= MAX_COLLECTIBLE_SKUS
+					&& skus.iter().all(|sku| sku.0 != 0)
+					&& (0..skus.len()).all(|index| !skus[..index].contains(&skus[index]))
+			}) && self.global_name.as_ref().is_none_or(|name| {
+			name.as_ref().is_none_or(|name| {
+				!name.trim().is_empty() && text(name, MAX_PROFILE_NAME_CHARS, false)
+			})
+		}) && self
 			.bio
 			.as_ref()
 			.is_none_or(|bio| text(bio, MAX_PROFILE_BIO_CHARS, true))
@@ -96,17 +116,25 @@ impl ProfileEdit {
 	}
 }
 
+/// A base64 PNG data URI of the documented shape.
+fn png_data_uri(uri: &str) -> bool {
+	uri.strip_prefix("data:image/png;base64,")
+		.is_some_and(|data| {
+			!data.is_empty()
+				&& data
+					.bytes()
+					.all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'/' | b'='))
+		})
+}
+
 /// PNG data URI small enough to send as a profile picture.
 pub fn valid_avatar_uri(uri: &str) -> bool {
-	uri.len() <= MAX_PROFILE_AVATAR_URI
-		&& uri
-			.strip_prefix("data:image/png;base64,")
-			.is_some_and(|data| {
-				!data.is_empty()
-					&& data
-						.bytes()
-						.all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'/' | b'='))
-			})
+	uri.len() <= MAX_PROFILE_AVATAR_URI && png_data_uri(uri)
+}
+
+/// PNG data URI small enough to send as a profile banner, which is 3:1 and more detailed.
+pub fn valid_banner_uri(uri: &str) -> bool {
+	uri.len() <= MAX_PROFILE_BANNER_URI && png_data_uri(uri)
 }
 
 #[cfg(test)]
@@ -132,6 +160,18 @@ mod edit_tests {
 		assert!(!edit.valid());
 		edit.avatar = Some(None);
 		assert!(edit.valid());
+		// A banner keeps its 3:1 detail, so it may carry more than a square picture.
+		edit.banner = Some(Some(format!(
+			"data:image/png;base64,{}",
+			"A".repeat(MAX_PROFILE_AVATAR_URI)
+		)));
+		assert!(edit.valid());
+		edit.banner = Some(Some(format!(
+			"data:image/png;base64,{}",
+			"A".repeat(MAX_PROFILE_BANNER_URI)
+		)));
+		assert!(!edit.valid());
+		edit.banner = None;
 		edit.bio.as_mut().unwrap().push('x');
 		assert!(!edit.valid());
 		edit.bio = Some("First line\nSecond line".into());
@@ -175,6 +215,9 @@ pub struct UserProfile {
 	/// catalog read, so `effect`/`frame` may stay empty while the SKU is known.
 	pub effect_sku: Option<crate::Id>,
 	pub frame_sku: Option<crate::Id>,
+	/// Every equipped collectible SKU, in the order the service sent them. Equipping a frame
+	/// rewrites this whole list, so dropping one would unequip the others.
+	pub collectible_skus: Vec<crate::Id>,
 	pub effect: Option<Box<crate::ProfileEffect>>,
 	pub frame: Option<Box<crate::ProfileFrame>>,
 	/// Owned and earnable badges from the optional catalog read; display order included.
@@ -351,6 +394,7 @@ impl UserProfile {
 		size_of::<Self>()
 			+ self.effect.as_ref().map_or(0, |effect| effect.bytes())
 			+ self.frame.as_ref().map_or(0, |frame| frame.bytes())
+			+ self.collectible_skus.capacity() * size_of::<Id>()
 			+ self.board.as_ref().map_or(0, |board| {
 				board.capacity() * size_of::<ProfileGameWidget>()
 					+ board
@@ -426,6 +470,8 @@ impl UserProfile {
 				.frame
 				.as_deref()
 				.is_none_or(|frame| frame.valid() && Some(frame.sku) == self.frame_sku)
+			&& self.collectible_skus.len() <= MAX_COLLECTIBLE_SKUS
+			&& self.collectible_skus.iter().all(|sku| sku.0 != 0)
 			&& self.board.as_ref().is_none_or(|board| {
 				board.len() <= 4
 					&& board.iter().enumerate().all(|(index, widget)| {

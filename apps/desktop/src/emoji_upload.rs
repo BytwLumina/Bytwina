@@ -179,7 +179,7 @@ fn read(path: &Path, cancelled: &AtomicBool) -> Result<Prepared, &'static str> {
 			preview.ok_or("GIF has no frames")?,
 		)
 	} else {
-		crate::group_icon::decode_image(&bytes, 128, false)?
+		crate::group_icon::decode_image(&bytes, crate::group_icon::Output::wide(128))?
 	};
 	let mut name: String = path
 		.file_stem()

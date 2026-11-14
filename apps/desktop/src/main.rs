@@ -4679,6 +4679,50 @@ impl Desktop {
 									profile.user.avatar = avatar
 										.map(|_| "0123456789abcdef0123456789abcdef".to_owned());
 								}
+								if let Some(sku) = changes.avatar_decoration_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.decoration = sku.and_then(|sku| {
+										let mut decoration =
+											test_support::synthetic_cosmetics().decoration?;
+										decoration.sku = sku;
+										Some(decoration)
+									});
+								}
+								if let Some(sku) = changes.nameplate_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.nameplate = sku.and_then(|sku| {
+										let mut nameplate =
+											test_support::synthetic_cosmetics().nameplate?;
+										nameplate.sku = sku;
+										Some(nameplate)
+									});
+								}
+								if let Some(sku) = changes.profile_effect_sku {
+									profile.effect_sku = sku;
+									profile.effect = sku.and_then(|sku| {
+										let mut effect = ui::synthetic_own_profile(own).effect?;
+										effect.sku = sku;
+										Some(effect)
+									});
+								}
+								if let Some(skus) = &changes.collectibles_sku_ids {
+									// The demo has no product types, so the draft appends the
+									// pending frame last; that is the entry this arm adopts.
+									profile.collectible_skus.clone_from(skus);
+									let frame = skus
+										.iter()
+										.rev()
+										.copied()
+										.find(|sku| Some(*sku) != profile.effect_sku);
+									profile.frame_sku = frame;
+									profile.frame = frame.and_then(|sku| {
+										let mut frame = ui::synthetic_own_profile(own).frame?;
+										frame.sku = sku;
+										Some(frame)
+									});
+								}
 							}
 							Ok(Box::new(profile))
 						})
@@ -7085,6 +7129,16 @@ impl eframe::App for Desktop {
 						.is_some_and(|own| own.id == scope.1)
 				{
 					Err("Sign in before changing your profile picture")
+				} else if self.messaging.profile_picture_is_banner() {
+					// A banner keeps its 3:1 aspect; cropping it square is what made it look wrong.
+					self.profile_avatar.start(
+						scope,
+						self.runtime.handle(),
+						&ctx,
+						self.window.clone(),
+						"Choose profile banner",
+						group_icon::Output::BANNER,
+					)
 				} else {
 					self.profile_avatar.start(
 						scope,
@@ -7092,7 +7146,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose profile picture",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7111,7 +7165,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose group icon",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7128,7 +7182,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose server icon",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7148,7 +7202,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose role icon",
-						128,
+						group_icon::Output::icon(128),
 					)
 				};
 				match result {
@@ -7169,7 +7223,7 @@ impl eframe::App for Desktop {
 							&ctx,
 							self.window.clone(),
 							"Choose server icon",
-							512,
+							group_icon::Output::icon(512),
 						)
 					};
 				if let Err(error) = result {

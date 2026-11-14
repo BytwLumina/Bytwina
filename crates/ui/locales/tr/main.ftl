@@ -1028,7 +1028,6 @@ extensions-ui-toolbar-working-on-your-last-action = Son eyleminiz üzerinde çal
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = Yazı tipini içe aktar…
 # Context: show
 fonts-show-inter-default = Inter (varsayılan)
 # Context: show
@@ -4362,6 +4361,22 @@ emoji-picker-popup-stickers = Çıkartmalar
 profile-edit-form-display-name = Görünen ad
 profile-edit-form-pronouns = Zamirler
 profile-edit-form-about-me = Hakkımda
+
+profile-edit-form-banner = Afiş
+profile-edit-form-new-banner-chosen-save-to-upload-it = Yeni afiş seçildi. Yüklemek için kaydet.
+profile-edit-form-your-banner-will-be-removed-when-you-save = Kaydettiğinde afişin kaldırılacak.
+profile-edit-form-premium-accounts-can-add-a-banner = Premium hesaplar afiş ekleyebilir
+profile-edit-form-decoration = Avatar süslemesi
+profile-edit-form-nameplate = İsim plakası
+profile-edit-form-profile-effect = Profil efekti
+profile-edit-form-profile-frame = Profil çerçevesi
+profile-edit-form-default = Varsayılan
+profile-edit-form-none = Yok
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = Kaydediliyor…
 group-menu-action-leaving = Ayrılınıyor…
 group-menu-action-save = Kaydet
@@ -4501,7 +4516,6 @@ voice-recipient-stop-ringing = Çalmayı durdur
 voice-recipient-ringing = Çalıyor…
 voice-recipient-not-in-call = Aramada değil
 
-
 reconnect-now = Şimdi yeniden bağlan
 
 voice-call-moved-to-another-client = Bu cihazın arama oturumu değiştirildi
@@ -4585,7 +4599,6 @@ server-emoji-empty-animated = Henüz hareketli emoji yok
 server-emoji-empty-detail = Eklemek için bir görsel yükleyin. GIF'ler hareketli emoji olur.
 
 server-stickers-empty-detail = İlk çıkartmanızı eklemek için bir görsel yükleyin.
-
 
 screen-macos-system-picker = macOS sistem seçicisiyle seç
 

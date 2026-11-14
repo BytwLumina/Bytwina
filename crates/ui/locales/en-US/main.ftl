@@ -5043,8 +5043,14 @@ profile-edit-form-premium-accounts-can-add-a-banner = Premium accounts can add a
 profile-edit-form-decoration = Avatar decoration
 profile-edit-form-nameplate = Nameplate
 profile-edit-form-profile-effect = Profile effect
+profile-edit-form-profile-frame = Profile frame
 profile-edit-form-default = Default
 profile-edit-form-none = None
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 
 soundboard-ui-title = Soundboard
 soundboard-ui-close = Close

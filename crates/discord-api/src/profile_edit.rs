@@ -121,14 +121,38 @@ impl DiscordApi {
 					.theme_colors
 					.as_ref()
 					.is_some_and(|theme| *theme != saved.theme_colors)
-				|| changes.display_name_style.as_ref().is_some_and(|style| {
-					*style
-						!= saved
-							.user
-							.cosmetics
-							.as_deref()
-							.and_then(|cosmetics| cosmetics.name_style.clone())
-				})) {
+				|| changes.avatar_decoration_sku.is_some_and(|sku| {
+					sku != saved
+						.user
+						.cosmetics
+						.as_deref()
+						.and_then(|cosmetics| cosmetics.decoration.as_ref())
+						.map(|decoration| decoration.sku)
+				}) || changes.nameplate_sku.is_some_and(|sku| {
+				sku != saved
+					.user
+					.cosmetics
+					.as_deref()
+					.and_then(|cosmetics| cosmetics.nameplate.as_ref())
+					.map(|nameplate| nameplate.sku)
+			}) || changes
+				.profile_effect_sku
+				.is_some_and(|sku| sku != saved.effect_sku)
+				|| changes.collectibles_sku_ids.as_ref().is_some_and(|skus| {
+					// The service may reorder the equipped list, but never the set it holds.
+					let mut requested = skus.clone();
+					let mut equipped = saved.collectible_skus.clone();
+					requested.sort_unstable();
+					equipped.sort_unstable();
+					requested != equipped
+				}) || changes.display_name_style.as_ref().is_some_and(|style| {
+				*style
+					!= saved
+						.user
+						.cosmetics
+						.as_deref()
+						.and_then(|cosmetics| cosmetics.name_style.clone())
+			})) {
 			return Err(Failure::ProtocolAt(
 				"Profile changes were not confirmed; reload before retrying",
 			));

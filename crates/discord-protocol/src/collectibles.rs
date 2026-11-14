@@ -109,16 +109,21 @@ pub struct NameStyleDto {
 }
 pub type NameStyleField = Option<Lenient<NameStyleDto>>;
 
-/// A style with at most five valid colours; anything else is dropped.
+/// A style with at most five valid colours; Solid may omit colours to use the default text
+/// colour, while the other effects need at least one colour.
 pub fn name_style(field: NameStyleField) -> Option<model::NameStyle> {
 	let dto = Lenient::value(field)?;
-	let colors = dto.colors?;
-	if colors.is_empty() || colors.len() > model::NameStyle::MAX_COLORS {
+	let effect = model::NameEffect::from_id(dto.effect_id.unwrap_or(1));
+	let colors = dto.colors.unwrap_or_default();
+	if colors.is_empty() && effect != model::NameEffect::Solid {
+		return None;
+	}
+	if colors.len() > model::NameStyle::MAX_COLORS {
 		return None;
 	}
 	let style = model::NameStyle {
 		font: dto.font_id.unwrap_or(0),
-		effect: model::NameEffect::from_id(dto.effect_id.unwrap_or(1)),
+		effect,
 		colors: colors
 			.into_iter()
 			.map(|color| u32::try_from(color).ok().filter(|c| *c <= 0xff_ffff))
@@ -172,6 +177,7 @@ pub fn apply_member(
 /// One entry of a profile's `collectibles` list.
 #[derive(Deserialize)]
 pub(crate) struct EquippedDto {
+	#[serde(alias = "skuId")]
 	sku_id: Id,
 	#[serde(rename = "type")]
 	kind: u8,
@@ -191,6 +197,8 @@ pub(crate) struct LegacyEffectDto {
 pub(crate) struct Equipped {
 	pub effect: Option<Id>,
 	pub frame: Option<Id>,
+	/// Every unexpired equipped SKU, of every type, in service order.
+	pub skus: Vec<Id>,
 }
 impl Equipped {
 	pub(crate) fn parse(
@@ -212,6 +220,11 @@ impl Equipped {
 			if item.sku_id.0 == 0 || expired {
 				continue;
 			}
+			if equipped.skus.len() < model::MAX_COLLECTIBLE_SKUS
+				&& !equipped.skus.contains(&item.sku_id)
+			{
+				equipped.skus.push(item.sku_id);
+			}
 			match item.kind {
 				PROFILE_EFFECT => equipped.effect = equipped.effect.or(Some(item.sku_id)),
 				PROFILE_FRAME => equipped.frame = equipped.frame.or(Some(item.sku_id)),
@@ -224,6 +237,12 @@ impl Equipped {
 			&& unexpired(effect.expires_at, now)
 		{
 			equipped.effect = Some(effect.id);
+			// The legacy field is the same collectible; keep the rewritten list complete.
+			if equipped.skus.len() < model::MAX_COLLECTIBLE_SKUS
+				&& !equipped.skus.contains(&effect.id)
+			{
+				equipped.skus.push(effect.id);
+			}
 		}
 		equipped
 	}
@@ -231,6 +250,7 @@ impl Equipped {
 
 #[derive(Deserialize)]
 struct ProductDto {
+	#[serde(alias = "skuId")]
 	sku_id: Id,
 	#[serde(default)]
 	items: Vec<serde_json::Value>,
@@ -284,33 +304,46 @@ struct PositionDto {
 struct SourceDto {
 	src: String,
 }
+/// The catalog spells frame fields both ways: the documented shape uses snake_case, while the
+/// payloads the mobile client accepts carry camelCase, so both are read.
 #[derive(Deserialize)]
 struct FrameDto {
 	#[serde(rename = "type")]
 	kind: u8,
+	#[serde(alias = "skuId")]
 	sku_id: Id,
 	#[serde(default)]
 	label: Option<String>,
+	#[serde(default)]
 	layers: Vec<Lenient<FrameLayerDto>>,
-	#[serde(default)]
+	#[serde(default, alias = "innerWidth")]
 	inner_width: Option<u32>,
-	#[serde(default)]
+	#[serde(default, alias = "overflowTop")]
 	overflow_top: u32,
-	#[serde(default)]
+	#[serde(default, alias = "overflowBottom")]
 	overflow_bottom: u32,
-	#[serde(default)]
+	#[serde(default, alias = "overflowHorizontal")]
 	overflow_horizontal: u32,
 }
+/// A layer's `type`, `order` and `anchor` are strings in both the documented shape and the mobile
+/// client; the absent ones default to the values the mobile client assumes.
 #[derive(Deserialize)]
 struct FrameLayerDto {
 	id: Id,
-	#[serde(rename = "type")]
+	#[serde(rename = "type", default = "frame_layer_kind")]
 	kind: String,
+	#[serde(default = "frame_layer_order")]
 	order: String,
 	#[serde(default)]
 	anchor: Option<String>,
 	#[serde(default)]
 	responsive: bool,
+}
+fn frame_layer_kind() -> String {
+	"staple".to_owned()
+}
+fn frame_layer_order() -> String {
+	"front".to_owned()
 }
 
 fn product_item<T: serde::de::DeserializeOwned>(
@@ -429,9 +462,9 @@ pub fn decode_frame(bytes: &[u8], sku: Id) -> Result<ProfileFrame, DecodeError> 
 				_ => return None,
 			};
 			let anchor = match layer.anchor.as_deref() {
-				Some("top") => FrameAnchor::Top,
+				Some("top") | None => FrameAnchor::Top,
 				Some("bottom") => FrameAnchor::Bottom,
-				Some("center") | None => FrameAnchor::Center,
+				Some("center") => FrameAnchor::Center,
 				Some(_) => return None,
 			};
 			// A staple needs an edge to pin to.
@@ -467,6 +500,7 @@ pub const MAX_PURCHASES_WIRE: usize = 512 * 1024;
 
 #[derive(Deserialize)]
 struct PurchaseDto {
+	#[serde(alias = "skuId")]
 	sku_id: Id,
 	#[serde(rename = "type")]
 	kind: u32,
@@ -540,11 +574,24 @@ mod tests {
 		for bad in [
 			serde_json::json!({"effect_id": 2, "colors": []}),
 			serde_json::json!({"effect_id": 2, "colors": [16777216]}),
-			serde_json::json!({"effect_id": 2, "colors": [1, 2, 3, 4, 5]}),
 			serde_json::json!("not a style"),
 		] {
 			assert!(name_style(serde_json::from_value(bad).ok()).is_none());
 		}
+		let solid = name_style(
+			serde_json::from_value(serde_json::json!({"font_id": 1, "effect_id": 1})).ok(),
+		)
+		.unwrap();
+		assert!(solid.colors.is_empty() && solid.valid());
+		let prism = name_style(
+			serde_json::from_value(serde_json::json!({
+				"effect_id": 7,
+				"colors": [1, 2, 3, 4, 5]
+			}))
+			.ok(),
+		)
+		.unwrap();
+		assert_eq!(prism.colors.len(), 5);
 	}
 
 	use super::*;
@@ -672,11 +719,27 @@ mod tests {
 		assert_eq!(frame.layers.len(), 3);
 		assert_eq!(frame.layers[1].kind, FrameLayerKind::Rail);
 		assert!(!frame.layers[1].front && frame.layers[1].responsive);
-		assert_eq!(frame.layers[2].anchor, FrameAnchor::Center);
+		// A layer without an anchor is pinned to the top, as the mobile client assumes.
+		assert_eq!(frame.layers[2].anchor, FrameAnchor::Top);
 		assert_eq!(frame.layers[0].key(Id(30)), "frame-30-31");
 		let [top, bottom, side] = frame.overflow(300.0);
 		assert_eq!((top, bottom, side), (76.0, 53.0, 14.0));
 		assert!(decode_frame(frame_json_without_layers().as_bytes(), Id(30)).is_err());
+		// The same product with camelCase keys and omitted layer fields, as the mobile client reads it.
+		let camel = json!({"skuId":"40","items":[{"type":3,"skuId":"40","innerWidth":1200,
+			"overflowTop":304,"overflowBottom":212,"overflowHorizontal":56,
+			"layers":[{"id":"41"},{"id":"42","anchor":"bottom"}]}]});
+		let camel = decode_frame(camel.to_string().as_bytes(), Id(40)).unwrap();
+		assert_eq!(camel.layers.len(), 2);
+		assert_eq!(camel.layers[0].kind, FrameLayerKind::Staple);
+		assert!(camel.layers[0].front);
+		assert_eq!(camel.layers[1].anchor, FrameAnchor::Bottom);
+		assert_eq!(camel.inner_width, 1200);
+		assert_eq!(camel.overflow_top, 304);
+		// Integer layer fields have no documented mapping; do not invent one.
+		let numeric = json!({"sku_id":"30","items":[{"type":3,"sku_id":"30",
+			"layers":[{"id":"31","type":0,"order":0,"anchor":0}]}]});
+		assert!(decode_frame(numeric.to_string().as_bytes(), Id(30)).is_err());
 	}
 
 	fn frame_json_without_layers() -> String {

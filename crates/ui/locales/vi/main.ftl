@@ -4946,8 +4946,14 @@ profile-edit-form-premium-accounts-can-add-a-banner = Tài khoản Premium mới
 profile-edit-form-decoration = Trang trí ảnh đại diện
 profile-edit-form-nameplate = Bảng tên
 profile-edit-form-profile-effect = Hiệu ứng hồ sơ
+profile-edit-form-profile-frame = Khung hồ sơ
 profile-edit-form-default = Mặc định
 profile-edit-form-none = Không dùng
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 
 soundboard-ui-title = Bảng âm thanh
 soundboard-ui-close = Đóng

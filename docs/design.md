@@ -40,9 +40,10 @@ palette surfaces in both message and forum composers, independently of chat tran
 ## Brand mark and server rail
 
 The application mark is the Bytwina comet-and-starburst (`assets/brand/`), not a third-party logo.
-Its silhouette is rasterized into the shared icon atlas as `bytwina-mark` and painted wherever the
-client identifies itself: the loading screen, the sign-in card and its button, the login header
-and the Direct Messages tile at the top of the server rail.
+Its white silhouette (`bytwina-mark-mono.png`, traced from the designer's raster master) is pasted
+into the shared icon atlas as `bytwina-mark` and painted wherever the client identifies itself: the
+loading screen, the sign-in card and its button, the login header and the Direct Messages tile at the
+top of the server rail.
 
 Server tiles keep one constant rounded-square silhouette instead of morphing between a circle and
 a squircle. Selection and unread state are shown by `notifications::rail_indicator`: a 3px accent

@@ -3,6 +3,7 @@ use crate::{
 	DecodeError, UserDto,
 	collectibles::{self, Equipped, Lenient},
 };
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use model::{
 	GuildProfile, Id, ProfileBadge, ProfileConnection, ProfileGame, ProfileGameWidget,
 	ProfileGameWidgetKind, ProfileGuild, UserProfile,
@@ -13,6 +14,16 @@ use serde::{
 };
 
 pub const MAX_PROFILE_WIRE: usize = 256 * 1024;
+
+/// Base64 data URI for a profile image the native picker already bounded by bytes.
+///
+/// Unlike an icon, a banner keeps its 3:1 aspect and is more detailed, so this only enforces the
+/// PNG signature and the caller's budget.
+pub fn image_data_uri(png: &[u8], max_png: usize) -> Option<String> {
+	let png_header = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR";
+	(png.len() >= 33 && png.len() <= max_png && png.starts_with(png_header))
+		.then(|| format!("data:image/png;base64,{}", STANDARD.encode(png)))
+}
 
 /// Unofficial current-user PATCH fields; omit untouched fields, retain explicit nulls.
 pub fn encode_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, DecodeError> {
@@ -62,8 +73,11 @@ pub fn encode_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, De
 	Ok(serde_json::Value::Object(fields))
 }
 
-/// The `/users/@me/profile` group: banner, theme and profile effect live on a different
-/// endpoint from the account fields, and some are premium-only.
+/// The `/users/@me/profile` group: banner and equipped collectibles live on a different endpoint
+/// from the account fields, and both are premium-only.
+///
+/// The official client equips a profile frame by rewriting the whole `collectibles_sku_ids`
+/// list; that list already carries the effect, so `profile_effect_id` is omitted with it.
 pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_json::Value> {
 	if !changes.valid() {
 		return None;
@@ -72,14 +86,41 @@ pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_jso
 	if let Some(banner) = &changes.banner {
 		fields.insert("banner".into(), serde_json::json!(banner));
 	}
-	if let Some(sku) = changes.profile_effect_sku {
-		fields.insert(
-			"profile_effect_id".into(),
-			serde_json::json!(sku.map(|sku| sku.to_string())),
-		);
+	match &changes.collectibles_sku_ids {
+		Some(skus) => {
+			let skus: Vec<String> = skus.iter().map(ToString::to_string).collect();
+			fields.insert("collectibles_sku_ids".into(), serde_json::json!(skus));
+		}
+		None => {
+			if let Some(sku) = changes.profile_effect_sku {
+				fields.insert(
+					"profile_effect_id".into(),
+					serde_json::json!(sku.map(|sku| sku.to_string())),
+				);
+			}
+		}
 	}
-	if let Some(colors) = &changes.theme_colors {
-		fields.insert("theme_colors".into(), serde_json::json!(colors));
+	if let Some(theme) = &changes.theme_colors {
+		fields.insert("theme_colors".into(), serde_json::json!(theme));
+	}
+	if let Some(style) = &changes.display_name_style {
+		let value = style.as_ref().map(|style| {
+			serde_json::json!({
+				"font_id": style.font,
+				"effect_id": match style.effect {
+					model::NameEffect::Solid => 1,
+					model::NameEffect::Gradient => 2,
+					model::NameEffect::Neon => 3,
+					model::NameEffect::Toon => 4,
+					model::NameEffect::Pop => 5,
+					model::NameEffect::Glow => 6,
+					model::NameEffect::Prism => 7,
+					model::NameEffect::Gummy => 8,
+				},
+				"colors": &style.colors,
+			})
+		});
+		fields.insert("display_name_styles".into(), value);
 	}
 	(!fields.is_empty()).then_some(serde_json::Value::Object(fields))
 }
@@ -476,6 +517,8 @@ pub fn decode_profile(
 		(Some(guild), Some(mut member)) => {
 			let mut profile = dto.guild_member_profile.unwrap_or_default();
 			// A server profile's own effect or frame replaces the account's in that server.
+			// Its collectible list stays server-scoped, so the account list is left untouched:
+			// a global profile edit rewrites the account's equipped set.
 			let server =
 				Equipped::parse(profile.collectibles.take(), profile.profile_effect.take());
 			equipped.effect = server.effect.or(equipped.effect);
@@ -575,6 +618,7 @@ pub fn decode_profile(
 		board,
 		effect_sku: equipped.effect,
 		frame_sku: equipped.frame,
+		collectible_skus: equipped.skus,
 		effect: None,
 		frame: None,
 		badge_catalog: None,
@@ -630,9 +674,13 @@ mod tests {
 				"display_name_colors": [1, 2, 3, 4, 5]
 			})
 		);
+		let metadata = encode_profile_metadata(&changes).unwrap();
+		assert_eq!(metadata["theme_colors"], json!([0x123456, 0xabcdef]));
+		assert_eq!(metadata["display_name_styles"]["font_id"], 13);
+		assert_eq!(metadata["display_name_styles"]["effect_id"], 2);
 		assert_eq!(
-			encode_profile_metadata(&changes).unwrap(),
-			json!({"theme_colors": [0x123456, 0xabcdef]})
+			metadata["display_name_styles"]["colors"],
+			json!([1, 2, 3, 4, 5])
 		);
 	}
 	#[test]
@@ -708,6 +756,10 @@ mod tests {
 			(account.effect_sku, account.frame_sku),
 			(Some(Id(10)), Some(Id(11)))
 		);
+		// Equipping one collectible rewrites the whole list, so the account's list is kept,
+		// with the legacy effect field folded into it.
+		assert_eq!(account.collectible_skus, vec![Id(11), Id(10)]);
+		assert_eq!(server.collectible_skus, account.collectible_skus);
 		assert!(account.valid() && account.effect.is_none());
 		let odd = json!({"user":{"id":"1","username":"n"},"user_profile":{"profile_effect":"x","collectibles":{"a":1}}});
 		let odd = decode_profile(odd.to_string().as_bytes(), None, false).unwrap();

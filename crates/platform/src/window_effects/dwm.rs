@@ -41,7 +41,6 @@ unsafe extern "system" fn resize_border(
 			let _ = RemoveWindowSubclass(hwnd, Some(resize_border), id);
 			let _ = RemovePropW(hwnd, RESIZE_BORDER);
 		}
-		let result = DefSubclassProc(hwnd, message, wparam, lparam);
 		if message == WM_STYLECHANGING && wparam.0 as i32 == GWL_STYLE.0 {
 			// winit rewrites the style bits on maximize, restore and decoration changes.
 			// WM_STYLECHANGING supplies a writable STYLESTRUCT for this synchronous call.
@@ -50,7 +49,9 @@ unsafe extern "system" fn resize_border(
 				style.styleNew |= WS_THICKFRAME.0;
 			}
 		}
-		result
+		// Repair the style before forwarding. DefSubclassProc invokes the next procedure
+		// synchronously, so changing STYLESTRUCT afterwards is too late for this rewrite.
+		DefSubclassProc(hwnd, message, wparam, lparam)
 	}
 }
 
@@ -115,7 +116,6 @@ unsafe extern "system" fn custom_caption(
 			let _ = RemoveWindowSubclass(hwnd, Some(custom_caption), id);
 			let _ = RemovePropW(hwnd, REQUESTED_MENU);
 		}
-		let result = DefSubclassProc(hwnd, message, wparam, lparam);
 		if message == WM_STYLECHANGING && wparam.0 as i32 == GWL_STYLE.0 {
 			// WM_STYLECHANGING supplies a writable STYLESTRUCT for this synchronous call.
 			let style = &mut *(lparam.0 as *mut STYLESTRUCT);
@@ -129,7 +129,9 @@ unsafe extern "system" fn custom_caption(
 				style.styleNew &= !WS_SYSMENU.0;
 			}
 		}
-		result
+		// Forward only after normalizing the requested style; otherwise the next procedure
+		// can see an undecorated style and turn an edge press back into a drag.
+		DefSubclassProc(hwnd, message, wparam, lparam)
 	}
 }
 
