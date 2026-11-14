@@ -1028,7 +1028,6 @@ extensions-ui-toolbar-working-on-your-last-action = 最後のアクションに�
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = フォントをインポート…
 # Context: show
 fonts-show-inter-default = インター (デフォルト)
 # Context: show
@@ -4362,6 +4361,22 @@ emoji-picker-popup-stickers = スタンプ
 profile-edit-form-display-name = 表示名
 profile-edit-form-pronouns = 代名詞
 profile-edit-form-about-me = 自己紹介
+
+profile-edit-form-banner = バナー
+profile-edit-form-new-banner-chosen-save-to-upload-it = 新しいバナーを選択しました。保存するとアップロードされます。
+profile-edit-form-your-banner-will-be-removed-when-you-save = 保存するとバナーは削除されます。
+profile-edit-form-premium-accounts-can-add-a-banner = プレミアムアカウントはバナーを追加できます
+profile-edit-form-decoration = アバターの装飾
+profile-edit-form-nameplate = ネームプレート
+profile-edit-form-profile-effect = プロフィールエフェクト
+profile-edit-form-profile-frame = プロフィールフレーム
+profile-edit-form-default = デフォルト
+profile-edit-form-none = なし
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = 保存中…
 group-menu-action-leaving = 退出中…
 group-menu-action-save = 保存

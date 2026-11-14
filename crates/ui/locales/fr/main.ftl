@@ -1027,7 +1027,6 @@ extensions-ui-toolbar-working-on-your-last-action = Travailler sur votre derniè
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = Importer la police…
 # Context: show
 fonts-show-inter-default = Inter (par défaut)
 # Context: show
@@ -4368,6 +4367,22 @@ emoji-picker-popup-stickers = Stickers
 profile-edit-form-display-name = Nom d'affichage
 profile-edit-form-pronouns = Pronoms
 profile-edit-form-about-me = À propos de moi
+
+profile-edit-form-banner = Bannière
+profile-edit-form-new-banner-chosen-save-to-upload-it = Nouvelle bannière choisie. Enregistrez pour la téléverser.
+profile-edit-form-your-banner-will-be-removed-when-you-save = Votre bannière sera supprimée lorsque vous enregistrerez.
+profile-edit-form-premium-accounts-can-add-a-banner = Les comptes Premium peuvent ajouter une bannière
+profile-edit-form-decoration = Décoration d’avatar
+profile-edit-form-nameplate = Plaque de nom
+profile-edit-form-profile-effect = Effet de profil
+profile-edit-form-profile-frame = Cadre de profil
+profile-edit-form-default = Par défaut
+profile-edit-form-none = Aucun
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = Enregistrement…
 group-menu-action-leaving = Départ…
 group-menu-action-save = Enregistrer

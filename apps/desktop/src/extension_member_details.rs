@@ -232,6 +232,7 @@ mod tests {
 				board: None,
 				effect_sku: None,
 				frame_sku: None,
+				collectible_skus: Vec::new(),
 				effect: None,
 				frame: None,
 				badge_catalog: None,

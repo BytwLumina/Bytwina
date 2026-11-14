@@ -85,6 +85,9 @@ verified against a live session:
 - `PATCH /users/@me/profile` with `banner` (PNG data URI) and `profile_effect_id`. Premium only,
   according to the documentation. Account fields keep going to `PATCH /users/@me`.
 - `PATCH /users/@me` with `avatar_decoration_sku_id` and `nameplate_sku_id`; a nested `null` clears.
+- `PATCH /users/@me/profile` with `theme_colors` (the two profile-card colours) and
+  `display_name_styles` (font, effect and colour list); these fields are unofficial normal-client
+  behavior and remain live-unverified.
 - `GET /users/@me/collectibles-purchases` for the owned list the picker shows.
 - `GET /soundboard-default-sounds`, `GET /guilds/{id}/soundboard-sounds` and
   `POST /channels/{id}/send-soundboard-sound`.
@@ -231,7 +234,9 @@ establish it.
   member objects (`font_id`, `effect_id`, `colors`), with a member's value overriding the
   user's in that server. The shape and the font and effect ids come from the official web
   client's public JavaScript (October 15, 2026); this is unofficial and live delivery is
-  unverified. One to four 0xRRGGBB colours are accepted; anything else drops the style.
+  unverified. Up to five 0xRRGGBB colours are accepted; Solid may omit colours to use the
+  default text colour, while non-Solid styles need at least one colour. Other malformed values
+  drop the style.
   Gradient effects spread every colour evenly across the name.
   Effects 1–8 (solid, gradient, neon, toon, pop, glow, prism, gummy) are drawn as still
   approximations: gradients across the name, and halo, outline or shadow layers behind it.

@@ -7,8 +7,8 @@
 //! official catalog order. Never persisted as artwork.
 use serde::{Deserialize, Serialize};
 
-/// The official client shows at most this many public badges beside a name.
-pub const MAX_PUBLIC_BADGES: usize = 6;
+/// Keep every documented public badge; the UI still bounds the row by its available width.
+pub const MAX_PUBLIC_BADGES: usize = 14;
 
 /// Documented user flag bits that carry a public badge.
 pub mod flag {
@@ -205,7 +205,7 @@ mod tests {
 		// A subscription leads the row.
 		let nitro = AccountFlags::new(u64::from(flag::STAFF), 2);
 		assert_eq!(badges(&nitro)[0], Kind::Nitro);
-		// The row never grows past the official cap.
+		// Every documented flag plus Nitro remains visible.
 		let all = AccountFlags::new(
 			u64::from(
 				flag::STAFF
@@ -223,7 +223,7 @@ mod tests {
 			),
 			1,
 		);
-		assert_eq!(badges(&all).len(), MAX_PUBLIC_BADGES);
+		assert_eq!(badges(&all).len(), 14);
 		// Out-of-range flags are ignored rather than rejected.
 		assert!(badges(&AccountFlags::new(u64::MAX, 0)).len() <= MAX_PUBLIC_BADGES);
 	}

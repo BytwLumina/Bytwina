@@ -793,6 +793,10 @@ impl MessagingUi {
 	pub fn take_profile_picture_request(&mut self) -> Option<(u64, Id, u64)> {
 		self.settings.editor.avatar_request.take()
 	}
+	/// True when the pending picture request targets the banner rather than the avatar.
+	pub fn profile_picture_is_banner(&self) -> bool {
+		self.settings.editor.choosing_banner()
+	}
 	pub fn accept_profile_picture(
 		&mut self,
 		ctx: &egui::Context,

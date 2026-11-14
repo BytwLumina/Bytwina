@@ -17,6 +17,7 @@ struct Draft {
 	decoration: Option<Option<Id>>,
 	nameplate: Option<Option<Id>>,
 	effect: Option<Option<Id>>,
+	frame: Option<Option<Id>>,
 	theme_colors: Option<[u32; 2]>,
 	display_name_style: Option<NameStyle>,
 }
@@ -37,12 +38,27 @@ impl Draft {
 			decoration: None,
 			nameplate: None,
 			effect: None,
+			frame: None,
 			theme_colors: profile.theme_colors,
 			display_name_style,
 		}
 	}
 	fn changes(&self, profile: &UserProfile) -> ProfileEdit {
 		let name = (!self.name.is_empty()).then(|| self.name.clone());
+		let effect = self
+			.effect
+			.filter(|selected| *selected != profile.effect_sku);
+		let frame = self.frame.filter(|selected| *selected != profile.frame_sku);
+		// A frame is equipped by rewriting the whole equipped list, so any frame pick travels
+		// as that list instead of a field of its own. The list also carries a pending effect.
+		let collectibles_sku_ids = frame
+			.is_some()
+			.then(|| equipped_skus(profile, effect, frame));
+		let profile_effect_sku = if collectibles_sku_ids.is_some() {
+			None
+		} else {
+			effect
+		};
 		ProfileEdit {
 			global_name: (name != profile.global_name).then_some(name),
 			bio: (self.bio != profile.bio).then(|| self.bio.clone()),
@@ -59,7 +75,8 @@ impl Draft {
 			},
 			avatar_decoration_sku: self.decoration,
 			nameplate_sku: self.nameplate,
-			profile_effect_sku: self.effect,
+			profile_effect_sku,
+			collectibles_sku_ids,
 			theme_colors: (self.theme_colors != profile.theme_colors).then_some(self.theme_colors),
 			display_name_style: (self.display_name_style
 				!= profile
@@ -90,6 +107,48 @@ impl Draft {
 			self.display_name_style = fresh.display_name_style.clone();
 		}
 	}
+}
+
+/// The complete equipped-collectible list with a pending effect and frame applied.
+///
+/// The official client keeps the service's order and appends the new pick, so the list stays
+/// stable when one collectible changes. Duplicates and overflow are dropped: the service
+/// rejects the request otherwise.
+fn equipped_skus(
+	profile: &UserProfile,
+	effect: Option<Option<Id>>,
+	frame: Option<Option<Id>>,
+) -> Vec<Id> {
+	let mut skus = profile.collectible_skus.clone();
+	// A server profile can carry a frame the account list does not name, so both equipped
+	// SKUs are folded in before the pending pick is applied.
+	for current in [profile.effect_sku, profile.frame_sku]
+		.into_iter()
+		.flatten()
+	{
+		if !skus.contains(&current) {
+			skus.push(current);
+		}
+	}
+	if let Some(effect) = effect {
+		if let Some(current) = profile.effect_sku {
+			skus.retain(|sku| *sku != current);
+		}
+		skus.extend(effect);
+	}
+	if let Some(frame) = frame {
+		if let Some(current) = profile.frame_sku {
+			skus.retain(|sku| *sku != current);
+		}
+		skus.extend(frame);
+	}
+	let mut unique: Vec<Id> = Vec::with_capacity(skus.len().min(model::MAX_COLLECTIBLE_SKUS));
+	for sku in skus {
+		if unique.len() < model::MAX_COLLECTIBLE_SKUS && !unique.contains(&sku) {
+			unique.push(sku);
+		}
+	}
+	unique
 }
 
 /// What the preview card paints inside the avatar circle.
@@ -618,6 +677,14 @@ fn form(
 		"profile-edit-form-profile-effect",
 		model::CollectibleKind::Effect,
 		&mut draft.effect,
+		owned,
+	);
+	ui.add_space(6.0);
+	decor_row(
+		ui,
+		"profile-edit-form-profile-frame",
+		model::CollectibleKind::Frame,
+		&mut draft.frame,
 		owned,
 	);
 	ui.add_space(6.0);
