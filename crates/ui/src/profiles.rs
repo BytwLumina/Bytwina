@@ -4508,7 +4508,7 @@ fn effect_clock(
 }
 
 /// The equipped profile frame and effect around and over a finished card.
-fn paint_collectibles(
+pub(crate) fn paint_collectibles(
 	ui: &mut egui::Ui,
 	avatars: &mut Avatars,
 	data: &model::UserProfile,
