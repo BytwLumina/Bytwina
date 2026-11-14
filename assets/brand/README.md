@@ -1,35 +1,38 @@
 # Bytwina brand assets
 
 Bytwina's own application mark: a monochrome comet trail with a four-point starburst, a trailing
-star and sparks. It is drawn from flat ink colours only — no gradients and no embedded raster
-image — and it is not Apple, Discord or any other vendor's branding.
+star and sparks. The artwork is flat ink layers on white — ink `#141417`, then `#4B4B53`,
+`#9A9AA2` and a `#E1E1E1` comet trail at reduced opacity — and it is not Apple, Discord or any
+other vendor's branding.
 
-- `bytwina.svg` — light rounded plate carrying the mark; the master vector source and the shape
-  used for the raster previews.
-- `bytwina-flat.svg` — dark rounded plate variant for dark surfaces and low-colour contexts.
-- `bytwina-mark.svg` — solid silhouette trimmed to its bounding box, view box `148 141 760 760`.
-  `tools/generate-icons.py` rasterizes this one into the shared icon atlas as `bytwina-mark`,
-  which the interface tints at draw time.
-- `bytwina-1024.png` — 1024×1024 sRGB RGBA preview render of the light plate icon.
-- `bytwina-tray.png` — 72×72 black-on-transparent render of `bytwina-mark.svg`, embedded by
-  `crates/platform` as the macOS menu bar template image; macOS tints it per appearance, so only
-  its alpha is used. Regenerate with:
+The mark is authored as raster art, so the 1024 px PNG is the master and the SVG is traced from it.
 
-  ```sh
-  sed -e 's/fill="#fff"/fill="#000"/g' -e 's/stroke="#fff"/stroke="#000"/g' \
-    assets/brand/bytwina-mark.svg |
-    rsvg-convert -w 72 -h 72 -o assets/brand/bytwina-tray.png
-  ```
+- `bytwina-mark-source.png` — the designer's 1024×1024 mark on a white background. Every other
+  file here is generated from it; replace this file to rebrand.
+- `bytwina-mark.svg` — vector trace of the mark (view box `100 63.5 828 828`), four paths per
+  tone using `fill="#fff"` with `fill-opacity`. `crates/platform` rewrites that placeholder fill
+  into the desktop's foreground colour for the Linux symbolic tray icon, so the string
+  `fill="#fff"` must survive edits.
+- `bytwina-mark.png` — the mark on transparency, resampled from the source.
+- `bytwina-mark-mono.png` — white silhouette with per-tone alpha. `tools/generate-icons.py` pastes
+  this into the shared icon atlas as `bytwina-mark`, which the interface tints at draw time.
+- `bytwina-1024.png` — 1024×1024 sRGB RGBA application icon: the mark at 62 % of a white rounded
+  plate (radius 230 of 1024). The rest of the `bytwina-{16,24,32,48,64,128,256,512}.png` ladder is
+  resampled from it.
+- `bytwina-tray.png` — 72×72 black-on-transparent render of the mark, embedded by `crates/platform`
+  as the macOS menu bar template image; macOS tints it per appearance, so only its alpha is used.
 
-The packaged platform icons built from the same artwork live in `packaging/` (`macos/Bytwina.icns`
-and `Bytwina.icon`, `windows/Bytwina.ico`, `linux/hicolor/*`). Regenerate the PNG sizes and the
-Windows icon from the 1024 px render:
+Regenerate every raster, the Windows `.ico` and the packaged copies from the source mark:
 
 ```sh
-python tools/generate-app-icon.py assets/brand/bytwina-1024.png
+python3 tools/generate-app-icon.py --mark assets/brand/bytwina-mark-source.png
 ```
 
-Brand palette: ink `#111111`, trailing grays `#3C3C3C`, `#6A6A6A`, comet trail `#D9D9D9`, plate
-white `#FFFFFF` and plate ink `#111111`. The interface accent
-(`design::DEFAULT_PRIMARY_RGB`, `#1a72e8`) is unchanged and is tuned so white text on it keeps a
+The packaged platform icons built from the same artwork live in `packaging/` (`macos/Bytwina.icns`
+and `Bytwina.icon`, `windows/Bytwina.ico`, `linux/hicolor/*`). The Windows icon and the
+`packaging/linux/hicolor` ladder are written by the command above; the macOS `.icns` is not, and
+needs the Apple icon toolchain.
+
+The interface accent (`design::DEFAULT_PRIMARY_RGB`, `#1a72e8`) is separate from the mark, which is
+always drawn in the fixed brand black/white pair, and it is tuned so white text on it keeps a
 4.5:1 contrast ratio.
