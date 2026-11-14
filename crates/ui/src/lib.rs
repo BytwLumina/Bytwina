@@ -1485,6 +1485,26 @@ impl MessagingUi {
 							design::window_controls(ui);
 						}
 						ui.spacing_mut().item_spacing.x = 10.0;
+						// Discord keeps Quests in the app's top-right corner, not in the Friends
+						// header, so it opens from here into the home surface.
+						if state.demo || state.auth == client_core::auth::AuthState::Authenticated {
+							let response = icons::toggle(
+								ui,
+								icons::Icon::Sparkle,
+								28.0,
+								self.showing_quests(),
+								"quests",
+							);
+							crate::notifications::title_badge(
+								ui,
+								response.rect,
+								u32::try_from(state.quests().len()).unwrap_or(u32::MAX),
+								design::window_palette(ui).base,
+							);
+							if response.clicked() {
+								self.open_quests(state);
+							}
+						}
 						if self.updates.available || self.updates.ready {
 							let (label, icon) = if self.updates.ready {
 								(
@@ -2146,6 +2166,7 @@ impl MessagingUi {
 							)
 						});
 						if response.on_hover_text(language.text("friends")).clicked() {
+							self.leave_quests();
 							state.open_home();
 							self.guild = None;
 							self.search.open = false;
