@@ -1229,8 +1229,8 @@ pub const WINDOW_CONTROLS_WIDTH: f32 = if cfg!(target_os = "windows") {
 
 /// Tallest Windows caption strip that draws [`window_controls`]: the login
 /// header (56 pt) above the sign-in header (44 pt) and the title strip
-/// ([`TITLE_BAR_HEIGHT`]). Resize handles start below it so corner clicks
-/// reach Close on every screen, not just the title strip.
+/// ([`TITLE_BAR_HEIGHT`]). The east resize handle starts below it so the
+/// caption buttons keep their hit targets on every screen.
 pub const WINDOW_CAPTION_HEIGHT: f32 = if cfg!(target_os = "windows") {
 	56.0
 } else {
@@ -1284,10 +1284,10 @@ pub fn window_drag(ui: &mut egui::Ui, rect: egui::Rect) {
 }
 
 /// Hit boxes for the native resize handles within `rect`, each paired with its
-/// resize direction and cursor. On Windows the top-right caption area is
-/// excluded so corner clicks reach Close; the east handle starts below
-/// [`WINDOW_CAPTION_HEIGHT`], covering the tallest caption strip, and the
-/// north-east handle is empty. Linux's inset header bar buttons leave that corner free.
+/// resize direction and cursor. The thin top edge and top-left corner remain resize
+/// surfaces even when the rest of the caption strip starts a window drag. On Windows
+/// the top-right caption area is excluded so corner clicks reach Close; the east handle
+/// starts below [`WINDOW_CAPTION_HEIGHT`] to avoid the caption buttons.
 pub(crate) fn resize_handles(
 	rect: egui::Rect,
 ) -> [(egui::Rect, egui::ResizeDirection, egui::CursorIcon); 8] {
@@ -1301,23 +1301,10 @@ pub(crate) fn resize_handles(
 		(corner, corner)
 	};
 	let rect_at = |min: [f32; 2], max: [f32; 2]| egui::Rect::from_min_max(min.into(), max.into());
-	// The north edge starts below the caption strip on Windows: the strip belongs to the
-	// window drag region, and a resize handle over it steals the press.
-	let north_top = if cfg!(target_os = "windows") {
-		t + WINDOW_CAPTION_HEIGHT
-	} else {
-		t
-	};
 	[
-		// Corners that sit under the caption strip are sized from the strip's bottom edge so
-		// the whole top band stays a drag/caption surface.
 		(
-			rect_at([l, north_top], [l + corner, north_top + corner]),
-			if cfg!(target_os = "windows") {
-				D::West
-			} else {
-				D::NorthWest
-			},
+			rect_at([l, t], [l + corner, t + corner]),
+			D::NorthWest,
 			C::ResizeNwSe,
 		),
 		(
@@ -1331,7 +1318,7 @@ pub(crate) fn resize_handles(
 			C::ResizeNwSe,
 		),
 		(
-			rect_at([l + corner, north_top], [r - north_end, north_top + edge]),
+			rect_at([l + corner, t], [r - north_end, t + edge]),
 			D::North,
 			C::ResizeVertical,
 		),
