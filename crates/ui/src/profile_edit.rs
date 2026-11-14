@@ -901,7 +901,7 @@ fn preview(
 	media: (bool, &[model::Guild]),
 	opening: &mut Option<String>,
 	picture: Picture<'_>,
-	banner: Option<&egui::TextureHandle>,
+	pending_banner: Option<&egui::TextureHandle>,
 	clickable: bool,
 ) -> Option<AvatarAction> {
 	let (demo, guilds) = media;
@@ -940,7 +940,7 @@ fn preview(
 				.map(rgb)
 				.or_else(|| profile.theme_colors.map(crate::profiles::Theme::banner))
 				.unwrap_or(colors.raised);
-			match (&draft.banner, banner) {
+			match (&draft.banner, pending_banner) {
 				// The banner image covers its color, so a saved profile paints it as is.
 				(None, _) if profile.banner.is_some() => {
 					avatars.paint_banner(ui, profile, banner, corner, demo);
@@ -949,7 +949,9 @@ fn preview(
 					paint_draft_banner(ui, texture, banner, corner, color);
 				}
 				// A pending removal, or a picture still decoding, shows the color alone.
-				_ => ui.painter().rect_filled(banner, corner, color),
+				_ => {
+					ui.painter().rect_filled(banner, corner, color);
+				}
 			}
 			let avatar = egui::Rect::from_min_size(
 				banner.left_bottom() + egui::vec2(16.0, -40.0),
