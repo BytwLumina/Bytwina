@@ -1824,6 +1824,12 @@ impl Picker {
 										ui.add_space(12.0);
 									}
 									let searching = !self.query.trim().is_empty();
+									// Discord's picker keeps the tone and category controls above the
+									// grid; browsing without them hides half the catalog.
+									if !searching && self.server.is_none() {
+										self.unicode_bar(ui);
+										ui.add_space(6.0);
+									}
 									let guild = self
 										.server
 										.and_then(|id| state.guilds.iter().find(|g| g.id == id));

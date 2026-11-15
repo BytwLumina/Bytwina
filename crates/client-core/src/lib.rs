@@ -974,6 +974,8 @@ pub struct State {
 	/// Device preference for which profile cosmetics are shown and loaded.
 	pub profile_cosmetics: model::CosmeticPreferences,
 	pub own_profile: profile::OwnProfile,
+	/// The server-scoped profile currently open in the editor, if any.
+	pub server_profile: profile::ServerProfile,
 	pub badge_editor: profile::BadgeEditor,
 	pub invites: invites::Cache,
 	pub invite_join: invites::Join,
@@ -1219,6 +1221,7 @@ impl Default for State {
 			profile_cache: Default::default(),
 			profile_cosmetics: Default::default(),
 			own_profile: Default::default(),
+			server_profile: Default::default(),
 			badge_editor: Default::default(),
 			invites: Default::default(),
 			invite_join: Default::default(),
@@ -2387,10 +2390,7 @@ impl State {
 			..
 		} = command
 		{
-			self.fail(auth::Failure::ProtocolAt(
-				"Server profile was not queued; reload to continue",
-			));
-			let _ = (user, guild, request);
+			self.reject_server_profile(user, guild, request);
 			return;
 		}
 		if let Command::QuestHeartbeat { quest, request, .. } = command {
@@ -2902,6 +2902,7 @@ impl State {
 			self.local_game_activity = Default::default();
 			self.invalidate_messaging_permissions(None);
 			self.interrupt_own_profile();
+			self.interrupt_server_profile();
 		}
 		if let Event::ScheduledEvent(event) = &envelope.event {
 			self.events.apply(event.clone());
@@ -3361,16 +3362,13 @@ impl State {
 				self.apply_own_profile(user, request, result);
 				Ok(())
 			}
-			Event::GuildProfileEdited { result, .. } => {
-				if result.is_err() {
-					self.fail(
-						result
-							.as_ref()
-							.err()
-							.copied()
-							.unwrap_or(auth::Failure::Protocol),
-					);
-				}
+			Event::GuildProfileEdited {
+				user,
+				guild,
+				request,
+				result,
+			} => {
+				self.apply_server_profile(user, guild, request, result);
 				Ok(())
 			}
 			Event::Profile {
@@ -3897,6 +3895,7 @@ impl State {
 				self.server_members_shortcuts.clear();
 				self.group_actions.reset();
 				self.clear_own_profile();
+				self.clear_server_profile();
 				self.user = Some(user);
 				self.guilds = guilds;
 				self.channels = channels;
@@ -4587,6 +4586,7 @@ impl State {
 			self.interrupt_gif_favorites();
 			self.invalidate_messaging_permissions(Some(failure));
 			self.interrupt_own_profile();
+			self.interrupt_server_profile();
 			self.interrupt_badge_settings();
 			self.local_game_activity = Default::default();
 			self.cancel_message_actions();

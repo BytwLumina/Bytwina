@@ -95,6 +95,11 @@ mod timestamp_picker;
 pub fn synthetic_own_profile(user: &model::User) -> model::UserProfile {
 	profiles::synthetic(user, None)
 }
+/// Synthetic server profile for the offline command adapter; never service data.
+#[cfg(any(test, feature = "demo"))]
+pub fn synthetic_server_profile(user: &model::User, guild: Id) -> model::UserProfile {
+	profiles::synthetic(user, Some(guild))
+}
 mod contact_editor;
 pub mod dialog;
 mod join_server;

@@ -61,6 +61,8 @@ impl Draft {
 		};
 		ProfileEdit {
 			global_name: (name != profile.global_name).then_some(name),
+			// Server nicknames travel only through the guild editor.
+			nick: None,
 			bio: (self.bio != profile.bio).then(|| self.bio.clone()),
 			pronouns: (self.pronouns != profile.pronouns).then(|| self.pronouns.clone()),
 			accent_color: (self.color != profile.accent_color).then_some(self.color),
@@ -151,6 +153,61 @@ fn equipped_skus(
 	unique
 }
 
+/// The server-scoped half of the editor. Discord stores a nickname, picture, banner, bio and
+/// pronouns per server, separate from the account profile.
+#[derive(Clone, PartialEq, Eq)]
+struct ServerDraft {
+	nick: String,
+	bio: String,
+	pronouns: String,
+	/// Same encoding as [`Draft::avatar`], for the server picture.
+	avatar: Option<Option<String>>,
+	banner: Option<Option<String>>,
+}
+impl ServerDraft {
+	fn from_profile(profile: &UserProfile) -> Option<Self> {
+		let guild = profile.guild.as_ref()?;
+		Some(Self {
+			nick: guild.nick.clone().unwrap_or_default(),
+			bio: guild.bio.clone(),
+			pronouns: guild.pronouns.clone(),
+			avatar: None,
+			banner: None,
+		})
+	}
+	fn changes(&self, profile: &UserProfile) -> ProfileEdit {
+		let Some(guild) = profile.guild.as_ref() else {
+			return ProfileEdit::default();
+		};
+		let nick = (!self.nick.is_empty()).then(|| self.nick.clone());
+		ProfileEdit {
+			nick: (nick != guild.nick).then_some(nick),
+			bio: (self.bio != guild.bio).then(|| self.bio.clone()),
+			pronouns: (self.pronouns != guild.pronouns).then(|| self.pronouns.clone()),
+			avatar: match &self.avatar {
+				Some(None) if guild.avatar.is_none() => None,
+				other => other.clone(),
+			},
+			banner: match &self.banner {
+				Some(None) if guild.banner.is_none() => None,
+				other => other.clone(),
+			},
+			..Default::default()
+		}
+	}
+	fn rebase(&mut self, before: &Self, fresh: &Self) {
+		if self.nick == before.nick {
+			self.nick = fresh.nick.clone();
+		}
+		if self.bio == before.bio {
+			self.bio = fresh.bio.clone();
+		}
+		if self.pronouns == before.pronouns {
+			self.pronouns = fresh.pronouns.clone();
+		}
+	}
+}
+
 /// What the preview card paints inside the avatar circle.
 enum Picture<'a> {
 	/// The account's current picture, fetched like any other avatar.
@@ -192,8 +249,23 @@ pub(super) struct Editor {
 	pending_banner: Option<egui::TextureHandle>,
 	/// Local copy of the last saved picture, keyed by the avatar hash the service returned.
 	saved_picture: Option<(Option<String>, egui::TextureHandle)>,
+	/// True while the server-profile tab is showing instead of the account tab.
+	server: bool,
+	server_guild: Option<Id>,
+	server_draft: Option<ServerDraft>,
+	server_baseline: Option<ServerDraft>,
+	server_submitted: Option<u64>,
+	server_saved: bool,
+	server_pending_picture: Option<egui::TextureHandle>,
+	server_pending_banner: Option<egui::TextureHandle>,
+	server_saved_picture: Option<(Option<String>, egui::TextureHandle)>,
 }
 impl Editor {
+	/// Whether the pending native picker fills the banner rather than the avatar.
+	pub fn choosing_banner(&self) -> bool {
+		self.choosing_banner
+	}
+
 	/// Result of the native picker. Errors are returned so the caller can toast them.
 	pub fn accept_avatar(
 		&mut self,
@@ -211,12 +283,42 @@ impl Editor {
 			return Ok(());
 		}
 		let banner = self.choosing_banner;
+		let server = self.server;
 		self.choosing = false;
 		self.choosing_banner = false;
 		match result {
 			Ok(Some((uri, image))) => {
-				if !model::valid_avatar_uri(&uri) || image.size[0] > 512 || image.size[1] > 512 {
+				// The server picture and banner share the account picker's decode budget.
+				if !if banner {
+					model::valid_banner_uri(&uri)
+				} else {
+					model::valid_avatar_uri(&uri)
+				} || image.size[0] > 512
+					|| image.size[1] > 512
+				{
 					return Err("That picture is too large; choose a simpler image");
+				}
+				if server {
+					let Some(draft) = self.server_draft.as_mut() else {
+						return Ok(());
+					};
+					if banner {
+						draft.banner = Some(Some(uri));
+						self.server_pending_banner = Some(ctx.load_texture(
+							"server-profile-banner-preview",
+							image,
+							egui::TextureOptions::LINEAR,
+						));
+					} else {
+						draft.avatar = Some(Some(uri));
+						self.server_pending_picture = Some(ctx.load_texture(
+							"server-profile-avatar-preview",
+							image,
+							egui::TextureOptions::LINEAR,
+						));
+					}
+					self.server_saved = false;
+					return Ok(());
 				}
 				let Some(draft) = self.draft.as_mut() else {
 					return Ok(());
@@ -317,6 +419,11 @@ impl Editor {
 			{
 				commands.push(command);
 			}
+		}
+		self.scope_tabs(ui, state);
+		if self.server {
+			self.show_server(ui, state, avatars, commands);
+			return;
 		}
 		let Some(profile) = state.own_profile.data.as_ref() else {
 			return;
@@ -525,6 +632,327 @@ impl Editor {
 			);
 		}
 		crate::markdown::confirm_external_link(ui.ctx(), &mut self.preview_link, true);
+		if !state.demo && !state.gateway_connected {
+			design::hint(
+				ui,
+				&crate::i18n::translate("profile-edit-show-reconnect-to-save-your-profile"),
+			);
+		}
+	}
+
+	/// Account versus server scope, like Discord's two profile tabs.
+	fn scope_tabs(&mut self, ui: &mut egui::Ui, state: &State) {
+		ui.horizontal(|ui| {
+			ui.spacing_mut().item_spacing.x = 8.0;
+			if design::button(
+				ui,
+				&crate::i18n::translate("profile-edit-scope-account"),
+				if self.server {
+					design::ButtonKind::Neutral
+				} else {
+					design::ButtonKind::Primary
+				},
+			)
+			.clicked()
+			{
+				self.server = false;
+			}
+			ui.add_enabled_ui(!state.guilds.is_empty(), |ui| {
+				if design::button(
+					ui,
+					&crate::i18n::translate("profile-edit-scope-server"),
+					if self.server {
+						design::ButtonKind::Primary
+					} else {
+						design::ButtonKind::Neutral
+					},
+				)
+				.clicked()
+				{
+					self.server = true;
+				}
+			});
+		});
+		ui.add_space(12.0);
+	}
+
+	/// The server-scoped editor: nickname, picture, banner, bio and pronouns.
+	fn show_server(
+		&mut self,
+		ui: &mut egui::Ui,
+		state: &mut State,
+		_avatars: &mut Avatars,
+		commands: &mut Vec<Command>,
+	) {
+		let colors = design::palette(ui);
+		if self.server_guild.is_none() {
+			self.server_guild = state.guilds.first().map(|guild| guild.id);
+		}
+		let selected = self
+			.server_guild
+			.and_then(|id| state.guilds.iter().find(|guild| guild.id == id))
+			.map(|guild| guild.name.clone());
+		ui.add_enabled_ui(!state.server_profile.saving, |ui| {
+			egui::ComboBox::from_id_salt("profile-server-scope")
+				.selected_text(selected.unwrap_or_else(|| {
+					crate::i18n::translate("profile-edit-server-choose-a-server")
+				}))
+				.width(240.0)
+				.show_ui(ui, |ui| {
+					for guild in &state.guilds {
+						if ui
+							.selectable_label(self.server_guild == Some(guild.id), &guild.name)
+							.clicked() && self.server_guild != Some(guild.id)
+						{
+							self.server_guild = Some(guild.id);
+							self.server_draft = None;
+							self.server_baseline = None;
+							self.server_submitted = None;
+							self.server_saved = false;
+							self.server_pending_picture = None;
+							self.server_pending_banner = None;
+							self.server_saved_picture = None;
+						}
+					}
+				});
+		});
+		ui.label(
+			egui::RichText::new(crate::i18n::translate("profile-edit-server-description"))
+				.size(12.0)
+				.color(colors.muted),
+		);
+		ui.add_space(10.0);
+		if let Some(guild) = self.server_guild
+			&& state.server_profile.guild != Some(guild)
+			&& !state.server_profile.loading
+			&& !state.server_profile.saving
+			&& let Some(command) = state.load_server_profile(guild)
+		{
+			commands.push(command);
+		}
+		if state.server_profile.loading {
+			ui.horizontal(|ui| {
+				ui.add(egui::Spinner::new().size(14.0));
+				ui.label(
+					egui::RichText::new(crate::i18n::translate("profile-edit-server-loading"))
+						.size(13.0)
+						.color(colors.muted),
+				);
+			});
+		}
+		if let Some(error) = state.server_profile.error {
+			design::notice(ui, design::Level::Error, error);
+			if !state.server_profile.loading
+				&& !state.server_profile.saving
+				&& let Some(guild) = self.server_guild
+				&& design::text_action(
+					ui,
+					&crate::i18n::translate("profile-edit-show-reload-profile"),
+				)
+				.clicked() && let Some(command) = state.load_server_profile(guild)
+			{
+				commands.push(command);
+			}
+		}
+		if self.server_submitted == Some(state.server_profile.request)
+			&& !state.server_profile.saving
+		{
+			self.server_submitted = None;
+			if state.server_profile.error.is_none()
+				&& let Some(profile) = &state.server_profile.data
+			{
+				let uploaded = self
+					.server_draft
+					.as_ref()
+					.is_some_and(|draft| matches!(draft.avatar, Some(Some(_))));
+				self.server_saved_picture = match (uploaded, self.server_pending_picture.take()) {
+					(true, Some(texture)) => Some((
+						profile
+							.guild
+							.as_ref()
+							.and_then(|guild| guild.avatar.clone()),
+						texture,
+					)),
+					_ => None,
+				};
+				self.server_draft = ServerDraft::from_profile(profile);
+				self.server_saved = true;
+			}
+		}
+		let Some(guild) = self.server_guild else {
+			design::hint(
+				ui,
+				&crate::i18n::translate("profile-edit-server-no-servers"),
+			);
+			return;
+		};
+		let mut submit = None;
+		let mut reset = false;
+		{
+			let Some(profile) = state
+				.server_profile
+				.data
+				.as_ref()
+				.filter(|profile| profile.guild.as_ref().is_some_and(|g| g.guild == guild))
+			else {
+				if !state.server_profile.loading {
+					design::hint(
+						ui,
+						&crate::i18n::translate("profile-edit-server-select-a-server"),
+					);
+				}
+				return;
+			};
+			let fresh = ServerDraft::from_profile(profile);
+			if let (Some(draft), Some(before)) = (&mut self.server_draft, &self.server_baseline) {
+				draft.rebase(before, &fresh);
+			}
+			self.server_baseline = fresh;
+			if self.server_draft.is_none() {
+				self.server_draft = ServerDraft::from_profile(profile);
+			}
+			let Some(draft) = self.server_draft.as_mut() else {
+				return;
+			};
+			let before = draft.clone();
+			let editable = !state.server_profile.loading && !state.server_profile.saving;
+			let picture = self.server_pending_picture.as_ref().or_else(|| {
+				self.server_saved_picture
+					.as_ref()
+					.and_then(|(hash, texture)| {
+						(hash.is_some()
+							&& profile
+								.guild
+								.as_ref()
+								.is_some_and(|guild| guild.avatar == *hash))
+						.then_some(texture)
+					})
+			});
+			let banner = self.server_pending_banner.as_ref();
+			let mut action = None;
+			ui.add_enabled_ui(editable, |ui| {
+				action = server_form(ui, draft, profile, self.choosing, picture, banner);
+			});
+			match action {
+				Some(AvatarAction::Pick) if editable && !self.choosing => {
+					self.revision = self.revision.wrapping_add(1);
+					self.choosing = true;
+					self.choosing_banner = false;
+					self.avatar_request = Some((state.generation, profile.user.id, self.revision));
+				}
+				Some(AvatarAction::Remove) => {
+					draft.avatar = Some(None);
+					self.server_pending_picture = None;
+				}
+				Some(AvatarAction::Undo) => {
+					draft.avatar = None;
+					self.server_pending_picture = None;
+				}
+				Some(AvatarAction::BannerPick) if editable && !self.choosing => {
+					self.revision = self.revision.wrapping_add(1);
+					self.choosing = true;
+					self.choosing_banner = true;
+					self.avatar_request = Some((state.generation, profile.user.id, self.revision));
+				}
+				Some(AvatarAction::BannerRemove) => {
+					draft.banner = Some(None);
+					self.server_pending_banner = None;
+				}
+				Some(AvatarAction::BannerUndo) => {
+					draft.banner = None;
+					self.server_pending_banner = None;
+				}
+				_ => {}
+			}
+			if *draft != before {
+				self.server_saved = false;
+			}
+			let changes = draft.changes(profile);
+			let changed = changes != ProfileEdit::default();
+			ui.add_space(16.0);
+			egui::Frame::new()
+				.fill(colors.base)
+				.corner_radius(8)
+				.inner_margin(egui::Margin::symmetric(12, 8))
+				.show(ui, |ui| {
+					ui.set_width(ui.available_width());
+					ui.horizontal(|ui| {
+						ui.spacing_mut().item_spacing.x = 12.0;
+						if state.server_profile.saving {
+							ui.add(egui::Spinner::new().size(14.0));
+							ui.label(
+								egui::RichText::new(crate::i18n::translate(
+									"profile-edit-server-saving",
+								))
+								.size(13.0)
+								.color(colors.muted),
+							);
+						} else if self.server_saved {
+							ui.label(
+								egui::RichText::new(crate::i18n::translate_if_key(if state.demo {
+									"profile-edit-show-saved-in-preview"
+								} else {
+									"profile-edit-server-saved"
+								}))
+								.size(13.0)
+								.color(colors.positive),
+							);
+						} else if changed {
+							ui.label(
+								egui::RichText::new(crate::i18n::translate(
+									"profile-edit-show-you-have-unsaved-changes",
+								))
+								.size(13.0)
+								.color(colors.text),
+							);
+						}
+						ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+							ui.add_enabled_ui(
+								changed && changes.valid() && state.can_save_server_profile(),
+								|ui| {
+									if design::button(
+										ui,
+										&crate::i18n::translate("profile-edit-show-save-changes"),
+										design::ButtonKind::Primary,
+									)
+									.clicked()
+									{
+										submit = Some(changes.clone());
+									}
+								},
+							);
+							ui.add_enabled_ui(changed && editable, |ui| {
+								if design::button(
+									ui,
+									&crate::i18n::translate("profile-edit-show-cancel"),
+									design::ButtonKind::Neutral,
+								)
+								.clicked()
+								{
+									reset = true;
+								}
+							});
+						});
+					});
+				});
+		}
+		if reset {
+			self.server_draft = state
+				.server_profile
+				.data
+				.as_ref()
+				.and_then(ServerDraft::from_profile);
+			self.server_pending_picture = None;
+			self.server_pending_banner = None;
+			self.server_saved = false;
+		}
+		if let Some(changes) = submit
+			&& let Some(command) = state.save_guild_profile(guild, changes)
+		{
+			self.server_submitted = Some(state.server_profile.request);
+			self.server_saved = false;
+			commands.push(command);
+		}
 		if !state.demo && !state.gateway_connected {
 			design::hint(
 				ui,
@@ -741,6 +1169,164 @@ fn form(
 	action
 }
 
+/// Server-scoped fields only. Account cosmetics deliberately do not appear here because the
+/// guild endpoint rejects them.
+fn server_form(
+	ui: &mut egui::Ui,
+	draft: &mut ServerDraft,
+	profile: &UserProfile,
+	choosing: bool,
+	picture: Option<&egui::TextureHandle>,
+	banner: Option<&egui::TextureHandle>,
+) -> Option<AvatarAction> {
+	let colors = design::palette(ui);
+	let guild = profile.guild.as_ref()?;
+	ui.spacing_mut().item_spacing.y = 6.0;
+	let mut action = None;
+	if picture.is_some() || banner.is_some() {
+		let width = ui.available_width().min(420.0);
+		let (rect, _) = ui.allocate_exact_size(egui::vec2(width, 72.0), egui::Sense::hover());
+		let corner = egui::CornerRadius {
+			nw: 8,
+			ne: 8,
+			sw: 0,
+			se: 0,
+		};
+		if let Some(banner) = banner {
+			paint_draft_banner(ui, banner, rect, corner, colors.raised);
+		} else {
+			ui.painter().rect_filled(rect, corner, colors.raised);
+		}
+		if let Some(picture) = picture {
+			let avatar = egui::Rect::from_min_size(
+				rect.left_bottom() + egui::vec2(12.0, -28.0),
+				egui::Vec2::splat(56.0),
+			);
+			ui.scope_builder(egui::UiBuilder::new().max_rect(avatar), |ui| {
+				ui.add(
+					egui::Image::new(picture)
+						.fit_to_exact_size(egui::Vec2::splat(56.0))
+						.corner_radius(28.0),
+				);
+			});
+		}
+		ui.add_space(12.0);
+	}
+	let has_picture = match &draft.avatar {
+		Some(value) => value.is_some(),
+		None => guild.avatar.is_some(),
+	};
+	design::row(
+		ui,
+		"profile-edit-server-avatar",
+		Some(match &draft.avatar {
+			Some(Some(_)) => "profile-edit-server-avatar-new",
+			Some(None) => "profile-edit-server-avatar-remove",
+			None => "profile-edit-server-avatar-hint",
+		}),
+		|ui| {
+			ui.add_enabled_ui(!choosing, |ui| {
+				if design::button(
+					ui,
+					&crate::i18n::translate("profile-edit-form-change"),
+					design::ButtonKind::Outline,
+				)
+				.clicked()
+				{
+					action = Some(AvatarAction::Pick);
+				}
+			});
+			if draft.avatar.is_some() {
+				if design::text_action(ui, &crate::i18n::translate("profile-edit-form-undo"))
+					.clicked()
+				{
+					action = Some(AvatarAction::Undo);
+				}
+			} else if has_picture
+				&& design::text_action(ui, &crate::i18n::translate("profile-edit-form-remove"))
+					.clicked()
+			{
+				action = Some(AvatarAction::Remove);
+			}
+			if choosing {
+				ui.add(egui::Spinner::new().size(14.0));
+			}
+		},
+	);
+	ui.add_space(10.0);
+	field(
+		ui,
+		"profile-edit-server-nickname",
+		"profile-edit-server-nickname",
+		&mut draft.nick,
+		model::MAX_PROFILE_NAME_CHARS,
+		false,
+	);
+	ui.label(
+		egui::RichText::new(crate::i18n::translate("profile-edit-server-nickname-hint"))
+			.size(12.0)
+			.color(colors.muted),
+	);
+	ui.add_space(8.0);
+	field(
+		ui,
+		"profile-edit-server-pronouns",
+		"profile-edit-server-pronouns",
+		&mut draft.pronouns,
+		model::MAX_PROFILE_PRONOUNS_CHARS,
+		false,
+	);
+	ui.add_space(8.0);
+	field(
+		ui,
+		"profile-edit-server-bio",
+		"profile-edit-server-bio",
+		&mut draft.bio,
+		model::MAX_PROFILE_BIO_CHARS,
+		true,
+	);
+	ui.add_space(10.0);
+	let has_banner = match &draft.banner {
+		Some(value) => value.is_some(),
+		None => guild.banner.is_some(),
+	};
+	design::row(
+		ui,
+		"profile-edit-server-banner",
+		Some(match &draft.banner {
+			Some(Some(_)) => "profile-edit-server-banner-new",
+			Some(None) => "profile-edit-server-banner-remove",
+			None => "profile-edit-server-banner-hint",
+		}),
+		|ui| {
+			ui.add_enabled_ui(!choosing, |ui| {
+				if design::button(
+					ui,
+					&crate::i18n::translate("profile-edit-form-change"),
+					design::ButtonKind::Outline,
+				)
+				.clicked()
+				{
+					action = Some(AvatarAction::BannerPick);
+				}
+			});
+			if draft.banner.is_some() {
+				if design::text_action(ui, &crate::i18n::translate("profile-edit-form-undo"))
+					.clicked()
+				{
+					action = Some(AvatarAction::BannerUndo);
+				}
+			} else if has_banner
+				&& design::text_action(ui, &crate::i18n::translate("profile-edit-form-remove"))
+					.clicked()
+			{
+				action = Some(AvatarAction::BannerRemove);
+			}
+		},
+	);
+	action
+}
+
 fn name_style_editor(ui: &mut egui::Ui, draft: &mut Draft) {
 	let label = crate::i18n::translate("settings-cosmetics-name-styles");
 	let mut reset = false;
@@ -753,7 +1339,7 @@ fn name_style_editor(ui: &mut egui::Ui, draft: &mut Draft) {
 				egui::ComboBox::from_id_salt("profile-name-style-font")
 					.selected_text(format!("Font {}", style.font))
 					.show_ui(ui, |ui| {
-						for font in [11, 3, 4, 6, 7, 8, 10, 12, 13, 14, 15, 16] {
+						for font in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17] {
 							ui.selectable_value(&mut style.font, font, format!("Font {font}"));
 						}
 					});
@@ -1186,6 +1772,34 @@ mod tests {
 		assert_eq!(draft.pronouns, "she/her");
 		assert!(draft.name.is_empty() && draft.bio.is_empty());
 		assert_eq!(draft.changes(&profile).pronouns, None);
+	}
+	#[test]
+	fn server_draft_only_sends_changed_fields_and_clears_an_empty_nickname() {
+		let user = model::User {
+			flags: model::AccountFlags::default(),
+			id: model::Id(1),
+			name: "Synthetic".into(),
+			avatar: None,
+			webhook: false,
+			kind: Default::default(),
+			discriminator: 0,
+			primary_guild: None,
+			cosmetics: None,
+		};
+		let mut profile = crate::profiles::synthetic(&user, Some(model::Id(7)));
+		profile.guild.as_mut().unwrap().nick = Some("Before".into());
+		let mut draft = ServerDraft::from_profile(&profile).unwrap();
+		assert!(draft.changes(&profile) == ProfileEdit::default());
+		draft.nick.clear();
+		draft.bio = "New bio".into();
+		let changes = draft.changes(&profile);
+		assert_eq!(changes.nick, Some(None));
+		assert_eq!(changes.bio, Some("New bio".into()));
+		assert_eq!(changes.pronouns, None);
+		assert!(changes.valid());
+		// A removal the server does not have is not a change.
+		draft.avatar = Some(None);
+		assert_eq!(draft.changes(&profile).avatar, None);
 	}
 	#[test]
 	fn preview_drops_an_effect_the_draft_cleared() {

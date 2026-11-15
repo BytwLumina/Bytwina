@@ -35,7 +35,7 @@ Test detail: egui 0.36.2's [`Font::has_glyph`](https://github.com/emilk/egui/blo
 
 ### Display-name fonts
 
-Discord's Nitro display-name styles name a font by id. Bytwina bundles unmodified SIL Open Font License 1.1 faces for 14 of them, used only when Settings › Appearance › name styles is on. Each face is embedded in the executable but parsed only the first time a visible styled name uses it; there is no runtime font download. Variable faces render at weight 500. Néo-Castel (id 7) is distributed only through a store checkout and Hexagon (id 17) has no identified source, so those names, Default (id 11) and unknown ids keep the interface font. Whether each face matches the exact build Discord serves is unverified.
+Discord's Nitro display-name styles name a font by id. Bytwina bundles unmodified SIL Open Font License 1.1 faces for 16 of them, used only when Settings › Appearance › name styles is on. Each face is embedded in the executable but parsed only the first time a visible styled name uses it; there is no runtime font download. Variable faces render at weight 500. Néo-Castel (id 7) is distributed only through a store checkout and Hexagon (id 17) has no identified source, so those two use OFL stand-ins (Bodoni Moda and Audiowide) chosen for a similar voice; Default (id 11) and unknown ids keep the interface font. Whether each face matches the exact build Discord serves is unverified.
 
 | Asset | Discord font id | Bytes | Copyright and license |
 |---|---:|---:|---|
@@ -45,6 +45,7 @@ Discord's Nitro display-name styles name a font by id. Bytwina bundles unmodifie
 | `fonts/Chicle-Regular.ttf` | 4 (Chicle) | 41,032 | Copyright (c) 2011 Angel Koziupa; [OFL 1.1](fonts/Chicle-OFL.txt) |
 | `fonts/Compagnon-Roman.otf` | 5 (Compagnon) | 54,376 | Copyright (c) 2018 Juliette Duhé, Léa Pradine, Valentin Papon, Sébastien Riollier and Chloé Lozano; [OFL 1.1](fonts/Compagnon-OFL.txt) |
 | `fonts/MuseoModerno.ttf` | 6 (MuseoModerno) | 188,724 | Copyright 2020 The MuseoModerno Project Authors; [OFL 1.1](fonts/MuseoModerno-OFL.txt) |
+| `fonts/BodoniModa.ttf` | 7 (Néo-Castel stand-in) | 162,104 | Copyright 2020 The Bodoni Moda Project Authors; [OFL 1.1](fonts/BodoniModa-OFL.txt) |
 | `fonts/PixelifySans.ttf` | 8 (Pixelify) | 79,160 | Copyright 2021 The Pixelify Sans Project Authors; [OFL 1.1](fonts/PixelifySans-OFL.txt) |
 | `fonts/Ribes-Regular.otf` | 9 (Ribes) | 36,208 | Copyright © 2023 Collletttivo; [OFL 1.1](fonts/Ribes-OFL.txt) |
 | `fonts/Sinistre-Regular.otf` | 10 (Sinistre) | 120,700 | Copyright © 2023 Collletttivo; [OFL 1.1](fonts/Sinistre-OFL.txt) |
@@ -53,8 +54,9 @@ Discord's Nitro display-name styles name a font by id. Bytwina bundles unmodifie
 | `fonts/Orbitron.ttf` | 14 (Orbitron) | 38,576 | Copyright 2018 The Orbitron Project Authors; Reserved Font Name "Orbitron"; [OFL 1.1](fonts/Orbitron-OFL.txt) |
 | `fonts/NewRocker-Regular.ttf` | 15 (New Rocker) | 173,224 | Copyright (c) 2011 Pablo Impallari; [OFL 1.1](fonts/NewRocker-OFL.txt) |
 | `fonts/Kalam-Regular.ttf` | 16 (Kalam) | 427,360 | Copyright (c) 2014 Indian Type Foundry; [OFL 1.1](fonts/Kalam-OFL.txt) |
+| `fonts/Audiowide-Regular.ttf` | 17 (Hexagon stand-in) | 69,916 | Copyright (c) 2012 Brian J. Bonislawsky DBA Astigmatic (AOETI); Reserved Font Name "Audiowide"; [OFL 1.1](fonts/Audiowide-OFL.txt) |
 
-Downloaded October 15, 2026 from pinned upstream sources. Variable-font filenames are shortened locally; font bytes are unchanged. `Compagnon-OFL.txt` joins the upstream `COPYRIGHT.md` and `LICENSE.txt`.
+Downloaded October 15, 2026 from pinned upstream sources; the Néo-Castel and Hexagon stand-ins were downloaded November 14, 2026. Variable-font filenames are shortened locally; font bytes are unchanged. `Compagnon-OFL.txt` joins the upstream `COPYRIGHT.md` and `LICENSE.txt`.
 
 - [Bangers](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/bangers/Bangers-Regular.ttf), [license](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/bangers/OFL.txt). SHA-256: `4160a7311de9342674cce9160cde9fcbb30f48190397d86ff1b70b455af65824`.
 - [BioRhyme](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/biorhyme/BioRhyme%5Bwdth%2Cwght%5D.ttf), [license](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/biorhyme/OFL.txt). SHA-256: `3ef9bcf73838d59683b4144ddd4687bc9023340ee8e2bec33bc7b3cead65c9f7`.
@@ -70,8 +72,10 @@ Downloaded October 15, 2026 from pinned upstream sources. Variable-font filename
 - [Orbitron](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/orbitron/Orbitron%5Bwght%5D.ttf), [license](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/orbitron/OFL.txt). SHA-256: `f42db2dd16e642258e35782916eceb1dcdbea06fb958d77ad71dc5963587e8fd`.
 - [New Rocker](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/newrocker/NewRocker-Regular.ttf), [license](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/newrocker/OFL.txt). SHA-256: `28a499ce5b8bcf0652f8b2e25135183eaddf0c3c8c3e251259b075c71d1ef14c`.
 - [Kalam](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/kalam/Kalam-Regular.ttf), [license](https://github.com/google/fonts/blob/b7c8331cf620346575487ef8db0e2c729f014675/ofl/kalam/OFL.txt). SHA-256: `57cecb63d4608019371954274ae1d8c397764debd5b19d4a33c1efa4dc923c0b`.
+- [Bodoni Moda](https://github.com/google/fonts/tree/main/ofl/bodonimoda), [license](https://github.com/google/fonts/blob/main/ofl/bodonimoda/OFL.txt). Variable face downloaded November 14, 2026 and stored as `BodoniModa.ttf`; bytes unchanged. SHA-256: `550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf`.
+- [Audiowide](https://github.com/google/fonts/blob/main/ofl/audiowide/Audiowide-Regular.ttf), [license](https://github.com/google/fonts/blob/main/ofl/audiowide/OFL.txt). Downloaded November 14, 2026; bytes unchanged. SHA-256: `c7c0f2b0f6fad8c623e31772ce79f94a4edb9321ffce9fce978ea892d20ae730`.
 
-The 14 display-name faces total **3,493,132 bytes (3.33 MiB)**, asserted below 4 MiB by `cargo test -p ui name_fonts`.
+The 16 display-name faces total **3,725,152 bytes (3.55 MiB)**, asserted below 4 MiB by `cargo test -p ui name_fonts`.
 
 ## Icons
 

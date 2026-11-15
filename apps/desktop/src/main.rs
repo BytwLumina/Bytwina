@@ -4657,7 +4657,7 @@ impl Desktop {
 								.clone()
 								.unwrap_or_else(|| ui::synthetic_own_profile(own));
 							if let Some(changes) = changes {
-								if !changes.valid() {
+								if !changes.valid() || changes.nick.is_some() {
 									return Err(Failure::Capacity);
 								}
 								if let Some(name) = changes.global_name {
@@ -4745,7 +4745,7 @@ impl Desktop {
 						.as_ref()
 						.filter(|own| own.id == user)
 						.map(|own| {
-							let profile = self
+							let mut profile = self
 								.state
 								.own_profile
 								.data
@@ -4756,14 +4756,41 @@ impl Desktop {
 								.as_ref()
 								.is_none_or(|member| member.guild != guild)
 							{
-								return Err(Failure::Protocol);
+								profile.guild =
+									ui::synthetic_server_profile(own, guild).guild.take();
 							}
 							if let Some(changes) = changes {
 								if !changes.valid()
 									|| changes.global_name.is_some()
-									|| changes.avatar.is_some()
+									|| changes.accent_color.is_some()
+									|| changes.theme_colors.is_some()
+									|| changes.avatar_decoration_sku.is_some()
+									|| changes.nameplate_sku.is_some()
+									|| changes.display_name_style.is_some()
+									|| changes.profile_effect_sku.is_some()
+									|| changes.collectibles_sku_ids.is_some()
 								{
 									return Err(Failure::Capacity);
+								}
+								let Some(member) = profile.guild.as_mut() else {
+									return Err(Failure::Protocol);
+								};
+								if let Some(nick) = changes.nick {
+									member.nick = nick;
+								}
+								if let Some(bio) = changes.bio {
+									member.bio = bio;
+								}
+								if let Some(pronouns) = changes.pronouns {
+									member.pronouns = pronouns;
+								}
+								if let Some(avatar) = changes.avatar {
+									member.avatar =
+										avatar.map(|_| "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into());
+								}
+								if let Some(banner) = changes.banner {
+									member.banner =
+										banner.map(|_| "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".into());
 								}
 							}
 							Ok(Box::new(profile))

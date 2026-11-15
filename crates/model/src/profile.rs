@@ -17,6 +17,8 @@ pub const MAX_PROFILE_BANNER_URI: usize = 22 + 4 * (1024_usize * 1024).div_ceil(
 #[derive(Clone, Default, PartialEq, Eq)]
 pub struct ProfileEdit {
 	pub global_name: Option<Option<String>>,
+	/// Server nickname; nested `None` clears it. Only the guild endpoint accepts it.
+	pub nick: Option<Option<String>>,
 	pub bio: Option<String>,
 	pub pronouns: Option<String>,
 	pub accent_color: Option<Option<u32>>,
@@ -42,6 +44,7 @@ impl ProfileEdit {
 	fn text_bytes(&self) -> usize {
 		size_of::<Self>()
 			+ self.global_name.as_ref().map_or(0, bytes)
+			+ self.nick.as_ref().map_or(0, bytes)
 			+ bytes(&self.bio)
 			+ bytes(&self.pronouns)
 	}
@@ -98,6 +101,10 @@ impl ProfileEdit {
 					&& skus.iter().all(|sku| sku.0 != 0)
 					&& (0..skus.len()).all(|index| !skus[..index].contains(&skus[index]))
 			}) && self.global_name.as_ref().is_none_or(|name| {
+			name.as_ref().is_none_or(|name| {
+				!name.trim().is_empty() && text(name, MAX_PROFILE_NAME_CHARS, false)
+			})
+		}) && self.nick.as_ref().is_none_or(|name| {
 			name.as_ref().is_none_or(|name| {
 				!name.trim().is_empty() && text(name, MAX_PROFILE_NAME_CHARS, false)
 			})
@@ -182,6 +189,11 @@ mod edit_tests {
 		edit.global_name = Some(Some(" ".into()));
 		assert!(!edit.valid());
 		edit.global_name = None;
+		edit.nick = Some(Some("🦀".repeat(MAX_PROFILE_NAME_CHARS + 1)));
+		assert!(!edit.valid());
+		edit.nick = Some(Some("server name".into()));
+		assert!(edit.valid());
+		edit.nick = None;
 		edit.accent_color = Some(Some(0x100_0000));
 		assert!(!edit.valid());
 		edit.accent_color = None;

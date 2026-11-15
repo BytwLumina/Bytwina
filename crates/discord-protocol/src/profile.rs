@@ -27,7 +27,9 @@ pub fn image_data_uri(png: &[u8], max_png: usize) -> Option<String> {
 
 /// Unofficial current-user PATCH fields; omit untouched fields, retain explicit nulls.
 pub fn encode_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, DecodeError> {
-	if !changes.valid() {
+	// The account endpoint does not accept a server nickname; only the guild editor may
+	// carry one, and silently dropping it would look like a successful save.
+	if !changes.valid() || changes.nick.is_some() {
 		return Err(DecodeError);
 	}
 	let mut fields = serde_json::Map::new();
@@ -123,6 +125,40 @@ pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_jso
 		fields.insert("display_name_styles".into(), value);
 	}
 	(!fields.is_empty()).then_some(serde_json::Value::Object(fields))
+}
+
+/// The guild-scoped group: a server profile owns its nickname, picture, banner, bio and
+/// pronouns; account-only fields (display name, decorations, name style) must not travel here.
+pub fn encode_guild_edit(changes: &model::ProfileEdit) -> Result<serde_json::Value, DecodeError> {
+	if !changes.valid()
+		|| changes.global_name.is_some()
+		|| changes.accent_color.is_some()
+		|| changes.theme_colors.is_some()
+		|| changes.avatar_decoration_sku.is_some()
+		|| changes.nameplate_sku.is_some()
+		|| changes.display_name_style.is_some()
+		|| changes.profile_effect_sku.is_some()
+		|| changes.collectibles_sku_ids.is_some()
+	{
+		return Err(DecodeError);
+	}
+	let mut fields = serde_json::Map::new();
+	if let Some(nick) = &changes.nick {
+		fields.insert("nick".into(), serde_json::json!(nick));
+	}
+	if let Some(bio) = &changes.bio {
+		fields.insert("bio".into(), serde_json::json!(bio));
+	}
+	if let Some(pronouns) = &changes.pronouns {
+		fields.insert("pronouns".into(), serde_json::json!(pronouns));
+	}
+	if let Some(avatar) = &changes.avatar {
+		fields.insert("avatar".into(), serde_json::json!(avatar));
+	}
+	if let Some(banner) = &changes.banner {
+		fields.insert("banner".into(), serde_json::json!(banner));
+	}
+	Ok(serde_json::Value::Object(fields))
 }
 #[derive(Deserialize)]
 struct ProfileDto {
@@ -682,6 +718,52 @@ mod tests {
 			metadata["display_name_styles"]["colors"],
 			json!([1, 2, 3, 4, 5])
 		);
+	}
+	#[test]
+	fn guild_edits_carry_only_server_scoped_fields() {
+		let changes = model::ProfileEdit {
+			nick: Some(Some("server name".into())),
+			bio: Some("hello".into()),
+			pronouns: Some(String::new()),
+			avatar: Some(None),
+			banner: Some(None),
+			..Default::default()
+		};
+		assert_eq!(
+			encode_guild_edit(&changes).unwrap(),
+			json!({
+				"nick": "server name",
+				"bio": "hello",
+				"pronouns": "",
+				"avatar": null,
+				"banner": null
+			})
+		);
+		// Account-only fields are rejected rather than silently dropped.
+		for account_only in [
+			model::ProfileEdit {
+				global_name: Some(None),
+				..Default::default()
+			},
+			model::ProfileEdit {
+				accent_color: Some(None),
+				..Default::default()
+			},
+			model::ProfileEdit {
+				theme_colors: Some(None),
+				..Default::default()
+			},
+			model::ProfileEdit {
+				display_name_style: Some(None),
+				..Default::default()
+			},
+			model::ProfileEdit {
+				collectibles_sku_ids: Some(vec![]),
+				..Default::default()
+			},
+		] {
+			assert!(encode_guild_edit(&account_only).is_err());
+		}
 	}
 	#[test]
 	fn partial_profiles_preserve_identity_and_reject_malformed_lists() {

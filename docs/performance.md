@@ -868,7 +868,8 @@ size is `zstd -19` of the executable alone.
 | Staged `dist` payload bytes (no archives) | 92,445,973 | 96,065,437 | +3,619,464 (+3.92%) |
 | Executable, `zstd -19` bytes | 42,744,679 | 44,296,091 | +1,551,412 (+3.63%) |
 
-The growth is the 14 embedded display-name fonts (3,493,132 bytes) and their license texts.
+The growth is the 14 embedded display-name fonts (3,493,132 bytes) and their license texts; the later
+Néo-Castel and Hexagon stand-ins add 232,020 bytes, bringing the set to 16 faces and 3,725,152 bytes.
 The faces are embedded but parsed only when a visible styled name first needs one; with name
 styles off (the default) none is parsed. CPU, process memory and frame timings were not
 sampled, and no runtime improvement is claimed.

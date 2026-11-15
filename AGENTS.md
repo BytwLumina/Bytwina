@@ -655,11 +655,11 @@ Changing any of these without updating the test breaks CI:
 - Windows binaries are unsigned: SmartScreen warns, users choose "More info → Run anyway".
 - Several protocol claims in `docs/discord-compatibility.md` are explicitly unverified; do not
   promote them to verified without evidence.
-- The emoji picker lists one tile per base emoji and expands skin-tone variants on search, but has
-  no tone chooser (Discord's `emoji_tone`) and no category jump bar; the bundled CLDR order allows
-  one without new data.
-- Name styles cover 14 of Discord's fonts (ids 1-6, 8-10, 12-16): Néo-Castel (7) and Hexagon (17)
-  have no identified source and Default (11) falls back to the interface font.
+- The emoji picker chooses a default skin tone and pins a CLDR category above the grid; the
+  category controls filter rather than scroll to a section, and search still lists every tone
+  variant for an explicit pick.
+- Name styles cover all Discord font ids except Default (11): Néo-Castel (7) and Hexagon (17) use
+  OFL stand-ins because the originals have no identified source.
 - Badges beside a message author or in a member row appear only for profiles already cached; a
   member who was never opened shows none.
 - `apps/desktop/src/screen.rs` still holds ~28 hardcoded English screen-share strings; the `ui` crate

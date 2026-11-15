@@ -240,11 +240,12 @@ establish it.
   Gradient effects spread every colour evenly across the name.
   Effects 1–8 (solid, gradient, neon, toon, pop, glow, prism, gummy) are drawn as still
   approximations: gradients across the name, and halo, outline or shadow layers behind it.
-  Discord's animations are not reproduced. Fonts 1–16 except 7 use bundled OFL faces with
-  the same family names (see `assets/README.md`); Néo-Castel (7), Hexagon (17), Default (11)
-  and unknown ids keep the interface font. The bundled files may differ from the builds
-  Discord serves. Chat, member and search rows show the colours and effect while the row is
-  hovered; profile cards and the account panel always show them.
+  Discord's animations are not reproduced. Fonts 1–17 except 11 use bundled OFL faces with
+  the same family names (see `assets/README.md`); Néo-Castel (7) and Hexagon (17) use OFL
+  stand-ins because the originals are unavailable, Default (11) and unknown ids keep the
+  interface font. The bundled files may differ from the builds Discord serves. Chat, member
+  and search rows show the colours and effect while the row is hovered; profile cards and
+  the account panel always show them.
 - **Profile effects and frames:** profile responses list them in `user_profile` and
   `guild_member_profile` `collectibles` (type 1 = effect, 3 = frame). The older
   `profile_effect.id` is accepted as the effect SKU, and a server profile's own values

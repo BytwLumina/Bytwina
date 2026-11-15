@@ -174,19 +174,23 @@ impl DiscordApi {
 		if let Some(changes) = &changes {
 			if !changes.valid()
 				|| changes.global_name.is_some()
-				|| changes.avatar.is_some()
+				|| changes.accent_color.is_some()
+				|| changes.theme_colors.is_some()
 				|| changes.avatar_decoration_sku.is_some()
 				|| changes.nameplate_sku.is_some()
 				|| changes.display_name_style.is_some()
+				|| changes.profile_effect_sku.is_some()
+				|| changes.collectibles_sku_ids.is_some()
 			{
 				return Err(Failure::Protocol);
 			}
-			if let Some(metadata) = profile::encode_profile_metadata(changes) {
+			let body = profile::encode_guild_edit(changes).map_err(|_| Failure::Protocol)?;
+			if body.as_object().is_some_and(|fields| !fields.is_empty()) {
 				let bytes = zeroize::Zeroizing::new(
 					self.request_limited(
 						Method::PATCH,
 						&format!("/guilds/{guild}/profile/@me"),
-						Some(metadata),
+						Some(body),
 						profile::MAX_PROFILE_WIRE,
 					)
 					.await?,
@@ -206,14 +210,41 @@ impl DiscordApi {
 			.await?;
 		let saved =
 			profile::decode_profile(&bytes, Some(guild), false).map_err(|_| Failure::Protocol)?;
-		if saved.user.id != user
-			|| saved
-				.guild
-				.as_ref()
-				.is_none_or(|profile| profile.guild != guild)
-		{
+		let Some(member) = saved
+			.guild
+			.as_ref()
+			.filter(|profile| profile.guild == guild)
+		else {
 			return Err(Failure::ProtocolAt(
 				"Server profile response was not for the requested guild",
+			));
+		};
+		if saved.user.id != user {
+			return Err(Failure::ProtocolAt(
+				"Server profile response was not for the requested account",
+			));
+		}
+		if let Some(changes) = &changes
+			&& (changes
+				.nick
+				.as_ref()
+				.is_some_and(|nick| *nick != member.nick)
+				|| changes.bio.as_ref().is_some_and(|bio| *bio != member.bio)
+				|| changes
+					.pronouns
+					.as_ref()
+					.is_some_and(|pronouns| *pronouns != member.pronouns)
+				|| changes
+					.avatar
+					.as_ref()
+					.is_some_and(|avatar| avatar.is_some() != member.avatar.is_some())
+				|| changes
+					.banner
+					.as_ref()
+					.is_some_and(|banner| banner.is_some() != member.banner.is_some()))
+		{
+			return Err(Failure::ProtocolAt(
+				"Server profile changes were not confirmed; reload before retrying",
 			));
 		}
 		Ok(Box::new(saved))
