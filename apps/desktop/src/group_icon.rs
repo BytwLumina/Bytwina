@@ -15,6 +15,40 @@ use std::{
 type Scope = (u64, Id, u64);
 type Selected = Result<Option<(String, egui::ColorImage)>, &'static str>;
 const MAX_INPUT: usize = 8 * 1024 * 1024;
+
+/// What one picker produces: the longest output edge, whether the source is centre-cropped to a
+/// square, and the PNG budget for the data URI it builds.
+#[derive(Clone, Copy)]
+pub struct Output {
+	pub edge: u32,
+	pub square: bool,
+	pub png_bytes: usize,
+}
+impl Output {
+	/// Square icon at `edge` pixels, within the shared icon budget.
+	pub const fn icon(edge: u32) -> Self {
+		Self {
+			edge,
+			square: true,
+			png_bytes: 256 * 1024,
+		}
+	}
+	/// Artwork that keeps its own aspect, such as an emoji or a profile banner.
+	pub const fn wide(edge: u32) -> Self {
+		Self {
+			edge,
+			square: false,
+			png_bytes: 256 * 1024,
+		}
+	}
+	/// A profile banner is 3:1 and detailed, so it keeps its aspect with a larger budget.
+	pub const BANNER: Self = Self {
+		edge: 512,
+		square: false,
+		png_bytes: 1024 * 1024,
+	};
+}
+
 struct Choosing {
 	scope: Scope,
 	result: mpsc::Receiver<Selected>,
@@ -32,7 +66,7 @@ impl GroupIcon {
 		context: &egui::Context,
 		parent: Arc<winit::window::Window>,
 		title: &'static str,
-		output_edge: u32,
+		output: Output,
 	) -> Result<(), &'static str> {
 		if self.choosing.is_some() {
 			return Err("Close the previous image picker first");
@@ -50,7 +84,7 @@ impl GroupIcon {
 						if decode_flag.load(Ordering::Acquire) {
 							Ok(None)
 						} else {
-							read(&path, output_edge).map(Some)
+							read(&path, output).map(Some)
 						}
 					})
 					.await
@@ -111,7 +145,7 @@ impl Drop for GroupIcon {
 	}
 }
 
-fn read(path: &Path, output_edge: u32) -> Result<(String, egui::ColorImage), &'static str> {
+fn read(path: &Path, output: Output) -> Result<(String, egui::ColorImage), &'static str> {
 	let metadata =
 		std::fs::symlink_metadata(path).map_err(|_| "Could not open the chosen image")?;
 	if !metadata.is_file() || metadata.file_type().is_symlink() {
@@ -125,21 +159,25 @@ fn read(path: &Path, output_edge: u32) -> Result<(String, egui::ColorImage), &'s
 	file.take(MAX_INPUT as u64 + 1)
 		.read_to_end(&mut bytes)
 		.map_err(|_| "Could not read the chosen image")?;
-	decode(&bytes, output_edge)
+	decode(&bytes, output)
 }
 
-fn decode(bytes: &[u8], output_edge: u32) -> Result<(String, egui::ColorImage), &'static str> {
-	decode_image(bytes, output_edge, true)
+fn decode(bytes: &[u8], output: Output) -> Result<(String, egui::ColorImage), &'static str> {
+	decode_image(bytes, output)
 }
 
 pub(crate) fn decode_image(
 	bytes: &[u8],
-	output_edge: u32,
-	square: bool,
+	output: Output,
 ) -> Result<(String, egui::ColorImage), &'static str> {
-	let (png, preview) = decode_png(bytes, output_edge, square, 256 * 1024)?;
-	let uri = discord_protocol::group_actions::icon_data_uri(&png)
-		.ok_or("Prepared icon exceeds 256 KB; choose a simpler image")?;
+	let (png, preview) = decode_png(bytes, output.edge, output.square, output.png_bytes)?;
+	// Icons keep the icon boundary's square rule; wide artwork such as a banner may be larger.
+	let uri = if output.square {
+		discord_protocol::group_actions::icon_data_uri(&png)
+	} else {
+		discord_protocol::profile::image_data_uri(&png, output.png_bytes)
+	}
+	.ok_or("Prepared image is too large; choose a simpler image")?;
 	Ok((uri, preview))
 }
 
@@ -207,16 +245,16 @@ mod tests {
 		))
 		.write_to(&mut png, image::ImageFormat::Png)
 		.unwrap();
-		let (uri, preview) = decode(png.get_ref(), 256).unwrap();
+		let (uri, preview) = decode(png.get_ref(), Output::icon(256)).unwrap();
 		assert_eq!(preview.size, [256, 256]);
 		assert!(uri.starts_with("data:image/png;base64,"));
-		assert!(decode(b"invalid", 256).is_err());
-		assert!(decode(&vec![0; MAX_INPUT + 1], 256).is_err());
+		assert!(decode(b"invalid", Output::icon(256)).is_err());
+		assert!(decode(&vec![0; MAX_INPUT + 1], Output::icon(256)).is_err());
 		png = Cursor::new(Vec::new());
 		image::DynamicImage::new_rgba8(4097, 1)
 			.write_to(&mut png, image::ImageFormat::Png)
 			.unwrap();
-		assert!(decode(png.get_ref(), 256).is_err());
+		assert!(decode(png.get_ref(), Output::icon(256)).is_err());
 	}
 	#[test]
 	fn stale_picker_retains_single_slot_until_completion_and_discards_result() {

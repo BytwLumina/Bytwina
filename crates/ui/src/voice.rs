@@ -2184,7 +2184,10 @@ impl MessagingUi {
 		if let Some(started) = switch.confirmed_at {
 			if state.voice.active.is_some() {
 				self.voice_switch = None;
-			} else if state.voice.departed == Some(switch.from) && self.voice_switch_ready {
+			} else if (state.voice.departed == Some(switch.from)
+				|| state.voice.abandoned == Some(switch.from))
+				&& self.voice_switch_ready
+			{
 				let switch = self.voice_switch.take().expect("pending switch");
 				let (muted, deafened) = switch
 					.audio
@@ -6039,11 +6042,9 @@ mod tests {
 		assert!(messaging.call_unavailable(&state, Id(25)).is_some());
 		state.demo = false;
 		messaging.voice_available = false;
-		assert!(
-			messaging
-				.call_unavailable(&state, Id(25))
-				.unwrap()
-				.contains("Voice is unavailable")
+		assert_eq!(
+			messaging.call_unavailable(&state, Id(25)),
+			Some("voice-call-unavailable-voice-is-unavailable-in-this-session")
 		);
 	}
 
@@ -6247,11 +6248,9 @@ mod tests {
 			"Incoming calls require an explicit answer"
 		);
 		messaging.voice_available = false;
-		assert!(
-			messaging
-				.call_unavailable(&state, Id(1))
-				.unwrap()
-				.contains("Voice is unavailable")
+		assert_eq!(
+			messaging.call_unavailable(&state, Id(1)),
+			Some("voice-call-unavailable-voice-is-unavailable-in-this-session")
 		);
 		messaging.voice_available = true;
 		assert!(messaging.call_unavailable(&state, Id(1)).is_none());

@@ -189,14 +189,15 @@ impl Nameplate {
 pub struct NameStyle {
 	pub font: u32,
 	pub effect: NameEffect,
-	/// 0xRRGGBB colours, at most [`NameStyle::MAX_COLORS`].
+	/// 0xRRGGBB colours, at most [`NameStyle::MAX_COLORS`]. Solid styles may omit a colour;
+	/// Discord uses that form for the default text colour.
 	pub colors: Vec<u32>,
 }
 impl NameStyle {
 	/// Discord accepts between one and five colors depending on the effect.
 	pub const MAX_COLORS: usize = 5;
 	pub fn valid(&self) -> bool {
-		!self.colors.is_empty()
+		(self.effect == NameEffect::Solid || !self.colors.is_empty())
 			&& self.colors.len() <= Self::MAX_COLORS
 			&& self.colors.iter().all(|color| *color <= 0xff_ffff)
 	}
@@ -269,6 +270,7 @@ impl Cosmetics {
 	pub fn valid(&self) -> bool {
 		self.decoration.as_ref().is_none_or(AvatarDecoration::valid)
 			&& self.nameplate.as_ref().is_none_or(Nameplate::valid)
+			&& self.name_style.as_ref().is_none_or(NameStyle::valid)
 	}
 }
 
@@ -613,5 +615,25 @@ mod tests {
 		};
 		assert!(decoration.valid() && decoration.animated());
 		assert!(decoration.active(99) && !decoration.active(100));
+		let solid_default = NameStyle {
+			font: 0,
+			effect: NameEffect::Solid,
+			colors: Vec::new(),
+		};
+		assert!(solid_default.valid());
+		let prism = NameStyle {
+			font: 1,
+			effect: NameEffect::Prism,
+			colors: vec![1, 2, 3, 4, 5],
+		};
+		assert!(prism.valid());
+		assert!(
+			!NameStyle {
+				font: 1,
+				effect: NameEffect::Neon,
+				colors: Vec::new(),
+			}
+			.valid()
+		);
 	}
 }

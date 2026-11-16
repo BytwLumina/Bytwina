@@ -401,9 +401,9 @@ const INTER_SEMIBOLD: &[u8] = include_bytes!("../../../assets/fonts/Inter-SemiBo
 
 /// Discord display-name fonts by `display_name_styles.font_id`. Each is installed the first time
 /// a styled name needs it, so sessions with name styles off never parse them. Néo-Castel (7) is
-/// sold only through a checkout and Hexagon (17) has no identified source; both, Default (11)
-/// and unknown ids keep the interface font.
-const NAME_FONTS: [(u32, &str, &[u8]); 14] = [
+/// sold only through a checkout and Hexagon (17) has no identified source, so those two use OFL
+/// stand-ins chosen for a similar voice. Default (11) and unknown ids keep the interface font.
+const NAME_FONTS: [(u32, &str, &[u8]); 16] = [
 	(
 		1,
 		"Bytwina Name Bangers",
@@ -433,6 +433,11 @@ const NAME_FONTS: [(u32, &str, &[u8]); 14] = [
 		6,
 		"Bytwina Name MuseoModerno",
 		include_bytes!("../../../assets/fonts/MuseoModerno.ttf"),
+	),
+	(
+		7,
+		"Bytwina Name Bodoni Moda",
+		include_bytes!("../../../assets/fonts/BodoniModa.ttf"),
 	),
 	(
 		8,
@@ -473,6 +478,11 @@ const NAME_FONTS: [(u32, &str, &[u8]); 14] = [
 		16,
 		"Bytwina Name Kalam",
 		include_bytes!("../../../assets/fonts/Kalam-Regular.ttf"),
+	),
+	(
+		17,
+		"Bytwina Name Audiowide",
+		include_bytes!("../../../assets/fonts/Audiowide-Regular.ttf"),
 	),
 ];
 
@@ -800,7 +810,7 @@ mod tests {
 		for (id, name, data) in NAME_FONTS {
 			let face = skrifa::FontRef::new(data).unwrap_or_else(|_| panic!("{name}"));
 			assert!(face.charmap().map('A').is_some(), "{name} lacks Latin");
-			assert!(!matches!(id, 0 | 7 | 11 | 17));
+			assert!(!matches!(id, 0 | 11));
 		}
 		let ctx = Context::default();
 		install(&ctx);

@@ -4657,7 +4657,7 @@ impl Desktop {
 								.clone()
 								.unwrap_or_else(|| ui::synthetic_own_profile(own));
 							if let Some(changes) = changes {
-								if !changes.valid() {
+								if !changes.valid() || changes.nick.is_some() {
 									return Err(Failure::Capacity);
 								}
 								if let Some(name) = changes.global_name {
@@ -4678,6 +4678,50 @@ impl Desktop {
 									// Synthetic hash: the fixture never uploads or fetches images.
 									profile.user.avatar = avatar
 										.map(|_| "0123456789abcdef0123456789abcdef".to_owned());
+								}
+								if let Some(sku) = changes.avatar_decoration_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.decoration = sku.and_then(|sku| {
+										let mut decoration =
+											test_support::synthetic_cosmetics().decoration?;
+										decoration.sku = sku;
+										Some(decoration)
+									});
+								}
+								if let Some(sku) = changes.nameplate_sku {
+									let cosmetics =
+										profile.user.cosmetics.get_or_insert_with(Default::default);
+									cosmetics.nameplate = sku.and_then(|sku| {
+										let mut nameplate =
+											test_support::synthetic_cosmetics().nameplate?;
+										nameplate.sku = sku;
+										Some(nameplate)
+									});
+								}
+								if let Some(sku) = changes.profile_effect_sku {
+									profile.effect_sku = sku;
+									profile.effect = sku.and_then(|sku| {
+										let mut effect = ui::synthetic_own_profile(own).effect?;
+										effect.sku = sku;
+										Some(effect)
+									});
+								}
+								if let Some(skus) = &changes.collectibles_sku_ids {
+									// The demo has no product types, so the draft appends the
+									// pending frame last; that is the entry this arm adopts.
+									profile.collectible_skus.clone_from(skus);
+									let frame = skus
+										.iter()
+										.rev()
+										.copied()
+										.find(|sku| Some(*sku) != profile.effect_sku);
+									profile.frame_sku = frame;
+									profile.frame = frame.and_then(|sku| {
+										let mut frame = ui::synthetic_own_profile(own).frame?;
+										frame.sku = sku;
+										Some(frame)
+									});
 								}
 							}
 							Ok(Box::new(profile))
@@ -4701,7 +4745,7 @@ impl Desktop {
 						.as_ref()
 						.filter(|own| own.id == user)
 						.map(|own| {
-							let profile = self
+							let mut profile = self
 								.state
 								.own_profile
 								.data
@@ -4712,14 +4756,41 @@ impl Desktop {
 								.as_ref()
 								.is_none_or(|member| member.guild != guild)
 							{
-								return Err(Failure::Protocol);
+								profile.guild =
+									ui::synthetic_server_profile(own, guild).guild.take();
 							}
 							if let Some(changes) = changes {
 								if !changes.valid()
 									|| changes.global_name.is_some()
-									|| changes.avatar.is_some()
+									|| changes.accent_color.is_some()
+									|| changes.theme_colors.is_some()
+									|| changes.avatar_decoration_sku.is_some()
+									|| changes.nameplate_sku.is_some()
+									|| changes.display_name_style.is_some()
+									|| changes.profile_effect_sku.is_some()
+									|| changes.collectibles_sku_ids.is_some()
 								{
 									return Err(Failure::Capacity);
+								}
+								let Some(member) = profile.guild.as_mut() else {
+									return Err(Failure::Protocol);
+								};
+								if let Some(nick) = changes.nick {
+									member.nick = nick;
+								}
+								if let Some(bio) = changes.bio {
+									member.bio = bio;
+								}
+								if let Some(pronouns) = changes.pronouns {
+									member.pronouns = pronouns;
+								}
+								if let Some(avatar) = changes.avatar {
+									member.avatar =
+										avatar.map(|_| "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into());
+								}
+								if let Some(banner) = changes.banner {
+									member.banner =
+										banner.map(|_| "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".into());
 								}
 							}
 							Ok(Box::new(profile))
@@ -7085,6 +7156,16 @@ impl eframe::App for Desktop {
 						.is_some_and(|own| own.id == scope.1)
 				{
 					Err("Sign in before changing your profile picture")
+				} else if self.messaging.profile_picture_is_banner() {
+					// A banner keeps its 3:1 aspect; cropping it square is what made it look wrong.
+					self.profile_avatar.start(
+						scope,
+						self.runtime.handle(),
+						&ctx,
+						self.window.clone(),
+						"Choose profile banner",
+						group_icon::Output::BANNER,
+					)
 				} else {
 					self.profile_avatar.start(
 						scope,
@@ -7092,7 +7173,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose profile picture",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7111,7 +7192,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose group icon",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7128,7 +7209,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose server icon",
-						256,
+						group_icon::Output::icon(256),
 					)
 				};
 				if let Err(error) = result {
@@ -7148,7 +7229,7 @@ impl eframe::App for Desktop {
 						&ctx,
 						self.window.clone(),
 						"Choose role icon",
-						128,
+						group_icon::Output::icon(128),
 					)
 				};
 				match result {
@@ -7169,7 +7250,7 @@ impl eframe::App for Desktop {
 							&ctx,
 							self.window.clone(),
 							"Choose server icon",
-							512,
+							group_icon::Output::icon(512),
 						)
 					};
 				if let Err(error) = result {

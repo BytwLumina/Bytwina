@@ -1824,6 +1824,12 @@ impl Picker {
 										ui.add_space(12.0);
 									}
 									let searching = !self.query.trim().is_empty();
+									// Discord's picker keeps the tone and category controls above the
+									// grid; browsing without them hides half the catalog.
+									if !searching && self.server.is_none() {
+										self.unicode_bar(ui);
+										ui.add_space(6.0);
+									}
 									let guild = self
 										.server
 										.and_then(|id| state.guilds.iter().find(|g| g.id == id));
@@ -2918,11 +2924,16 @@ mod tests {
 		assert_ne!(deep, thumb);
 		assert!(standard()[deep].0.contains('\u{1f3ff}'));
 		// A base with no dark variant falls back to itself rather than an invented sequence.
+		// Presentation selectors may differ between the catalog base and its variant.
+		let without_selector =
+			|index: usize| base_emoji(standard()[index].0).replace('\u{fe0f}', "");
 		for base in browse_indices() {
 			let chosen = preferred_variant(*base, 5);
 			assert_eq!(
-				base_emoji(standard()[chosen].0),
-				base_emoji(standard()[*base].0)
+				without_selector(chosen),
+				without_selector(*base),
+				"{}",
+				standard()[*base].0
 			);
 		}
 	}

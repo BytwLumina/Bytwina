@@ -16,6 +16,8 @@ import subprocess
 import sys
 import urllib.request
 
+from PIL import Image
+
 VERSION = "2.1.1"  # @phosphor-icons/core on npm, MIT
 BASE = f"https://cdn.jsdelivr.net/npm/@phosphor-icons/core@{VERSION}"
 COLUMNS, CELL, PAD = 8, 64, 4
@@ -24,6 +26,11 @@ GLYPH = CELL - 2 * PAD
 # Repository-local artwork, rasterized from the repository instead of an upstream package.
 # `assets/icons/thread.svg` is the thread glyph; it is listed inline below.
 BRAND_MARK = "repo:assets/brand/bytwina-mark.svg"
+# The brand cell is not a Phosphor glyph: it is pasted from the mark art after rasterizing, so
+# the cell matches the shipped application icon instead of a hand-drawn approximation.
+BRAND_CELL = "bytwina-mark"
+BRAND_MONO = "assets/brand/bytwina-mark-mono.png"
+BRAND_MONO_SHA256 = "a89cbebd82af8c9b96aa9027f0a07584c1a93a2762c2eb49e9d77f853f23eddb"
 
 # name, upstream asset, SHA-256 of the unmodified SVG file.
 ICONS = [
@@ -85,7 +92,7 @@ ICONS = [
     ("copy", "bold/copy-bold.svg", "204e84365593c418c71d9ce0674be3dd3e5ff13d0dc13e1f728249ef9571bf9e"),
     ("seal-check", "fill/seal-check-fill.svg", "27702a62622ac4156d2a18b10fc7c526b3b2b9f782741e2cb07aea6964d71132"),
     ("calendar-blank", "fill/calendar-blank-fill.svg", "405596825bf3705baa7d289ed1242106fded80e34967927549a0413f4303a0ac"),
-    ("bytwina-mark", BRAND_MARK, "c9af1d0381339b62a0639724a9d4f6ca8ab289ac415e8ced986e81dd6e8fc9e6"),
+    ("bytwina-mark", BRAND_MARK, "535d9a05bf0aa41672ab619d71879459614aaadfde3727af2f3cabaef4769dbd"),
     ("file", "fill/file-fill.svg", "d6fe00691e45b5e9b87ccc5a8fc9022485935408167ab1234817915df4fd1ca4"),
     ("file-image", "fill/file-image-fill.svg", "0266eb983ed5cec9152d76691152123b92b2cb84d8c139c37793d0870df3f601"),
     ("file-pdf", "fill/file-pdf-fill.svg", "12622b293b9a1efa1f56969ca74ab88085d388c4be926f81cfcb49406a8da05d"),
@@ -158,6 +165,20 @@ def inner_svg(svg):
     return svg[start:end]
 
 
+def paste_brand(destination, index, root):
+    """Replace the brand cell with the mark art, which is a raster master, not a glyph."""
+    cell = dict(index)[BRAND_CELL]
+    left = (cell % COLUMNS) * CELL
+    top = (cell // COLUMNS) * CELL
+    atlas = Image.open(destination / "atlas.png").convert("RGBA")
+    mark = (
+        Image.open(root / BRAND_MONO).convert("RGBA").resize((GLYPH, GLYPH), Image.LANCZOS)
+    )
+    atlas.paste((0, 0, 0, 0), (left, top, left + CELL, top + CELL))
+    atlas.alpha_composite(mark, (left + PAD, top + PAD))
+    atlas.save(destination / "atlas.png", optimize=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resvg", default="resvg", help="path to the resvg executable")
@@ -165,12 +186,19 @@ def main():
     args = parser.parse_args()
     destination = Path(__file__).resolve().parents[1] / "assets" / "icons"
     destination.mkdir(parents=True, exist_ok=True)
+    root = Path(__file__).resolve().parents[1]
 
     license_text = fetch("LICENSE")
     if args.print_hashes:
         print("LICENSE", hashlib.sha256(license_text).hexdigest())
     elif hashlib.sha256(license_text).hexdigest() != LICENSE_SHA256:
         raise ValueError("LICENSE SHA-256 mismatch")
+
+    mono = (root / BRAND_MONO).read_bytes()
+    if args.print_hashes:
+        print("BRAND MONO", BRAND_MONO, hashlib.sha256(mono).hexdigest())
+    elif hashlib.sha256(mono).hexdigest() != BRAND_MONO_SHA256:
+        raise ValueError(f"{BRAND_MONO} SHA-256 mismatch")
 
     simple_license = fetch("LICENSE.md", SIMPLE_BASE)
     if args.print_hashes:
@@ -191,7 +219,6 @@ def main():
         '<path d="M40 24 L232 216" stroke="#000" stroke-width="44" stroke-linecap="round"/></mask></defs>'
     )
     index = []
-    root = Path(__file__).resolve().parents[1]
     for cell, (name, asset, sha256, simple) in enumerate(sources):
         local = asset.startswith("repo:")
         if local:
@@ -241,6 +268,7 @@ def main():
         subprocess.run(["oxipng", "-o", "max", "--strip", "all", "-q", destination / "atlas.png"], check=True)
     else:
         print("oxipng not found; atlas.png left at resvg compression", file=sys.stderr)
+    paste_brand(destination, index, root)
     (destination / "index.tsv").write_text("".join(f"{name}\t{cell}\n" for name, cell in index), encoding="utf-8")
     (destination / "LICENSE").write_bytes(license_text)
     (destination / "LICENSE-SIMPLE-ICONS").write_bytes(simple_license)

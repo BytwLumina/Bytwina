@@ -64,6 +64,23 @@ fn pointer(pos: egui::Pos2, button: PointerButton, pressed: bool) -> Vec<InputEv
 	]
 }
 
+#[test]
+fn resize_hit_boxes_keep_the_top_edge_and_corner_separate_from_drag() {
+	let rect = egui::Rect::from_min_size(egui::pos2(10.0, 20.0), egui::vec2(800.0, 600.0));
+	let handles = crate::design::resize_handles(rect);
+
+	assert_eq!(handles[0].1, egui::ResizeDirection::NorthWest);
+	assert!(handles[0].0.contains(egui::pos2(10.5, 20.5)));
+	assert_eq!(handles[3].1, egui::ResizeDirection::North);
+	assert_eq!(handles[3].0.top(), rect.top());
+	assert_eq!(handles[3].0.bottom(), rect.top() + 5.0);
+	assert!(
+		!handles[3]
+			.0
+			.contains(egui::pos2(rect.right() - 2.0, rect.top() + 1.0))
+	);
+}
+
 #[cfg(target_os = "windows")]
 #[test]
 fn hidden_title_strip_does_not_start_window_drag() {

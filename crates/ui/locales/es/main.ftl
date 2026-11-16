@@ -1027,7 +1027,6 @@ extensions-ui-toolbar-working-on-your-last-action = Trabajando en tu última acc
 
 ## crates/ui/src/fonts.rs
 # Context: show
-fonts-show-import-font = Importar fuente…
 # Context: show
 fonts-show-inter-default = Inter (predeterminado)
 # Context: show
@@ -4368,6 +4367,22 @@ emoji-picker-popup-stickers = Stickers
 profile-edit-form-display-name = Nombre para mostrar
 profile-edit-form-pronouns = Pronombres
 profile-edit-form-about-me = Sobre mí
+
+profile-edit-form-banner = Banner
+profile-edit-form-new-banner-chosen-save-to-upload-it = Nuevo banner elegido. Guárdalo para subirlo.
+profile-edit-form-your-banner-will-be-removed-when-you-save = Tu banner se eliminará al guardar.
+profile-edit-form-premium-accounts-can-add-a-banner = Las cuentas Premium pueden añadir un banner
+profile-edit-form-decoration = Decoración de avatar
+profile-edit-form-nameplate = Placa de nombre
+profile-edit-form-profile-effect = Efecto de perfil
+profile-edit-form-profile-frame = Marco de perfil
+profile-edit-form-default = Predeterminado
+profile-edit-form-none = Ninguno
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 group-menu-action-saving = Guardando…
 group-menu-action-leaving = Saliendo…
 group-menu-action-save = Guardar
@@ -4515,7 +4530,6 @@ voice-recipient-stop-ringing = Dejar de llamar
 voice-recipient-ringing = Llamando…
 voice-recipient-not-in-call = Fuera de la llamada
 
-
 reconnect-now = Reconectar ahora
 
 voice-call-moved-to-another-client = Se reemplazó la sesión de llamada de este dispositivo
@@ -4599,7 +4613,6 @@ server-emoji-empty-animated = Aún no hay emojis animados
 server-emoji-empty-detail = Suba una imagen para añadir uno. Los GIF se convierten en emojis animados.
 
 server-stickers-empty-detail = Suba una imagen para añadir su primer sticker.
-
 
 screen-macos-system-picker = Elegir con el selector del sistema macOS
 

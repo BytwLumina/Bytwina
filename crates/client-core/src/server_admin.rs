@@ -351,8 +351,42 @@ impl State {
 		roles.sort_by(|(a, _), (b, _)| b.cmp_hierarchy(a));
 		roles
 	}
+	/// Kick, ban and timeout need the permission and a loaded member you outrank. A member
+	/// whose roles are not loaded is refused, since their rank is unknown here.
+	fn can_moderate_member(&self, guild: Id, user: Id, permission: u128) -> bool {
+		self.guild_permission(guild, permission)
+			&& self
+				.loaded_member_roles(guild, user)
+				.is_some_and(|roles| self.outranks_member(guild, user, roles))
+	}
+	/// A member's roles from the settings member page, else the open channel's live rows.
+	fn loaded_member_roles(&self, guild: Id, user: Id) -> Option<&[Id]> {
+		self.admin_member(guild, user)
+			.map(|member| member.roles.as_slice())
+			.or_else(|| self.live_member_role_ids(guild, user))
+	}
+	/// Holds Kick, Ban or Moderate Members. Context-menu moderation uses the administration
+	/// state with these alone, so access cleanup must not treat it as settings-only.
+	pub(crate) fn can_moderate_guild(&self, guild: Id) -> bool {
+		[p::KICK_MEMBERS, p::BAN_MEMBERS, p::MODERATE_MEMBERS]
+			.into_iter()
+			.any(|permission| self.guild_permission(guild, permission))
+	}
+	/// Discord does not time out administrators, whatever their rank.
+	fn can_timeout_guild_member(&self, guild: Id, user: Id) -> bool {
+		self.can_moderate_member(guild, user, p::MODERATE_MEMBERS)
+			&& !self.loaded_member_roles(guild, user).is_some_and(|roles| {
+				self.guild_roles(guild)
+					.unwrap_or_default()
+					.iter()
+					.any(|role| {
+						(role.id == guild || roles.contains(&role.id))
+							&& role.bits & p::ADMINISTRATOR != 0
+					})
+			})
+	}
 	pub fn can_kick_guild_member(&self, guild: Id, user: Id) -> bool {
-		self.guild_permission(guild, p::KICK_MEMBERS) && self.above_admin_member(guild, user)
+		self.can_moderate_member(guild, user, p::KICK_MEMBERS)
 	}
 	pub fn can_edit_guild_nickname(&self, guild: Id, user: Id) -> bool {
 		if self.user.as_ref().is_some_and(|own| own.id == user) {
@@ -445,6 +479,8 @@ impl State {
 			Action::SetRole { user, role, .. } => self.can_edit_member_role(guild, *user, *role),
 			Action::SetNickname { user, .. } => self.can_edit_guild_nickname(guild, *user),
 			Action::Kick { user } => self.can_kick_guild_member(guild, *user),
+			Action::Ban { user, .. } => self.can_moderate_member(guild, *user, p::BAN_MEMBERS),
+			Action::Timeout { user, .. } => self.can_timeout_guild_member(guild, *user),
 			Action::Prune { days, execute } => {
 				self.can_prune_guild(guild)
 					&& (!execute
@@ -641,6 +677,8 @@ impl State {
 					}
 					_ => false,
 				}
+			} else if let Some(permission) = moderation_permission(action) {
+				!self.guild_permission(event.guild, permission)
 			} else {
 				!self.can_open_member_settings(event.guild)
 			}
@@ -767,10 +805,16 @@ impl State {
 				_ => false,
 			},
 			(
-				Some(Action::SetRole { user, .. } | Action::SetNickname { user, .. }),
+				Some(
+					Action::SetRole { user, .. }
+					| Action::SetNickname { user, .. }
+					| Action::Timeout { user, .. },
+				),
 				Outcome::Member(member),
 			) => *user == member.user.id,
-			(Some(Action::Kick { user }), Outcome::Kicked(id)) => user == id,
+			(Some(Action::Kick { user } | Action::Ban { user, .. }), Outcome::Kicked(id)) => {
+				user == id
+			}
 			(Some(action), Outcome::Stickers(page)) if action.sticker() => {
 				page.items
 					.iter()
@@ -995,6 +1039,17 @@ impl State {
 		}
 		self.server_admin.revision = self.server_admin.revision.wrapping_add(1);
 		Ok(())
+	}
+}
+
+/// The permission a member moderation needs. Context menus hold it without Manage Server,
+/// so their results are not tied to the settings member page.
+fn moderation_permission(action: &Action) -> Option<u128> {
+	match action {
+		Action::Kick { .. } => Some(p::KICK_MEMBERS),
+		Action::Ban { .. } => Some(p::BAN_MEMBERS),
+		Action::Timeout { .. } => Some(p::MODERATE_MEMBERS),
+		_ => None,
 	}
 }
 

@@ -4946,8 +4946,14 @@ profile-edit-form-premium-accounts-can-add-a-banner = Tài khoản Premium mới
 profile-edit-form-decoration = Trang trí ảnh đại diện
 profile-edit-form-nameplate = Bảng tên
 profile-edit-form-profile-effect = Hiệu ứng hồ sơ
+profile-edit-form-profile-frame = Khung hồ sơ
 profile-edit-form-default = Mặc định
 profile-edit-form-none = Không dùng
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 
 soundboard-ui-title = Bảng âm thanh
 soundboard-ui-close = Đóng
@@ -5101,7 +5107,7 @@ voice-call-unavailable-waiting-for-the-previous-call-to-disconnect = Đang chờ
 voice-call-unavailable-you-are-already-in-this-call = Bạn đã ở trong cuộc gọi này rồi.
 voice-call-unavailable-joining-this-channel-is-unavailable-with-current-permission-information = Không thể tham gia kênh này với thông tin quyền hiện tại.
 voice-request-call-audio-joining-this-call-is-no-longer-available = Không thể tham gia cuộc gọi này nữa
-voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Đã huỷ chuyển cuộc gọi: cuộc gọi trước chưa ngắt xong. Hãy kết nối lại rồi gọi tiếp.
+voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Hủy chuyển cuộc gọi: cuộc gọi trước chưa ngắt xong. Hãy thử tham gia lại.
 voice-show-call-switch-switch-calls = Chuyển cuộc gọi?
 voice-show-call-switch-you-are-already-in-another-call-leave-it-and-join = Bạn đang ở trong một cuộc gọi khác. Rời cuộc gọi đó và tham gia { $name }?
 voice-show-call-switch-the-selected-channel = kênh đã chọn
@@ -5308,6 +5314,7 @@ extensions-ui-capability-deletedmessages = Giữ tin nhắn đã xoá trong bộ
 lib-status-paste-cancelled-focus-the-message-and-paste-again = Đã huỷ dán; hãy chọn lại ô tin nhắn rồi dán lần nữa
 lib-status-pasted-text-exceeds-the-draft-limit = Văn bản dán vượt giới hạn bản nháp
 lib-status-paste-an-image-with-at-most-4-million-pixels = Hãy dán ảnh có tối đa 4 triệu điểm ảnh
+lib-paste-image-too-large = Hãy dán ảnh có tối đa 16 triệu điểm ảnh, hoặc đính kèm dưới dạng tệp
 lib-status-cancel-the-current-reply-before-restoring-this-message = Hãy huỷ trả lời hiện tại trước khi khôi phục tin nhắn này
 lib-status-text-restored-reselect-the-attachment-before-sending-again = Đã khôi phục văn bản; chọn lại tệp đính kèm trước khi gửi
 lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text = Hãy giữ hoặc xoá bản nháp hiện có trước khi khôi phục văn bản đang chờ
@@ -5489,3 +5496,54 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Tin nhắn đã lưu đã đầy. Xoá bớt một tin trước khi lưu tin mới.
 new-message-too-many = Ngoài cậu, nhóm chỉ bắt đầu với tối đa { $limit } người khác.
+profile-edit-scope-account = Tài khoản của tớ
+profile-edit-scope-server = Hồ sơ máy chủ
+profile-edit-server-choose-a-server = Chọn một máy chủ
+profile-edit-server-description = Những thông tin này chỉ áp dụng cho máy chủ đang chọn.
+profile-edit-server-loading = Đang tải hồ sơ máy chủ…
+profile-edit-server-saving = Đang lưu hồ sơ máy chủ…
+profile-edit-server-saved = Đã lưu hồ sơ máy chủ.
+profile-edit-server-no-servers = Hãy tham gia một máy chủ để chỉnh hồ sơ máy chủ.
+profile-edit-server-select-a-server = Chọn một máy chủ để chỉnh hồ sơ.
+profile-edit-server-avatar = Ảnh đại diện máy chủ
+profile-edit-server-avatar-hint = PNG, JPEG, GIF hoặc WebP tối đa 8 MB; cắt thành hình vuông
+profile-edit-server-avatar-new = Đã chọn ảnh đại diện máy chủ mới; lưu để tải lên
+profile-edit-server-avatar-remove = Ảnh đại diện máy chủ sẽ bị xoá khi cậu lưu
+profile-edit-server-nickname = Biệt danh trong máy chủ
+profile-edit-server-nickname-hint = Để trống để dùng tên hiển thị
+profile-edit-server-pronouns = Đại từ xưng hô trong máy chủ
+profile-edit-server-bio = Giới thiệu trong máy chủ
+profile-edit-server-banner = Ảnh bìa máy chủ
+profile-edit-server-banner-hint = Thêm ảnh bìa chỉ máy chủ này nhìn thấy
+profile-edit-server-banner-new = Đã chọn ảnh bìa máy chủ mới; lưu để tải lên
+profile-edit-server-banner-remove = Ảnh bìa máy chủ sẽ bị xoá khi cậu lưu
+# Context: moderation
+moderation-menu-timeout = Chặn tạm thời { $name }
+# Context: moderation
+moderation-menu-kick = Đuổi { $name }
+# Context: moderation
+moderation-menu-ban = Cấm { $name }
+# Context: moderation
+moderation-timeout-detail = Họ không thể gửi tin nhắn, thả cảm xúc hay tham gia kênh thoại cho đến khi hết thời hạn chặn.
+# Context: moderation
+moderation-kick-detail = Họ có thể quay lại bằng một lời mời mới.
+# Context: moderation
+moderation-ban-detail = Họ không thể quay lại cho đến khi lệnh cấm được gỡ.
+# Context: moderation
+moderation-duration-60-seconds = 60 giây
+# Context: moderation
+moderation-remove-timeout = Gỡ chặn tạm thời
+# Context: moderation
+moderation-delete-history = Xoá lịch sử tin nhắn
+# Context: moderation
+moderation-delete-none = Không xoá tin nào
+# Context: moderation
+moderation-delete-hour = Một giờ trước
+# Context: moderation
+moderation-delete-day = 24 giờ trước
+# Context: moderation
+moderation-delete-week = 7 ngày trước
+# Context: moderation
+moderation-confirm-timeout = Chặn tạm thời
+# Context: moderation
+moderation-confirm-ban = Cấm

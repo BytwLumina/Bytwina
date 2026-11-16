@@ -35,7 +35,8 @@ pub(crate) enum Tab {
 	Pending,
 	Restricted,
 	Add,
-	/// Discord Quests: the account's sponsored quests and their rewards.
+	/// Discord Quests: the account's sponsored quests and their rewards. Discord keeps this out
+	/// of the Friends header, so it opens from the title bar instead.
 	Quests,
 	/// Message bookmarks and reminders.
 	Saved,
@@ -96,6 +97,31 @@ impl Friends {
 	}
 }
 impl MessagingUi {
+	/// Whether the Quests page is the surface on screen right now.
+	pub(crate) fn showing_quests(&self) -> bool {
+		self.guild.is_none() && self.friends.tab == Tab::Quests
+	}
+	/// Leaving Quests puts the home surface back on Friends, as Discord does.
+	pub(crate) fn leave_quests(&mut self) {
+		if self.friends.tab == Tab::Quests {
+			self.friends.tab = Tab::Online;
+			self.friends.query.clear();
+		}
+	}
+	/// Opens Quests from the title bar: leave any server or conversation and show Home first,
+	/// because the page renders in the friends surface rather than over a timeline.
+	pub(crate) fn open_quests(&mut self, state: &mut State) {
+		// Server settings keeps unsaved edits on the page it is showing; do not discard them.
+		if !self.server_settings.navigate_away(state) {
+			return;
+		}
+		self.settings.open = false;
+		state.open_home();
+		self.guild = None;
+		self.search.open = false;
+		self.friends.query.clear();
+		self.friends.tab = Tab::Quests;
+	}
 	#[cfg(feature = "demo")]
 	pub fn prepare_friends_sample(&mut self) {
 		self.friends.tab = Tab::Online;
@@ -441,15 +467,12 @@ impl MessagingUi {
 						(Tab::Pending, language.text("friends-pending")),
 						(Tab::Restricted, language.text("friends-blocked-ignored")),
 						(Tab::Add, language.text("friends-add")),
-						(Tab::Quests, language.text("quests")),
 					] {
 						let count = if tab == Tab::Pending {
 							state
 								.pending_friends()
 								.filter(|(_, _, incoming)| *incoming)
 								.count()
-						} else if tab == Tab::Quests {
-							state.quests().len()
 						} else if tab == Tab::Saved {
 							state.saved_messages.len()
 						} else {
@@ -1324,5 +1347,27 @@ mod tests {
 			assert_eq!(friends.list, restored);
 			check_cache(&mut friends, &state);
 		}
+	}
+
+	#[test]
+	fn quests_open_over_home_and_leave_back_to_friends() {
+		let mut state = test_support::demo_state();
+		let channel = state.selected.expect("demo opens a conversation");
+		let mut view = crate::MessagingUi {
+			guild: state.channel(channel).and_then(|channel| channel.guild),
+			..Default::default()
+		};
+		view.search.open = true;
+		view.friends.query = "robin".into();
+		view.open_quests(&mut state);
+		// The page draws inside the home surface, so a conversation must not stay selected.
+		assert!(view.showing_quests());
+		assert!(state.selected.is_none());
+		assert!(view.guild.is_none());
+		assert!(!view.search.open);
+		assert!(view.friends.query.is_empty());
+		view.leave_quests();
+		assert!(!view.showing_quests());
+		assert!(view.friends.tab == Tab::Online);
 	}
 }

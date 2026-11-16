@@ -1813,3 +1813,40 @@ fn thread_members_load_without_parent_list_and_reject_retired_replies() {
 	);
 	assert!(state.request_members().is_none());
 }
+
+#[test]
+fn profile_roles_sort_by_position_not_the_assigned_array_order() {
+	let mut state = state();
+	for (id, position) in [(Id(30), 5), (Id(31), 9), (Id(32), 9)] {
+		let mut role = state.guild_roles(Id(10)).unwrap()[1].clone();
+		role.id = id;
+		role.position = position;
+		permission(
+			&mut state,
+			PermissionEvent::Role {
+				guild: Id(10),
+				role,
+			},
+		);
+	}
+	let member = model::GuildProfile {
+		guild: Id(10),
+		// The service does not reorder this array after a role position update, and it still
+		// carries @everyone.
+		roles: vec![Id(32), Id(10), Id(30), Id(31)],
+		nick: None,
+		avatar: None,
+		banner: None,
+		bio: String::new(),
+		pronouns: String::new(),
+		joined_at: None,
+	};
+	let ordered: Vec<_> = state
+		// A member other than this account: the account's own roles come from the permission
+		// mirror, not from the profile array under test.
+		.profile_roles(Id(77), &member)
+		.iter()
+		.map(|role| role.id)
+		.collect();
+	assert_eq!(ordered, vec![Id(31), Id(32), Id(30)]);
+}

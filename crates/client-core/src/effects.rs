@@ -112,7 +112,7 @@ mod tests {
 		let mut effects = Effects::default();
 		let request = effects.push(&effect(3), "Airhorn".into(), now).unwrap();
 		assert_eq!(effects.unplayed(None, now).unwrap().0.request, request);
-		assert!(effects.unplayed(Some(request), now).unwrap().1 == false);
+		assert!(!effects.unplayed(Some(request), now).unwrap().1);
 		assert!(effects.unplayed(None, now + TTL).is_none());
 	}
 

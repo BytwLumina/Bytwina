@@ -26,8 +26,8 @@ legal disclaimer applies. The license file is staged in both packages as
 One repository-drawn glyph, `thread.svg` (four slanted round-capped bars on the same 256-unit
 grid), marks threads; it is rasterized with the Phosphor set and carries no upstream license.
 
-- `atlas.png`: 512×896 RGBA, 50,291 bytes after lossless `oxipng -o max --strip all`.
-  SHA-256 `b82147006e32676eeb37614390e77001754b86be1d297fb22e1e9b62783219d1`.
+- `atlas.png`: 512×896 RGBA, 50,733 bytes after lossless `oxipng -o max --strip all`.
+  SHA-256 `42a7eaf0d9e946a17080507b53c6fef4af997060a784385f6c66c8aea411a582`.
 - `index.tsv`: icon name, tab, zero-based cell; SHA-256
   `cc8a5f5cebe0bcb916e6a12c4dae58c6feabee0487b2ca3e8bb1a3f1c6f378de`.
 
@@ -52,9 +52,9 @@ The media-viewer caret and download glyphs are unmodified Phosphor `caret-left-b
 The screen-share fullscreen glyph is unmodified Phosphor `corners-out-bold.svg`, fetched from the
 same pinned 2.1.1 package on September 27, 2026.
 
-The `bytwina-mark` cell is our own artwork, not an upstream icon: it is the solid silhouette of
-the Bytwina starburst trail from `assets/brand/bytwina-mark.svg`, trimmed to its bounding box so it
-matches Phosphor's glyph weight in the cell. It replaced the Discord brand mark that previously
-occupied cell 58; no third-party application logo is bundled any more. `tools/generate-icons.py`
-pins its SHA-256 like every upstream source and rasterizes it from the repository rather than a
-package mirror.
+The `bytwina-mark` cell is our own artwork, not an upstream icon: the Bytwina starburst trail with
+its comet arc, four-point star and trailing sparks. The mark is authored as raster art, so
+`tools/generate-icons.py` sketches the cell from `assets/brand/bytwina-mark.svg` and then overwrites
+it with `assets/brand/bytwina-mark-mono.png`, the white silhouette the interface tints at draw time;
+that PNG's SHA-256 is pinned alongside every upstream source. It replaced the Discord brand mark
+that previously occupied cell 58; no third-party application logo is bundled any more.

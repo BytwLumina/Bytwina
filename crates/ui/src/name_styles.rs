@@ -127,7 +127,8 @@ pub(crate) fn backdrop(style: &NameStyle, galley: &Arc<Galley>, pos: Pos2) -> Ve
 			})
 			.collect::<Vec<_>>()
 	};
-	let glow = rgb(style.colors[0]);
+	// Solid/default styles may omit a colour; effects still need a bounded backdrop colour.
+	let glow = rgb(style.colors.first().copied().unwrap_or(0));
 	let shadow = rgb(style.colors.get(1).copied().unwrap_or(0));
 	match style.effect {
 		// Faint, so the halo lifts the name without smearing its letters.

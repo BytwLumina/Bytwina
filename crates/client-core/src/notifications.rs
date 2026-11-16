@@ -662,7 +662,7 @@ impl State {
 		}
 	}
 	pub fn take_notification(&mut self) -> Option<Notification> {
-		while let Some(notification) = self.read_state.activity.notifications.front() {
+		while !self.read_state.activity.notifications.is_empty() {
 			// Preferences arrive separately from messages. Do not consume an alert while
 			// that snapshot is still unknown: doing so permanently lost early mentions.
 			if !self.notification_preferences_known() {
@@ -1608,6 +1608,7 @@ mod tests {
 				level: Some(0),
 				suppress_everyone: Some(false),
 				suppress_roles: Some(false),
+				overrides_known: true,
 				..Default::default()
 			},
 		);

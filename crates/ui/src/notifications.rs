@@ -211,6 +211,19 @@ pub(super) fn rail_badge(ui: &egui::Ui, id: egui::Id, rect: egui::Rect, count: u
 		shown,
 	);
 }
+/// Count badge on a title-bar icon: the rail's geometry, scaled down and pinned top-right.
+pub(super) fn title_badge(ui: &egui::Ui, rect: egui::Rect, count: u32, ring: Color32) {
+	if count == 0 || !ui.is_rect_visible(rect) {
+		return;
+	}
+	badge_scaled(
+		ui,
+		rect.right_top() + egui::vec2(-5.0, 7.0),
+		count,
+		ring,
+		0.8,
+	);
+}
 /// Green speaker badge on the rail avatar of the conversation you are calling in.
 fn call_badge(ui: &egui::Ui, rect: egui::Rect) {
 	speaker_badge(ui, rect, design::palette(ui).positive, Color32::WHITE);
@@ -323,6 +336,7 @@ impl MessagingUi {
 					self.server_menu.all_read_item(ui, state);
 				});
 				if response.clicked() {
+					self.leave_quests();
 					self.guild = None;
 					if let Some(command) = state.open_messages() {
 						commands.push(command);

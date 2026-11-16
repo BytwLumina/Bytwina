@@ -78,7 +78,7 @@ impl VerificationUi {
 				dialog::notice(
 					ui,
 					dialog::Level::Warning,
-					crate::i18n::translate("verification-show-official-client-safety-warning"),
+					&crate::i18n::translate("verification-show-official-client-safety-warning"),
 				);
 				ui.add_space(12.0);
 				let height = if self.active {

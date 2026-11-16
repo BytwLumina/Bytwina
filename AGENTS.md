@@ -293,7 +293,7 @@ Tokens: `RADIUS = 16`, `PAD = 20.0`, `BUTTON_HEIGHT = 38.0`, `TITLE_BAR_HEIGHT =
 `MAX_CUSTOM_FONT_BYTES = 32 MiB`, `DEFAULT_IDLE_TIMEOUT_SECS = 600`.
 
 i18n: 14 languages (`i18n::Language::ALL`, `cs de en-US es fr it ja pl pt-BR ru tr vi zh-CN zh-TW`)
-backed by `crates/ui/locales/<tag>/main.ftl`; the `en-US` catalog carries the same **3075** keys as
+backed by `crates/ui/locales/<tag>/main.ftl`; the `en-US` catalog carries the same **3083** keys as
 every other locale that has been translated in full. Adding a
 string means adding it to **every** locale or it falls back to English. Status strings in the core
 are `&'static str`, so the shell stores the locale *key* and translates once at the toast boundary
@@ -625,7 +625,7 @@ Changing any of these without updating the test breaks CI:
 | legacy SDK fixture **574_991 bytes** | `crates/extensions/examples/legacy_sdk_check.rs` + fixture README |
 | session cache **500 / 4 MiB / 1024** | `crates/session-cache/src/lib.rs` |
 | `WINDOWS_FILES` allowlist | `apps/desktop/src/updater_install.rs` — must list every packaged top-level entry |
-| locale key count **3075** in `en-US` | `crates/ui/locales/*/main.ftl` |
+| locale key count **3083** in `en-US` | `crates/ui/locales/*/main.ftl` |
 | SQLite schema **29** | `crates/local-store/src/lib.rs` |
 | extension limits (16/4/2/0.25 MiB, 8 plugins, 64 capabilities) | `crates/extensions/src/lib.rs` |
 | `THEME_FIELDS` order (18) | `crates/ui/src/design.rs` and `theme_editor` |
@@ -655,11 +655,11 @@ Changing any of these without updating the test breaks CI:
 - Windows binaries are unsigned: SmartScreen warns, users choose "More info → Run anyway".
 - Several protocol claims in `docs/discord-compatibility.md` are explicitly unverified; do not
   promote them to verified without evidence.
-- The emoji picker lists one tile per base emoji and expands skin-tone variants on search, but has
-  no tone chooser (Discord's `emoji_tone`) and no category jump bar; the bundled CLDR order allows
-  one without new data.
-- Name styles cover 14 of Discord's fonts (ids 1-6, 8-10, 12-16): Néo-Castel (7) and Hexagon (17)
-  have no identified source and Default (11) falls back to the interface font.
+- The emoji picker chooses a default skin tone and pins a CLDR category above the grid; the
+  category controls filter rather than scroll to a section, and search still lists every tone
+  variant for an explicit pick.
+- Name styles cover all Discord font ids except Default (11): Néo-Castel (7) and Hexagon (17) use
+  OFL stand-ins because the originals have no identified source.
 - Badges beside a message author or in a member row appear only for profiles already cached; a
   member who was never opened shows none.
 - `apps/desktop/src/screen.rs` still holds ~28 hardcoded English screen-share strings; the `ui` crate

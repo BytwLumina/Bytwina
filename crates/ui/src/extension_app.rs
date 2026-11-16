@@ -822,6 +822,7 @@ impl MessagingUi {
 				if !self.server_settings.navigate_away(state) {
 					return Err("Finish editing server settings first".into());
 				}
+				self.leave_quests();
 				self.guild = None;
 				state.open_home();
 				self.search.open = false;

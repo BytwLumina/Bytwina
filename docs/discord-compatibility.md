@@ -1,5 +1,35 @@
 # Discord compatibility — checked 2026-09-10
 
+## Member moderation from the context menu — November 16, 2026
+
+Server Settings already kicked, banned and timed out members; the same three actions are now offered
+from a member's context menu when the account holds the permission and outranks the target with
+loaded roles. The wire shapes are the existing ones:
+
+- `PUT /guilds/{guild_id}/bans/{user_id}` with `{"delete_message_seconds": n}`, where `n` is bounded
+  to Discord's seven-day ceiling (`MAX_BAN_DELETE_SECONDS`). Documented.
+- `PATCH /guilds/{guild_id}/members/{user_id}` with `communication_disabled_until`, an ISO-8601
+  timestamp at most `MAX_TIMEOUT_SECONDS` (28 days) ahead, or `null` to clear. The body is built
+  after shared rate-limit admission, so the duration starts when the request is sent rather than
+  when the button was pressed.
+- `DELETE /guilds/{guild_id}/members/{user_id}` — unchanged.
+
+Ban and kick share the removal outcome, so the member page drops the row either way. A definite
+refusal (for example `403`) can be retried from the same dialog; a request whose outcome is unknown
+is never repeated without a new confirmation. The context menu derives its server from the selected
+channel, so it is hidden where no server member row exists.
+
+**Unverified live**: this client has not sent a ban or a timeout from a context menu against the
+service; the behaviour above follows the documented routes and synthetic fixtures only.
+
+## Unacknowledged voice hangup — November 16, 2026
+
+A `VOICE_STATE_UPDATE` leave that the service never acknowledged kept the gateway's `departing`
+marker set, so every later join was refused and the call switch gave up after 12 s. Expiry now only
+reports the failure and lets the blocked join through; the late acknowledgement of the old call is
+matched against the retained superseded departure, so it cannot end the new one. This is a local
+state-machine repair, not a protocol claim.
+
 ## Quests — November 10, 2026
 
 Discord does not publish developer documentation for Quests. The shapes below come from the
@@ -85,6 +115,9 @@ verified against a live session:
 - `PATCH /users/@me/profile` with `banner` (PNG data URI) and `profile_effect_id`. Premium only,
   according to the documentation. Account fields keep going to `PATCH /users/@me`.
 - `PATCH /users/@me` with `avatar_decoration_sku_id` and `nameplate_sku_id`; a nested `null` clears.
+- `PATCH /users/@me/profile` with `theme_colors` (the two profile-card colours) and
+  `display_name_styles` (font, effect and colour list); these fields are unofficial normal-client
+  behavior and remain live-unverified.
 - `GET /users/@me/collectibles-purchases` for the owned list the picker shows.
 - `GET /soundboard-default-sounds`, `GET /guilds/{id}/soundboard-sounds` and
   `POST /channels/{id}/send-soundboard-sound`.
@@ -231,15 +264,18 @@ establish it.
   member objects (`font_id`, `effect_id`, `colors`), with a member's value overriding the
   user's in that server. The shape and the font and effect ids come from the official web
   client's public JavaScript (October 15, 2026); this is unofficial and live delivery is
-  unverified. One to four 0xRRGGBB colours are accepted; anything else drops the style.
+  unverified. Up to five 0xRRGGBB colours are accepted; Solid may omit colours to use the
+  default text colour, while non-Solid styles need at least one colour. Other malformed values
+  drop the style.
   Gradient effects spread every colour evenly across the name.
   Effects 1–8 (solid, gradient, neon, toon, pop, glow, prism, gummy) are drawn as still
   approximations: gradients across the name, and halo, outline or shadow layers behind it.
-  Discord's animations are not reproduced. Fonts 1–16 except 7 use bundled OFL faces with
-  the same family names (see `assets/README.md`); Néo-Castel (7), Hexagon (17), Default (11)
-  and unknown ids keep the interface font. The bundled files may differ from the builds
-  Discord serves. Chat, member and search rows show the colours and effect while the row is
-  hovered; profile cards and the account panel always show them.
+  Discord's animations are not reproduced. Fonts 1–17 except 11 use bundled OFL faces with
+  the same family names (see `assets/README.md`); Néo-Castel (7) and Hexagon (17) use OFL
+  stand-ins because the originals are unavailable, Default (11) and unknown ids keep the
+  interface font. The bundled files may differ from the builds Discord serves. Chat, member
+  and search rows show the colours and effect while the row is hovered; profile cards and
+  the account panel always show them.
 - **Profile effects and frames:** profile responses list them in `user_profile` and
   `guild_member_profile` `collectibles` (type 1 = effect, 3 = frame). The older
   `profile_effect.id` is accepted as the effect SKU, and a server profile's own values

@@ -126,6 +126,19 @@ pub struct OwnProfile {
 	generation: u64,
 }
 
+/// One server-scoped profile opened in the editor. Discord keeps this separate from the
+/// account profile, so it never reuses `OwnProfile`.
+#[derive(Default)]
+pub struct ServerProfile {
+	pub guild: Option<Id>,
+	pub data: Option<UserProfile>,
+	pub loading: bool,
+	pub saving: bool,
+	pub error: Option<&'static str>,
+	pub request: u64,
+	generation: u64,
+}
+
 /// The account's pending badge settings write.
 #[derive(Default)]
 pub struct BadgeEditor {
@@ -304,7 +317,7 @@ impl State {
 		if !self.can_save_own_profile() || changes == model::ProfileEdit::default() {
 			return None;
 		}
-		if !changes.valid() {
+		if !changes.valid() || changes.nick.is_some() {
 			self.own_profile.error = Some("Profile changes are invalid or exceed safe limits");
 			return None;
 		}
@@ -318,32 +331,178 @@ impl State {
 			changes: Some(changes),
 		})
 	}
+	/// Whether the open server profile can be written.
+	pub fn can_save_server_profile(&self) -> bool {
+		(self.demo || (self.auth == AuthState::Authenticated && self.gateway_connected))
+			&& !self.server_profile.loading
+			&& !self.server_profile.saving
+			&& self.server_profile.generation == self.generation
+			&& self.server_profile.data.as_ref().is_some_and(|data| {
+				!data.limited
+					&& data
+						.guild
+						.as_ref()
+						.is_some_and(|guild| Some(guild.guild) == self.server_profile.guild)
+					&& self
+						.user
+						.as_ref()
+						.is_some_and(|user| user.id == data.user.id)
+			})
+	}
+	/// Loads one server profile. Changing servers while a write is in flight is refused so
+	/// the response cannot land on the wrong draft.
+	pub fn load_server_profile(&mut self, guild: Id) -> Option<Command> {
+		if guild.0 == 0 || self.server_profile.loading || self.server_profile.saving {
+			return None;
+		}
+		let Some(user) = self
+			.user
+			.as_ref()
+			.map(|user| user.id)
+			.filter(|id| id.0 != 0)
+		else {
+			self.server_profile.error = Some("Sign in before editing a server profile");
+			return None;
+		};
+		if !self.demo && (self.auth != AuthState::Authenticated || !self.gateway_connected) {
+			self.server_profile.error = Some("Reconnect to load the server profile");
+			return None;
+		}
+		let keep = if self.server_profile.guild == Some(guild)
+			&& self.server_profile.generation == self.generation
+		{
+			self.server_profile.data.take()
+		} else {
+			None
+		};
+		let request = self.server_profile.request.wrapping_add(1);
+		self.server_profile = ServerProfile {
+			guild: Some(guild),
+			data: keep,
+			loading: true,
+			generation: self.generation,
+			request,
+			..Default::default()
+		};
+		Some(Command::EditGuildProfile {
+			user,
+			guild,
+			request: self.server_profile.request,
+			changes: None,
+		})
+	}
 	/// Builds a server-scoped profile write. It is intentionally independent from the global
-	/// editor and only permits the metadata fields accepted by Discord's guild endpoint.
+	/// editor and only permits the fields accepted by Discord's guild endpoint.
 	pub fn save_guild_profile(
 		&mut self,
 		guild: Id,
 		changes: model::ProfileEdit,
 	) -> Option<Command> {
 		let user = self.user.as_ref()?.id;
-		if guild.0 == 0
-			|| !changes.valid()
+		if !self.can_save_server_profile()
+			|| self.server_profile.guild != Some(guild)
 			|| changes == model::ProfileEdit::default()
+			|| !changes.valid()
 			|| changes.global_name.is_some()
-			|| changes.avatar.is_some()
+			|| changes.accent_color.is_some()
+			|| changes.theme_colors.is_some()
 			|| changes.avatar_decoration_sku.is_some()
 			|| changes.nameplate_sku.is_some()
 			|| changes.display_name_style.is_some()
-			|| (!self.demo && (self.auth != AuthState::Authenticated || !self.gateway_connected))
+			|| changes.profile_effect_sku.is_some()
+			|| changes.collectibles_sku_ids.is_some()
 		{
 			return None;
 		}
+		self.server_profile.request = self.server_profile.request.wrapping_add(1);
+		self.server_profile.saving = true;
+		self.server_profile.error = None;
 		Some(Command::EditGuildProfile {
 			user,
 			guild,
-			request: self.generation,
+			request: self.server_profile.request,
 			changes: Some(changes),
 		})
+	}
+	pub(crate) fn clear_server_profile(&mut self) {
+		if self.server_profile.saving {
+			return;
+		}
+		let request = self.server_profile.request.wrapping_add(1);
+		self.server_profile = ServerProfile {
+			request,
+			..Default::default()
+		};
+	}
+	fn server_profile_pending(&self, user: Id, guild: Id, request: u64) -> bool {
+		self.server_profile.guild == Some(guild)
+			&& self.server_profile.request == request
+			&& self.server_profile.generation == self.generation
+			&& self.user.as_ref().is_some_and(|own| own.id == user)
+			&& (self.server_profile.loading || self.server_profile.saving)
+	}
+	pub(crate) fn reject_server_profile(&mut self, user: Id, guild: Id, request: u64) {
+		if self.server_profile_pending(user, guild, request) {
+			self.server_profile.loading = false;
+			self.server_profile.saving = false;
+			self.server_profile.error = Some("Server profile request was not queued; try again");
+		}
+	}
+	pub(crate) fn apply_server_profile(
+		&mut self,
+		user: Id,
+		guild: Id,
+		request: u64,
+		result: Result<Box<UserProfile>, Failure>,
+	) {
+		if !self.server_profile_pending(user, guild, request) {
+			return;
+		}
+		let saving = self.server_profile.saving;
+		self.server_profile.loading = false;
+		self.server_profile.saving = false;
+		match result {
+			Ok(data)
+				if data.user.id == user
+					&& data
+						.guild
+						.as_ref()
+						.is_some_and(|profile| profile.guild == guild)
+					&& data.valid() =>
+			{
+				self.server_profile.error = data
+					.limited
+					.then_some("Server profile is incomplete; editing is disabled");
+				self.server_profile.data = Some(*data);
+			}
+			result => {
+				self.server_profile.error = Some(if saving {
+					"Server profile save could not be confirmed; reopen it before retrying"
+				} else if let Err(failure) = result {
+					failure.label()
+				} else {
+					"Server profile response was invalid or too large"
+				});
+				if let Err(failure) = result
+					&& failure.ends_session()
+					&& failure != Failure::Capacity
+				{
+					self.fail(failure);
+				}
+			}
+		}
+	}
+	pub(crate) fn interrupt_server_profile(&mut self) {
+		if self.server_profile.loading || self.server_profile.saving {
+			self.server_profile.error = Some(if self.server_profile.saving {
+				"Save interrupted; changes may have applied. Reopen the server profile to check"
+			} else {
+				"Server profile loading interrupted; reconnect and reload"
+			});
+		}
+		self.server_profile.request = self.server_profile.request.wrapping_add(1);
+		self.server_profile.loading = false;
+		self.server_profile.saving = false;
 	}
 	pub fn clear_own_profile(&mut self) {
 		// Hiding an editor cannot cancel an already admitted write or permit a second one.
@@ -763,6 +922,7 @@ mod tests {
 			board: None,
 			effect_sku: None,
 			frame_sku: None,
+			collectible_skus: Vec::new(),
 			effect: None,
 			frame: None,
 			badge_catalog: None,
@@ -1423,6 +1583,7 @@ mod tests {
 					board: None,
 					effect_sku: None,
 					frame_sku: None,
+					collectible_skus: Vec::new(),
 					effect: None,
 					frame: None,
 					badge_catalog: None,
@@ -1614,6 +1775,7 @@ mod tests {
 					board: None,
 					effect_sku: None,
 					frame_sku: None,
+					collectible_skus: Vec::new(),
 					effect: None,
 					frame: None,
 					badge_catalog: None,

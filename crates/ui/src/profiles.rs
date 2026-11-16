@@ -1999,15 +1999,7 @@ fn role_chips(
 	user: Id,
 	guild: &model::GuildProfile,
 ) {
-	let Some(roles) = state.guild_roles(guild.guild) else {
-		return;
-	};
-	let assigned = state.profile_role_ids(user, guild);
-	let roles: Vec<_> = roles
-		.iter()
-		.rev()
-		.filter(|role| role.id != guild.guild && assigned.contains(&role.id))
-		.collect();
+	let roles = state.profile_roles(user, guild);
 	let max_width = ui.available_width();
 	let widths: Vec<_> = roles
 		.iter()
@@ -4545,8 +4537,13 @@ pub(crate) fn paint_collectibles(
 	let clip = if let Some(panel) = dock_clip {
 		panel
 	} else if full {
-		let [_, _, side] = frame.overflow(card.width());
-		ui.clip_rect().expand2(vec2(side, 0.0))
+		// Staples overflow the card vertically and rails horizontally, so both axes grow.
+		let [top, bottom, side] = frame.overflow(card.width());
+		let clip = ui.clip_rect();
+		Rect::from_min_max(
+			pos2(clip.left() - side, clip.top() - top),
+			pos2(clip.right() + side, clip.bottom() + bottom),
+		)
 	} else {
 		ui.ctx().content_rect()
 	};
@@ -4640,6 +4637,7 @@ pub fn synthetic(user: &User, guild: Option<Id>) -> model::UserProfile {
         }),
         effect_sku: Some(Id(9201)),
         frame_sku: Some(Id(9202)),
+        collectible_skus: vec![Id(9201), Id(9202)],
         effect: Some(Box::new(synthetic_effect())),
         frame: Some(Box::new(synthetic_frame())),
         badge_catalog: Some(Box::new(crate::badges::synthetic_catalog())),

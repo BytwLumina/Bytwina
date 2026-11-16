@@ -75,6 +75,7 @@ mod markdown;
 mod member_search;
 mod mentions;
 mod messaging_permissions;
+mod moderation;
 mod notification_settings;
 mod notifications;
 mod pending;
@@ -94,6 +95,11 @@ mod timestamp_picker;
 #[cfg(any(test, feature = "demo"))]
 pub fn synthetic_own_profile(user: &model::User) -> model::UserProfile {
 	profiles::synthetic(user, None)
+}
+/// Synthetic server profile for the offline command adapter; never service data.
+#[cfg(any(test, feature = "demo"))]
+pub fn synthetic_server_profile(user: &model::User, guild: Id) -> model::UserProfile {
+	profiles::synthetic(user, Some(guild))
 }
 mod contact_editor;
 pub mod dialog;
@@ -166,6 +172,13 @@ pub struct AttachmentPaste {
 	pub text: Option<String>,
 	pub image: Option<std::sync::Arc<egui::ColorImage>>,
 }
+
+/// A pasted image is held decoded while it is encoded, so pixels bound its memory rather than
+/// its file size: 64 MiB for each RGBA copy, which fits a 5K screenshot. Larger images attach
+/// as files.
+pub const MAX_PASTE_PIXELS: usize = 16 * 1024 * 1024;
+pub const PASTE_PIXELS_EXCEEDED: &str =
+	"Paste an image with at most 16 million pixels, or attach it as a file";
 
 fn oversized_text(limit: u64) -> String {
 	crate::i18n::translate_args(
@@ -341,6 +354,7 @@ pub struct MessagingUi {
 	menu_role_change: bool,
 	pending_mention: Option<Id>,
 	contact_editor: contact_editor::ContactEditor,
+	moderation: moderation::Moderation,
 	profile_link: Option<String>,
 	/// The docked DM card's link awaiting confirmation, apart from the popout's.
 	dm_profile_link: Option<String>,
@@ -793,6 +807,10 @@ impl MessagingUi {
 	pub fn take_profile_picture_request(&mut self) -> Option<(u64, Id, u64)> {
 		self.settings.editor.avatar_request.take()
 	}
+	/// True when the pending picture request targets the banner rather than the avatar.
+	pub fn profile_picture_is_banner(&self) -> bool {
+		self.settings.editor.choosing_banner()
+	}
 	pub fn accept_profile_picture(
 		&mut self,
 		ctx: &egui::Context,
@@ -1188,9 +1206,14 @@ impl MessagingUi {
 				} else if request
 					.image
 					.as_ref()
-					.is_some_and(|image| image.pixels.len() > 4 * 1024 * 1024)
+					.is_some_and(|image| image.pixels.len() > MAX_PASTE_PIXELS)
 				{
-					state.status = "lib-status-paste-an-image-with-at-most-4-million-pixels".into();
+					// The status line is easy to miss, so an oversized paste looked like nothing
+					// happened. A toast matches how the clipboard worker reports its rejections.
+					self.toasts.push(
+						design::Level::Error,
+						crate::i18n::translate("lib-paste-image-too-large"),
+					);
 				} else {
 					self.attachment_paste_requested = Some(request);
 					self.upload_busy = true;
@@ -1481,6 +1504,26 @@ impl MessagingUi {
 							design::window_controls(ui);
 						}
 						ui.spacing_mut().item_spacing.x = 10.0;
+						// Discord keeps Quests in the app's top-right corner, not in the Friends
+						// header, so it opens from here into the home surface.
+						if state.demo || state.auth == client_core::auth::AuthState::Authenticated {
+							let response = icons::toggle(
+								ui,
+								icons::Icon::Sparkle,
+								28.0,
+								self.showing_quests(),
+								"quests",
+							);
+							crate::notifications::title_badge(
+								ui,
+								response.rect,
+								u32::try_from(state.quests().len()).unwrap_or(u32::MAX),
+								design::window_palette(ui).base,
+							);
+							if response.clicked() {
+								self.open_quests(state);
+							}
+						}
 						if self.updates.available || self.updates.ready {
 							let (label, icon) = if self.updates.ready {
 								(
@@ -2142,6 +2185,7 @@ impl MessagingUi {
 							)
 						});
 						if response.on_hover_text(language.text("friends")).clicked() {
+							self.leave_quests();
 							state.open_home();
 							self.guild = None;
 							self.search.open = false;
@@ -5901,6 +5945,11 @@ impl MessagingUi {
 					self.profile.hide();
 					self.contact_editor.open(user, true, state)
 				}
+				user_menu::Action::Moderate { guild, user, kind } => {
+					self.profile.hide();
+					self.moderation.open(guild, user, kind, state);
+					None
+				}
 				user_menu::Action::Shortcut(intent) => {
 					self.apply_shortcut(state, intent);
 					None
@@ -5920,6 +5969,9 @@ impl MessagingUi {
 			}
 		}
 		self.contact_editor.show(&ctx, state, &mut commands);
+		let settings_open = self.server_settings.is_open();
+		self.moderation
+			.show(&ctx, state, &mut commands, settings_open);
 		self.drain_profile(state, &mut commands);
 		// While the card's DM waits on a captcha, step aside for the dialog but keep its draft.
 		let direct_verifying = self.user_direct.is_some()

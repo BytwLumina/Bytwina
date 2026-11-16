@@ -327,6 +327,45 @@ impl DiscordApi {
 				}
 				Ok(Outcome::Kicked(*user))
 			}
+			Action::Ban {
+				user,
+				delete_seconds,
+			} => {
+				let bytes = self
+					.request_limited(
+						Method::PUT,
+						&format!("/guilds/{guild}/bans/{user}"),
+						Some(json!({"delete_message_seconds":delete_seconds})),
+						4096,
+					)
+					.await
+					.map_err(write_failure)?;
+				if !bytes.is_empty() {
+					return Err(Failure::Ambiguous);
+				}
+				Ok(Outcome::Kicked(*user))
+			}
+			Action::Timeout { user, seconds } => {
+				// The duration starts when the request is admitted, after any shared cooldown.
+				let seconds = *seconds;
+				let bytes = self
+					.request_prepared(
+						Method::PATCH,
+						&format!("/guilds/{guild}/members/{user}"),
+						Box::new(move || {
+							wire::timeout(seconds, crate::unix_millis())
+								.map_err(|_| Failure::Protocol)
+						}),
+						64 * 1024,
+					)
+					.await
+					.map_err(write_failure)?;
+				let member = wire::member(&bytes, *user).map_err(|_| Failure::Ambiguous)?;
+				if member.timeout_until.is_some() != seconds.is_some() {
+					return Err(Failure::Ambiguous);
+				}
+				Ok(Outcome::Member(member))
+			}
 			Action::Prune { days, execute } => {
 				let (method, path, body) = if *execute {
 					(

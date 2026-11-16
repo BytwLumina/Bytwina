@@ -5043,8 +5043,14 @@ profile-edit-form-premium-accounts-can-add-a-banner = Premium accounts can add a
 profile-edit-form-decoration = Avatar decoration
 profile-edit-form-nameplate = Nameplate
 profile-edit-form-profile-effect = Profile effect
+profile-edit-form-profile-frame = Profile frame
 profile-edit-form-default = Default
 profile-edit-form-none = None
+profile-edit-form-customize = Customize
+profile-edit-form-profile-theme = Profile theme
+profile-edit-form-profile-theme-description = Choose the two colors used across your profile card.
+profile-edit-form-display-name-style = Display Name Style
+profile-edit-form-display-name-style-description = Choose your display name font, effect and colors.
 
 soundboard-ui-title = Soundboard
 soundboard-ui-close = Close
@@ -5104,7 +5110,7 @@ voice-call-unavailable-waiting-for-the-previous-call-to-disconnect = Waiting for
 voice-call-unavailable-you-are-already-in-this-call = You are already in this call.
 voice-call-unavailable-joining-this-channel-is-unavailable-with-current-permission-information = Joining this channel is unavailable with current permission information.
 voice-request-call-audio-joining-this-call-is-no-longer-available = Joining this call is no longer available
-voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Call switch cancelled: previous call did not finish disconnecting. Reconnect before calling again.
+voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Call switch cancelled: previous call did not finish disconnecting. Try joining again.
 voice-show-call-switch-switch-calls = Switch calls?
 voice-show-call-switch-you-are-already-in-another-call-leave-it-and-join = You are already in another call. Leave it and join { $name }?
 voice-show-call-switch-the-selected-channel = the selected channel
@@ -5311,6 +5317,7 @@ extensions-ui-capability-deletedmessages = Keep loaded deleted messages in sessi
 lib-status-paste-cancelled-focus-the-message-and-paste-again = Paste cancelled; focus the message and paste again
 lib-status-pasted-text-exceeds-the-draft-limit = Pasted text exceeds the draft limit
 lib-status-paste-an-image-with-at-most-4-million-pixels = Paste an image with at most 4 million pixels
+lib-paste-image-too-large = Paste an image with at most 16 million pixels, or attach it as a file
 lib-status-cancel-the-current-reply-before-restoring-this-message = Cancel the current reply before restoring this message
 lib-status-text-restored-reselect-the-attachment-before-sending-again = Text restored; reselect the attachment before sending again
 lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text = Keep or clear the existing draft before restoring pending text
@@ -5492,3 +5499,54 @@ saved-messages-count = { $count ->
     }
 saved-messages-full = Saved messages are full. Remove one before saving another.
 new-message-too-many = { $limit } other people is the most a group can start with.
+profile-edit-scope-account = My account
+profile-edit-scope-server = Server profiles
+profile-edit-server-choose-a-server = Choose a server
+profile-edit-server-description = These details only apply to the selected server.
+profile-edit-server-loading = Loading server profile…
+profile-edit-server-saving = Saving server profile…
+profile-edit-server-saved = Server profile saved.
+profile-edit-server-no-servers = Join a server to edit a server profile.
+profile-edit-server-select-a-server = Choose a server to edit its profile.
+profile-edit-server-avatar = Server avatar
+profile-edit-server-avatar-hint = PNG, JPEG, GIF or WebP up to 8 MB; cropped to a square
+profile-edit-server-avatar-new = New server avatar chosen; save to upload it
+profile-edit-server-avatar-remove = Your server avatar will be removed when you save
+profile-edit-server-nickname = Server nickname
+profile-edit-server-nickname-hint = Leave blank to use your display name
+profile-edit-server-pronouns = Server pronouns
+profile-edit-server-bio = Server bio
+profile-edit-server-banner = Server banner
+profile-edit-server-banner-hint = Add a banner that only this server sees
+profile-edit-server-banner-new = New server banner chosen; save to upload it
+profile-edit-server-banner-remove = Your server banner will be removed when you save
+# Context: moderation
+moderation-menu-timeout = Timeout { $name }
+# Context: moderation
+moderation-menu-kick = Kick { $name }
+# Context: moderation
+moderation-menu-ban = Ban { $name }
+# Context: moderation
+moderation-timeout-detail = They cannot send messages, react or join voice channels until the timeout ends.
+# Context: moderation
+moderation-kick-detail = They can rejoin with a new invite.
+# Context: moderation
+moderation-ban-detail = They cannot rejoin until the ban is removed.
+# Context: moderation
+moderation-duration-60-seconds = 60 seconds
+# Context: moderation
+moderation-remove-timeout = Remove timeout
+# Context: moderation
+moderation-delete-history = Delete message history
+# Context: moderation
+moderation-delete-none = Don't delete any
+# Context: moderation
+moderation-delete-hour = Previous hour
+# Context: moderation
+moderation-delete-day = Previous 24 hours
+# Context: moderation
+moderation-delete-week = Previous 7 days
+# Context: moderation
+moderation-confirm-timeout = Timeout
+# Context: moderation
+moderation-confirm-ban = Ban

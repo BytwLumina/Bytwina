@@ -472,6 +472,29 @@ impl State {
 			})
 			.unwrap_or(&member.roles)
 	}
+	/// Assigned roles ordered from the top of the server hierarchy, omitting @everyone.
+	///
+	/// A role position update does not reorder the member's assigned-role array, so callers that
+	/// paint a hierarchy (profile chips, role lists) cannot rely on that array's order.
+	pub fn profile_roles<'a>(
+		&'a self,
+		user: Id,
+		member: &'a model::GuildProfile,
+	) -> Vec<&'a p::Role> {
+		let assigned = self.profile_role_ids(user, member);
+		if assigned.len() > p::MAX_MEMBER_ROLES {
+			return Vec::new();
+		}
+		let Some(roles) = self.guild_roles(member.guild) else {
+			return Vec::new();
+		};
+		let mut roles: Vec<_> = roles
+			.iter()
+			.filter(|role| role.id != member.guild && assigned.contains(&role.id))
+			.collect();
+		roles.sort_by(|a, b| b.cmp_hierarchy(a));
+		roles
+	}
 	pub fn profile_name_colors(
 		&self,
 		user: &model::User,
