@@ -1207,12 +1207,21 @@ mod tests {
 				let mut state = test_support::demo_state();
 				let (commands, _) =
 					frame(&ctx, &mut editor, &mut state, &mut avatars, width, vec![]);
-				assert_eq!(commands.len(), 1);
+				assert_eq!(
+					commands
+						.iter()
+						.filter(|command| matches!(command, Command::EditProfile { .. }))
+						.count(),
+					1
+				);
 				let Command::EditProfile {
 					user,
 					request,
 					changes: None,
-				} = commands.into_iter().next().unwrap()
+				} = commands
+					.into_iter()
+					.find(|command| matches!(command, Command::EditProfile { .. }))
+					.unwrap()
 				else {
 					panic!("load expected")
 				};

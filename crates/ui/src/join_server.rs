@@ -1023,7 +1023,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Join Server",
+				"Join a Server",
 			);
 			let Some(Command::JoinInvite { request, .. }) = commands.pop() else {
 				panic!("join missing")
@@ -1034,7 +1034,7 @@ mod tests {
 				&mut state,
 				&mut commands,
 				size,
-				"Please wait…",
+				"Please wait...",
 			);
 			assert!(commands.is_empty());
 			state.apply(client_core::Envelope {

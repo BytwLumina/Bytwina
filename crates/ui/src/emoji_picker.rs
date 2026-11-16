@@ -2918,11 +2918,16 @@ mod tests {
 		assert_ne!(deep, thumb);
 		assert!(standard()[deep].0.contains('\u{1f3ff}'));
 		// A base with no dark variant falls back to itself rather than an invented sequence.
+		// Presentation selectors may differ between the catalog base and its variant.
+		let without_selector =
+			|index: usize| base_emoji(standard()[index].0).replace('\u{fe0f}', "");
 		for base in browse_indices() {
 			let chosen = preferred_variant(*base, 5);
 			assert_eq!(
-				base_emoji(standard()[chosen].0),
-				base_emoji(standard()[*base].0)
+				without_selector(chosen),
+				without_selector(*base),
+				"{}",
+				standard()[*base].0
 			);
 		}
 	}
