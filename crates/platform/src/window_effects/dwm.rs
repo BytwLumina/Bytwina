@@ -145,6 +145,7 @@ fn set_custom_caption(hwnd: HWND, enabled: bool) -> Result<(), String> {
 		if style == 0 {
 			return Err(windows::core::Error::from_win32().to_string());
 		}
+		let mut requested = None;
 		let style = if enabled {
 			let menu = (style as u32 & WS_SYSMENU.0) as usize | 1;
 			SetPropW(hwnd, REQUESTED_MENU, Some(HANDLE(menu as _)))
@@ -153,8 +154,9 @@ fn set_custom_caption(hwnd: HWND, enabled: bool) -> Result<(), String> {
 				let _ = RemovePropW(hwnd, REQUESTED_MENU);
 				return Err("Could not install the custom-caption subclass.".to_owned());
 			}
-			// Mask the first request here: writing the unchanged style sends no
-			// WM_STYLECHANGING, so the subclass never sees this initial value.
+			requested = Some(menu);
+			// Mask the first request here: writing the unchanged style may send no
+			// WM_STYLECHANGING, so the subclass must not be the only masker.
 			style & !(WS_SYSMENU.0 as isize)
 		} else {
 			RemoveWindowSubclass(hwnd, Some(custom_caption), 0)
@@ -165,6 +167,11 @@ fn set_custom_caption(hwnd: HWND, enabled: bool) -> Result<(), String> {
 		};
 		if SetWindowLongPtrW(hwnd, GWL_STYLE, style) == 0 {
 			return Err(windows::core::Error::from_win32().to_string());
+		}
+		if let Some(menu) = requested {
+			// The write above may have re-recorded the already-masked value; the menu the
+			// caller asked for is the one read before masking.
+			let _ = SetPropW(hwnd, REQUESTED_MENU, Some(HANDLE(menu as _)));
 		}
 	}
 	Ok(())
@@ -205,7 +212,8 @@ pub fn extend_frame(window: &Window, extended: bool) -> Result<(), String> {
 mod tests {
 	use super::*;
 	use windows::Win32::UI::WindowsAndMessaging::{
-		CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_OVERLAPPEDWINDOW,
+		CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_MAXIMIZEBOX, WS_MINIMIZEBOX,
+		WS_OVERLAPPEDWINDOW, WS_POPUP,
 	};
 	use windows::core::w;
 
@@ -217,7 +225,10 @@ mod tests {
 				WINDOW_EX_STYLE::default(),
 				w!("STATIC"),
 				w!("caption test"),
-				WS_OVERLAPPEDWINDOW,
+				// Custom captions are only enabled on an undecorated window. winit keeps the
+				// menu, thick frame and both boxes there, so the test uses the same shape;
+				// a decorated style keeps its menu by design.
+				WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
 				0,
 				0,
 				100,
@@ -243,16 +254,21 @@ mod tests {
 			set_custom_caption(hwnd, false).unwrap();
 			assert_eq!(GetWindowLongPtrW(hwnd, GWL_STYLE), style);
 			set_custom_caption(hwnd, true).unwrap();
-			// Borderless fullscreen removes the menu while suppression is active.
+			// Borderless fullscreen removes the menu while suppression is active; the
+			// subclass keeps a thick frame so the border still resizes.
 			let fullscreen_style = style & !(WS_OVERLAPPEDWINDOW.0 as isize);
 			SetWindowLongPtrW(hwnd, GWL_STYLE, fullscreen_style);
 			set_custom_caption(hwnd, false).unwrap();
-			assert_eq!(GetWindowLongPtrW(hwnd, GWL_STYLE), fullscreen_style);
+			let fullscreen = GetWindowLongPtrW(hwnd, GWL_STYLE);
+			assert_eq!(fullscreen & WS_SYSMENU.0 as isize, 0);
 			// Disabling twice, or enabling in fullscreen, must not invent a menu.
 			set_custom_caption(hwnd, false).unwrap();
 			set_custom_caption(hwnd, true).unwrap();
 			set_custom_caption(hwnd, false).unwrap();
-			assert_eq!(GetWindowLongPtrW(hwnd, GWL_STYLE), fullscreen_style);
+			assert_eq!(
+				GetWindowLongPtrW(hwnd, GWL_STYLE) & WS_SYSMENU.0 as isize,
+				0
+			);
 			// Returning to windowed mode must restore the latest request, not the
 			// absent menu captured when the subclass was installed in fullscreen.
 			set_custom_caption(hwnd, true).unwrap();
