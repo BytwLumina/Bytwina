@@ -879,6 +879,7 @@ impl Calls {
 		let own = owner == Some(state.user_id);
 		if own
 			&& state.channel_id.is_none()
+			&& self.departing.is_none()
 			&& let Some((channel, request, _)) = self
 				.superseded
 				.filter(|(_, _, guild)| *guild == state.guild_id)

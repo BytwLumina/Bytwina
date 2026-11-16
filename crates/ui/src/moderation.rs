@@ -245,6 +245,9 @@ pub(crate) mod tests {
 		}
 		/// Clicks the confirming button and returns the request it sent, if any.
 		fn confirm(&mut self, label: &str) -> Option<(Id, u64, Action)> {
+			// A centred modal positions itself from the previous pass's size, so the first
+			// frame is asked to settle and its shapes are not worth clicking.
+			let _ = self.frame(vec![]);
 			let text = self.frame(vec![]);
 			let (_, rect) = text
 				.iter()
