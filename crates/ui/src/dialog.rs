@@ -252,11 +252,12 @@ impl Body<'_> {
 				// A right-to-left row with centred children fills all the height it is offered.
 				// Inside a modal that is the previous frame's size, so a plain `with_layout`
 				// made the strip keep the height of the tallest page shown so far. Offer one
-				// button row instead; taller children still grow it.
+				// button row instead; taller children still grow it. Wrapping keeps a dialog
+				// narrower than its actions (a 320-wide window) inside the viewport.
 				let size = egui::vec2(ui.available_width(), design::BUTTON_HEIGHT);
 				ui.allocate_ui_with_layout(
 					size,
-					egui::Layout::right_to_left(egui::Align::Center),
+					egui::Layout::right_to_left(egui::Align::Center).with_main_wrap(true),
 					add,
 				)
 				.inner
