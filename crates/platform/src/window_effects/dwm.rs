@@ -155,8 +155,9 @@ fn set_custom_caption(hwnd: HWND, enabled: bool) -> Result<(), String> {
 				let _ = RemovePropW(hwnd, REQUESTED_MENU);
 				return Err("Could not install the custom-caption subclass.".to_owned());
 			}
-			// Let the callback mask the initial request too, without recording our own mask.
-			style
+			// Mask the first request here: writing the unchanged style sends no
+			// WM_STYLECHANGING, so the subclass never sees this initial value.
+			style & !(WS_SYSMENU.0 as isize)
 		} else {
 			RemoveWindowSubclass(hwnd, Some(custom_caption), 0)
 				.ok()
