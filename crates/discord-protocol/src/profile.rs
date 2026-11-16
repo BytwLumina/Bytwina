@@ -122,7 +122,7 @@ pub fn encode_profile_metadata(changes: &model::ProfileEdit) -> Option<serde_jso
 				"colors": &style.colors,
 			})
 		});
-		fields.insert("display_name_styles".into(), value);
+		fields.insert("display_name_styles".into(), serde_json::json!(value));
 	}
 	(!fields.is_empty()).then_some(serde_json::Value::Object(fields))
 }

@@ -804,8 +804,10 @@ impl Editor {
 				return;
 			};
 			let fresh = ServerDraft::from_profile(profile);
-			if let (Some(draft), Some(before)) = (&mut self.server_draft, &self.server_baseline) {
-				draft.rebase(before, &fresh);
+			if let (Some(draft), Some(before), Some(fresh)) =
+				(&mut self.server_draft, &self.server_baseline, &fresh)
+			{
+				draft.rebase(before, fresh);
 			}
 			self.server_baseline = fresh;
 			if self.server_draft.is_none() {
