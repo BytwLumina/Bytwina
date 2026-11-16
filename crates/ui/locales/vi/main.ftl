@@ -5314,6 +5314,7 @@ extensions-ui-capability-deletedmessages = Giữ tin nhắn đã xoá trong bộ
 lib-status-paste-cancelled-focus-the-message-and-paste-again = Đã huỷ dán; hãy chọn lại ô tin nhắn rồi dán lần nữa
 lib-status-pasted-text-exceeds-the-draft-limit = Văn bản dán vượt giới hạn bản nháp
 lib-status-paste-an-image-with-at-most-4-million-pixels = Hãy dán ảnh có tối đa 4 triệu điểm ảnh
+lib-paste-image-too-large = Hãy dán ảnh có tối đa 16 triệu điểm ảnh, hoặc đính kèm dưới dạng tệp
 lib-status-cancel-the-current-reply-before-restoring-this-message = Hãy huỷ trả lời hiện tại trước khi khôi phục tin nhắn này
 lib-status-text-restored-reselect-the-attachment-before-sending-again = Đã khôi phục văn bản; chọn lại tệp đính kèm trước khi gửi
 lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text = Hãy giữ hoặc xoá bản nháp hiện có trước khi khôi phục văn bản đang chờ

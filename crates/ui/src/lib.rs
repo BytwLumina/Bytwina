@@ -172,6 +172,13 @@ pub struct AttachmentPaste {
 	pub image: Option<std::sync::Arc<egui::ColorImage>>,
 }
 
+/// A pasted image is held decoded while it is encoded, so pixels bound its memory rather than
+/// its file size: 64 MiB for each RGBA copy, which fits a 5K screenshot. Larger images attach
+/// as files.
+pub const MAX_PASTE_PIXELS: usize = 16 * 1024 * 1024;
+pub const PASTE_PIXELS_EXCEEDED: &str =
+	"Paste an image with at most 16 million pixels, or attach it as a file";
+
 fn oversized_text(limit: u64) -> String {
 	crate::i18n::translate_args(
 		"public-upload-oversized",
@@ -1197,9 +1204,14 @@ impl MessagingUi {
 				} else if request
 					.image
 					.as_ref()
-					.is_some_and(|image| image.pixels.len() > 4 * 1024 * 1024)
+					.is_some_and(|image| image.pixels.len() > MAX_PASTE_PIXELS)
 				{
-					state.status = "lib-status-paste-an-image-with-at-most-4-million-pixels".into();
+					// The status line is easy to miss, so an oversized paste looked like nothing
+					// happened. A toast matches how the clipboard worker reports its rejections.
+					self.toasts.push(
+						design::Level::Error,
+						crate::i18n::translate("lib-paste-image-too-large"),
+					);
 				} else {
 					self.attachment_paste_requested = Some(request);
 					self.upload_busy = true;

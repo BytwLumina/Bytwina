@@ -1999,15 +1999,7 @@ fn role_chips(
 	user: Id,
 	guild: &model::GuildProfile,
 ) {
-	let Some(roles) = state.guild_roles(guild.guild) else {
-		return;
-	};
-	let assigned = state.profile_role_ids(user, guild);
-	let roles: Vec<_> = roles
-		.iter()
-		.rev()
-		.filter(|role| role.id != guild.guild && assigned.contains(&role.id))
-		.collect();
+	let roles = state.profile_roles(user, guild);
 	let max_width = ui.available_width();
 	let widths: Vec<_> = roles
 		.iter()

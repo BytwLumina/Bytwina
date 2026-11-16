@@ -5317,6 +5317,7 @@ extensions-ui-capability-deletedmessages = Keep loaded deleted messages in sessi
 lib-status-paste-cancelled-focus-the-message-and-paste-again = Paste cancelled; focus the message and paste again
 lib-status-pasted-text-exceeds-the-draft-limit = Pasted text exceeds the draft limit
 lib-status-paste-an-image-with-at-most-4-million-pixels = Paste an image with at most 4 million pixels
+lib-paste-image-too-large = Paste an image with at most 16 million pixels, or attach it as a file
 lib-status-cancel-the-current-reply-before-restoring-this-message = Cancel the current reply before restoring this message
 lib-status-text-restored-reselect-the-attachment-before-sending-again = Text restored; reselect the attachment before sending again
 lib-status-keep-or-clear-the-existing-draft-before-restoring-pending-text = Keep or clear the existing draft before restoring pending text
