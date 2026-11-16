@@ -5110,7 +5110,7 @@ voice-call-unavailable-waiting-for-the-previous-call-to-disconnect = Waiting for
 voice-call-unavailable-you-are-already-in-this-call = You are already in this call.
 voice-call-unavailable-joining-this-channel-is-unavailable-with-current-permission-information = Joining this channel is unavailable with current permission information.
 voice-request-call-audio-joining-this-call-is-no-longer-available = Joining this call is no longer available
-voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Call switch cancelled: previous call did not finish disconnecting. Reconnect before calling again.
+voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Call switch cancelled: previous call did not finish disconnecting. Try joining again.
 voice-show-call-switch-switch-calls = Switch calls?
 voice-show-call-switch-you-are-already-in-another-call-leave-it-and-join = You are already in another call. Leave it and join { $name }?
 voice-show-call-switch-the-selected-channel = the selected channel
@@ -5520,3 +5520,33 @@ profile-edit-server-banner = Server banner
 profile-edit-server-banner-hint = Add a banner that only this server sees
 profile-edit-server-banner-new = New server banner chosen; save to upload it
 profile-edit-server-banner-remove = Your server banner will be removed when you save
+# Context: moderation
+moderation-menu-timeout = Timeout { $name }
+# Context: moderation
+moderation-menu-kick = Kick { $name }
+# Context: moderation
+moderation-menu-ban = Ban { $name }
+# Context: moderation
+moderation-timeout-detail = They cannot send messages, react or join voice channels until the timeout ends.
+# Context: moderation
+moderation-kick-detail = They can rejoin with a new invite.
+# Context: moderation
+moderation-ban-detail = They cannot rejoin until the ban is removed.
+# Context: moderation
+moderation-duration-60-seconds = 60 seconds
+# Context: moderation
+moderation-remove-timeout = Remove timeout
+# Context: moderation
+moderation-delete-history = Delete message history
+# Context: moderation
+moderation-delete-none = Don't delete any
+# Context: moderation
+moderation-delete-hour = Previous hour
+# Context: moderation
+moderation-delete-day = Previous 24 hours
+# Context: moderation
+moderation-delete-week = Previous 7 days
+# Context: moderation
+moderation-confirm-timeout = Timeout
+# Context: moderation
+moderation-confirm-ban = Ban

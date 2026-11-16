@@ -280,6 +280,35 @@ pub fn query(query: &Query, now_millis: i64) -> Result<Value, DecodeError> {
 	}
 	Ok(value)
 }
+/// Member edit ending a timeout `seconds` after `now_millis`; `None` clears it.
+/// https://docs.discord.com/developers/resources/guild#modify-guild-member
+pub fn timeout(seconds: Option<u32>, now_millis: i64) -> Result<Value, DecodeError> {
+	let until = match seconds {
+		Some(seconds) => {
+			let end = (i128::from(now_millis) + i128::from(seconds) * 1000) * 1_000_000;
+			Some(crate::pins::format_cursor(end).map_err(|_| DecodeError)?)
+		}
+		None => None,
+	};
+	Ok(json!({"communication_disabled_until":until}))
+}
+#[cfg(test)]
+mod timeout_tests {
+	use super::*;
+
+	#[test]
+	fn timeout_bodies_end_after_the_duration_or_clear_it() {
+		assert_eq!(
+			timeout(Some(60), 1_700_000_000_000).unwrap(),
+			json!({"communication_disabled_until":"2023-11-14T22:14:20Z"})
+		);
+		assert_eq!(
+			timeout(None, 1_700_000_000_000).unwrap(),
+			json!({"communication_disabled_until":null})
+		);
+		assert!(timeout(Some(60), i64::MAX).is_err());
+	}
+}
 fn valid_image(bytes: &[u8], animated: bool) -> bool {
 	if bytes.is_empty() || bytes.len() > m::MAX_IMAGE_BYTES {
 		return false;

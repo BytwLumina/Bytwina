@@ -106,7 +106,18 @@ struct ProxyState {
 
 enum RequestContent {
 	Json(serde_json::Value),
-	Multipart { content_type: String, body: Vec<u8> },
+	/// Built after shared rate-limit admission, so an embedded timestamp starts then.
+	Prepared(Box<dyn Fn() -> Result<serde_json::Value, Failure> + Send + Sync>),
+	Multipart {
+		content_type: String,
+		body: Vec<u8>,
+	},
+}
+
+fn unix_millis() -> i64 {
+	std::time::SystemTime::now()
+		.duration_since(std::time::UNIX_EPOCH)
+		.map_or(0, |value| value.as_millis().min(i64::MAX as u128) as i64)
 }
 
 fn stream_preview_url(bytes: &[u8], key: &str) -> Result<String, Failure> {
@@ -321,6 +332,25 @@ impl DiscordApi {
 		)
 		.await
 	}
+	/// One typed request whose JSON body is built once shared rate-limit admission is reached,
+	/// for bodies that embed a timestamp like a member timeout.
+	async fn request_prepared(
+		&self,
+		method: Method,
+		path: &str,
+		build: Box<dyn Fn() -> Result<serde_json::Value, Failure> + Send + Sync>,
+		max_bytes: usize,
+	) -> Result<Vec<u8>, Failure> {
+		self.request_with_content(
+			method,
+			path,
+			Some(RequestContent::Prepared(build)),
+			max_bytes,
+			None,
+			None,
+		)
+		.await
+	}
 	async fn request_multipart_limited(
 		&self,
 		path: &str,
@@ -462,6 +492,7 @@ impl DiscordApi {
 			if let Some(content) = body.take() {
 				request = match content {
 					RequestContent::Json(body) => request.json(&body),
+					RequestContent::Prepared(build) => request.json(&build()?),
 					RequestContent::Multipart { content_type, body } => request
 						.header(
 							CONTENT_TYPE,

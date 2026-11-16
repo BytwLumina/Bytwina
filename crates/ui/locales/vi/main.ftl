@@ -5107,7 +5107,7 @@ voice-call-unavailable-waiting-for-the-previous-call-to-disconnect = Đang chờ
 voice-call-unavailable-you-are-already-in-this-call = Bạn đã ở trong cuộc gọi này rồi.
 voice-call-unavailable-joining-this-channel-is-unavailable-with-current-permission-information = Không thể tham gia kênh này với thông tin quyền hiện tại.
 voice-request-call-audio-joining-this-call-is-no-longer-available = Không thể tham gia cuộc gọi này nữa
-voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Đã huỷ chuyển cuộc gọi: cuộc gọi trước chưa ngắt xong. Hãy kết nối lại rồi gọi tiếp.
+voice-show-call-switch-call-switch-cancelled-previous-call-did-not-finish-disconnecting-reconnect = Hủy chuyển cuộc gọi: cuộc gọi trước chưa ngắt xong. Hãy thử tham gia lại.
 voice-show-call-switch-switch-calls = Chuyển cuộc gọi?
 voice-show-call-switch-you-are-already-in-another-call-leave-it-and-join = Bạn đang ở trong một cuộc gọi khác. Rời cuộc gọi đó và tham gia { $name }?
 voice-show-call-switch-the-selected-channel = kênh đã chọn
@@ -5517,3 +5517,33 @@ profile-edit-server-banner = Ảnh bìa máy chủ
 profile-edit-server-banner-hint = Thêm ảnh bìa chỉ máy chủ này nhìn thấy
 profile-edit-server-banner-new = Đã chọn ảnh bìa máy chủ mới; lưu để tải lên
 profile-edit-server-banner-remove = Ảnh bìa máy chủ sẽ bị xoá khi cậu lưu
+# Context: moderation
+moderation-menu-timeout = Chặn tạm thời { $name }
+# Context: moderation
+moderation-menu-kick = Đuổi { $name }
+# Context: moderation
+moderation-menu-ban = Cấm { $name }
+# Context: moderation
+moderation-timeout-detail = Họ không thể gửi tin nhắn, thả cảm xúc hay tham gia kênh thoại cho đến khi hết thời hạn chặn.
+# Context: moderation
+moderation-kick-detail = Họ có thể quay lại bằng một lời mời mới.
+# Context: moderation
+moderation-ban-detail = Họ không thể quay lại cho đến khi lệnh cấm được gỡ.
+# Context: moderation
+moderation-duration-60-seconds = 60 giây
+# Context: moderation
+moderation-remove-timeout = Gỡ chặn tạm thời
+# Context: moderation
+moderation-delete-history = Xoá lịch sử tin nhắn
+# Context: moderation
+moderation-delete-none = Không xoá tin nào
+# Context: moderation
+moderation-delete-hour = Một giờ trước
+# Context: moderation
+moderation-delete-day = 24 giờ trước
+# Context: moderation
+moderation-delete-week = 7 ngày trước
+# Context: moderation
+moderation-confirm-timeout = Chặn tạm thời
+# Context: moderation
+moderation-confirm-ban = Cấm

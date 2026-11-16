@@ -75,6 +75,7 @@ mod markdown;
 mod member_search;
 mod mentions;
 mod messaging_permissions;
+mod moderation;
 mod notification_settings;
 mod notifications;
 mod pending;
@@ -353,6 +354,7 @@ pub struct MessagingUi {
 	menu_role_change: bool,
 	pending_mention: Option<Id>,
 	contact_editor: contact_editor::ContactEditor,
+	moderation: moderation::Moderation,
 	profile_link: Option<String>,
 	/// The docked DM card's link awaiting confirmation, apart from the popout's.
 	dm_profile_link: Option<String>,
@@ -5943,6 +5945,11 @@ impl MessagingUi {
 					self.profile.hide();
 					self.contact_editor.open(user, true, state)
 				}
+				user_menu::Action::Moderate { guild, user, kind } => {
+					self.profile.hide();
+					self.moderation.open(guild, user, kind, state);
+					None
+				}
 				user_menu::Action::Shortcut(intent) => {
 					self.apply_shortcut(state, intent);
 					None
@@ -5962,6 +5969,9 @@ impl MessagingUi {
 			}
 		}
 		self.contact_editor.show(&ctx, state, &mut commands);
+		let settings_open = self.server_settings.is_open();
+		self.moderation
+			.show(&ctx, state, &mut commands, settings_open);
 		self.drain_profile(state, &mut commands);
 		// While the card's DM waits on a captcha, step aside for the dialog but keep its draft.
 		let direct_verifying = self.user_direct.is_some()
