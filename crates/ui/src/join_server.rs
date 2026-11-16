@@ -873,9 +873,12 @@ mod tests {
 		label: &str,
 	) {
 		let texts = frame(ctx, dialog, state, commands, size, vec![]);
+		// The dialog title can repeat an action's label (both read "Join a Server"), and the
+		// footer sits below it, so click the lowest matching text.
 		let rect = texts
 			.iter()
-			.find(|(text, _)| text == label)
+			.filter(|(text, _)| text == label)
+			.max_by(|a, b| a.1.center().y.total_cmp(&b.1.center().y))
 			.unwrap_or_else(|| panic!("Missing {label}: {texts:?}"))
 			.1;
 		assert!(egui::Rect::from_min_size(egui::Pos2::ZERO, size).contains_rect(rect));
