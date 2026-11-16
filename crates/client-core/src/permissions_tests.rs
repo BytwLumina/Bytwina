@@ -1842,7 +1842,9 @@ fn profile_roles_sort_by_position_not_the_assigned_array_order() {
 		joined_at: None,
 	};
 	let ordered: Vec<_> = state
-		.profile_roles(Id(2), &member)
+		// A member other than this account: the account's own roles come from the permission
+		// mirror, not from the profile array under test.
+		.profile_roles(Id(77), &member)
 		.iter()
 		.map(|role| role.id)
 		.collect();
