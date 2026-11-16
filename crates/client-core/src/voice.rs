@@ -158,6 +158,9 @@ pub struct State {
 	pub active: Option<Call>,
 	/// Last released local request: service departure or local-only abandonment.
 	pub departed: Option<(Id, u64)>,
+	/// A hangup the gateway stopped waiting for. Discord never confirmed it, but nothing
+	/// blocks the next join any more, so a pending call switch may go ahead.
+	pub abandoned: Option<(Id, u64)>,
 	pub incoming: Option<Id>,
 	/// One explicit outgoing attempt, confirmed only by service ringing recipients.
 	outgoing: Option<(Id, u64, bool)>,
@@ -595,6 +598,7 @@ impl ClientState {
 		self.voice.ring_error = None;
 		// A join puts this account back in the channel; an older departure must not outlive it.
 		self.voice.departed = None;
+		self.voice.abandoned = None;
 		self.voice.active = Some(Call {
 			channel,
 			guild,
@@ -1174,6 +1178,15 @@ impl ClientState {
 			} => {
 				if request == 0 || self.voice.active.is_none() {
 					self.status = message.into();
+				}
+				if request != 0
+					&& self
+						.voice
+						.active
+						.as_ref()
+						.is_none_or(|call| (call.channel, call.request) != (channel, request))
+				{
+					self.voice.abandoned = Some((channel, request));
 				}
 				if let Some(call) = &mut self.voice.active
 					&& call.channel == channel
