@@ -345,7 +345,7 @@ impl ScreenUi {
 					ui.set_width(ui.available_width());
 					ui.add(
 						egui::Label::new(
-							egui::RichText::new(self.status.as_str())
+							egui::RichText::new(crate::i18n::translate_if_key(self.status.as_str()))
 								.size(12.0)
 								.color(colors.muted),
 						)

@@ -662,8 +662,6 @@ Changing any of these without updating the test breaks CI:
   have no identified source and Default (11) falls back to the interface font.
 - Badges beside a message author or in a member row appear only for profiles already cached; a
   member who was never opened shows none.
-- `apps/desktop/src/screen.rs` still holds ~28 hardcoded English screen-share strings; the `ui` crate
-  is otherwise fully localised.
 
 ## 6.13 Code conventions
 
