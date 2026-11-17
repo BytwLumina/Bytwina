@@ -207,6 +207,78 @@ impl SavedMessages {
 	}
 }
 
+impl crate::State {
+	pub fn load_saved_messages(&mut self) -> Option<crate::Command> {
+		if self.saved_messages.loading() {
+			return None;
+		}
+		let request = self.saved_messages.next_request();
+		self.saved_messages.begin_list(request);
+		Some(crate::Command::SavedMessages(Command::Load { request }))
+	}
+	/// Save or re-time one message. `due_at` alone is sent, so unmentioned fields stay as they are.
+	pub fn save_message(
+		&mut self,
+		channel: Id,
+		message: Id,
+		due_at: Option<i64>,
+	) -> Option<crate::Command> {
+		if self.saved_messages.busy()
+			|| channel.0 == 0
+			|| message.0 == 0
+			|| due_at.is_some_and(|due| !model::saved_messages::valid_timestamp(due))
+			|| self.permission(
+				channel,
+				model::permissions::VIEW_CHANNEL | model::permissions::READ_MESSAGE_HISTORY,
+			) != Some(true)
+		{
+			return None;
+		}
+		// Two separate ceilings: plain bookmarks, and everything including reminders.
+		if self.saved_messages.saved(channel, message).is_none() {
+			if due_at.is_none()
+				&& self
+					.saved_messages
+					.rows()
+					.filter(|row| row.due_at.is_none())
+					.count() >= model::saved_messages::MAX_BOOKMARKS
+			{
+				self.saved_messages.error = Some("saved-messages-full");
+				return None;
+			}
+			if self.saved_messages.len() >= model::saved_messages::MAX_SAVED_MESSAGES {
+				self.saved_messages.error = Some("saved-messages-full");
+				return None;
+			}
+		}
+		let request = self.saved_messages.request.wrapping_add(1);
+		if !self.saved_messages.begin_write(request, channel, message) {
+			return None;
+		}
+		Some(crate::Command::SavedMessages(Command::Save {
+			channel,
+			message,
+			due_at,
+			request,
+		}))
+	}
+	/// Removal stays available for a row whose message the client can no longer see.
+	pub fn remove_saved_message(&mut self, channel: Id, message: Id) -> Option<crate::Command> {
+		if self.saved_messages.busy() || self.saved_messages.saved(channel, message).is_none() {
+			return None;
+		}
+		let request = self.saved_messages.request.wrapping_add(1);
+		if !self.saved_messages.begin_write(request, channel, message) {
+			return None;
+		}
+		Some(crate::Command::SavedMessages(Command::Remove {
+			channel,
+			message,
+			request,
+		}))
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -294,77 +366,5 @@ mod tests {
 			result: Ok((Id(1), Id(5))),
 		});
 		assert!(saved.is_empty());
-	}
-}
-
-impl crate::State {
-	pub fn load_saved_messages(&mut self) -> Option<crate::Command> {
-		if self.saved_messages.loading() {
-			return None;
-		}
-		let request = self.saved_messages.next_request();
-		self.saved_messages.begin_list(request);
-		Some(crate::Command::SavedMessages(Command::Load { request }))
-	}
-	/// Save or re-time one message. `due_at` alone is sent, so unmentioned fields stay as they are.
-	pub fn save_message(
-		&mut self,
-		channel: Id,
-		message: Id,
-		due_at: Option<i64>,
-	) -> Option<crate::Command> {
-		if self.saved_messages.busy()
-			|| channel.0 == 0
-			|| message.0 == 0
-			|| due_at.is_some_and(|due| !model::saved_messages::valid_timestamp(due))
-			|| self.permission(
-				channel,
-				model::permissions::VIEW_CHANNEL | model::permissions::READ_MESSAGE_HISTORY,
-			) != Some(true)
-		{
-			return None;
-		}
-		// Two separate ceilings: plain bookmarks, and everything including reminders.
-		if self.saved_messages.saved(channel, message).is_none() {
-			if due_at.is_none()
-				&& self
-					.saved_messages
-					.rows()
-					.filter(|row| row.due_at.is_none())
-					.count() >= model::saved_messages::MAX_BOOKMARKS
-			{
-				self.saved_messages.error = Some("saved-messages-full");
-				return None;
-			}
-			if self.saved_messages.len() >= model::saved_messages::MAX_SAVED_MESSAGES {
-				self.saved_messages.error = Some("saved-messages-full");
-				return None;
-			}
-		}
-		let request = self.saved_messages.request.wrapping_add(1);
-		if !self.saved_messages.begin_write(request, channel, message) {
-			return None;
-		}
-		Some(crate::Command::SavedMessages(Command::Save {
-			channel,
-			message,
-			due_at,
-			request,
-		}))
-	}
-	/// Removal stays available for a row whose message the client can no longer see.
-	pub fn remove_saved_message(&mut self, channel: Id, message: Id) -> Option<crate::Command> {
-		if self.saved_messages.busy() || self.saved_messages.saved(channel, message).is_none() {
-			return None;
-		}
-		let request = self.saved_messages.request.wrapping_add(1);
-		if !self.saved_messages.begin_write(request, channel, message) {
-			return None;
-		}
-		Some(crate::Command::SavedMessages(Command::Remove {
-			channel,
-			message,
-			request,
-		}))
 	}
 }

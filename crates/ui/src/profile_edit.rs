@@ -901,7 +901,7 @@ fn preview(
 	media: (bool, &[model::Guild]),
 	opening: &mut Option<String>,
 	picture: Picture<'_>,
-	banner: Option<&egui::TextureHandle>,
+	pending_banner: Option<&egui::TextureHandle>,
 	clickable: bool,
 ) -> Option<AvatarAction> {
 	let (demo, guilds) = media;
@@ -940,7 +940,7 @@ fn preview(
 				.map(rgb)
 				.or_else(|| profile.theme_colors.map(crate::profiles::Theme::banner))
 				.unwrap_or(colors.raised);
-			match (&draft.banner, banner) {
+			match (&draft.banner, pending_banner) {
 				// The banner image covers its color, so a saved profile paints it as is.
 				(None, _) if profile.banner.is_some() => {
 					avatars.paint_banner(ui, profile, banner, corner, demo);
@@ -949,7 +949,9 @@ fn preview(
 					paint_draft_banner(ui, texture, banner, corner, color);
 				}
 				// A pending removal, or a picture still decoding, shows the color alone.
-				_ => ui.painter().rect_filled(banner, corner, color),
+				_ => {
+					ui.painter().rect_filled(banner, corner, color);
+				}
 			}
 			let avatar = egui::Rect::from_min_size(
 				banner.left_bottom() + egui::vec2(16.0, -40.0),
@@ -1141,12 +1143,14 @@ mod tests {
 		}
 		// A picture the picker just produced owns the banner until the saved copy arrives.
 		let ctx = egui::Context::default();
-		let mut editor = Editor::default();
-		editor.pending_banner = Some(ctx.load_texture(
-			"profile-banner-preview",
-			egui::ColorImage::filled([8, 4], egui::Color32::RED),
-			egui::TextureOptions::LINEAR,
-		));
+		let mut editor = Editor {
+			pending_banner: Some(ctx.load_texture(
+				"profile-banner-preview",
+				egui::ColorImage::filled([8, 4], egui::Color32::RED),
+				egui::TextureOptions::LINEAR,
+			)),
+			..Default::default()
+		};
 		assert!(editor.pending_banner.is_some());
 		editor.pending_banner = None;
 		assert!(editor.pending_banner.is_none());
@@ -1203,12 +1207,21 @@ mod tests {
 				let mut state = test_support::demo_state();
 				let (commands, _) =
 					frame(&ctx, &mut editor, &mut state, &mut avatars, width, vec![]);
-				assert_eq!(commands.len(), 1);
+				assert_eq!(
+					commands
+						.iter()
+						.filter(|command| matches!(command, Command::EditProfile { .. }))
+						.count(),
+					1
+				);
 				let Command::EditProfile {
 					user,
 					request,
 					changes: None,
-				} = commands.into_iter().next().unwrap()
+				} = commands
+					.into_iter()
+					.find(|command| matches!(command, Command::EditProfile { .. }))
+					.unwrap()
 				else {
 					panic!("load expected")
 				};

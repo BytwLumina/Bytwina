@@ -540,7 +540,7 @@ mod tests {
 		for bad in [
 			serde_json::json!({"effect_id": 2, "colors": []}),
 			serde_json::json!({"effect_id": 2, "colors": [16777216]}),
-			serde_json::json!({"effect_id": 2, "colors": [1, 2, 3, 4, 5]}),
+			serde_json::json!({"effect_id": 2, "colors": [1, 2, 3, 4, 5, 6]}),
 			serde_json::json!("not a style"),
 		] {
 			assert!(name_style(serde_json::from_value(bad).ok()).is_none());

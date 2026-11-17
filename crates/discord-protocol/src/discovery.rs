@@ -158,7 +158,7 @@ mod tests {
 	#[test]
 	fn a_wrapper_page_keeps_supported_rows_and_drops_the_rest() {
 		let json = r#"{"guilds":[
-			{"id":"1","name":"Supported","description":"Hello","icon":"a_12","vanity_url_code":"chat",
+			{"id":"1","name":"Supported","description":"Hello","icon":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","vanity_url_code":"chat",
 			 "approximate_member_count":400,"approximate_presence_count":20,"primary_category_id":5,
 			 "features":["VERIFIED","COMMUNITY"]},
 			{"id":"2","name":"","icon":"../../evil"},
