@@ -121,8 +121,12 @@ impl ReadState {
 	pub(crate) fn row(&self, channel: Id) -> Option<Option<Id>> {
 		self.entries.get(&channel).map(|(id, _)| *id)
 	}
-	pub(crate) fn busy(&self) -> bool {
+	/// A read acknowledgement is in flight; a second one would be refused.
+	pub fn ack_pending(&self) -> bool {
 		self.pending.is_some()
+	}
+	pub(crate) fn busy(&self) -> bool {
+		self.ack_pending()
 	}
 	pub fn status(&self, channel: Id) -> Option<&'static str> {
 		self.status
@@ -1183,6 +1187,18 @@ mod navigation_tests {
 			assert_eq!(state.unread(Id(1)), Some(true));
 		}
 	}
+
+	#[test]
+	fn a_pending_acknowledgement_gates_a_second_read() {
+		let mut state = state(Some(Id(100)));
+		assert!(!state.read_state.ack_pending());
+		assert!(state.prepare_mark_read(Id(500)).is_some());
+		assert!(state.read_state.ack_pending());
+		assert!(state.prepare_mark_read(Id(500)).is_none());
+		state.read_state.cancel();
+		assert!(!state.read_state.ack_pending());
+	}
+
 	#[test]
 	fn marking_a_dm_or_group_unread_restores_the_badge_count() {
 		{

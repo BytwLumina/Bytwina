@@ -2052,6 +2052,23 @@ fn bar_button(
 	response
 }
 
+/// The same action while its acknowledgement is in flight: a spinner instead of a button.
+fn bar_saving(ui: &mut egui::Ui, label: &str, color: egui::Color32) {
+	// Right-to-left layouts place the first item at the right edge, so the spinner goes first.
+	let rtl = ui.layout().horizontal_placement() == egui::Align::Max;
+	if rtl {
+		ui.add(egui::Spinner::new().size(12.0).color(color));
+	}
+	ui.spacing_mut().item_spacing.x = 4.0;
+	ui.add(egui::Label::new(
+		crate::design::medium(ui, label, 13.0).color(color),
+	));
+	if !rtl {
+		ui.add(egui::Spinner::new().size(12.0).color(color));
+	}
+	ui.spacing_mut().item_spacing.x = 12.0;
+}
+
 fn banner_rect(area: egui::Rect) -> egui::Rect {
 	egui::Rect::from_min_size(
 		egui::pos2(area.left() + 16.0, area.top()),
@@ -2061,11 +2078,14 @@ fn banner_rect(area: egui::Rect) -> egui::Rect {
 
 /// Returns whether the reader asked to jump to unread or mark the channel read.
 /// Discord's unread bar; `summary` is "N new messages since HH:MM" once the divider is loaded.
+/// While an acknowledgement is already in flight the core would refuse another, so the action
+/// becomes a spinner instead of a button that silently does nothing.
 fn unread_banner(
 	ui: &mut egui::Ui,
 	rect: egui::Rect,
 	jump: bool,
 	summary: Option<&str>,
+	saving: bool,
 ) -> (bool, bool) {
 	let colors = crate::design::palette(ui);
 	let mut jump_unread = false;
@@ -2085,7 +2105,9 @@ fn unread_banner(
 			// Buttons first, so a long summary truncates into the space they leave.
 			ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
 				let mark = crate::i18n::translate("timeline-unread-banner-mark-as-read");
-				if bar_button(ui, &mark, crate::icons::Icon::Check, text).clicked() {
+				if saving {
+					bar_saving(ui, &mark, text);
+				} else if bar_button(ui, &mark, crate::icons::Icon::Check, text).clicked() {
 					mark_read = true;
 				}
 				let jump_label = crate::i18n::translate("timeline-unread-banner-jump-to-unread");
@@ -2725,8 +2747,13 @@ impl TimelineView {
 				.and_then(|channel| state.channel(channel))
 				.and_then(|channel| channel.last_message);
 			if state.show_missed_banner() && self.unread_dismissed != Some(latest) {
-				let (jump_unread, mark_read) =
-					unread_banner(ui, banner_rect(area), state.can_jump_unread(), None);
+				let (jump_unread, mark_read) = unread_banner(
+					ui,
+					banner_rect(area),
+					state.can_jump_unread(),
+					None,
+					state.read_state.ack_pending(),
+				);
 				if jump_unread {
 					self.unread_jump = true;
 					self.browse_away();
@@ -5087,8 +5114,13 @@ impl TimelineView {
 		{
 			self.unread_session |= self.unread_boundary.is_some();
 			let summary = self.unread_summary(state);
-			let (jump_unread, mark_read) =
-				unread_banner(ui, banner_rect(area), can_jump_unread, summary.as_deref());
+			let (jump_unread, mark_read) = unread_banner(
+				ui,
+				banner_rect(area),
+				can_jump_unread,
+				summary.as_deref(),
+				state.read_state.ack_pending(),
+			);
 			if jump_unread {
 				if state.can_jump_unread() {
 					self.unread_jump = true;
@@ -8180,6 +8212,34 @@ mod tests {
 			!labels.iter().any(|(text, _)| text == "Mark as read"),
 			"Mark as read left the banner up: {labels:?}"
 		);
+	}
+
+	#[test]
+	fn a_pending_read_acknowledgement_refuses_the_banner_mark_as_read() {
+		let ctx = egui::Context::default();
+		let mut state = live_unread_channel(8);
+		state.older_exhausted = false;
+		state
+			.timeline
+			.insert(text_message(5), false, false)
+			.unwrap();
+		state.timeline.delete(Id(5)).unwrap();
+		let mut view = TimelineView::default();
+		let _ = settle_banner(&ctx, &mut view, &mut state);
+		// A mark-read is already in flight, so the core would refuse a second one.
+		assert!(state.prepare_mark_channel_read(Id(20)).is_some());
+		let labels = settle_banner(&ctx, &mut view, &mut state);
+		let pos = labels
+			.iter()
+			.find(|(text, _)| text == "Mark as read")
+			.map(|(_, rect)| rect.center())
+			.expect("the saving banner still names the action it is waiting for");
+		click_at(&ctx, &mut view, &mut state, pos);
+		assert!(
+			view.mark_channel_read.is_none(),
+			"a refused acknowledgement must not request a second read"
+		);
+		assert!(state.read_state.ack_pending());
 	}
 
 	/// A synthetic DM with messages 11..=40 loaded and a read marker at `read`.
