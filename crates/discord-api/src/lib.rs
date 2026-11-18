@@ -1586,6 +1586,7 @@ impl DiscordApi {
 				request,
 				with_mutuals,
 				cosmetics,
+				badges_only,
 			} => {
 				let mut path = format!(
 					"/users/{user}/profile?with_mutual_guilds={with_mutuals}&with_mutual_friends={with_mutuals}&with_mutual_friends_count=false"
@@ -1602,42 +1603,47 @@ impl DiscordApi {
 					if profile.user.id != user {
 						return Err(Failure::Protocol);
 					}
-					// Optional names/artwork must not hold the entire profile behind slow reads
-					// or a shared service cooldown. Dropping these reads is safe: they never write.
-					let effect = profile.effect_sku.filter(|_| cosmetics.effects);
-					let frame = profile.frame_sku.filter(|_| cosmetics.frames);
-					let (board, catalog, badges) = tokio::join!(
-						tokio::time::timeout(
-							PROFILE_EXTRAS,
-							self.load_profile_board_games(&mut profile),
-						),
-						tokio::time::timeout(
-							PROFILE_EXTRAS,
-							self.load_profile_collectibles(effect, frame),
-						),
-						// Only the account's own profile is requested without mutuals.
-						tokio::time::timeout(
-							Duration::from_secs(2),
-							self.load_badge_catalog(user, !with_mutuals)
-						),
-					);
-					if let Ok(result) = board {
-						result?;
-					}
-					if let Ok(result) = badges {
-						profile.badge_catalog = result?.map(Box::new);
-						if !profile.valid() {
-							profile.badge_catalog = None;
+					// A badge warm-up pays for the profile read alone: its row never shows
+					// board games or effect artwork, and the catalog read keys off
+					// `with_mutuals`, which is false for the viewer's own profile.
+					if !badges_only {
+						// Optional names/artwork must not hold the entire profile behind slow reads
+						// or a shared service cooldown. Dropping these reads is safe: they never write.
+						let effect = profile.effect_sku.filter(|_| cosmetics.effects);
+						let frame = profile.frame_sku.filter(|_| cosmetics.frames);
+						let (board, catalog, badges) = tokio::join!(
+							tokio::time::timeout(
+								PROFILE_EXTRAS,
+								self.load_profile_board_games(&mut profile),
+							),
+							tokio::time::timeout(
+								PROFILE_EXTRAS,
+								self.load_profile_collectibles(effect, frame),
+							),
+							// Only the account's own profile is requested without mutuals.
+							tokio::time::timeout(
+								Duration::from_secs(2),
+								self.load_badge_catalog(user, !with_mutuals)
+							),
+						);
+						if let Ok(result) = board {
+							result?;
 						}
-					}
-					if let Ok(result) = catalog {
-						let (effect, frame) = result?;
-						profile.effect = effect.map(Box::new);
-						profile.frame = frame.map(Box::new);
-						// Artwork that would exceed the profile bound is dropped, not the profile.
-						if !profile.valid() {
-							profile.effect = None;
-							profile.frame = None;
+						if let Ok(result) = badges {
+							profile.badge_catalog = result?.map(Box::new);
+							if !profile.valid() {
+								profile.badge_catalog = None;
+							}
+						}
+						if let Ok(result) = catalog {
+							let (effect, frame) = result?;
+							profile.effect = effect.map(Box::new);
+							profile.frame = frame.map(Box::new);
+							// Artwork that would exceed the profile bound is dropped, not the profile.
+							if !profile.valid() {
+								profile.effect = None;
+								profile.frame = None;
+							}
 						}
 					}
 					Ok(Box::new(profile))
@@ -3432,6 +3438,7 @@ mod tests {
 					request: 1,
 					with_mutuals: true,
 					cosmetics: Default::default(),
+					badges_only: false,
 				}).await;
 				if case == 2 {
 					assert!(matches!(event, Event::Profile { result: Err(Failure::Expired), .. }));
@@ -3548,6 +3555,7 @@ mod tests {
 					request: 9,
 					with_mutuals: true,
 					cosmetics: Default::default(),
+					badges_only: false,
 				})
 				.await
 		});
@@ -3591,6 +3599,7 @@ mod tests {
 				request: 10,
 				with_mutuals: true,
 				cosmetics: Default::default(),
+				badges_only: false,
 			})
 			.await,
 			Event::Profile {
@@ -3607,6 +3616,7 @@ mod tests {
 				request: 11,
 				with_mutuals: true,
 				cosmetics: Default::default(),
+				badges_only: false,
 			})
 			.await,
 			Event::Profile {

@@ -519,8 +519,12 @@ through the global editor. A new command needs a `Command`/`Event` pair, an API 
 a reducer in `client-core`, and a demo arm in `apps/desktop/src/main.rs`.
 
 **Badges beside a name:** badges exist only on the full profile, never on the gateway, so
-`State::cached_badges` reads a profile that is already cached and never fetches. Do not call the
-profile endpoint per visible row.
+`State::cached_badges` reads a cached card or the small warmed badge row and never fetches inside
+rendering. A visible author or member with neither is warmed one row at a time by
+`State::preload_visible_badges` (`BADGE_PER_MINUTE = 6`, `BADGE_SCAN = 64`, one in flight), which
+sends a `badges_only` profile command that skips the optional reads and fills
+`ProfileCache::insert_badges` instead of the card cache. Badge request ids carry `BADGE_BIT` so a
+warm-up and a card preload never share an id. Do not call the profile endpoint per visible row.
 
 **Quest progress:** quest status may include `claimed_tier`, `orb_quantity_claimed`, stream heartbeat
 timestamps, per-task heartbeat expiry, `stream_progress_seconds` and the integer
@@ -660,8 +664,6 @@ Changing any of these without updating the test breaks CI:
   one without new data.
 - Name styles cover 14 of Discord's fonts (ids 1-6, 8-10, 12-16): Néo-Castel (7) and Hexagon (17)
   have no identified source and Default (11) falls back to the interface font.
-- Badges beside a message author or in a member row appear only for profiles already cached; a
-  member who was never opened shows none.
 - `apps/desktop/src/screen.rs` still holds ~28 hardcoded English screen-share strings; the `ui` crate
   is otherwise fully localised.
 

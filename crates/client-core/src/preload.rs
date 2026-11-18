@@ -16,6 +16,10 @@ pub const CONVERSATION_DWELL: Duration = Duration::from_millis(120);
 pub const PROFILE_DWELL: Duration = Duration::from_millis(300);
 /// Speculative requests per minute and kind, so sweeping across many rows stays a handful.
 pub(crate) const PER_MINUTE: usize = 12;
+/// Badge rows are decorative and wait behind the conversation and card shares.
+pub(crate) const BADGE_PER_MINUTE: usize = 6;
+/// A pass looks at the first rendered people only, so a long list cannot be walked on load.
+const BADGE_SCAN: usize = 64;
 /// Remembered targets, so revisiting an unchanged one does not repeat its request.
 const ATTEMPTS: usize = 64;
 /// A preloaded page is trusted this long, so an unchanged target may be loaded again afterwards.
@@ -24,9 +28,16 @@ const ATTEMPT_AGE: Duration = Duration::from_secs(5 * 60);
 const LOST: Duration = Duration::from_secs(30);
 /// Preload request ids carry this bit, so they never equal a click's own request id.
 const REQUEST_BIT: u64 = 1 << 63;
+/// Badge rows carry a second bit: they answer as `Command::Profile` too, so a card preload and
+/// a badge warm-up must not share an id or one result would land in the other's cache.
+const BADGE_BIT: u64 = 1 << 62;
 
 pub(crate) fn is_preload(request: u64) -> bool {
 	request & REQUEST_BIT != 0
+}
+
+pub(crate) fn is_badge_request(request: u64) -> bool {
+	request & BADGE_BIT != 0
 }
 
 /// Dwell, admission, in-flight and adoption tracking for one kind of preload target.
@@ -39,6 +50,10 @@ pub struct Intent<K> {
 	/// Each target with the version (latest message) it was last requested at.
 	attempts: VecDeque<(K, Option<Id>, Instant)>,
 	next: u64,
+	/// This kind's share of [`PER_MINUTE`]; a decorative kind takes fewer.
+	limit: usize,
+	/// A bit that namespaces this kind's request ids, when it shares a command with another kind.
+	tag: u64,
 }
 struct InFlight<K> {
 	target: K,
@@ -49,6 +64,11 @@ struct InFlight<K> {
 }
 impl<K> Default for Intent<K> {
 	fn default() -> Self {
+		Self::capped(PER_MINUTE, 0)
+	}
+}
+impl<K> Intent<K> {
+	fn capped(limit: usize, tag: u64) -> Self {
 		Self {
 			hovered: None,
 			in_flight: None,
@@ -56,6 +76,8 @@ impl<K> Default for Intent<K> {
 			sent: VecDeque::new(),
 			attempts: VecDeque::new(),
 			next: 0,
+			limit,
+			tag,
 		}
 	}
 }
@@ -110,7 +132,7 @@ impl<K: Copy + PartialEq> Intent<K> {
 		{
 			self.sent.pop_front();
 		}
-		if self.sent.len() >= PER_MINUTE
+		if self.sent.len() >= self.limit
 			|| self.attempts.iter().any(|(known, known_version, at)| {
 				(*known, *known_version) == (target, version)
 					&& now.saturating_duration_since(*at) < ATTEMPT_AGE
@@ -123,8 +145,8 @@ impl<K: Copy + PartialEq> Intent<K> {
 		}
 		self.attempts.push_back((target, version, now));
 		self.sent.push_back(now);
-		self.next = self.next.wrapping_add(1) & !REQUEST_BIT;
-		let request = REQUEST_BIT | self.next;
+		self.next = self.next.wrapping_add(1) & !(REQUEST_BIT | self.tag);
+		let request = REQUEST_BIT | self.tag | self.next;
 		self.in_flight = Some(InFlight {
 			target,
 			request,
@@ -168,6 +190,12 @@ impl<K: Copy + PartialEq> Intent<K> {
 			flight.stale = true;
 		}
 	}
+	/// Whether `request` is the one this kind currently has in flight.
+	pub(crate) fn owns(&self, request: u64) -> bool {
+		self.in_flight
+			.as_ref()
+			.is_some_and(|flight| flight.request == request)
+	}
 	/// Routes a preload's result. A failed target is forgotten so a later rest may try again.
 	pub(crate) fn arrived(&mut self, request: u64, ok: bool) -> Arrival {
 		let flight = self.in_flight.take_if(|flight| flight.request == request);
@@ -187,15 +215,27 @@ impl<K: Copy + PartialEq> Intent<K> {
 	}
 }
 
-#[derive(Default)]
 pub struct Preload {
 	pub(crate) conversations: Intent<Id>,
 	/// Profiles by `(user, guild)`, as a card would request them.
 	pub(crate) profiles: Intent<(Id, Option<Id>)>,
+	/// Badge rows for visible people; one request, filled without opening a card.
+	pub(crate) badges: Intent<Id>,
 	/// The recent-page request of a click whose adopted preload was turned away.
 	pub(crate) retry: Option<Command>,
 	/// The same for a profile card.
 	pub(crate) profile_retry: Option<Command>,
+}
+impl Default for Preload {
+	fn default() -> Self {
+		Self {
+			conversations: Intent::default(),
+			profiles: Intent::default(),
+			badges: Intent::capped(BADGE_PER_MINUTE, BADGE_BIT),
+			retry: None,
+			profile_retry: None,
+		}
+	}
 }
 
 /// Where a preload's result goes.
@@ -227,6 +267,7 @@ impl State {
 		self.preload.profile_retry = None;
 		self.preload.conversations.interrupt();
 		self.preload.profiles.interrupt();
+		self.preload.badges.interrupt();
 	}
 
 	/// Call once per frame with the conversation under the pointer and the one pressed, if any.
@@ -289,6 +330,25 @@ impl State {
 		Some(Command::Prefetch(Box::new(
 			self.profile_command(user, guild, request),
 		)))
+	}
+	/// Warms the badge row for the first visible person with no cached profile or badges.
+	/// One request per call, only spare capacity, never for the open card.
+	pub fn preload_visible_badges(&mut self, visible: &[Id], now: Instant) -> Option<Command> {
+		if !self.can_preload() {
+			return None;
+		}
+		let user = visible
+			.iter()
+			.copied()
+			.take(BADGE_SCAN)
+			.find(|user| {
+				user.0 != 0
+					&& self.profile_cache.peek(*user, now).is_none()
+					&& self.profile_cache.badges(*user, now).is_none()
+					&& !self.profile.as_ref().is_some_and(|view| view.user == *user)
+			})?;
+		let request = self.preload.badges.admit(user, None, now)?;
+		Some(Command::Prefetch(Box::new(self.badge_command(user, request))))
 	}
 	/// How long until a resting pointer becomes intent, so the UI can wake without input.
 	pub fn preload_wake(&self, now: Instant) -> Option<Duration> {
@@ -706,5 +766,93 @@ mod tests {
 		);
 		state.demo = true;
 		assert!(rest(&mut state, 9, later + Duration::from_secs(61)).is_none());
+	}
+
+	#[test]
+	fn a_visible_badge_warm_up_sends_one_badges_only_request() {
+		let now = Instant::now();
+		let mut state = state();
+		let Some(Command::Prefetch(command)) = state.preload_visible_badges(&[Id(2), Id(3)], now)
+		else {
+			panic!("badge warm-up expected");
+		};
+		assert!(matches!(
+			*command,
+			Command::Profile {
+				user: Id(2),
+				guild: None,
+				badges_only: true,
+				..
+			}
+		));
+		assert!(
+			state.preload_visible_badges(&[Id(3)], now).is_none(),
+			"one badge request at a time"
+		);
+	}
+
+	#[test]
+	fn a_visible_badge_warm_up_skips_cached_people() {
+		let now = Instant::now();
+		let mut state = state();
+		state.profile_cache.insert(Id(2), None, profile(2), now);
+		state.profile_cache.insert_badges(Id(3), vec![], now);
+		assert!(
+			state.preload_visible_badges(&[Id(2), Id(3)], now).is_none(),
+			"a cached card or badge row needs no warm-up"
+		);
+	}
+
+	#[test]
+	fn a_badge_warm_up_and_a_card_preload_never_share_a_request_id() {
+		let now = Instant::now();
+		let mut state = state();
+		let Some(Command::Prefetch(badge_command)) = state.preload_visible_badges(&[Id(2)], now)
+		else {
+			panic!("badge warm-up expected");
+		};
+		let Some(Command::Prefetch(card_command)) =
+			state.preload_profile(None, Some((Id(3), None)), now)
+		else {
+			panic!("card preload expected");
+		};
+		let (Command::Profile { request: badge, .. }, Command::Profile { request: card, .. }) =
+			(&*badge_command, &*card_command)
+		else {
+			panic!("both warm-ups are profile requests");
+		};
+		assert_ne!(
+			badge, card,
+			"both answer as Event::Profile, so one id may only mean one of them"
+		);
+	}
+
+	fn profile(id: u64) -> model::UserProfile {
+		let mut user = test_message().author;
+		user.id = Id(id);
+		model::UserProfile {
+			user,
+			username: "synthetic".into(),
+			global_name: None,
+			banner: None,
+			accent_color: None,
+			bio: String::new(),
+			pronouns: String::new(),
+			badges: vec![],
+			connections: vec![],
+			mutual_guilds: vec![],
+			mutual_friends: vec![],
+			guild: None,
+			theme_colors: None,
+			clan: None,
+			board: None,
+			effect_sku: None,
+			frame_sku: None,
+			effect: None,
+			frame: None,
+			badge_catalog: None,
+			private: false,
+			limited: false,
+		}
 	}
 }

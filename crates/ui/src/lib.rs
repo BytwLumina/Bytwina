@@ -1764,6 +1764,7 @@ impl MessagingUi {
 								profiles::member_presence(state, member, guild);
 							let subtitle = profiles::subtitle(custom, activities);
 							let in_voice = voice_users.contains(&member.user.id);
+							self.preload.member(member.user.id);
 							let voice_label = in_voice.then(|| language.text("member-in-voice"));
 							let online =
 								status.is_some_and(|s| matches!(s, "online" | "idle" | "dnd"));
@@ -1892,8 +1893,8 @@ impl MessagingUi {
 													)
 												},
 											);
-											// Badges from a cached profile only; the member list never
-											// opens one, so an unvisited member shows none.
+											// Badges from a cached card or the small warmed row; a
+											// member with neither is warmed by the preload pass.
 											let member_badges: Vec<_> = state
 												.cached_badges(member.user.id)
 												.map(|badges| {
@@ -6067,6 +6068,7 @@ impl MessagingUi {
 			state,
 			self.preload_on_hover,
 			profile_guild,
+			&self.timeline.visible_authors,
 			&mut commands,
 		);
 		if !commands.is_empty() {
