@@ -2060,7 +2060,9 @@ fn bar_saving(ui: &mut egui::Ui, label: &str, color: egui::Color32) {
 		ui.add(egui::Spinner::new().size(12.0).color(color));
 	}
 	ui.spacing_mut().item_spacing.x = 4.0;
-	ui.add(egui::Label::new(crate::design::medium(ui, label, 13.0).color(color)));
+	ui.add(egui::Label::new(
+		crate::design::medium(ui, label, 13.0).color(color),
+	));
 	if !rtl {
 		ui.add(egui::Spinner::new().size(12.0).color(color));
 	}
