@@ -12,6 +12,8 @@ pub(crate) struct Preload {
 	person: Option<(Id, bool)>,
 	/// The hovered server's target channel at a state revision; resolving it can scan channels.
 	guild_target: Option<(Id, u64, Option<Id>)>,
+	/// Members rendered this frame; the badge warm-up picks one per pass.
+	members: Vec<Id>,
 }
 impl Preload {
 	/// Notes a conversation row; `channel` is resolved only while the pointer is on the row.
@@ -51,6 +53,12 @@ impl Preload {
 	pub(crate) fn person(&mut self, person: Option<(Id, bool)>) {
 		self.person = person;
 	}
+	/// Notes a rendered member, so a visible badge row can be warmed without a card.
+	pub(crate) fn member(&mut self, user: Id) {
+		if self.members.len() < client_core::member_search::LIMIT && !self.members.contains(&user) {
+			self.members.push(user);
+		}
+	}
 	/// Sends at most one preload per kind for this frame and clears the notes for the next one.
 	/// `profile_guild` is the server context a card opened now would use.
 	pub(crate) fn finish(
@@ -59,6 +67,7 @@ impl Preload {
 		state: &mut State,
 		enabled: bool,
 		profile_guild: Option<Id>,
+		visible_authors: &[Id],
 		commands: &mut Vec<Command>,
 	) {
 		let Self {
@@ -66,6 +75,7 @@ impl Preload {
 			pressed,
 			person,
 			guild_target,
+			members,
 		} = std::mem::take(self);
 		// Kept only while a server icon stays under the pointer.
 		self.guild_target = guild_target.filter(|_| conversation.is_some());
@@ -79,6 +89,13 @@ impl Preload {
 		let target = person.map(|(user, _)| (user, profile_guild));
 		let pressed = person.filter(|(_, pressed)| *pressed).and(target);
 		if let Some(command) = state.preload_profile(target, pressed, now) {
+			commands.push(command);
+		}
+		// Visible rows fill their badge rows too, at the same low priority as a preload.
+		if let Some(command) = state.preload_visible_badges(visible_authors, now) {
+			commands.push(command);
+		}
+		if let Some(command) = state.preload_visible_badges(&members, now) {
 			commands.push(command);
 		}
 		// A resting pointer produces no input events, so wake once when its dwell completes.
@@ -120,7 +137,7 @@ mod tests {
 				},
 			);
 			let mut commands = Vec::new();
-			preload.finish(&ctx, state, true, None, &mut commands);
+			preload.finish(&ctx, state, true, None, &[], &mut commands);
 			let wake = ctx.has_requested_repaint();
 			output.drop_without_applying_deltas();
 			(commands, row.center(), wake)
@@ -157,7 +174,7 @@ mod tests {
 		// A pressed person preloads the card their click opens, in the given server context.
 		preload.person(Some((Id(9), true)));
 		let mut commands = Vec::new();
-		preload.finish(&ctx, &mut state, true, None, &mut commands);
+		preload.finish(&ctx, &mut state, true, None, &[], &mut commands);
 		assert!(matches!(
 			commands.as_slice(),
 			[Command::Prefetch(command)]
@@ -165,7 +182,7 @@ mod tests {
 		));
 		let mut disabled = Vec::new();
 		preload.person(Some((Id(10), true)));
-		preload.finish(&ctx, &mut state, false, None, &mut disabled);
+		preload.finish(&ctx, &mut state, false, None, &[], &mut disabled);
 		assert!(disabled.is_empty());
 	}
 }

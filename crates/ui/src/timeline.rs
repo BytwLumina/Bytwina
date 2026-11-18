@@ -3627,8 +3627,9 @@ impl TimelineView {
 													},
 												)
 												.on_hover_cursor(egui::CursorIcon::PointingHand);
-												// Profile badges beside the author name, like Discord. Only a
-												// profile already cached has them; nothing is fetched here.
+												// Profile badges beside the author name, like Discord. A
+												// cached card or warmed row already has them; nothing is
+												// fetched while rendering.
 												let author_badges: Vec<_> = state
 													.cached_badges(message.author.id)
 													.map(|badges| {

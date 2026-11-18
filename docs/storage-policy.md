@@ -744,6 +744,14 @@ previews are loaded but not played until the picker shows them.
 GIF home hover reads retain at most twelve timestamps and send at most twelve requests per
 minute, including failed/cleared-view retries. Cache hits consume no slot; explicit clicks and
 retries keep their normal behavior. Timestamp allocation is included in the GIF byte estimate.
+Badge rows beside a visible message author or member start on the frame they render, without a
+pointer: one request at a time, at most six per minute (counted separately from conversation and
+profile preloads), never for the open card or for someone with a cached card or badge row, and only
+the first 64 rendered people are scanned. The request is the profile request with `badges_only`, so
+the optional board, collectible and badge-catalog reads are skipped; the result fills a separate
+256-entry, 256 KiB, 15-minute badge cache that never evicts or enlarges the card cache. Badge
+request ids carry their own bit, so a badge row and a card preload never share an id. No disk data
+is written.
 Connection replacement, READY, disconnect and resync discard conversation/profile flight and
 adoption markers while preserving the minute caps and request counters. Adopted profile results
 may finish an open card, but invalidated results cannot refill the profile cache. The desktop

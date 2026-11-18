@@ -1968,6 +1968,7 @@ mod tests {
 			request: 100,
 			with_mutuals: true,
 			cosmetics: Default::default(),
+			badges_only: false,
 		};
 		assert!(matches!(
 			reject_prefetch_at_capacity(&mut tasks, &profile),

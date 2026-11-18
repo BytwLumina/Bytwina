@@ -14,15 +14,24 @@ use std::{
 pub const CACHE_ENTRIES: usize = 32;
 pub const CACHE_BYTES: usize = 1024 * 1024;
 pub const CACHE_TTL: Duration = Duration::from_secs(15 * 60);
+/// A badge row warmed for a visible author; the full card cache must not be evicted for it.
+pub const BADGE_CACHE_ENTRIES: usize = 256;
+pub const BADGE_CACHE_BYTES: usize = 256 * 1024;
 #[derive(Default)]
 pub struct ProfileCache {
 	entries: VecDeque<CachedProfile>,
+	badges: VecDeque<CachedBadges>,
 }
 struct CachedProfile {
 	user: Id,
 	guild: Option<Id>,
 	fetched: Instant,
 	data: UserProfile,
+}
+struct CachedBadges {
+	user: Id,
+	fetched: Instant,
+	badges: Vec<model::ProfileBadge>,
 }
 impl ProfileCache {
 	fn get(&mut self, user: Id, guild: Option<Id>, now: Instant) -> Option<&UserProfile> {
@@ -33,7 +42,7 @@ impl ProfileCache {
 			.find(|entry| entry.user == user && entry.guild == guild)
 			.map(|entry| &entry.data)
 	}
-	fn insert(&mut self, user: Id, guild: Option<Id>, data: UserProfile, now: Instant) {
+	pub(crate) fn insert(&mut self, user: Id, guild: Option<Id>, data: UserProfile, now: Instant) {
 		self.entries
 			.retain(|entry| !(entry.user == user && entry.guild == guild));
 		self.entries.push_back(CachedProfile {
@@ -46,10 +55,53 @@ impl ProfileCache {
 			self.entries.pop_front();
 		}
 	}
+	/// The warmed badge row for `user`, while it is unexpired.
+	pub(crate) fn badges(&self, user: Id, now: Instant) -> Option<&[model::ProfileBadge]> {
+		self.badges
+			.iter()
+			.find(|row| {
+				row.user == user && now.saturating_duration_since(row.fetched) <= CACHE_TTL
+			})
+			.map(|row| row.badges.as_slice())
+	}
+	pub(crate) fn insert_badges(
+		&mut self,
+		user: Id,
+		badges: Vec<model::ProfileBadge>,
+		now: Instant,
+	) {
+		self.badges.retain(|row| row.user != user);
+		self.badges.push_back(CachedBadges {
+			user,
+			fetched: now,
+			badges,
+		});
+		while self.badges.len() > BADGE_CACHE_ENTRIES || self.badges_bytes() > BADGE_CACHE_BYTES {
+			self.badges.pop_front();
+		}
+	}
 	pub fn bytes(&self) -> usize {
 		self.entries
 			.iter()
 			.map(|entry| size_of::<CachedProfile>() + entry.data.bytes())
+			.sum()
+	}
+	fn badges_bytes(&self) -> usize {
+		self.badges
+			.iter()
+			.map(|row| {
+				size_of::<CachedBadges>()
+					+ row
+						.badges
+						.iter()
+						.map(|badge| {
+							badge.id.capacity()
+								+ badge.description.capacity()
+								+ badge.icon.as_ref().map_or(0, String::capacity)
+								+ badge.art.as_ref().map_or(0, String::capacity)
+						})
+						.sum::<usize>()
+			})
 			.sum()
 	}
 	/// Whether an unexpired profile for `(user, guild)` is cached, without evicting anything.
@@ -61,7 +113,7 @@ impl ProfileCache {
 		})
 	}
 	/// A cached, unexpired global profile, without refreshing or evicting anything.
-	fn peek(&self, user: Id, now: Instant) -> Option<&UserProfile> {
+	pub(crate) fn peek(&self, user: Id, now: Instant) -> Option<&UserProfile> {
 		self.entries
 			.iter()
 			.find(|entry| {
@@ -80,10 +132,12 @@ impl ProfileCache {
 	/// Drops every cached view of `user`, such as after a friendship changes what they share.
 	pub(crate) fn forget(&mut self, user: Id) {
 		self.entries.retain(|entry| entry.user != user);
+		self.badges.retain(|row| row.user != user);
 	}
 	/// Keeps only cached views of users for whom `keep` holds.
 	pub(crate) fn retain_users(&mut self, mut keep: impl FnMut(Id) -> bool) {
 		self.entries.retain(|entry| keep(entry.user));
+		self.badges.retain(|row| keep(row.user));
 	}
 	pub fn len(&self) -> usize {
 		self.entries.len()
@@ -94,6 +148,8 @@ impl ProfileCache {
 	pub fn clear(&mut self) {
 		self.entries.clear();
 		self.entries.shrink_to_fit();
+		self.badges.clear();
+		self.badges.shrink_to_fit();
 	}
 }
 
@@ -541,19 +597,14 @@ impl State {
 	pub fn request_profile(&mut self, user: Id, guild: Option<Id>) -> Option<Command> {
 		self.request_profile_at(user, guild, Instant::now())
 	}
-	/// Badges from an already cached profile, for the badge row beside a message author.
-	/// Opens nothing and never requests; an uncached author simply has no badges yet.
+	/// Badges from a cached profile, for the badge row beside a message author. Opens nothing:
+	/// an uncached author is warmed in the background and has no badges until that arrives.
 	pub fn cached_badges(&self, user: Id) -> Option<&[model::ProfileBadge]> {
 		let now = Instant::now();
 		self.profile_cache
-			.entries
-			.iter()
-			.find(|entry| {
-				entry.user == user
-					&& entry.guild.is_none()
-					&& now.saturating_duration_since(entry.fetched) < crate::profile::CACHE_TTL
-			})
-			.map(|entry| entry.data.badges.as_slice())
+			.peek(user, now)
+			.map(|profile| profile.badges.as_slice())
+			.or_else(|| self.profile_cache.badges(user, now))
 	}
 
 	pub fn request_profile_at(
@@ -604,6 +655,18 @@ impl State {
 			request,
 			with_mutuals: self.user.as_ref().is_none_or(|own| own.id != user),
 			cosmetics: self.profile_cosmetics,
+			badges_only: false,
+		}
+	}
+	/// A warm-up that fills the badge row; one request, no optional extras.
+	pub(crate) fn badge_command(&self, user: Id, request: u64) -> Command {
+		Command::Profile {
+			user,
+			guild: None,
+			request,
+			with_mutuals: self.user.as_ref().is_none_or(|own| own.id != user),
+			cosmetics: model::CosmeticPreferences::default(),
+			badges_only: true,
 		}
 	}
 	pub(crate) fn profile_cached(&self, user: Id, guild: Option<Id>, now: Instant) -> bool {
@@ -664,6 +727,23 @@ impl State {
 			&& *failure != Failure::Capacity
 		{
 			self.fail(*failure);
+			return;
+		}
+		// A badge warm-up fills the small row cache only; an expired, refused or failed result
+		// forgets the target so a later visible pass may try again. It answers as a profile
+		// request, so the tag decides where it lands, never the shape of the payload.
+		if preload::is_badge_request(request) {
+			if self.preload.badges.owns(request) {
+				let ok = match &result {
+					Ok(data) if accepts(user, guild, data) => {
+						self.profile_cache
+							.insert_badges(user, data.badges.clone(), Instant::now());
+						true
+					}
+					_ => false,
+				};
+				self.preload.badges.arrived(request, ok);
+			}
 			return;
 		}
 		if preload::is_preload(request) {
@@ -1376,6 +1456,7 @@ mod tests {
 				request: new,
 				with_mutuals: true,
 				cosmetics: Default::default(),
+				badges_only: false,
 			});
 			assert!(!state.profile.as_ref().unwrap().loading);
 			assert!(state.profile.as_ref().unwrap().error.is_some());
@@ -1727,5 +1808,52 @@ mod tests {
 			assert_eq!(state.profile_cache.len(), 1);
 			assert!(state.channels.iter().all(|channel| channel.id != Id(3)));
 		}
+	}
+
+	#[test]
+	fn a_badge_warm_up_fills_its_row_without_touching_the_card_cache() {
+		let mut state = own_state();
+		let now = Instant::now();
+		let Some(Command::Prefetch(command)) = state.preload_visible_badges(&[Id(2)], now) else {
+			panic!("badge warm-up expected");
+		};
+		let Command::Profile {
+			request,
+			guild: None,
+			badges_only: true,
+			..
+		} = *command
+		else {
+			panic!("a warm-up is not a card request");
+		};
+		let mut data = own_data("Synthetic friend");
+		data.user.id = Id(2);
+		data.badges = vec![model::ProfileBadge {
+			id: "staff".into(),
+			description: "Staff".into(),
+			icon: None,
+			art: None,
+		}];
+		state.apply_profile(Id(2), None, request, Ok(data));
+		assert_eq!(state.cached_badges(Id(2)).map(|row| row.len()), Some(1));
+		assert_eq!(state.profile_cache.len(), 0, "the card cache must not grow");
+		assert!(state.profile.is_none(), "a warm-up never opens a card");
+	}
+
+	#[test]
+	fn a_badge_response_for_another_user_is_refused_and_forgotten() {
+		let mut state = own_state();
+		let now = Instant::now();
+		let Some(Command::Prefetch(command)) = state.preload_visible_badges(&[Id(2)], now) else {
+			panic!("badge warm-up expected");
+		};
+		let Command::Profile { request, .. } = *command else {
+			panic!()
+		};
+		state.apply_profile(Id(3), None, request, Ok(own_data("Someone else")));
+		assert!(state.cached_badges(Id(2)).is_none());
+		assert!(state.cached_badges(Id(3)).is_none());
+		// The refused target is forgotten, so the next visible pass may ask again.
+		assert!(state.preload_visible_badges(&[Id(2)], now).is_some());
 	}
 }

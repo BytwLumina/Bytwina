@@ -334,6 +334,8 @@ pub enum Command {
 		with_mutuals: bool,
 		/// Hidden effects and frames skip their optional catalog read.
 		cosmetics: model::CosmeticPreferences,
+		/// A badge row only needs the profile's badge list; skip the three optional reads.
+		badges_only: bool,
 	},
 	CancelProfile,
 	/// The account's own badge order and hidden set; one explicit write.
