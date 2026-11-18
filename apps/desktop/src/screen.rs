@@ -562,10 +562,7 @@ impl Screen {
 			.rtc
 			.take()
 			.ok_or("screen-share-missing-rtc-identity")?;
-		let (token, endpoint) = pending
-			.server
-			.take()
-			.ok_or("screen-share-missing-server")?;
+		let (token, endpoint) = pending.server.take().ok_or("screen-share-missing-server")?;
 		let session = voice::Secret::new(pending.session.to_string())
 			.map_err(|_| "screen-share-invalid-session")?;
 		let credentials = voice::VoiceConnection {
