@@ -99,7 +99,7 @@ file or a socket; `client-core` performing HTTP/WS itself.
 |---|---|
 | `Command` **70** variants, `Event` **90** variants | `crates/client-core/src/lib.rs` |
 | Locale catalogs: **15** languages (14 files + System) | `crates/ui/src/i18n.rs` `Language::ALL` |
-| `en-US` keys **3077**; `vi` **3077**; most others **2649**; `cs` 2727, `zh-*` 2721, `de` 2657 | `crates/ui/locales/*/main.ftl` |
+| `en-US` keys **3105**; `vi` **3105**; most others **2677**; `cs` 2755, `zh-*` 2749, `de` 2685 | `crates/ui/locales/*/main.ftl` |
 | SQLite schema **29** (`NATIVE_SCHEMA` = `READABLE_SCHEMA`) | `crates/local-store/src/lib.rs` |
 | Client build advertised **634_304** | `crates/client-core/src/fingerprint.rs` |
 | Timeline window **500 msgs / 4 MiB / 1024 mutations** | `crates/session-cache/src/lib.rs` |
