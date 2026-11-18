@@ -1285,7 +1285,7 @@ impl MessagingUi {
 				self.screen_tile(ui, rect, compact);
 				self.screen
 					.capture_status
-					.map(crate::i18n::translate)
+					.map(crate::i18n::translate_if_key)
 					.unwrap_or_else(|| {
 						crate::i18n::translate("voice-tile-your-screen-local-preview")
 					})
@@ -1462,7 +1462,7 @@ impl MessagingUi {
 					let status = if self.voice_stream_status.is_empty() {
 						crate::i18n::translate("voice-stream-tile-connecting-to-the-stream")
 					} else {
-						crate::i18n::translate(self.voice_stream_status)
+						crate::i18n::translate_if_key(self.voice_stream_status)
 					};
 					let spinner = egui::Rect::from_center_size(
 						rect.center() - egui::vec2(0.0, 18.0),

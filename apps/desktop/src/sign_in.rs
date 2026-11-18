@@ -602,43 +602,134 @@ impl Desktop {
 				egui::ScrollArea::vertical()
 					.id_salt("sign-in-scroll")
 					.show(ui, |ui| {
+						// A wide window splits into a brand pane and the card, so the first screen
+						// has a subject instead of a lone form. A narrow one keeps the centred
+						// column: the card must never be squeezed below its own text.
+						let wide = ui.available_width() >= 940.0;
 						let card = if self.sign_in_height > 0.0 {
 							self.sign_in_height + 72.0
 						} else {
 							560.0
 						};
-						ui.add_space(((ui.available_height() - card) * 0.4).max(16.0));
-						ui.vertical_centered(|ui| {
-							ui.allocate_ui_with_layout(
-								egui::vec2(ui.available_width().min(460.0), 0.0),
-								egui::Layout::top_down(egui::Align::Min),
-								|ui| {
-									self.sign_in_card(ui);
-									#[cfg(feature = "demo")]
-									if self.fixture_only {
-										self.sign_in_preview(ui);
-									}
-									// Centring needs the height this actually took; it is
-									// stable between frames.
-									self.sign_in_height = ui.min_rect().height();
-								},
-							);
-							ui.add_space(18.0);
-							ui.label(
-								egui::RichText::new(ui::i18n::translate(
-									"main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord",
-								))
-								.size(12.0)
-								.color(p.muted),
-							);
-							ui.add_space(24.0);
-						});
+						if wide {
+							let width = ui.available_width().min(1040.0);
+							ui.add_space(64.0);
+							ui.horizontal_top(|ui| {
+								ui.add_space(((ui.available_width() - width) * 0.5).max(0.0));
+								ui.allocate_ui_with_layout(
+									egui::vec2((width - 460.0 - 56.0).max(280.0), 0.0),
+									egui::Layout::top_down(egui::Align::Min),
+									|ui| self.sign_in_brand(ui),
+								);
+								ui.add_space(56.0);
+								ui.allocate_ui_with_layout(
+									egui::vec2(460.0, 0.0),
+									egui::Layout::top_down(egui::Align::Min),
+									|ui| {
+										// The pane above already carries the mark and wordmark.
+										self.sign_in_card(ui, false);
+										#[cfg(feature = "demo")]
+										if self.fixture_only {
+											self.sign_in_preview(ui);
+										}
+										ui.add_space(18.0);
+										self.sign_in_footer(ui);
+										self.sign_in_height = ui.min_rect().height();
+									},
+								);
+							});
+							ui.add_space(56.0);
+						} else {
+							ui.add_space(((ui.available_height() - card) * 0.4).max(16.0));
+							ui.vertical_centered(|ui| {
+								ui.allocate_ui_with_layout(
+									egui::vec2(ui.available_width().min(460.0), 0.0),
+									egui::Layout::top_down(egui::Align::Min),
+									|ui| {
+										self.sign_in_card(ui, true);
+										#[cfg(feature = "demo")]
+										if self.fixture_only {
+											self.sign_in_preview(ui);
+										}
+										// Centring needs the height this actually took; it is
+										// stable between frames.
+										self.sign_in_height = ui.min_rect().height();
+									},
+								);
+								ui.add_space(18.0);
+								self.sign_in_footer(ui);
+								ui.add_space(24.0);
+							});
+						}
 					});
 			});
 	}
+	/// Wide-window brand pane: the mark, the wordmark and the promise. Everything interactive
+	/// stays in the card, so this pane is quiet by design.
+	fn sign_in_brand(&self, ui: &mut egui::Ui) {
+		let p = ui::design::palette(ui);
+		ui.add_space(24.0);
+		let (mark, _) = ui.allocate_exact_size(egui::vec2(64.0, 64.0), egui::Sense::hover());
+		ui.painter()
+			.rect_filled(mark.expand(10.0), 24, p.accent.gamma_multiply(0.14));
+		ui.painter().rect_filled(mark, 19, p.accent);
+		ui::icons::paint(
+			ui.painter(),
+			ui::icons::Icon::Bytwina,
+			mark.shrink(16.0),
+			p.accent_text,
+		);
+		ui.add_space(22.0);
+		ui.label(
+			ui::design::semibold(
+				ui,
+				ui::i18n::translate("main-sign-in-screen-bytwina"),
+				34.0,
+			)
+			.color(p.text_strong),
+		);
+		ui.add_space(10.0);
+		ui.add(
+			egui::Label::new(
+				egui::RichText::new(ui::i18n::translate(
+					"main-sign-in-header-sign-in-with-your-discord-account-to-get-started",
+				))
+				.size(15.0)
+				.color(p.muted),
+			)
+			.wrap(),
+		);
+		ui.add_space(26.0);
+		let stage = ui.painter().layout_no_wrap(
+			"Early preview".to_owned(),
+			egui::FontId::new(11.0, ui::design::medium_family(ui.ctx())),
+			p.muted,
+		);
+		let (pill, _) =
+			ui.allocate_exact_size(egui::vec2(stage.size().x + 18.0, 21.0), egui::Sense::hover());
+		ui.painter().rect_stroke(
+			pill,
+			10,
+			egui::Stroke::new(1.0, p.border),
+			egui::StrokeKind::Inside,
+		);
+		ui.painter()
+			.galley(pill.center() - stage.size() * 0.5, stage, p.muted);
+	}
+	/// The affiliation line under the card, on both layouts.
+	fn sign_in_footer(&self, ui: &mut egui::Ui) {
+		let p = ui::design::palette(ui);
+		ui.label(
+			egui::RichText::new(ui::i18n::translate(
+				"main-sign-in-screen-independent-and-open-source-not-affiliated-with-discord",
+			))
+			.size(12.0)
+			.color(p.muted),
+		);
+	}
 	/// Sign-in card: saved accounts first for returning owners, one clear primary action,
 	/// explicit consent, and everything else folded away until asked for.
-	fn sign_in_card(&mut self, ui: &mut egui::Ui) {
+	fn sign_in_card(&mut self, ui: &mut egui::Ui, mark: bool) {
 		let ctx = ui.ctx().clone();
 		let p = ui::design::palette(ui);
 		let shadow = egui::epaint::Shadow {
@@ -666,7 +757,7 @@ impl Desktop {
 				// authorized once and restores unattended on launch, so it only waits for idle.
 				// Fixture builds render the enabled state for captures; the actions stay inert.
 				let ready = self.authorized && idle;
-				self.sign_in_header(ui, returning);
+				self.sign_in_header(ui, returning, mark);
 				ui.add_space(16.0);
 				if returning {
 					self.sign_in_accounts(ui, idle);
@@ -722,20 +813,24 @@ impl Desktop {
 			});
 	}
 	/// App mark over a welcome line that adapts to whether this device already knows an account.
-	fn sign_in_header(&self, ui: &mut egui::Ui, returning: bool) {
+	/// The wide layout keeps the mark in the brand pane, so the card shows only the welcome text.
+	fn sign_in_header(&self, ui: &mut egui::Ui, returning: bool, mark: bool) {
 		let p = ui::design::palette(ui);
 		ui.vertical_centered(|ui| {
-			let (mark, _) = ui.allocate_exact_size(egui::vec2(44.0, 44.0), egui::Sense::hover());
-			ui.painter()
-				.rect_filled(mark.expand(6.0), 17, p.accent.gamma_multiply(0.16));
-			ui.painter().rect_filled(mark, 13, p.accent);
-			ui::icons::paint(
-				ui.painter(),
-				ui::icons::Icon::Bytwina,
-				mark.shrink(11.0),
-				p.accent_text,
-			);
-			ui.add_space(12.0);
+			if mark {
+				let (rect, _) =
+					ui.allocate_exact_size(egui::vec2(44.0, 44.0), egui::Sense::hover());
+				ui.painter()
+					.rect_filled(rect.expand(6.0), 17, p.accent.gamma_multiply(0.16));
+				ui.painter().rect_filled(rect, 13, p.accent);
+				ui::icons::paint(
+					ui.painter(),
+					ui::icons::Icon::Bytwina,
+					rect.shrink(11.0),
+					p.accent_text,
+				);
+				ui.add_space(12.0);
+			}
 			ui.label(
 				ui::design::semibold(
 					ui,
