@@ -44,6 +44,11 @@ Its silhouette is rasterized into the shared icon atlas as `bytwina-mark` and pa
 client identifies itself: the loading screen, the sign-in card and its button, the login header
 and the Direct Messages tile at the top of the server rail.
 
+Sign-in is two columns once the window is at least 940 px wide: a quiet brand pane carries the mark,
+the wordmark and the one-line promise, and the card holds the saved accounts, the single primary
+action and the folded disclosures. Narrower windows keep the centred card with the mark above it, so
+the form is never squeezed below its own text.
+
 Server tiles keep one constant rounded-square silhouette instead of morphing between a circle and
 a squircle. Selection and unread state are shown by `notifications::rail_indicator`: a 3px accent
 underline below the tile (wide when selected, narrower on hover), a short neutral tick for unread,

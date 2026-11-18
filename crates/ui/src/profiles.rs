@@ -341,13 +341,7 @@ pub(crate) fn activity_card(
 					};
 					ui.add(egui::Label::new(design::semibold(ui, title, 14.0)).truncate())
 						.on_hover_text(title);
-					for text in [
-						activity.details.as_deref().filter(|_| !spotify),
-						activity.state.as_deref(),
-					]
-					.into_iter()
-					.flatten()
-					{
+					for text in activity_lines(activity, spotify) {
 						ui.add(
 							egui::Label::new(RichText::new(text).size(12.0).color(muted))
 								.truncate(),
@@ -1321,20 +1315,49 @@ fn activity_summary(activity: &model::RichActivity) -> String {
 	format!("{} {}", activity_verb(activity), activity.name)
 }
 
+/// Secondary lines under an activity title. Discord repeats the title as `details` for streams
+/// and some games, so the same text must not be drawn twice on one card.
+fn activity_lines<'a>(activity: &'a model::RichActivity, spotify: bool) -> Vec<&'a str> {
+	let title = if spotify {
+		activity.details.as_deref().unwrap_or(activity.name.as_str())
+	} else {
+		activity.name.as_str()
+	};
+	let mut lines: Vec<&str> = Vec::new();
+	for text in [
+		activity.details.as_deref().filter(|_| !spotify),
+		activity.state.as_deref(),
+	]
+	.into_iter()
+	.flatten()
+	{
+		let same = |seen: &str| seen.trim().eq_ignore_ascii_case(text.trim());
+		if same(title) || lines.iter().any(|shown| same(shown)) {
+			continue;
+		}
+		lines.push(text);
+	}
+	lines
+}
+
 pub(crate) fn subtitle(custom: Option<&str>, activities: &[model::RichActivity]) -> Option<String> {
-	activities
-		.first()
-		.map(|activity| {
-			if is_spotify(activity) {
-				activity
-					.state
-					.clone()
-					.unwrap_or_else(|| activity_summary(activity))
-			} else {
-				activity_summary(activity)
-			}
+	// Discord shows a chosen custom status ahead of whatever the account is playing; the
+	// activity is the fallback, not the other way round.
+	custom
+		.filter(|text| !text.trim().is_empty())
+		.map(str::to_owned)
+		.or_else(|| {
+			activities.first().map(|activity| {
+				if is_spotify(activity) {
+					activity
+						.state
+						.clone()
+						.unwrap_or_else(|| activity_summary(activity))
+				} else {
+					activity_summary(activity)
+				}
+			})
 		})
-		.or_else(|| custom.map(str::to_owned))
 }
 
 fn rgb(value: u32) -> Color32 {
@@ -4700,6 +4723,42 @@ fn synthetic_frame() -> model::ProfileFrame {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	fn activity(name: &str) -> model::RichActivity {
+		model::RichActivity {
+			kind: 0,
+			name: name.into(),
+			details: None,
+			state: None,
+			image: None,
+			small_image: None,
+			started_at: None,
+			ends_at: None,
+		}
+	}
+
+	#[test]
+	fn an_activity_never_repeats_its_own_title_in_the_card() {
+		let mut youtube = activity("YouTube");
+		youtube.kind = 3;
+		youtube.details = Some("YouTube".into());
+		youtube.state = Some("Synthetic stream".into());
+		assert_eq!(
+			activity_lines(&youtube, false),
+			vec!["Synthetic stream"],
+			"Discord repeats the title as details for streams"
+		);
+	}
+
+	#[test]
+	fn a_custom_status_wins_over_the_activity_in_a_row_subtitle() {
+		let playing = activity("Minecraft");
+		assert_eq!(
+			subtitle(Some("Shipping"), std::slice::from_ref(&playing)).as_deref(),
+			Some("Shipping"),
+			"the chosen status is what Discord shows first"
+		);
+	}
 
 	#[test]
 	fn mixed_profile_gradients_keep_text_readable_at_and_between_endpoints() {
